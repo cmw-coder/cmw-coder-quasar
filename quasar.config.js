@@ -2,7 +2,7 @@
 
 /*
  * This file runs in a Node context (it's NOT transpiled by Babel), so use only
- * the ES6 features that are supported by your Node version. https://node.green/
+ * the ES6 features that are supported by your Node version. Https://node.green/
  */
 
 // Configuration for your app
@@ -11,7 +11,7 @@
 const { configure } = require('quasar/wrappers');
 const path = require('path');
 
-module.exports = configure(function (/* ctx */) {
+module.exports = configure((/* ctx */) => {
   return {
     eslint: {
       // fix: true,
@@ -71,6 +71,13 @@ module.exports = configure(function (/* ctx */) {
       // distDir
 
       // extendViteConf (viteConf) {},
+
+      alias: {
+        css: path.join(__dirname, './src/css'),
+        types: path.join(__dirname, './src/types'),
+        utils: path.join(__dirname, './src/utils'),
+      },
+
       // viteVuePluginOptions: {},
 
       vitePlugins: [
@@ -78,13 +85,13 @@ module.exports = configure(function (/* ctx */) {
           '@intlify/vite-plugin-vue-i18n',
           {
             // if you want to use Vue I18n Legacy API, you need to set `compositionOnly: false`
-            // compositionOnly: false,
+            compositionOnly: true,
 
             // if you want to use named tokens in your Vue I18n messages, such as 'Hello {name}',
             // you need to set `runtimeOnly: false`
-            // runtimeOnly: false,
+            runtimeOnly: false,
 
-            // you need to set i18n resource including paths !
+            // you need to set i18n resource including paths!
             include: path.resolve(__dirname, './src/i18n/**'),
           },
         ],
@@ -94,17 +101,17 @@ module.exports = configure(function (/* ctx */) {
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#devServer
     devServer: {
       // https: true
-      open: true, // opens browser window automatically
+      open: false, // opens a browser window automatically
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#framework
     framework: {
-      config: {},
+      config: { dark: 'auto' },
 
       // iconSet: 'material-icons', // Quasar icon set
       // lang: 'en-US', // Quasar language pack
 
-      // For special cases outside of where the auto-import strategy can have an impact
+      // For special cases outside where the auto-import strategy can have an impact
       // (like functional components as one of the examples),
       // you can manually specify Quasar components/directives to be available everywhere:
       //
@@ -112,12 +119,18 @@ module.exports = configure(function (/* ctx */) {
       // directives: [],
 
       // Quasar plugins
-      plugins: [],
+      plugins: [
+        'Dialog',
+        'Loading',
+        'LocalStorage',
+        'Notify',
+        'SessionStorage',
+      ],
     },
 
     // animations: 'all', // --- includes all animations
     // https://v2.quasar.dev/options/animations
-    animations: [],
+    animations: 'all',
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#sourcefiles
     // sourceFiles: {
@@ -148,7 +161,7 @@ module.exports = configure(function (/* ctx */) {
       // (gets superseded if process.env.PORT is specified at runtime)
 
       middlewares: [
-        'render', // keep this as last one
+        'render', // keep this as the last one
       ],
     },
 
@@ -187,7 +200,7 @@ module.exports = configure(function (/* ctx */) {
 
       packager: {
         // https://electron.github.io/electron-packager/main/interfaces/electronpackager.options.html
-        electronVersion: '22.3.27',
+        // electronVersion: '22.3.27',
       },
 
       builder: {
