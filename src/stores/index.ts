@@ -1,5 +1,6 @@
-import { store } from 'quasar/wrappers';
 import { createPinia } from 'pinia';
+import { createPersistedState } from 'pinia-plugin-persistedstate';
+import { store } from 'quasar/wrappers';
 import { Router } from 'vue-router';
 
 /*
@@ -8,6 +9,7 @@ import { Router } from 'vue-router';
  * @see https://pinia.vuejs.org/core-concepts/plugins.html#typing-new-store-properties
  */
 declare module 'pinia' {
+  // noinspection JSUnusedGlobalSymbols
   export interface PiniaCustomProperties {
     readonly router: Router;
   }
@@ -24,9 +26,11 @@ declare module 'pinia' {
 
 export default store((/* { ssrContext } */) => {
   const pinia = createPinia();
-
-  // You can add Pinia plugins here
-  // pinia.use(SomePiniaPlugin)
-
+  pinia.use(
+    createPersistedState({
+      auto: true,
+      key: (id) => `cmw-coder.${id}`,
+    })
+  );
   return pinia;
 });

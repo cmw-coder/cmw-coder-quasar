@@ -28,3 +28,53 @@
  * }
  */
 
+import { contextBridge } from 'electron';
+import { BrowserWindow } from '@electron/remote';
+
+// Add declaration for mainWindow
+declare global {
+  // noinspection JSUnusedGlobalSymbols
+  interface Window {
+    controlApi: {
+      minimize: () => void;
+      toggleMaximize: () => void;
+      close: () => void;
+    };
+  }
+}
+
+contextBridge.exposeInMainWorld('controlApi', {
+  minimize() {
+    const focusedWindow = BrowserWindow.getFocusedWindow();
+    if (focusedWindow === null) {
+      console.warn('No focused window found');
+      return;
+    }
+
+    focusedWindow.minimize();
+  },
+
+  toggleMaximize() {
+    const focusedWindow = BrowserWindow.getFocusedWindow();
+    if (focusedWindow === null) {
+      console.warn('No focused window found');
+      return;
+    }
+
+    if (focusedWindow.isMaximized()) {
+      focusedWindow.unmaximize();
+    } else {
+      focusedWindow.maximize();
+    }
+  },
+
+  close() {
+    const focusedWindow = BrowserWindow.getFocusedWindow();
+    if (focusedWindow === null) {
+      console.warn('No focused window found');
+      return;
+    }
+
+    focusedWindow.close();
+  },
+});

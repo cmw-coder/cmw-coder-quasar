@@ -12,10 +12,12 @@
     "build": "quasar build -m electron"
   },
   "dependencies": {
+    "@electron/remote": "^2.1.0",
     "@quasar/extras": "^1.16.7",
     "axios": "^1.6.0",
     "fastify": "^4.24.3",
     "pinia": "^2.1.7",
+    "pinia-plugin-persistedstate": "^3.2.0",
     "quasar": "^2.13.0",
     "vue": "^3.3.8",
     "vue-i18n": "^9.6.5",

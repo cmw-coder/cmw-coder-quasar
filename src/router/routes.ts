@@ -4,10 +4,21 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('pages/IndexPage.vue') }],
+    children: [
+      { path: '', redirect: '/dashboard' },
+      {
+        path: 'dashboard',
+        components: {
+          header: () => import('layouts/headers/MainHeader.vue'),
+          // leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
+          default: () => import('pages/DashboardPage.vue'),
+          // rightDrawer: () => import('layouts/drawers/RightMainDrawer.vue'),
+        },
+      },
+    ],
   },
 
-  // Always leave this as last one,
+  // Always leave this as the last one,
   // but you can also remove it
   {
     path: '/:catchAll(.*)*',

@@ -1,4 +1,5 @@
 import { app, nativeImage, BrowserWindow, Menu, Tray } from 'electron';
+import { initialize, enable } from '@electron/remote/main';
 import path from 'path';
 import os from 'os';
 
@@ -22,14 +23,16 @@ const createTray = () => {
 };
 
 function createWindow() {
+  initialize();
   /**
    * Initial window options
    */
   mainWindow = new BrowserWindow({
     icon: path.resolve(__dirname, 'icons/icon.png'), // tray icon
-    width: 1000,
-    height: 600,
+    width: 720,
+    height: 1000,
     useContentSize: true,
+    frame: false,
     webPreferences: {
       contextIsolation: true,
       // More info: https://v2.quasar.dev/quasar-cli-vite/developing-electron-apps/electron-preload-script
@@ -37,6 +40,8 @@ function createWindow() {
       sandbox: false,
     },
   });
+
+  enable(mainWindow.webContents);
 
   mainWindow.loadURL(process.env.APP_URL).then();
 

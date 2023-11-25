@@ -1,7 +1,34 @@
-// This is just an example,
-// so you can safely delete all default props below
-
 export default {
-  failed: 'Action failed',
-  success: 'Action was successful',
+  components:{
+    DarkModeButton: {
+      labels: {
+        toggleDarkMode: 'Toggle dark mode',
+      },
+    },
+  },
+  layouts: {
+    drawers: {
+      LeftMainDrawer: {
+      },
+      RightMainDrawer: {
+      },
+    },
+    footers: {
+    },
+    headers: {
+      MainHeader: {
+        labels: {
+          title: 'Comware Coder Assistant',
+        },
+      },
+    },
+  },
+  pages: {
+    DashboardPage: {
+      labels: {
+        title: 'Comware Coder Assistant',
+        intro: 'AI assisted coding for H3C',
+      },
+    },
+  },
 };
