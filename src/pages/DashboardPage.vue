@@ -9,12 +9,12 @@ const i18n = (relativePath: string) => {
 </script>
 
 <template>
-  <q-page class="row justify-evenly">
-    <q-card class="q-ma-md" flat>
-      <q-card-section class="text-h3 text-white text-center">
+  <q-page class="row justify-evenly q-pa-lg">
+    <q-card class="col-10" flat>
+      <q-card-section class="text-h4 text-white text-center">
         {{i18n('labels.title')}}
       </q-card-section>
-      <q-card-section class="text-h5 text-grey text-center">
+      <q-card-section class="text-h6 text-grey text-center">
         {{i18n('labels.intro')}}
       </q-card-section>
       <q-card-section>
@@ -49,7 +49,10 @@ const i18n = (relativePath: string) => {
         />
       </q-card-section>
       <q-card-section>
-        <q-btn label="Send" color="primary" />
+        <div class="row q-gutter-x-sm full-width">
+          <q-input class="col-grow" dense outlined rounded/>
+          <q-btn color="primary" label="Send" rounded />
+        </div>
       </q-card-section>
     </q-card>
   </q-page>

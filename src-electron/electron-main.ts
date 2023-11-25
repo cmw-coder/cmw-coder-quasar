@@ -29,9 +29,10 @@ function createWindow() {
    */
   mainWindow = new BrowserWindow({
     icon: path.resolve(__dirname, 'icons/icon.png'), // tray icon
-    width: 720,
-    height: 1000,
+    width: 630,
+    height: 1120,
     useContentSize: true,
+    transparent: false,
     frame: false,
     webPreferences: {
       contextIsolation: true,
@@ -47,7 +48,7 @@ function createWindow() {
 
   if (process.env.DEBUGGING) {
     // if on DEV or Production with debug enabled
-    mainWindow.webContents.openDevTools();
+    mainWindow.webContents.openDevTools({mode:'undocked'});
   } else {
     // we're on production; no access to devtools pls
     mainWindow.webContents.on('devtools-opened', () => {
