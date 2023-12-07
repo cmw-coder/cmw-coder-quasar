@@ -28,7 +28,7 @@ module.exports = configure((/* ctx */) => {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
-    boot: ['bus', 'axios', 'i18n'],
+    boot: [ 'axios', 'bus', 'extension', 'i18n'],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
     css: ['app.scss'],
@@ -78,7 +78,13 @@ module.exports = configure((/* ctx */) => {
         utils: path.join(__dirname, './src/utils'),
       },
 
-      // viteVuePluginOptions: {},
+      viteVuePluginOptions: {
+        template: {
+          compilerOptions: {
+            isPreTag: (tag) => tag === 'pre ' || tag === 'q-markdown',
+          },
+        },
+      },
 
       vitePlugins: [
         [

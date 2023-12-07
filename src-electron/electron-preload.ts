@@ -23,13 +23,15 @@
  *   // ...
  *   webPreferences: {
  *     // ...
- *     sandbox: false // <-- to be able to import @electron/remote in preload script
+ *     sandbox: false // <-- to be able to import @electron/remote in a preload script
  *   }
  * }
  */
 
 import { contextBridge } from 'electron';
 import { BrowserWindow } from '@electron/remote';
+import { modificationManager } from 'app/src-fastify/types/ModificationManager';
+import { main } from 'app/src-fastify/server';
 
 // Add declaration for mainWindow
 declare global {
@@ -39,6 +41,12 @@ declare global {
       minimize: () => void;
       toggleMaximize: () => void;
       close: () => void;
+    };
+    subscribeApi: {
+      subscribe: (
+        name: string,
+        callback: (path: string, content: string) => void
+      ) => void;
     };
   }
 }
@@ -78,3 +86,11 @@ contextBridge.exposeInMainWorld('controlApi', {
     focusedWindow.close();
   },
 });
+
+contextBridge.exposeInMainWorld('subscribeApi', {
+  subscribe(name: string, callback: (path: string, content: string) => void) {
+    modificationManager.subscribe(name, callback);
+  },
+});
+
+main().then();

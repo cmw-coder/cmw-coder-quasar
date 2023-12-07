@@ -7,16 +7,11 @@ const fastify = Fastify({
 });
 
 export const main = async () => {
-  fastify.listen(
+  fastify.register(import('./routes/modify'));
+  await fastify.listen(
     {
       host: '127.0.0.1',
-      port: 3000,
-    },
-    (err: any) => {
-      if (err) {
-        fastify.log.error(err);
-        fastify.close();
-      }
+      port: 3001,
     }
   );
 };
