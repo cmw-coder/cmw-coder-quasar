@@ -23,7 +23,7 @@ export const useSettingsStore = defineStore('settings', () => {
   const applyDarkMode = () => {
     Dark.set(darkMode.value);
     AddressbarColor.set(
-      Dark.isActive ? getPaletteColor('grey-10') : getPaletteColor('grey-2'),
+      Dark.isActive ? getPaletteColor('grey-10') : getPaletteColor('grey-2')
     );
   };
 

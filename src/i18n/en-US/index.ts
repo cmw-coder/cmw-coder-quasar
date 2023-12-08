@@ -1,5 +1,5 @@
 export default {
-  components:{
+  components: {
     DarkModeButton: {
       labels: {
         toggleDarkMode: 'Toggle dark mode',
@@ -8,13 +8,10 @@ export default {
   },
   layouts: {
     drawers: {
-      LeftMainDrawer: {
-      },
-      RightMainDrawer: {
-      },
+      LeftMainDrawer: {},
+      RightMainDrawer: {},
     },
-    footers: {
-    },
+    footers: {},
     headers: {
       MainHeader: {
         labels: {

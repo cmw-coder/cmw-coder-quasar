@@ -1,4 +1,4 @@
-import { app, nativeImage, BrowserWindow, Menu, Tray } from 'electron';
+import { app, ipcMain, nativeImage, BrowserWindow, Menu, Tray } from 'electron';
 import { initialize, enable } from '@electron/remote/main';
 import path from 'path';
 import os from 'os';
@@ -48,7 +48,7 @@ function createWindow() {
 
   if (process.env.DEBUGGING) {
     // if on DEV or Production with debug enabled
-    mainWindow.webContents.openDevTools({mode:'undocked'});
+    mainWindow.webContents.openDevTools({ mode: 'undocked' });
   } else {
     // we're on production; no access to devtools pls
     mainWindow.webContents.on('devtools-opened', () => {

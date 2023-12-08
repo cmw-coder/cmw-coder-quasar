@@ -30,7 +30,7 @@
 
 import { contextBridge } from 'electron';
 import { BrowserWindow } from '@electron/remote';
-import { modificationManager } from 'app/src-fastify/types/ModificationManager';
+import { modificationManager } from 'app/src-fastify/src/types/ModificationManager';
 import { main } from 'app/src-fastify/server';
 
 // Add declaration for mainWindow

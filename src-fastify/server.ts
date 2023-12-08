@@ -1,5 +1,7 @@
 import Fastify from 'fastify';
 
+import modify from 'routes/modify';
+
 const fastify = Fastify({
   logger: {
     level: 'warn',
@@ -7,11 +9,9 @@ const fastify = Fastify({
 });
 
 export const main = async () => {
-  fastify.register(import('./routes/modify'));
-  await fastify.listen(
-    {
-      host: '127.0.0.1',
-      port: 3001,
-    }
-  );
+  fastify.register(modify);
+  await fastify.listen({
+    host: '127.0.0.1',
+    port: 3001,
+  });
 };
