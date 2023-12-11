@@ -1,14 +1,13 @@
-import { app, ipcMain, nativeImage, BrowserWindow, Menu, Tray } from 'electron';
-import { initialize, enable } from '@electron/remote/main';
-import path from 'path';
+import { app, ipcMain, BrowserWindow, Tray, nativeImage, Menu } from 'electron';
 import os from 'os';
+import path from 'path';
 
 // needed in a case process is undefined under Linux
 const platform = process.platform || os.platform();
 
 let mainWindow: BrowserWindow | undefined;
 
-const createTray = () => {
+const initializeTrayIcon = () => {
   const tray = new Tray(
     nativeImage.createFromPath(path.resolve(__dirname, 'icons/icon.ico'))
   );
@@ -22,13 +21,9 @@ const createTray = () => {
   tray.setContextMenu(contextMenu);
 };
 
-function createWindow() {
-  initialize();
-  /**
-   * Initial window options
-   */
+const initializeMainWindow = () => {
   mainWindow = new BrowserWindow({
-    icon: path.resolve(__dirname, 'icons/icon.png'), // tray icon
+    icon: path.resolve(__dirname, 'icons/icon.png'), // taskbar icon
     width: 630,
     height: 1120,
     useContentSize: true,
@@ -41,8 +36,6 @@ function createWindow() {
       sandbox: false,
     },
   });
-
-  enable(mainWindow.webContents);
 
   mainWindow.loadURL(process.env.APP_URL).then();
 
@@ -59,12 +52,30 @@ function createWindow() {
   mainWindow.on('closed', () => {
     mainWindow = undefined;
   });
-}
+
+  ipcMain.on('controlApi', (event, arg) => {
+    switch (arg) {
+      case 'minimize':
+        mainWindow?.minimize();
+        break;
+      case 'toggleMaximize':
+        if (mainWindow?.isMaximized()) {
+          mainWindow?.unmaximize();
+        } else {
+          mainWindow?.maximize();
+        }
+        break;
+      case 'close':
+        mainWindow?.close();
+        break;
+    }
+  });
+};
 
 if (app.requestSingleInstanceLock()) {
   app.whenReady().then(() => {
-    createTray();
-    createWindow();
+    initializeTrayIcon();
+    initializeMainWindow();
   });
 
   app.on('window-all-closed', () => {
@@ -75,7 +86,7 @@ if (app.requestSingleInstanceLock()) {
 
   app.on('activate', () => {
     if (mainWindow === undefined) {
-      createWindow();
+      initializeMainWindow();
     }
   });
 } else {

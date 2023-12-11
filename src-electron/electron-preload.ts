@@ -28,10 +28,9 @@
  * }
  */
 
-import { contextBridge } from 'electron';
-import { BrowserWindow } from '@electron/remote';
-import { modificationManager } from 'app/src-fastify/src/types/ModificationManager';
-import { main } from 'app/src-fastify/server';
+import { contextBridge, ipcRenderer } from 'electron';
+import { modificationManager } from 'backend/types/ModificationManager';
+import { startServer } from 'backend/server';
 
 // Add declaration for mainWindow
 declare global {
@@ -52,38 +51,14 @@ declare global {
 }
 
 contextBridge.exposeInMainWorld('controlApi', {
-  minimize() {
-    const focusedWindow = BrowserWindow.getFocusedWindow();
-    if (focusedWindow === null) {
-      console.warn('No focused window found');
-      return;
-    }
-
-    focusedWindow.minimize();
-  },
-
-  toggleMaximize() {
-    const focusedWindow = BrowserWindow.getFocusedWindow();
-    if (focusedWindow === null) {
-      console.warn('No focused window found');
-      return;
-    }
-
-    if (focusedWindow.isMaximized()) {
-      focusedWindow.unmaximize();
-    } else {
-      focusedWindow.maximize();
-    }
-  },
-
   close() {
-    const focusedWindow = BrowserWindow.getFocusedWindow();
-    if (focusedWindow === null) {
-      console.warn('No focused window found');
-      return;
-    }
-
-    focusedWindow.close();
+    ipcRenderer.send('controlApi', 'close');
+  },
+  minimize() {
+    ipcRenderer.send('controlApi', 'minimize');
+  },
+  toggleMaximize() {
+    ipcRenderer.send('controlApi', 'toggleMaximize');
   },
 });
 
@@ -93,4 +68,4 @@ contextBridge.exposeInMainWorld('subscribeApi', {
   },
 });
 
-main().then();
+startServer().then();

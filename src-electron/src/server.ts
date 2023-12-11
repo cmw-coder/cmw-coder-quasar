@@ -1,6 +1,6 @@
 import Fastify from 'fastify';
 
-import modify from 'routes/modify';
+import modifyRoute from 'backend/routes/modify';
 
 const fastify = Fastify({
   logger: {
@@ -8,8 +8,8 @@ const fastify = Fastify({
   },
 });
 
-export const main = async () => {
-  fastify.register(modify);
+export const startServer = async () => {
+  fastify.register(modifyRoute);
   await fastify.listen({
     host: '127.0.0.1',
     port: 3001,
