@@ -26,6 +26,9 @@ export default {
         title: 'Comware Coder Assistant',
         intro: 'AI assisted coding for H3C',
       },
+      tooltips: {
+        copy: 'Copy to clipboard',
+      }
     },
   },
 };

@@ -1,4 +1,4 @@
-import { app, ipcMain, BrowserWindow, Tray, nativeImage, Menu } from 'electron';
+import { app, ipcMain, nativeImage, BrowserWindow, Menu, Tray } from 'electron';
 import { resolve } from 'path';
 
 import { forwardActions, startServer } from 'main/server';
