@@ -5,11 +5,11 @@ export enum Action {
 
 export interface ActionMessage {
   action: Action;
-  data: string;
+  data: never;
 }
 
 export class ActionMessage {
-  constructor(action: Action, data: string) {
+  constructor(action: Action, data: never) {
     this.action = action;
     this.data = data;
   }
