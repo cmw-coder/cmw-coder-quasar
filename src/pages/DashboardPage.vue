@@ -2,6 +2,8 @@
 import { useI18n } from 'vue-i18n';
 import { onMounted, ref } from 'vue';
 
+import { Action } from 'app/src-electron/types/action';
+
 const { t } = useI18n();
 
 const i18n = (relativePath: string) => {
@@ -11,8 +13,9 @@ const i18n = (relativePath: string) => {
 const markdownContent = ref('');
 
 onMounted(() => {
-  window.subscribeApi.subscribe('test', (path: string, content: string) => {
-    markdownContent.value = `Current Path: \n${path}\n\nContent:\n\n\`\`\`\n${content}\n\`\`\``;
+  window.subscribeApi.action(Action.Sync, (data: string) => {
+    console.log(data);
+    // markdownContent.value = `Current Path: \n${path}\n\nContent:\n\n\`\`\`\n${content}\n\`\`\``;
   });
 });
 </script>

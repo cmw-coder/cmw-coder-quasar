@@ -29,8 +29,11 @@
  */
 
 import { contextBridge, ipcRenderer } from 'electron';
-import { modificationManager } from 'backend/types/ModificationManager';
-import { startServer } from 'backend/server';
+
+import { Action } from 'types/action';
+import { ActionManager } from 'types/ActionManager';
+
+const actionManager = new ActionManager();
 
 // Add declaration for mainWindow
 declare global {
@@ -42,9 +45,9 @@ declare global {
       close: () => void;
     };
     subscribeApi: {
-      subscribe: (
-        name: string,
-        callback: (path: string, content: string) => void
+      action: (
+        action: Action,
+        callback: (data: string) => void
       ) => void;
     };
   }
@@ -63,9 +66,12 @@ contextBridge.exposeInMainWorld('controlApi', {
 });
 
 contextBridge.exposeInMainWorld('subscribeApi', {
-  subscribe(name: string, callback: (path: string, content: string) => void) {
-    modificationManager.subscribe(name, callback);
+  action(action: Action, callback: (data: string) => void) {
+    actionManager.registerAction(action, (message) => callback(message.data));
   },
 });
 
-startServer().then();
+ipcRenderer.on('action', (_, message) => {
+  console.log('action', message);
+  actionManager.handleAction(message);
+});

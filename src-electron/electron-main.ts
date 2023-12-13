@@ -1,15 +1,13 @@
 import { app, ipcMain, BrowserWindow, Tray, nativeImage, Menu } from 'electron';
-import os from 'os';
-import path from 'path';
+import { resolve } from 'path';
 
-// needed in a case process is undefined under Linux
-const platform = process.platform || os.platform();
+import { forwardActions, startServer } from 'main/server';
 
 let mainWindow: BrowserWindow | undefined;
 
 const initializeTrayIcon = () => {
   const tray = new Tray(
-    nativeImage.createFromPath(path.resolve(__dirname, 'icons/icon.ico'))
+    nativeImage.createFromPath(resolve(__dirname, 'icons/icon.ico'))
   );
   const contextMenu = Menu.buildFromTemplate([
     { label: 'Item1', type: 'radio' },
@@ -23,7 +21,7 @@ const initializeTrayIcon = () => {
 
 const initializeMainWindow = () => {
   mainWindow = new BrowserWindow({
-    icon: path.resolve(__dirname, 'icons/icon.png'), // taskbar icon
+    icon: resolve(__dirname, 'icons/icon.png'), // taskbar icon
     width: 630,
     height: 1120,
     useContentSize: true,
@@ -32,8 +30,7 @@ const initializeMainWindow = () => {
     webPreferences: {
       contextIsolation: true,
       // More info: https://v2.quasar.dev/quasar-cli-vite/developing-electron-apps/electron-preload-script
-      preload: path.resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD),
-      sandbox: false,
+      preload: resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD),
     },
   });
 
@@ -73,15 +70,19 @@ const initializeMainWindow = () => {
 };
 
 if (app.requestSingleInstanceLock()) {
-  app.whenReady().then(() => {
+  app.whenReady().then(async () => {
     initializeTrayIcon();
     initializeMainWindow();
+    if (mainWindow) {
+      forwardActions(mainWindow.webContents);
+      await startServer();
+    } else {
+      app.quit();
+    }
   });
 
   app.on('window-all-closed', () => {
-    if (platform !== 'darwin') {
-      app.quit();
-    }
+    app.quit();
   });
 
   app.on('activate', () => {
