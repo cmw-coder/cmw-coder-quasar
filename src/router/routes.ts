@@ -37,7 +37,7 @@ const routes: RouteRecordRaw[] = [
         components: {
           default: () => import('pages/CompletionSnippetPage.vue'),
         },
-      }
+      },
     ],
   },
 

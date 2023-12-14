@@ -4,25 +4,12 @@
     "baseUrl": ".",
     "sourceMap": true,
     "paths": {
-      "main/*": [
-        "./main/*"
-      ],
-      "preload/*": [
-        "./preload/*"
-      ],
-      "types/*": [
-        "./types/*"
-      ],
-      "web/*": [
-        "../src/*"
-      ],
+      "main/*": ["./main/*"],
+      "preload/*": ["./preload/*"],
+      "types/*": ["./types/*"],
+      "web/*": ["../src/*"]
     },
     "outDir": "dist"
   },
-  "include": [
-    "*.ts",
-    "main/**/*.ts",
-    "preload/**/*.ts",
-    "types/**/*.ts",
-  ]
+  "include": ["*.ts", "main/**/*.ts", "preload/**/*.ts", "types/**/*.ts"]
 }

@@ -69,6 +69,6 @@ export const useHighlighter = defineStore('highlighter', () => {
     backgroundColor,
     config,
     codeToHtml,
-    initialize
+    initialize,
   };
 });

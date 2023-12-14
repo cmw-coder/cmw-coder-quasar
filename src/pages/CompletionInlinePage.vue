@@ -19,7 +19,7 @@ onMounted(() => {
 <template>
   <q-page>
     <code class="text-grey">
-      {{ completion}}
+      {{ completion }}
     </code>
   </q-page>
 </template>

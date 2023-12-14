@@ -21,11 +21,7 @@ const codeContent = computed(() => codeToHtml(props.src, 'c'));
 </script>
 
 <template>
-  <q-card
-    v-if="codeContent.length"
-    flat
-    bordered
-  >
+  <q-card v-if="codeContent.length" flat bordered>
     <q-card-section>
       <div class="shiki-codes" v-html="codeContent" />
     </q-card-section>

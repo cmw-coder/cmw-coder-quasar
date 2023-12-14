@@ -62,12 +62,4 @@ export class CompletionInlineWindow {
   setCompletionWindowBounds(x: number, y: number) {
     this._window?.setPosition(x, y);
   }
-
-  setCompletionWindowWebContents(webContents) {
-    this.completionWindow.webContents = webContents;
-  }
-
-  getCompletionWindow() {
-    return this.completionWindow;
-  }
 }
