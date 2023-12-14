@@ -1,5 +1,11 @@
 export default {
   components: {
+    CodeBlock:{
+      tooltips: {
+        copy: 'Copy to clipboard',
+        insert: 'Insert to editor',
+      }
+    },
     DarkModeButton: {
       labels: {
         toggleDarkMode: 'Toggle dark mode',
@@ -28,6 +34,7 @@ export default {
       },
       tooltips: {
         copy: 'Copy to clipboard',
+        insert: 'Insert to editor',
       }
     },
   },

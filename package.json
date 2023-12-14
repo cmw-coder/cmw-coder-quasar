@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.16.9",
-    "@quasar/quasar-ui-qmarkdown": "2.0.0-beta.10",
     "axios": "^1.6.2",
     "iconv-lite": "^0.6.3",
     "pinia": "^2.1.7",
@@ -28,7 +27,6 @@
   "devDependencies": {
     "@intlify/vite-plugin-vue-i18n": "^3.4.0",
     "@quasar/app-vite": "^1.7.1",
-    "@quasar/quasar-app-extension-qmarkdown": "2.0.0-beta.10",
     "@types/node": "^16.18.68",
     "@types/ws": "^8.5.10",
     "@typescript-eslint/eslint-plugin": "^5.62.0",

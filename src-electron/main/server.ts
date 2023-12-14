@@ -1,18 +1,17 @@
-import { WebContents } from 'electron';
 import { Server, WebSocket } from 'ws';
 
-import { Action } from 'types/action';
 import { ActionManager } from 'types/ActionManager';
+import { Action, ActionMessage } from 'types/action';
 
 const actionManager = new ActionManager();
 
-export const forwardActions = (webContents: WebContents) => {
-  Object.values(Action).forEach((action) => {
-    actionManager.registerAction(action, (message) =>
-      webContents.send('action', message)
-    );
-  });
+export const registerAction = (
+  action: Action,
+  callback: (message: ActionMessage) => void
+) => {
+  actionManager.registerAction(action, callback);
 };
+
 export const startServer = async () => {
   const server = new Server({
     host: '127.0.0.1',

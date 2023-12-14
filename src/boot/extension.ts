@@ -1,9 +1,14 @@
 import { boot } from 'quasar/wrappers';
-import Plugin from '@quasar/quasar-ui-qmarkdown';
-import '@quasar/quasar-ui-qmarkdown/dist/index.css';
+import { getHighlighter, setCDN } from 'shiki';
 
-export default boot(({ app }) => {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  app.use(Plugin);
+setCDN('/node_modules/shiki/');
+const highlighter = await getHighlighter({
+  themes: ['dark-plus', 'light-plus'],
+  langs: ['c', 'c++'],
 });
+
+export default boot(async ({ app }) => {
+  app.config.globalProperties.$highlighter = highlighter;
+});
+
+export { highlighter };

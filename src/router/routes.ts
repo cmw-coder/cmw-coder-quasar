@@ -3,9 +3,13 @@ import { RouteRecordRaw } from 'vue-router';
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
+    redirect: '/main/dashboard',
+  },
+  {
+    path: '/main',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: '', redirect: '/dashboard' },
+      { path: '', redirect: '/main/dashboard' },
       {
         path: 'dashboard',
         components: {
@@ -15,6 +19,25 @@ const routes: RouteRecordRaw[] = [
           // rightDrawer: () => import('layouts/drawers/RightMainDrawer.vue'),
         },
       },
+    ],
+  },
+  {
+    path: '/simple',
+    component: () => import('layouts/SimpleLayout.vue'),
+    children: [
+      { path: '', redirect: '/simple/completion/inline' },
+      {
+        path: 'completion/inline',
+        components: {
+          default: () => import('pages/CompletionInlinePage.vue'),
+        },
+      },
+      {
+        path: 'completion/snippet',
+        components: {
+          default: () => import('pages/CompletionSnippetPage.vue'),
+        },
+      }
     ],
   },
 
