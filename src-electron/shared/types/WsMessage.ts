@@ -1,3 +1,5 @@
+import { CaretPosition } from 'shared/types/common';
+
 export enum WsAction {
   CompletionAccept = 'CompletionAccept',
   CompletionCache = 'CompletionCache',
@@ -78,10 +80,7 @@ export class CompletionCancelServerMessage implements WsMessage {
 export interface CompletionGenerateClientMessage extends WsMessage {
   action: WsAction.CompletionGenerate;
   data: {
-    cursor: {
-      character: number;
-      line: number;
-    };
+    caret: CaretPosition;
     path: string;
     prefix: string;
     suffix: string;

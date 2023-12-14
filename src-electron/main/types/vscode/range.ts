@@ -24,7 +24,7 @@ export class Range {
     startLine: number,
     startCharacter: number,
     endLine: number,
-    endCharacter: number,
+    endCharacter: number
   ) {
     if (
       startLine > endLine ||
@@ -73,7 +73,7 @@ export class Range {
    */
   public static strictContainsPosition(
     range: IRange,
-    position: IPosition,
+    position: IPosition
   ): boolean {
     if (position.line < range.start.line || position.line > range.end.line) {
       return false;
@@ -123,7 +123,7 @@ export class Range {
    */
   public static strictContainsRange(
     range: IRange,
-    otherRange: IRange,
+    otherRange: IRange
   ): boolean {
     if (
       otherRange.start.line < range.start.line ||
@@ -162,7 +162,7 @@ export class Range {
     } else if (b.start.line === a.start.line) {
       start = new Position(
         b.start.line,
-        Math.min(b.start.character, a.start.character),
+        Math.min(b.start.character, a.start.character)
       );
     } else {
       start = a.start;
@@ -173,7 +173,7 @@ export class Range {
     } else if (b.end.line === a.end.line) {
       end = new Position(
         b.end.line,
-        Math.max(b.end.character, a.end.character),
+        Math.max(b.end.character, a.end.character)
       );
     } else {
       end = a.end;
@@ -223,7 +223,7 @@ export class Range {
       resultStartLineNumber,
       resultStartColumn,
       resultEndLineNumber,
-      resultEndColumn,
+      resultEndColumn
     );
   }
 
@@ -232,7 +232,7 @@ export class Range {
    */
   public static isEqual(
     a: IRange | null | undefined,
-    b: IRange | null | undefined,
+    b: IRange | null | undefined
   ): boolean {
     if (!a && !b) {
       return true;
@@ -269,7 +269,7 @@ export class Range {
       range.start.line,
       range.start.character,
       range.start.line,
-      range.start.character,
+      range.start.character
     );
   }
 
@@ -281,7 +281,7 @@ export class Range {
       range.end.line,
       range.end.character,
       range.end.line,
-      range.end.character,
+      range.end.character
     );
   }
 
@@ -306,7 +306,7 @@ export class Range {
       range.start.line,
       range.start.character,
       range.end.line,
-      range.end.character,
+      range.end.character
     );
   }
 
@@ -377,7 +377,7 @@ export class Range {
    */
   public static compareRangesUsingStarts(
     a: IRange | null | undefined,
-    b: IRange | null | undefined,
+    b: IRange | null | undefined
   ): number {
     if (a && b) {
       const aStartLineNumber = a.start.line | 0;
@@ -550,7 +550,7 @@ export class Range {
       this.start.line + lineCount,
       this.start.character,
       this.end.line + lineCount,
-      this.end.character,
+      this.end.character
     );
   }
 

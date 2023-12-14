@@ -24,9 +24,8 @@ declare module 'pinia' {
  * with the Store instance.
  */
 
-const pinia = createPinia();
-
 export default store((/* { ssrContext } */) => {
+  const pinia = createPinia();
   pinia.use(
     createPersistedState({
       auto: true,
@@ -35,5 +34,3 @@ export default store((/* { ssrContext } */) => {
   );
   return pinia;
 });
-
-export { pinia };

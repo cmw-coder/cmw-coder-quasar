@@ -97,7 +97,7 @@ export class Position {
    */
   with(
     newLineNumber: number = this.line,
-    newColumn: number = this.character,
+    newColumn: number = this.character
   ): Position {
     if (newLineNumber === this.line && newColumn === this.character) {
       return this;

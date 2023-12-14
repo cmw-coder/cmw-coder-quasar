@@ -4,18 +4,16 @@ import { CompletionInlineWindow } from 'main/components/CompletionInlineWindow';
 import { MainWindow } from 'main/components/MainWindow';
 import { TrayIcon } from 'main/components/TrayIcon';
 import { registerWsMessage, startServer } from 'main/server';
+import { configStore, dataStore } from 'main/stores';
 import { b64GbkToUtf8 } from 'main/utils/iconv';
+import { parseSymbolString, parseTabString } from 'main/utils/parser';
 import { controlApiKey } from 'shared/types/constants';
 import {
   ControlMessage,
   triggerControlCallback,
 } from 'preload/types/ControlApi';
 import { WsAction } from 'shared/types/WsMessage';
-import {
-  parseCursorString,
-  parseSymbolString,
-  parseTabString,
-} from 'main/utils/parser';
+import { statisticsReporter } from "main/components/StatisticsReporter";
 
 if (app.requestSingleInstanceLock()) {
   const completionInlineWindow = new CompletionInlineWindow();
@@ -32,30 +30,39 @@ if (app.requestSingleInstanceLock()) {
   app.whenReady().then(() => {
     startServer().then(() => {
       registerWsMessage(WsAction.CompletionGenerate, (message) => {
-        const { cursor, path, prefix, suffix, symbolString, tabString } =
+        const { caret, path, prefix, suffix, symbolString, tabString } =
           message.data;
-        const decodedPath = b64GbkToUtf8;
-        const decodedPrefix = decode(Buffer.from(prefix, 'base64'), 'gb2312');
-        const decodedSuffix = decode(Buffer.from(suffix, 'base64'), 'gb2312');
+        const decodedPath = b64GbkToUtf8(path);
+        const decodedPrefix = b64GbkToUtf8(prefix);
+        const decodedSuffix = b64GbkToUtf8(suffix);
 
         const symbols = parseSymbolString(b64GbkToUtf8(symbolString));
         const tabs = parseTabString(b64GbkToUtf8(tabString));
 
+        console.log({
+          caret,
+          path: decodedPath,
+          prefix: decodedPrefix,
+          suffix: decodedSuffix,
+          symbols,
+          tabs,
+        });
+
         try {
-          fastify.statistics.updateCursor(cursorRange);
+          statisticsReporter.updateCaretPosition(caret);
           const prompt = await new PromptExtractor(
             new TextDocument(decodedPath),
-            cursorRange.start,
+            cursorRange.start
           ).getPromptComponents(tabs, symbols, decodedPrefix, decodedSuffix);
           const results = await promptProcessor.process(
             prompt,
             decodedPrefix,
-            projectId,
+            projectId
           );
           return {
             result: 'success',
             contents: results.map((result) =>
-              encode(result, 'gb2312').toString('base64'),
+              encode(result, 'gb2312').toString('base64')
             ),
           };
         } catch (e) {
