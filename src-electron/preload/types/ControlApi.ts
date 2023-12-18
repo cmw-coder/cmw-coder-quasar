@@ -117,7 +117,7 @@ const handlerMap = new Map<WindowType, Map<ControlType, GenericCallBack>>();
 // ↑↑↑↑↑↑↑↑↑↑                                   Local stuff                                     ↑↑↑↑↑↑↑↑↑↑
 // -------------------------------------------------------------------------------------------------------
 
-export const registerControlAction = <T extends keyof ControlMessageMapping>(
+export const registerControlCallback = <T extends keyof ControlMessageMapping>(
   windowType: WindowType,
   controlType: T,
   callback: (data: ControlMessageMapping[T]['data']) => void
@@ -129,7 +129,7 @@ export const registerControlAction = <T extends keyof ControlMessageMapping>(
   }
 };
 
-export const triggerControlAction = (
+export const triggerControlCallback = (
   windowType: WindowType,
   controlType: ControlType,
   data: unknown

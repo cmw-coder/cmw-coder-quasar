@@ -2,7 +2,7 @@ import { BrowserWindow } from 'electron';
 import { resolve } from 'path';
 import { registerWsMessage } from 'main/server';
 import { WsAction } from 'shared/types/WsMessage';
-import { ControlType, registerControlAction } from 'preload/types/ControlApi';
+import { ControlType, registerControlCallback } from 'preload/types/ControlApi';
 import { WindowType } from 'shared/types/WindowType';
 
 export class CompletionInlineWindow {
@@ -52,13 +52,13 @@ export class CompletionInlineWindow {
       )
     );
 
-    registerControlAction(WindowType.CompletionInline, ControlType.Hide, () =>
+    registerControlCallback(WindowType.CompletionInline, ControlType.Hide, () =>
       this._window?.hide()
     );
-    registerControlAction(WindowType.CompletionInline, ControlType.Show, () =>
+    registerControlCallback(WindowType.CompletionInline, ControlType.Show, () =>
       this._window?.show()
     );
-    registerControlAction(
+    registerControlCallback(
       WindowType.CompletionInline,
       ControlType.Move,
       (data) => {

@@ -1,9 +1,9 @@
-import { ipcRenderer } from 'electron';
+import { BrowserWindow, ipcRenderer } from 'electron';
 
 import { ActionType } from 'shared/types/ActionType';
 import { actionApiKey } from 'shared/types/constants';
 
-interface ActionMessage {
+export interface ActionMessage {
   type: ActionType;
   data: unknown;
 }
@@ -53,7 +53,7 @@ const handlerMap = new Map<ActionType, Array<GenericCallBack>>();
 // ↑↑↑↑↑↑↑↑↑↑                                   Local stuff                                     ↑↑↑↑↑↑↑↑↑↑
 // -------------------------------------------------------------------------------------------------------
 
-export const receive = <T extends keyof ActionMessageMapping>(
+export const registerActionCallback = <T extends keyof ActionMessageMapping>(
   actionType: T,
   callback: (data: ActionMessageMapping[T]['data']) => void
 ): void => {
@@ -66,14 +66,22 @@ export const receive = <T extends keyof ActionMessageMapping>(
   }
 };
 
-export const send = <T extends keyof ActionMessageMapping>(
+export const sendToMain = <T extends keyof ActionMessageMapping>(
   message: ActionMessageMapping[T]
 ): void => {
   ipcRenderer.send(actionApiKey, message);
 };
 
-ipcRenderer.on(actionApiKey, (_, message: ActionMessage) => {
-  handlerMap
-    .get(message.type)
-    ?.forEach((handler) => handler(<never>message.data));
-});
+export const sendToRenderer = <T extends keyof ActionMessageMapping>(
+  window: BrowserWindow,
+  message: ActionMessageMapping[T]
+): void => {
+  window.webContents.send(actionApiKey, message);
+};
+
+export const triggerActionCallback = (
+  actionType: ActionType,
+  data: unknown
+): void => {
+  handlerMap.get(actionType)?.forEach((handler) => handler(<never>data));
+};

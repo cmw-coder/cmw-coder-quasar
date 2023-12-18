@@ -1,4 +1,3 @@
-import { ControlType } from 'preload/types/ControlApi';
 import { ActionMessageMapping } from 'preload/types/ActionApi';
 import { actionApiKey, controlApiKey } from 'shared/types/constants';
 import { WindowType } from 'shared/types/WindowType';
@@ -7,19 +6,19 @@ declare global {
   // noinspection JSUnusedGlobalSymbols
   interface Window {
     [controlApiKey]: {
-      [ControlType.Close]: () => void;
-      [ControlType.Hide]: (windowType: WindowType) => void;
-      [ControlType.Minimize]: (windowType: WindowType) => void;
-      [ControlType.Move]: (
+      close: () => void;
+      hide: (windowType: WindowType) => void;
+      minimize: (windowType: WindowType) => void;
+      move: (
         position: { x?: number; y?: number },
         windowType: WindowType
       ) => void;
-      [ControlType.Resize]: (
+      resize: (
         size: { width?: number; height?: number },
         windowType: WindowType
       ) => void;
-      [ControlType.Show]: (windowType: WindowType) => void;
-      [ControlType.ToggleMaximize]: () => void;
+      show: (windowType: WindowType) => void;
+      toggleMaximize: () => void;
     };
     [actionApiKey]: {
       receive: <T extends keyof ActionMessageMapping>(

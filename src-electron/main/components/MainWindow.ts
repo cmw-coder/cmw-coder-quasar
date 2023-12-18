@@ -1,10 +1,14 @@
 import { BrowserWindow } from 'electron';
 import { resolve } from 'path';
 
-import { ControlType, registerControlAction } from 'preload/types/ControlApi';
+import { ControlType, registerControlCallback } from 'preload/types/ControlApi';
 import { registerWsMessage } from 'main/server';
 import { WsAction } from 'shared/types/WsMessage';
 import { WindowType } from 'shared/types/WindowType';
+import {
+  DebugSyncActionMessage,
+  sendToRenderer,
+} from 'preload/types/ActionApi';
 
 export class MainWindow {
   private _window: BrowserWindow | undefined;
@@ -48,18 +52,23 @@ export class MainWindow {
     });
 
     this._window.on('ready-to-show', () =>
-      registerWsMessage(WsAction.DebugSync, (message) =>
-        this._window?.webContents.send('action', message)
-      )
+      registerWsMessage(WsAction.DebugSync, (message) => {
+        if (this._window) {
+          sendToRenderer(
+            this._window,
+            new DebugSyncActionMessage(message.data)
+          );
+        }
+      })
     );
 
-    registerControlAction(WindowType.Main, ControlType.Close, () =>
+    registerControlCallback(WindowType.Main, ControlType.Close, () =>
       this._window?.close()
     );
-    registerControlAction(WindowType.Main, ControlType.Minimize, () =>
+    registerControlCallback(WindowType.Main, ControlType.Minimize, () =>
       this._window?.minimize()
     );
-    registerControlAction(WindowType.Main, ControlType.ToggleMaximize, () => {
+    registerControlCallback(WindowType.Main, ControlType.ToggleMaximize, () => {
       if (this._window?.isMaximized()) {
         this._window?.unmaximize();
       } else {

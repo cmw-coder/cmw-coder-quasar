@@ -11,24 +11,15 @@ const i18n = (relativePath: string) => {
 
 const emit = defineEmits(['toggle:left-drawer', 'toggle:right-drawer']);
 
-const closeApp = () => {
-  window.controlApi.Close();
-};
+const closeApp = () => window.controlApi.close();
 
-const minimize = () => {
-  window.controlApi.Minimize(WindowType.Main);
-};
-const toggleLeftDrawer = () => {
-  emit('toggle:left-drawer', true);
-};
+const minimize = () => window.controlApi.minimize(WindowType.Main);
 
-const toggleMaximize = () => {
-  window.controlApi.ToggleMaximize();
-};
+const toggleLeftDrawer = () => emit('toggle:left-drawer', true);
 
-const toggleRightDrawer = () => {
-  emit('toggle:right-drawer', true);
-};
+const toggleMaximize = () => window.controlApi.toggleMaximize();
+
+const toggleRightDrawer = () => emit('toggle:right-drawer', true);
 </script>
 
 <template>
