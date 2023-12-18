@@ -1,6 +1,8 @@
 import { app, Menu, nativeImage, Tray } from 'electron';
 import { resolve } from 'path';
 
+import packageJson from 'root/package.json';
+
 export class TrayIcon {
   private _tray: Tray | undefined;
 
@@ -8,6 +10,10 @@ export class TrayIcon {
     if (!this._tray) {
       this.create();
     }
+  }
+
+  onClick(callback: () => void) {
+    this._tray?.on('click', callback);
   }
 
   private create() {
@@ -19,15 +25,19 @@ export class TrayIcon {
       { label: 'Item1', type: 'radio' },
       { label: 'Item2', type: 'radio' },
       { label: 'Item3', type: 'radio', checked: true },
+      { type: 'separator' },
       {
         label: 'Exit',
         type: 'normal',
-        click: () => {
-          app.quit();
-        },
+        click: () => app.exit(),
       },
     ]);
-    this._tray.setToolTip('This is my application.');
+    this._tray.displayBalloon({
+      icon: nativeImage.createFromPath(resolve(__dirname, 'icons/icon.ico')),
+      title: 'Comware Coder',
+      content: 'Comware Coder is running in the background.',
+    });
     this._tray.setContextMenu(contextMenu);
+    this._tray.setToolTip(`Comware Coder v${packageJson.version}`);
   }
 }

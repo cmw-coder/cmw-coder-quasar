@@ -36,7 +36,7 @@ module.exports = configure((/* ctx */) => {
     // https://github.com/quasarframework/quasar/tree/dev/extras
     extras: [
       // 'ionicons-v4',
-      // 'mdi-v5',
+      'mdi-v6',
       // 'fontawesome-v6',
       // 'eva-icons',
       // 'themify',
@@ -50,7 +50,7 @@ module.exports = configure((/* ctx */) => {
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#build
     build: {
       target: {
-        browser: ['es2019', 'edge88', 'firefox78', 'chrome87', 'safari13.1'],
+        browser: ['esnext', 'edge89', 'firefox89', 'chrome89', 'safari15'],
         node: 'node16',
       },
 
@@ -79,13 +79,7 @@ module.exports = configure((/* ctx */) => {
         utils: path.join(__dirname, './src/utils'),
       },
 
-      viteVuePluginOptions: {
-        template: {
-          compilerOptions: {
-            isPreTag: (tag) => tag === 'pre ' || tag === 'q-markdown',
-          },
-        },
-      },
+      viteVuePluginOptions: {},
 
       vitePlugins: [
         [
@@ -115,7 +109,7 @@ module.exports = configure((/* ctx */) => {
     framework: {
       config: { dark: 'auto' },
 
-      // iconSet: 'material-icons', // Quasar icon set
+      iconSet: 'mdi-v6', // Quasar icon set
       // lang: 'en-US', // Quasar language pack
 
       // For special cases outside where the auto-import strategy can have an impact

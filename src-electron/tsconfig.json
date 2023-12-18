@@ -6,6 +6,7 @@
     "paths": {
       "main/*": ["./main/*"],
       "preload/*": ["./preload/*"],
+      "root/*": ["../*"],
       "shared/*": ["./shared/*"],
       "web/*": ["../src/*"]
     },

@@ -6,7 +6,6 @@ declare global {
   // noinspection JSUnusedGlobalSymbols
   interface Window {
     [controlApiKey]: {
-      close: () => void;
       hide: (windowType: WindowType) => void;
       minimize: (windowType: WindowType) => void;
       move: (

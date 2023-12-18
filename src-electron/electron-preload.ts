@@ -7,7 +7,6 @@ import {
   triggerActionCallback,
 } from 'preload/types/ActionApi';
 import {
-  CloseControlMessage,
   HideControlMessage,
   MinimizeControlMessage,
   MoveControlMessage,
@@ -20,7 +19,6 @@ import { actionApiKey, controlApiKey } from 'shared/types/constants';
 import { WindowType } from 'shared/types/WindowType';
 
 contextBridge.exposeInMainWorld(controlApiKey, {
-  close: () => sendControlAction(new CloseControlMessage()),
   hide: (windowType: WindowType) =>
     sendControlAction(new HideControlMessage(windowType)),
   minimize: (windowType: WindowType) =>

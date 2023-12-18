@@ -37,15 +37,11 @@ export class MainWindow {
 
     this._window.loadURL(process.env.APP_URL).then();
 
-    if (process.env.DEBUGGING) {
-      // if on DEV or Production with debug enabled
-      this._window.webContents.openDevTools({ mode: 'undocked' });
-    } else {
-      // we're on production; no access to devtools pls
-      this._window.webContents.on('devtools-opened', () => {
-        this._window?.webContents.closeDevTools();
-      });
-    }
+    this._window.webContents.openDevTools({ mode: 'undocked' });
+
+    // this._window.webContents.on('devtools-opened', () => {
+    //   this._window?.webContents.closeDevTools();
+    // });
 
     this._window.on('closed', () => {
       this._window = undefined;
@@ -62,8 +58,8 @@ export class MainWindow {
       })
     );
 
-    registerControlCallback(WindowType.Main, ControlType.Close, () =>
-      this._window?.close()
+    registerControlCallback(WindowType.Main, ControlType.Hide, () =>
+      this._window?.hide()
     );
     registerControlCallback(WindowType.Main, ControlType.Minimize, () =>
       this._window?.minimize()

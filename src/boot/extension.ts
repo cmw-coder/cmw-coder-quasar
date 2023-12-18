@@ -1,7 +1,7 @@
 import { boot } from 'quasar/wrappers';
 import { getHighlighter, setCDN } from 'shiki';
 
-setCDN('/node_modules/shiki/');
+setCDN('./node_modules/shiki/');
 const highlighter = await getHighlighter({
   themes: ['dark-plus', 'light-plus'],
   langs: ['c', 'c++'],
