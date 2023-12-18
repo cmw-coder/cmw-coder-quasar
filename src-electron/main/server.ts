@@ -5,7 +5,7 @@ import { WsMessageHandler } from 'main/types/WsMessageHandler';
 
 const wsMessageHandler = new WsMessageHandler();
 
-export const registerAction = <T extends keyof WsMessageMapping>(
+export const registerWsMessage = <T extends keyof WsMessageMapping>(
   action: T,
   callback: (message: WsMessageMapping[T]) => void
 ) => {

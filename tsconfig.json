@@ -17,5 +17,5 @@
       "utils/*": ["src/utils/*"]
     }
   },
-  "include": ["src/**/*", "src-electron/electron-preload.ts"]
+  "include": ["src/**/*", "src-electron/shared/**/*"]
 }

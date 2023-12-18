@@ -1,7 +1,9 @@
 import { BrowserWindow } from 'electron';
 import { resolve } from 'path';
-import { registerAction } from 'main/server';
+import { registerWsMessage } from 'main/server';
 import { WsAction } from 'shared/types/WsMessage';
+import { ControlType, registerControlAction } from 'preload/types/ControlApi';
+import { WindowType } from 'shared/types/WindowType';
 
 export class CompletionInlineWindow {
   private _window: BrowserWindow | undefined;
@@ -45,21 +47,26 @@ export class CompletionInlineWindow {
       .then();
 
     this._window.on('ready-to-show', () =>
-      registerAction(WsAction.CompletionGenerate, (message) =>
+      registerWsMessage(WsAction.CompletionGenerate, (message) =>
         this._window?.webContents.send('action', message)
       )
     );
-  }
 
-  showCompletionWindow() {
-    this._window?.show();
-  }
-
-  hideCompletionWindow() {
-    this._window?.hide();
-  }
-
-  setCompletionWindowBounds(x: number, y: number) {
-    this._window?.setPosition(x, y);
+    registerControlAction(WindowType.CompletionInline, ControlType.Hide, () =>
+      this._window?.hide()
+    );
+    registerControlAction(WindowType.CompletionInline, ControlType.Show, () =>
+      this._window?.show()
+    );
+    registerControlAction(
+      WindowType.CompletionInline,
+      ControlType.Move,
+      (data) => {
+        if (this._window) {
+          const [currentX, currentY] = this._window.getPosition();
+          this._window?.setPosition(data.x ?? currentX, data.y ?? currentY);
+        }
+      }
+    );
   }
 }

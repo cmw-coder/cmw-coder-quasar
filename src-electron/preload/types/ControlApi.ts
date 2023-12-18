@@ -1,12 +1,7 @@
 import { ipcRenderer } from 'electron';
 
-export const controlApiKey = 'controlApi' as const;
-
-export enum WindowType {
-  Main = 'Main',
-  CompletionInline = 'CompletionInline',
-  CompletionSnippet = 'CompletionSnippet',
-}
+import { controlApiKey } from 'shared/types/constants';
+import { WindowType } from 'shared/types/WindowType';
 
 export enum ControlType {
   Close = 'Close',
@@ -18,7 +13,7 @@ export enum ControlType {
   ToggleMaximize = 'ToggleMaximize',
 }
 
-interface ControlMessage {
+export interface ControlMessage {
   type: ControlType;
   data: unknown;
   windowType: WindowType;
@@ -91,7 +86,20 @@ export class ToggleMaximizeControlMessage implements ControlMessage {
   windowType = WindowType.Main;
 }
 
-export interface ControlMessageMapping {
+// -------------------------------------------------------------------------------------------------------
+// ↓↓↓↓↓↓↓↓↓↓                                   Local stuff                                     ↓↓↓↓↓↓↓↓↓↓
+// -------------------------------------------------------------------------------------------------------
+
+type ControlMessageUnion =
+  | CloseControlMessage
+  | HideControlMessage
+  | MinimizeControlMessage
+  | MoveControlMessage
+  | ResizeControlMessage
+  | ShowControlMessage
+  | ToggleMaximizeControlMessage;
+
+interface ControlMessageMapping {
   [ControlType.Close]: CloseControlMessage;
   [ControlType.Hide]: HideControlMessage;
   [ControlType.Minimize]: MinimizeControlMessage;
@@ -101,6 +109,33 @@ export interface ControlMessageMapping {
   [ControlType.ToggleMaximize]: ToggleMaximizeControlMessage;
 }
 
-export const sendControlAction = <T extends keyof ControlMessageMapping>(message: ControlMessageMapping[T]) => {
-  ipcRenderer.send(controlApiKey, message);
+type GenericCallBack = (data: never) => void;
+
+const handlerMap = new Map<WindowType, Map<ControlType, GenericCallBack>>();
+
+// -------------------------------------------------------------------------------------------------------
+// ↑↑↑↑↑↑↑↑↑↑                                   Local stuff                                     ↑↑↑↑↑↑↑↑↑↑
+// -------------------------------------------------------------------------------------------------------
+
+export const registerControlAction = <T extends keyof ControlMessageMapping>(
+  windowType: WindowType,
+  controlType: T,
+  callback: (data: ControlMessageMapping[T]['data']) => void
+) => {
+  if (handlerMap.has(windowType)) {
+    handlerMap.get(windowType)?.set(controlType, callback);
+  } else {
+    handlerMap.set(windowType, new Map([[controlType, callback]]));
+  }
 };
+
+export const triggerControlAction = (
+  windowType: WindowType,
+  controlType: ControlType,
+  data: unknown
+) => {
+  handlerMap.get(windowType)?.get(controlType)?.(<never>data);
+};
+
+export const sendControlAction = (message: ControlMessageUnion) =>
+  ipcRenderer.send(controlApiKey, message);

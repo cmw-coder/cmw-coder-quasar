@@ -3,7 +3,7 @@ import { useI18n } from 'vue-i18n';
 import { onMounted, ref } from 'vue';
 
 import CodeBlock from 'components/CodeBlock.vue';
-import { ActionType } from 'shared/types/ActionApi';
+import { ActionType } from 'shared/types/ActionType';
 import { b64GbkToUtf8 } from 'utils/iconv';
 
 const { t } = useI18n();

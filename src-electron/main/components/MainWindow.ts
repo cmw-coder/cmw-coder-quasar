@@ -1,8 +1,10 @@
-import { ipcMain, BrowserWindow } from 'electron';
+import { BrowserWindow } from 'electron';
 import { resolve } from 'path';
 
-import { registerAction } from 'main/server';
+import { ControlType, registerControlAction } from 'preload/types/ControlApi';
+import { registerWsMessage } from 'main/server';
 import { WsAction } from 'shared/types/WsMessage';
+import { WindowType } from 'shared/types/WindowType';
 
 export class MainWindow {
   private _window: BrowserWindow | undefined;
@@ -46,26 +48,22 @@ export class MainWindow {
     });
 
     this._window.on('ready-to-show', () =>
-      registerAction(WsAction.DebugSync, (message) =>
+      registerWsMessage(WsAction.DebugSync, (message) =>
         this._window?.webContents.send('action', message)
       )
     );
 
-    ipcMain.on('controlApi', (_, arg) => {
-      switch (arg) {
-        case 'minimize':
-          this._window?.minimize();
-          break;
-        case 'toggleMaximize':
-          if (this._window?.isMaximized()) {
-            this._window?.unmaximize();
-          } else {
-            this._window?.maximize();
-          }
-          break;
-        case 'close':
-          this._window?.close();
-          break;
+    registerControlAction(WindowType.Main, ControlType.Close, () =>
+      this._window?.close()
+    );
+    registerControlAction(WindowType.Main, ControlType.Minimize, () =>
+      this._window?.minimize()
+    );
+    registerControlAction(WindowType.Main, ControlType.ToggleMaximize, () => {
+      if (this._window?.isMaximized()) {
+        this._window?.unmaximize();
+      } else {
+        this._window?.maximize();
       }
     });
   }

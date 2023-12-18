@@ -1,12 +1,7 @@
 import { ipcRenderer } from 'electron';
 
-export const actionApiKey = 'actionApi' as const;
-
-export enum ActionType {
-  CompletionInline = 'CompletionInline',
-  CompletionSnippet = 'CompletionInline',
-  DebugSync = 'DebugSync',
-}
+import { ActionType } from 'shared/types/ActionType';
+import { actionApiKey } from 'shared/types/constants';
 
 interface ActionMessage {
   type: ActionType;
@@ -46,7 +41,17 @@ export interface ActionMessageMapping {
   [ActionType.DebugSync]: DebugSyncActionMessage;
 }
 
-const handlerMap = new Map<ActionType, Array<(data: never) => void>>();
+// -------------------------------------------------------------------------------------------------------
+// ↓↓↓↓↓↓↓↓↓↓                                   Local stuff                                     ↓↓↓↓↓↓↓↓↓↓
+// -------------------------------------------------------------------------------------------------------
+
+type GenericCallBack = (data: never) => void;
+
+const handlerMap = new Map<ActionType, Array<GenericCallBack>>();
+
+// -------------------------------------------------------------------------------------------------------
+// ↑↑↑↑↑↑↑↑↑↑                                   Local stuff                                     ↑↑↑↑↑↑↑↑↑↑
+// -------------------------------------------------------------------------------------------------------
 
 export const receive = <T extends keyof ActionMessageMapping>(
   actionType: T,
