@@ -6,10 +6,10 @@
     "paths": {
       "main/*": ["./main/*"],
       "preload/*": ["./preload/*"],
-      "types/*": ["./types/*"],
+      "shared/*": ["./shared/*"],
       "web/*": ["../src/*"]
     },
     "outDir": "dist"
   },
-  "include": ["*.ts", "main/**/*.ts", "preload/**/*.ts", "types/**/*.ts"]
+  "include": ["*.ts", "main/**/*.ts", "preload/**/*.ts", "shared/**/*.ts"]
 }

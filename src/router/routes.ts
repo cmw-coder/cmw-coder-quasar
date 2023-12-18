@@ -29,7 +29,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'completion/inline',
         components: {
-          default: () => import('pages/CompletionInlinePage.vue'),
+          default: () => import('pages/CompletionInline.vue'),
         },
       },
       {

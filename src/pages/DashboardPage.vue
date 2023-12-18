@@ -2,9 +2,8 @@
 import { useI18n } from 'vue-i18n';
 import { onMounted, ref } from 'vue';
 
-import { Action } from 'app/src-electron/types/action';
 import CodeBlock from 'components/CodeBlock.vue';
-import { SyncActionData } from 'types/action';
+import { ActionType } from 'shared/types/ActionApi';
 import { b64GbkToUtf8 } from 'utils/iconv';
 
 const { t } = useI18n();
@@ -16,7 +15,7 @@ const i18n = (relativePath: string) => {
 const codeContent = ref('');
 
 onMounted(() => {
-  window.subscribeApi.action(Action.Sync, (data: SyncActionData) => {
+  window.actionApi.receive(ActionType.DebugSync, (data) => {
     codeContent.value = b64GbkToUtf8(data.content);
   });
 });

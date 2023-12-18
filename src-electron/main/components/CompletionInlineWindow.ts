@@ -1,7 +1,7 @@
 import { BrowserWindow } from 'electron';
 import { resolve } from 'path';
 import { registerAction } from 'main/server';
-import { Action } from 'types/action';
+import { WsAction } from 'shared/types/WsMessage';
 
 export class CompletionInlineWindow {
   private _window: BrowserWindow | undefined;
@@ -45,7 +45,7 @@ export class CompletionInlineWindow {
       .then();
 
     this._window.on('ready-to-show', () =>
-      registerAction(Action.CompletionGenerate, (message) =>
+      registerAction(WsAction.CompletionGenerate, (message) =>
         this._window?.webContents.send('action', message)
       )
     );

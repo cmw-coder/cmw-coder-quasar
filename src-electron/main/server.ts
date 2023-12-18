@@ -1,16 +1,18 @@
 import { Server, WebSocket } from 'ws';
 
-import { ActionManager } from 'types/ActionManager';
-import { Action, ActionMessage } from 'types/action';
+import { WsMessageMapping } from 'shared/types/WsMessage';
+import { WsMessageHandler } from 'main/types/WsMessageHandler';
 
-const actionManager = new ActionManager();
+const wsMessageHandler = new WsMessageHandler();
 
-export const registerAction = (
-  action: Action,
-  callback: (message: ActionMessage) => void
+export const registerAction = <T extends keyof WsMessageMapping>(
+  action: T,
+  callback: (message: WsMessageMapping[T]) => void
 ) => {
-  actionManager.registerAction(action, callback);
+  wsMessageHandler.registerMessage(action, callback);
 };
+
+// Todo: Implement ability to send messages to clients
 
 export const startServer = async () => {
   const server = new Server({
@@ -21,7 +23,7 @@ export const startServer = async () => {
     console.log('New client connected');
 
     client.on('message', (message: string) => {
-      actionManager.handleAction(JSON.parse(message));
+      wsMessageHandler.handleAction(JSON.parse(message));
     });
 
     client.on('close', () => {

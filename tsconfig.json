@@ -10,11 +10,12 @@
       "css/*": ["src/css/*"],
       "layouts/*": ["src/layouts/*"],
       "pages/*": ["src/pages/*"],
+      "shared/*": ["src-electron/shared/*"],
       "src/*": ["src/*"],
       "stores/*": ["src/stores/*"],
       "types/*": ["src/types/*"],
       "utils/*": ["src/utils/*"]
     }
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "src-electron/electron-preload.ts"]
 }

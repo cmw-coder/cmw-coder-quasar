@@ -2,6 +2,7 @@
 import { useI18n } from 'vue-i18n';
 
 import DarkModeButton from 'components/DarkModeButton.vue';
+import { WindowType } from 'shared/types/ControlApi';
 
 const { t } = useI18n();
 const i18n = (relativePath: string) => {
@@ -11,11 +12,11 @@ const i18n = (relativePath: string) => {
 const emit = defineEmits(['toggle:left-drawer', 'toggle:right-drawer']);
 
 const closeApp = () => {
-  window.controlApi.close();
+  window.controlApi.Close(undefined);
 };
 
 const minimize = () => {
-  window.controlApi.minimize();
+  window.controlApi.minimize(WindowType.Main);
 };
 const toggleLeftDrawer = () => {
   emit('toggle:left-drawer', true);

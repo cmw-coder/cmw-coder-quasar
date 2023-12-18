@@ -1,28 +1,35 @@
-import { contextBridge, ipcRenderer } from 'electron';
+import { contextBridge } from 'electron';
 
-import { Action } from 'types/action';
-import { ActionManager } from 'types/ActionManager';
+import {
+  controlApiKey,
+  ControlType,
+  sendControlAction,
+} from 'shared/types/ControlApi';
+import {
+  actionApiKey,
+  receive,
+  send,
+} from 'shared/types/ActionApi';
 
-const actionManager = new ActionManager();
+contextBridge.exposeInMainWorld(
+  controlApiKey,
+  Object.fromEntries(
+    Object.values(ControlType).map((controlType) => {
+      return [controlType, sendControlAction];
+    })
+  )
+);
 
-contextBridge.exposeInMainWorld('controlApi', {
-  close() {
-    ipcRenderer.send('controlApi', 'close');
-  },
-  minimize() {
-    ipcRenderer.send('controlApi', 'minimize');
-  },
-  toggleMaximize() {
-    ipcRenderer.send('controlApi', 'toggleMaximize');
-  },
-});
+// contextBridge.exposeInMainWorld(controlApiKey, {
+//   close() {
+//     sendControlAction(new CloseControlMessage());
+//   },
+//   minimize(windowType: WindowType) {
+//     sendControlAction(new MinimizeControlMessage(windowType));
+//   },
+//   toggleMaximize() {
+//     sendControlAction(new ToggleMaximizeControlMessage());
+//   },
+// });
 
-contextBridge.exposeInMainWorld('subscribeApi', {
-  action(action: Action, callback: (data: never) => void) {
-    actionManager.registerAction(action, (message) => callback(message.data));
-  },
-});
-
-ipcRenderer.on('action', (_, message) => {
-  actionManager.handleAction(message);
-});
+contextBridge.exposeInMainWorld(actionApiKey, { receive, send });

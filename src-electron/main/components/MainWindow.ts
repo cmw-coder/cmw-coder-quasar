@@ -2,7 +2,7 @@ import { ipcMain, BrowserWindow } from 'electron';
 import { resolve } from 'path';
 
 import { registerAction } from 'main/server';
-import { Action } from 'types/action';
+import { WsAction } from 'shared/types/WsMessage';
 
 export class MainWindow {
   private _window: BrowserWindow | undefined;
@@ -46,7 +46,7 @@ export class MainWindow {
     });
 
     this._window.on('ready-to-show', () =>
-      registerAction(Action.Sync, (message) =>
+      registerAction(WsAction.DebugSync, (message) =>
         this._window?.webContents.send('action', message)
       )
     );
