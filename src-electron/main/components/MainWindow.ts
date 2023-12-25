@@ -12,6 +12,7 @@ import {
 
 export class MainWindow {
   private _window: BrowserWindow | undefined;
+  private readonly _urlBase = `${process.env.APP_URL}/#/main`;
 
   activate() {
     if (this._window) {
@@ -19,6 +20,18 @@ export class MainWindow {
     } else {
       this.create();
     }
+  }
+
+  login(userId: string) {
+    const isVisible = this._window?.isVisible() ?? false;
+    console.log(isVisible);
+    this.activate();
+    const url = new URL('/login', this._urlBase);
+    url.search = new URLSearchParams({
+      isVisible: isVisible.toString(),
+      userId,
+    }).toString();
+    this._window?.loadURL(url.href).then();
   }
 
   private create() {
@@ -35,7 +48,7 @@ export class MainWindow {
       },
     });
 
-    this._window.loadURL(process.env.APP_URL).then();
+    this._window.loadURL(this._urlBase).then();
 
     this._window.webContents.openDevTools({ mode: 'undocked' });
 

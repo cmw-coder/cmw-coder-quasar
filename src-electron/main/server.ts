@@ -1,13 +1,16 @@
 import { Server, WebSocket } from 'ws';
 
-import { WsMessageMapping } from 'shared/types/WsMessage';
+import {
+  WsClientMessageMapping,
+  WsServerMessageMapping,
+} from 'shared/types/WsMessage';
 import { WsMessageHandler } from 'main/types/WsMessageHandler';
 
 const wsMessageHandler = new WsMessageHandler();
 
-export const registerWsMessage = <T extends keyof WsMessageMapping>(
+export const registerWsMessage = <T extends keyof WsClientMessageMapping>(
   action: T,
-  callback: (message: WsMessageMapping[T]) => void
+  callback: (message: WsClientMessageMapping[T]) => WsServerMessageMapping[T]
 ) => {
   wsMessageHandler.registerMessage(action, callback);
 };
@@ -22,8 +25,11 @@ export const startServer = async () => {
   server.on('connection', (client: WebSocket) => {
     console.log('New client connected');
 
-    client.on('message', (message: string) => {
-      wsMessageHandler.handleAction(JSON.parse(message));
+    client.on('message', async (message: string) => {
+      const result = wsMessageHandler.handleAction(JSON.parse(message));
+      if (result) {
+        client.send(JSON.stringify(await result));
+      }
     });
 
     client.on('close', () => {

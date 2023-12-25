@@ -19,6 +19,12 @@ const routes: RouteRecordRaw[] = [
           // rightDrawer: () => import('layouts/drawers/RightMainDrawer.vue'),
         },
       },
+      {
+        path: 'login',
+        components: {
+          default: () => import('pages/LoginPage.vue'),
+        },
+      },
     ],
   },
   {

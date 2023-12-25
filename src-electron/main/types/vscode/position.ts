@@ -112,7 +112,7 @@ export class Position {
    * @param deltaLineNumber line number delta
    * @param deltaColumn character delta
    */
-  delta(deltaLineNumber: number = 0, deltaColumn: number = 0): Position {
+  delta(deltaLineNumber = 0, deltaColumn = 0): Position {
     return this.with(this.line + deltaLineNumber, this.character + deltaColumn);
   }
 

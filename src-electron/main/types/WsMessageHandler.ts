@@ -1,19 +1,26 @@
-import { WsMessageMapping } from 'shared/types/WsMessage';
+import {
+  WsClientMessageMapping,
+  WsServerMessageMapping,
+} from 'shared/types/WsMessage';
 
 export class WsMessageHandler {
   private _handlers = new Map<
-    keyof WsMessageMapping,
-    (message: unknown) => void
+    keyof WsClientMessageMapping,
+    (message: unknown) => unknown
   >();
 
-  handleAction<T extends keyof WsMessageMapping>(message: WsMessageMapping[T]) {
-    this._handlers.get(message.action)?.(message);
+  handleAction<T extends keyof WsClientMessageMapping>(
+    message: WsClientMessageMapping[T]
+  ) {
+    return <WsServerMessageMapping[T]>(
+      this._handlers.get(message.action)?.(message)
+    );
   }
 
-  registerMessage<T extends keyof WsMessageMapping>(
+  registerMessage<T extends keyof WsClientMessageMapping>(
     action: T,
-    callback: (message: WsMessageMapping[T]) => void
+    callback: (message: WsClientMessageMapping[T]) => WsServerMessageMapping[T]
   ) {
-    this._handlers.set(action, <(message: unknown) => void>callback);
+    this._handlers.set(action, <(message: unknown) => unknown>callback);
   }
 }

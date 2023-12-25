@@ -1,19 +1,29 @@
 import { app, ipcMain } from 'electron';
+import { decode, encode } from 'iconv-lite';
 
 import { CompletionInlineWindow } from 'main/components/CompletionInlineWindow';
 import { MainWindow } from 'main/components/MainWindow';
+import { PromptExtractor } from 'main/components/PromptExtractor';
+import { PromptProcessor } from 'main/components/PromptProcessor';
+import { statisticsReporter } from 'main/components/StatisticsReporter';
 import { TrayIcon } from 'main/components/TrayIcon';
 import { registerWsMessage, startServer } from 'main/server';
-import { configStore, dataStore } from 'main/stores';
-import { b64GbkToUtf8 } from 'main/utils/iconv';
+import { configStore } from 'main/stores';
+import { ApiStyle } from 'main/types/model';
+import { TextDocument } from 'main/types/TextDocument';
+import { Position } from 'main/types/vscode/position';
 import { parseSymbolString, parseTabString } from 'main/utils/parser';
-import { controlApiKey } from 'shared/types/constants';
+
 import {
   ControlMessage,
   triggerControlCallback,
 } from 'preload/types/ControlApi';
-import { WsAction } from 'shared/types/WsMessage';
-import { statisticsReporter } from "main/components/StatisticsReporter";
+
+import { controlApiKey } from 'shared/types/constants';
+import {
+  CompletionGenerateServerMessage,
+  WsAction,
+} from 'shared/types/WsMessage';
 
 if (app.requestSingleInstanceLock()) {
   const completionInlineWindow = new CompletionInlineWindow();
@@ -28,16 +38,28 @@ if (app.requestSingleInstanceLock()) {
     mainWindow.activate();
   });
   app.whenReady().then(() => {
-    startServer().then(() => {
-      registerWsMessage(WsAction.CompletionGenerate, (message) => {
-        const { caret, path, prefix, suffix, symbolString, tabString } =
-          message.data;
-        const decodedPath = b64GbkToUtf8(path);
-        const decodedPrefix = b64GbkToUtf8(prefix);
-        const decodedSuffix = b64GbkToUtf8(suffix);
+    startServer().then(async () => {
+      const promptProcessor = new PromptProcessor();
+      registerWsMessage(WsAction.CompletionGenerate, async (message) => {
+        const {
+          caret,
+          path,
+          prefix,
+          projectId,
+          suffix,
+          symbolString,
+          tabString,
+        } = message.data;
+        const decodedPath = decode(Buffer.from(path, 'base64'), 'gb2312');
+        const decodedPrefix = decode(Buffer.from(prefix, 'base64'), 'gb2312');
+        const decodedSuffix = decode(Buffer.from(suffix, 'base64'), 'gb2312');
 
-        const symbols = parseSymbolString(b64GbkToUtf8(symbolString));
-        const tabs = parseTabString(b64GbkToUtf8(tabString));
+        const symbols = parseSymbolString(
+          decode(Buffer.from(symbolString, 'base64'), 'gb2312')
+        );
+        const tabs = parseTabString(
+          decode(Buffer.from(tabString, 'base64'), 'gb2312')
+        );
 
         console.log({
           caret,
@@ -52,28 +74,37 @@ if (app.requestSingleInstanceLock()) {
           statisticsReporter.updateCaretPosition(caret);
           const prompt = await new PromptExtractor(
             new TextDocument(decodedPath),
-            cursorRange.start
+            new Position(caret.line, caret.character)
           ).getPromptComponents(tabs, symbols, decodedPrefix, decodedSuffix);
           const results = await promptProcessor.process(
             prompt,
             decodedPrefix,
             projectId
           );
-          return {
-            result: 'success',
-            contents: results.map((result) =>
+          return new CompletionGenerateServerMessage({
+            completions: results.map((result) =>
               encode(result, 'gb2312').toString('base64')
             ),
-          };
+            result: 'success',
+          });
         } catch (e) {
-          Logger.warn('route.completion.generate', e);
-          return { result: 'error', message: (<Error>e).message };
+          console.warn('route.completion.generate', e);
+          return new CompletionGenerateServerMessage({
+            result: 'error',
+            message: (<Error>e).message,
+          });
         }
       });
       trayIcon.activate();
       mainWindow.activate();
       trayIcon.onClick(() => mainWindow.activate());
       completionInlineWindow.activate();
+      if (configStore.apiStyle === ApiStyle.Linseer) {
+        configStore.onLogin = mainWindow.login;
+        if (!(await configStore.getAccessToken())) {
+          configStore.login();
+        }
+      }
     });
   });
 } else {

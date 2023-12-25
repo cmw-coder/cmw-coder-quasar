@@ -1,4 +1,4 @@
-import { Range } from 'types/vscode/range';
+import { Range } from 'main/types/vscode/range';
 
 export interface TextLine {
   /**

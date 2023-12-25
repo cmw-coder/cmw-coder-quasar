@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 import { constructData } from 'main/components/StatisticsReporter/utils';
-import { configStore, dataStore } from 'main/stores';
+import { configStore } from 'main/stores';
 import { CaretPosition } from 'shared/types/common';
 
 class StatisticsReporter {
@@ -36,7 +36,7 @@ class StatisticsReporter {
             projectId,
             version,
             username,
-            dataStore.modelType ?? configStore.defaultModelType,
+            configStore.modelType,
             true
           )
         );
@@ -73,7 +73,7 @@ class StatisticsReporter {
             projectId,
             version,
             username,
-            dataStore.modelType ?? configStore.defaultModelType,
+            configStore.modelType,
             false
           )
         );

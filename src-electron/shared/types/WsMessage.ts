@@ -6,8 +6,6 @@ export enum WsAction {
   CompletionCancel = 'CompletionCancel',
   CompletionGenerate = 'CompletionGenerate',
   DebugSync = 'DebugSync',
-  InfoProjectId = 'InfoProjectId',
-  InfoPluginVersion = 'InfoPluginVersion',
 }
 
 export interface WsMessage {
@@ -16,14 +14,12 @@ export interface WsMessage {
   timestamp: number;
 }
 
-export type StandardResult =
+type StandardResult<T = Record<string, never>> =
   | {
-      result: 'error' | 'failure';
+      result: 'failure' | 'error';
       message: string;
     }
-  | {
-      result: 'success';
-    };
+  | ({ result: 'success' } & T);
 
 export interface CompletionAcceptClientMessage extends WsMessage {
   action: WsAction.CompletionAccept;
@@ -83,6 +79,7 @@ export interface CompletionGenerateClientMessage extends WsMessage {
     caret: CaretPosition;
     path: string;
     prefix: string;
+    projectId: string;
     suffix: string;
     symbolString: string;
     tabString: string;
@@ -91,10 +88,10 @@ export interface CompletionGenerateClientMessage extends WsMessage {
 
 export class CompletionGenerateServerMessage implements WsMessage {
   action = WsAction.CompletionGenerate;
-  data: StandardResult & { completion: string };
+  data: StandardResult<{ completions: string[] }>;
   timestamp = Date.now();
 
-  constructor(data: StandardResult & { completion: string }) {
+  constructor(data: StandardResult<{ completions: string[] }>) {
     this.data = data;
   }
 }
@@ -107,42 +104,18 @@ export interface DebugSyncClientMessage extends WsMessage {
   };
 }
 
-export interface InfoProjectIdClientMessage extends WsMessage {
-  action: WsAction.InfoProjectId;
-  data: undefined;
-}
-
-export class InfoProjectIdServerMessage implements WsMessage {
-  action = WsAction.InfoProjectId;
-  data: StandardResult;
-  timestamp = Date.now();
-
-  constructor(data: StandardResult) {
-    this.data = data;
-  }
-}
-
-export interface InfoPluginVersionClientMessage extends WsMessage {
-  action: WsAction.InfoPluginVersion;
-  data: undefined;
-}
-
-export class InfoPluginVersionServerMessage implements WsMessage {
-  action = WsAction.InfoPluginVersion;
-  data: StandardResult;
-  timestamp = Date.now();
-
-  constructor(data: StandardResult) {
-    this.data = data;
-  }
-}
-
-export interface WsMessageMapping {
+export interface WsClientMessageMapping {
   [WsAction.CompletionAccept]: CompletionAcceptClientMessage;
   [WsAction.CompletionCache]: CompletionCacheClientMessage;
   [WsAction.CompletionCancel]: CompletionCancelClientMessage;
   [WsAction.CompletionGenerate]: CompletionGenerateClientMessage;
   [WsAction.DebugSync]: DebugSyncClientMessage;
-  [WsAction.InfoProjectId]: InfoProjectIdClientMessage;
-  [WsAction.InfoPluginVersion]: InfoPluginVersionClientMessage;
+}
+
+export interface WsServerMessageMapping {
+  [WsAction.CompletionAccept]: CompletionAcceptServerMessage;
+  [WsAction.CompletionCache]: CompletionCacheServerMessage;
+  [WsAction.CompletionCancel]: CompletionCancelServerMessage;
+  [WsAction.CompletionGenerate]: Promise<CompletionGenerateServerMessage>;
+  [WsAction.DebugSync]: void;
 }

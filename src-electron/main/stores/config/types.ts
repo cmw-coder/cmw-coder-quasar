@@ -20,6 +20,8 @@ export interface CommonConfigType {
   userId: string;
 }
 
+/// HuggingFace --------------------------------------------------------------------------------------------------------
+
 export interface HuggingFaceCompletionConfigType {
   contextLimit: number;
   endpoint: string;
@@ -40,9 +42,20 @@ export interface HuggingFaceModelConfigType {
 }
 
 export interface HuggingFaceConfigType extends CommonConfigType {
-  apiStyle: ApiStyle.HuggingFace;
   modelConfigs: HuggingFaceModelConfigType[];
 }
+
+export interface HuggingFaceDataType {
+  modelType: HuggingFaceModelType;
+}
+
+export interface HuggingFaceStoreType {
+  apiStyle: ApiStyle.HuggingFace;
+  config: HuggingFaceConfigType;
+  data: HuggingFaceDataType;
+}
+
+/// Linseer ------------------------------------------------------------------------------------------------------------
 
 export interface LinseerCompletionConfigType {
   contextLimit: number;
@@ -64,6 +77,19 @@ export interface LinseerModelConfigType {
 }
 
 export interface LinseerConfigType extends CommonConfigType {
-  apiStyle: ApiStyle.Linseer;
   modelConfigs: LinseerModelConfigType[];
+}
+
+export interface LinseerDataType {
+  modelType: LinseerModelType;
+  tokens: {
+    access: string;
+    refresh: string;
+  };
+}
+
+export interface LinseerStoreType {
+  apiStyle: ApiStyle.Linseer;
+  config: LinseerConfigType;
+  data: LinseerDataType;
 }

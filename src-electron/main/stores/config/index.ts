@@ -1,76 +1,164 @@
 import ElectronStore from 'electron-store';
 
 import {
-  defaultHuggingFaceConfig,
+  huggingFaceStoreDefault,
   defaultLinseerConfig,
 } from 'main/stores/config/default';
 import {
-  huggingFaceConfigSchema,
-  linseerConfigSchema,
+  huggingFaceStoreSchema,
+  linseerStoreSchema,
 } from 'main/stores/config/schema';
 import {
   HuggingFaceConfigType,
+  HuggingFaceDataType,
+  HuggingFaceStoreType,
   LinseerConfigType,
+  LinseerDataType,
+  LinseerStoreType,
 } from 'main/stores/config/types';
+import { judgment, refreshToken } from 'main/utils/axios';
 
 export class HuggingFaceConfigStore {
-  private _store: ElectronStore<HuggingFaceConfigType>;
+  private _store: ElectronStore<HuggingFaceStoreType>;
 
   constructor() {
     this._store = new ElectronStore({
-      defaults: defaultHuggingFaceConfig,
-      name: 'config',
-      schema: huggingFaceConfigSchema,
+      defaults: huggingFaceStoreDefault,
+      schema: huggingFaceStoreSchema,
     });
     console.log(this._store.path);
   }
 
-  get config() {
-    return this._store.store;
+  get apiStyle() {
+    return this._store.get('apiStyle');
   }
 
-  set config(config: HuggingFaceConfigType) {
-    Object.entries(config).forEach(([key, value]) =>
-      this._store.set(key, value)
+  get config(): HuggingFaceConfigType {
+    return this._store.get('config');
+  }
+
+  set config(config: Partial<HuggingFaceConfigType>) {
+    const currentConfig = this.config;
+    this._store.set('config', { ...currentConfig, ...config });
+  }
+
+  get data(): HuggingFaceDataType {
+    return this._store.get('data');
+  }
+
+  set data(data: Partial<HuggingFaceDataType>) {
+    const currentData = this.data;
+    this._store.set('data', { ...currentData, ...data });
+  }
+
+  get modelConfig() {
+    const { modelConfigs } = this.config;
+    const { modelType } = this.data;
+    return (
+      modelConfigs.find((modelConfig) => modelConfig.modelType === modelType) ??
+      modelConfigs[0]
     );
   }
 
-  get defaultModelType() {
-    return this._store.get('modelConfigs')[0].modelType;
+  get modelType() {
+    // Sanitize modelType
+    return this.modelConfig.modelType;
   }
 
-  get statistics(): string {
-    return this._store.get('statistics');
+  get statistics() {
+    return this.config.statistics;
   }
 }
 
 export class LinseerConfigStore {
-  private _store: ElectronStore<LinseerConfigType>;
+  private _loginHandler: ((userId: string) => void) | undefined;
+  private _store: ElectronStore<LinseerStoreType>;
 
   constructor() {
     this._store = new ElectronStore({
       defaults: defaultLinseerConfig,
-      name: 'config',
-      schema: linseerConfigSchema,
+      schema: linseerStoreSchema,
     });
     console.log(this._store.path);
   }
 
-  get config() {
-    return this._store.store;
+  get apiStyle() {
+    return this._store.get('apiStyle');
   }
 
-  set config(config: LinseerConfigType) {
+  get config(): LinseerConfigType {
+    return this._store.get('config');
+  }
+
+  set config(config: Partial<LinseerConfigType>) {
     Object.entries(config).forEach(([key, value]) =>
       this._store.set(key, value)
     );
   }
 
-  get defaultModelType() {
-    return this._store.get('modelConfigs')[0].modelType;
+  get data(): LinseerDataType {
+    return this._store.get('data');
+  }
+
+  set data(data: Partial<LinseerDataType>) {
+    const currentData = this.data;
+    this._store.set('data', { ...currentData, ...data });
+  }
+
+  get modelConfig() {
+    const { modelConfigs } = this.config;
+    const { modelType } = this.data;
+    return (
+      modelConfigs.find((modelConfig) => modelConfig.modelType === modelType) ??
+      modelConfigs[0]
+    );
+  }
+
+  get modelType() {
+    // Sanitize modelType
+    const currentModelConfig = this.modelConfig;
+    return currentModelConfig.modelType;
   }
 
   get statistics() {
-    return this._store.get('statistics');
+    return this.config.statistics;
+  }
+
+  set onLogin(handler: (userId: string) => void) {
+    this._loginHandler = handler;
+  }
+
+  login() {
+    this._loginHandler?.(this.config.userId);
+  }
+
+  async getAccessToken() {
+    if ((await this.checkAccessToken()) || (await this.refreshToken())) {
+      const { tokens } = this.data;
+      return tokens.access;
+    }
+  }
+
+  async checkAccessToken() {
+    const { tokens } = this.data;
+    try {
+      await judgment(tokens.access);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  async refreshToken() {
+    const currentData = this.data;
+    try {
+      const { data } = await refreshToken(currentData.tokens.refresh);
+      currentData.tokens.access = data.access_token;
+      currentData.tokens.refresh = data.refresh_token;
+      this.data = currentData;
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 }

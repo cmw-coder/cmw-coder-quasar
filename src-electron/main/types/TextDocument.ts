@@ -1,22 +1,20 @@
 import { readFileSync } from 'fs';
+import { decode } from 'iconv-lite';
 
-import { Position } from 'types/vscode/position';
-import { Range } from 'types/vscode/range';
-import { TextLine } from 'types/vscode/textLine';
-import { plainGbkToUtf8 } from 'main/utils/iconv';
+import { Position } from 'main/types/vscode/position';
+import { Range } from 'main/types/vscode/range';
+import { TextLine } from 'main/types/vscode/textLine';
 
 export class TextDocument {
   fileName: string;
-  isUntitled: boolean = false;
-  languageId: string = 'c';
-  version: number = 0;
-  isDirty: boolean = false;
-  isClosed: boolean = false;
+  languageId = 'c';
+  version = 0;
+  isClosed = false;
   lineCount: number;
   private readonly _content: string;
 
   constructor(filePath: string) {
-    this._content = plainGbkToUtf8(readFileSync(filePath));
+    this._content = decode(readFileSync(filePath), 'gb2312');
     this.fileName = filePath;
     this.lineCount = this._content.split('\n').length;
   }
