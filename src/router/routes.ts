@@ -22,6 +22,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'login',
         components: {
+          header: () => import('layouts/headers/MainHeader.vue'),
           default: () => import('pages/LoginPage.vue'),
         },
       },

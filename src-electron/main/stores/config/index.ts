@@ -2,7 +2,7 @@ import ElectronStore from 'electron-store';
 
 import {
   huggingFaceStoreDefault,
-  defaultLinseerConfig,
+  linseerConfigDefault,
 } from 'main/stores/config/default';
 import {
   huggingFaceStoreSchema,
@@ -23,6 +23,7 @@ export class HuggingFaceConfigStore {
 
   constructor() {
     this._store = new ElectronStore({
+      clearInvalidConfig: true,
       defaults: huggingFaceStoreDefault,
       schema: huggingFaceStoreSchema,
     });
@@ -76,7 +77,8 @@ export class LinseerConfigStore {
 
   constructor() {
     this._store = new ElectronStore({
-      defaults: defaultLinseerConfig,
+      clearInvalidConfig: true,
+      defaults: linseerConfigDefault,
       schema: linseerStoreSchema,
     });
     console.log(this._store.path);

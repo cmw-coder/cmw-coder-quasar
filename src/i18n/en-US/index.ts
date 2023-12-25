@@ -11,6 +11,14 @@ export default {
         toggleDarkMode: 'Toggle dark mode',
       },
     },
+    AccountInput: {
+      errors: {
+        account: 'Invalid account',
+      },
+      labels: {
+        account: 'Account (Job Number)',
+      },
+    },
   },
   layouts: {
     drawers: {

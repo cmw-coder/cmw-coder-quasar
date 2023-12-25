@@ -62,7 +62,7 @@ export const huggingFaceStoreDefault: HuggingFaceStoreType = {
   },
 };
 
-export const defaultLinseerConfig: LinseerStoreType = {
+export const linseerConfigDefault: LinseerStoreType = {
   apiStyle: ApiStyle.Linseer,
   config: {
     statistics: 'http://rdee.h3c.com/kong/RdTestResourceStatistic',

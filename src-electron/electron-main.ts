@@ -100,7 +100,7 @@ if (app.requestSingleInstanceLock()) {
       trayIcon.onClick(() => mainWindow.activate());
       completionInlineWindow.activate();
       if (configStore.apiStyle === ApiStyle.Linseer) {
-        configStore.onLogin = mainWindow.login;
+        configStore.onLogin = (userId) => mainWindow.login(userId);
         if (!(await configStore.getAccessToken())) {
           configStore.login();
         }

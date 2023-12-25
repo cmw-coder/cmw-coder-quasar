@@ -1,18 +1,19 @@
 import { BrowserWindow } from 'electron';
 import { resolve } from 'path';
 
-import { ControlType, registerControlCallback } from 'preload/types/ControlApi';
 import { registerWsMessage } from 'main/server';
-import { WsAction } from 'shared/types/WsMessage';
-import { WindowType } from 'shared/types/WindowType';
+import { historyToHash } from 'main/utils/common';
 import {
   DebugSyncActionMessage,
   sendToRenderer,
 } from 'preload/types/ActionApi';
+import { ControlType, registerControlCallback } from 'preload/types/ControlApi';
+import { WsAction } from 'shared/types/WsMessage';
+import { WindowType } from 'shared/types/WindowType';
 
 export class MainWindow {
   private _window: BrowserWindow | undefined;
-  private readonly _urlBase = `${process.env.APP_URL}/#/main`;
+  private readonly _urlBase = process.env.APP_URL;
 
   activate() {
     if (this._window) {
@@ -23,15 +24,19 @@ export class MainWindow {
   }
 
   login(userId: string) {
+    const isMinimized = this._window?.isMinimized() ?? false;
     const isVisible = this._window?.isVisible() ?? false;
-    console.log(isVisible);
     this.activate();
-    const url = new URL('/login', this._urlBase);
+    this._window?.center();
+    this._window?.focus();
+    const url = new URL('/main/login', this._urlBase);
     url.search = new URLSearchParams({
+      isMinimized: isMinimized.toString(),
       isVisible: isVisible.toString(),
       userId,
     }).toString();
-    this._window?.loadURL(url.href).then();
+    console.log(url.search);
+    this._window?.loadURL(historyToHash(url).href).catch();
   }
 
   private create() {
@@ -48,7 +53,11 @@ export class MainWindow {
       },
     });
 
-    this._window.loadURL(this._urlBase).then();
+    this._window.loadURL(this._urlBase).catch((e) => {
+      if (e.code !== 'ERR_ABORTED') {
+        throw e;
+      }
+    });
 
     this._window.webContents.openDevTools({ mode: 'undocked' });
 
@@ -60,7 +69,7 @@ export class MainWindow {
       this._window = undefined;
     });
 
-    this._window.on('ready-to-show', () =>
+    this._window.on('ready-to-show', async () => {
       registerWsMessage(WsAction.DebugSync, (message) => {
         if (this._window) {
           sendToRenderer(
@@ -68,8 +77,8 @@ export class MainWindow {
             new DebugSyncActionMessage(message.data)
           );
         }
-      })
-    );
+      });
+    });
 
     registerControlCallback(WindowType.Main, ControlType.Hide, () =>
       this._window?.hide()

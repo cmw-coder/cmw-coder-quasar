@@ -1,7 +1,5 @@
 import { BrowserWindow } from 'electron';
 import { resolve } from 'path';
-import { registerWsMessage } from 'main/server';
-import { WsAction } from 'shared/types/WsMessage';
 import { ControlType, registerControlCallback } from 'preload/types/ControlApi';
 import { WindowType } from 'shared/types/WindowType';
 
@@ -46,11 +44,9 @@ export class CompletionInlineWindow {
       .loadURL(process.env.APP_URL + '#/simple/completion/inline')
       .then();
 
-    this._window.on('ready-to-show', () =>
-      registerWsMessage(WsAction.CompletionGenerate, (message) =>
-        this._window?.webContents.send('action', message)
-      )
-    );
+    /*this._window.on('ready-to-show', () =>
+
+    );*/
 
     registerControlCallback(WindowType.CompletionInline, ControlType.Hide, () =>
       this._window?.hide()
