@@ -248,20 +248,6 @@ export class Range {
   }
 
   /**
-   * Return the end position (which will be after or equal to the start position)
-   */
-  public static getEndPosition(range: IRange): Position {
-    return new Position(range.end.line, range.end.character);
-  }
-
-  /**
-   * Return the start position (which will be before or equal to the end position)
-   */
-  public static getStartPosition(range: IRange): Position {
-    return new Position(range.start.line, range.start.character);
-  }
-
-  /**
    * Create a new empty range using this range's start position.
    */
   public static collapseToStart(range: IRange): Range {
@@ -289,39 +275,6 @@ export class Range {
     return new Range(start.line, start.character, end.line, end.character);
   }
 
-  /**
-   * Create a `Range` from an `IRange`.
-   */
-  public static lift(range: undefined | null): null;
-
-  public static lift(range: IRange): Range;
-
-  public static lift(range: IRange | undefined | null): Range | null;
-
-  public static lift(range: IRange | undefined | null): Range | null {
-    if (!range) {
-      return null;
-    }
-    return new Range(
-      range.start.line,
-      range.start.character,
-      range.end.line,
-      range.end.character
-    );
-  }
-
-  /**
-   * Test if `obj` is an `IRange`.
-   */
-  public static isIRange(obj: any): obj is IRange {
-    return (
-      obj &&
-      typeof obj.start.line === 'number' &&
-      typeof obj.start.character === 'number' &&
-      typeof obj.end.line === 'number' &&
-      typeof obj.end.character === 'number'
-    );
-  }
 
   /**
    * Test if the two ranges are touching in any way.
@@ -484,37 +437,6 @@ export class Range {
   }
 
   /**
-   * Return the end position (which will be after or equal to the start position)
-   */
-  public getEndPosition(): Position {
-    return Range.getEndPosition(this);
-  }
-
-  /**
-   * Return the start position (which will be before or equal to the end position)
-   */
-  public getStartPosition(): Position {
-    return Range.getStartPosition(this);
-  }
-
-  /**
-   * Transform to a user-presentable string representation.
-   */
-  public toString(): string {
-    return (
-      '[' +
-      this.start.line +
-      ',' +
-      this.start.character +
-      ' -> ' +
-      this.end.line +
-      ',' +
-      this.end.character +
-      ']'
-    );
-  }
-
-  /**
    * Create a new range using this range's start position, and using end.Line and end.character as the end position.
    */
   public setEndPosition(line: number, character: number): Range {
@@ -529,20 +451,6 @@ export class Range {
   }
 
   /**
-   * Create a new empty range using this range's start position.
-   */
-  public collapseToStart(): Range {
-    return Range.collapseToStart(this);
-  }
-
-  /**
-   * Create a new empty range using this range's end position.
-   */
-  public collapseToEnd(): Range {
-    return Range.collapseToEnd(this);
-  }
-
-  /**
    * Moves the range by the given number of lines.
    */
   public delta(lineCount: number): Range {
@@ -552,9 +460,5 @@ export class Range {
       this.end.line + lineCount,
       this.end.character
     );
-  }
-
-  public toJSON(): IRange {
-    return this;
   }
 }

@@ -74,22 +74,6 @@ export class Position {
   }
 
   /**
-   * Create a `Position` from an `IPosition`.
-   */
-  public static lift(pos: IPosition): Position {
-    return new Position(pos.line, pos.character);
-  }
-
-  /**
-   * Test if `obj` is an `IPosition`.
-   */
-  public static isIPosition(obj: any): obj is IPosition {
-    return (
-      obj && typeof obj.line === 'number' && typeof obj.character === 'number'
-    );
-  }
-
-  /**
    * Create a new position from this position.
    *
    * @param newLineNumber new line number

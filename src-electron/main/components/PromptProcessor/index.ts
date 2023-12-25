@@ -39,7 +39,6 @@ export class PromptProcessor {
       } else {
         const accessToken = await configStore.getAccessToken();
         if (!accessToken) {
-          // TODO: Prompt refresh tokens
           configStore.login();
           return [];
         }
