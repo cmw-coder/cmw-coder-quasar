@@ -74,6 +74,7 @@ module.exports = configure((/* ctx */) => {
 
       alias: {
         css: path.join(__dirname, './src/css'),
+        router: path.join(__dirname, './src/router'),
         shared: path.join(__dirname, './src-electron/shared'),
         types: path.join(__dirname, './src/types'),
         utils: path.join(__dirname, './src/utils'),

@@ -2,7 +2,6 @@ import { BrowserWindow } from 'electron';
 import { resolve } from 'path';
 
 import { registerWsMessage } from 'main/server';
-import { historyToHash } from 'main/utils/common';
 import {
   DebugSyncActionMessage,
   sendToRenderer,
@@ -13,7 +12,6 @@ import { WindowType } from 'shared/types/WindowType';
 
 export class MainWindow {
   private _window: BrowserWindow | undefined;
-  private readonly _urlBase = process.env.APP_URL;
 
   activate() {
     if (this._window) {
@@ -21,22 +19,6 @@ export class MainWindow {
     } else {
       this.create();
     }
-  }
-
-  login(userId: string) {
-    const isMinimized = this._window?.isMinimized() ?? false;
-    const isVisible = this._window?.isVisible() ?? false;
-    this.activate();
-    this._window?.center();
-    this._window?.focus();
-    const url = new URL('/main/login', this._urlBase);
-    url.search = new URLSearchParams({
-      isMinimized: isMinimized.toString(),
-      isVisible: isVisible.toString(),
-      userId,
-    }).toString();
-    console.log(url.search);
-    this._window?.loadURL(historyToHash(url).href).catch();
   }
 
   private create() {
@@ -53,13 +35,13 @@ export class MainWindow {
       },
     });
 
-    this._window.loadURL(this._urlBase).catch((e) => {
+    this._window.loadURL(process.env.APP_URL).catch((e) => {
       if (e.code !== 'ERR_ABORTED') {
         throw e;
       }
     });
 
-    this._window.webContents.openDevTools({ mode: 'undocked' });
+    // this._window.webContents.openDevTools({ mode: 'undocked' });
 
     // this._window.webContents.on('devtools-opened', () => {
     //   this._window?.webContents.closeDevTools();

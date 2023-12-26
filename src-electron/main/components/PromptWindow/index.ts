@@ -1,9 +1,11 @@
 import { BrowserWindow } from 'electron';
 import { resolve } from 'path';
+
+import { historyToHash } from 'main/utils/common';
 import { ControlType, registerControlCallback } from 'preload/types/ControlApi';
 import { WindowType } from 'shared/types/WindowType';
 
-export class CompletionInlineWindow {
+export class PromptWindow {
   private _window: BrowserWindow | undefined;
 
   activate() {
@@ -14,53 +16,52 @@ export class CompletionInlineWindow {
     }
   }
 
+  login(userId: string) {
+    this.activate();
+    this._window?.center();
+    this._window?.focus();
+    const url = new URL('/floating/login', process.env.APP_URL);
+    url.search = new URLSearchParams({ userId }).toString();
+    this._window?.loadURL(historyToHash(url).href).catch();
+  }
+
   private create() {
     this._window = new BrowserWindow({
       width: 500,
-      height: 21,
+      height: 500,
       useContentSize: true,
       resizable: false,
-      movable: false,
+      movable: true,
       minimizable: false,
       maximizable: false,
       closable: false,
-      focusable: false,
+      focusable: true,
       alwaysOnTop: true,
       fullscreenable: false,
       skipTaskbar: true,
       show: false,
       frame: false,
-      transparent: true,
+      transparent: false,
       webPreferences: {
         contextIsolation: true,
-        devTools: false,
+        // devTools: false,
         preload: resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD),
       },
     });
 
-    this._window.setIgnoreMouseEvents(true);
+    this._window.webContents.openDevTools({ mode: 'undocked' });
 
-    this._window
-      .loadURL(process.env.APP_URL + '#/simple/completion/inline')
-      .then();
+    /*this._window.on('ready-to-show', () => {});*/
 
-    /* this._window.on('ready-to-show', () => {}); */
-
-    registerControlCallback(WindowType.Immersive, ControlType.Hide, () =>
+    registerControlCallback(WindowType.Floating, ControlType.Close, () => {
+      this._window?.close();
+      this._window = undefined;
+    });
+    registerControlCallback(WindowType.Floating, ControlType.Hide, () =>
       this._window?.hide()
     );
-    registerControlCallback(WindowType.Immersive, ControlType.Show, () =>
+    registerControlCallback(WindowType.Floating, ControlType.Show, () =>
       this._window?.show()
-    );
-    registerControlCallback(
-      WindowType.Immersive,
-      ControlType.Move,
-      (data) => {
-        if (this._window) {
-          const [currentX, currentY] = this._window.getPosition();
-          this._window?.setPosition(data.x ?? currentX, data.y ?? currentY);
-        }
-      }
     );
   }
 }

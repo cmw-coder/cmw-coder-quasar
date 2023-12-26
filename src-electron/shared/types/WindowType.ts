@@ -1,5 +1,5 @@
 export enum WindowType {
+  Floating = 'Floating',
+  Immersive = 'Immersive',
   Main = 'Main',
-  CompletionInline = 'CompletionInline',
-  CompletionSnippet = 'CompletionSnippet',
 }

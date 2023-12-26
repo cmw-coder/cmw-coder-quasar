@@ -7,6 +7,6 @@ let apiStyle: ApiStyle;
 apiStyle = ApiStyle.Linseer;
 
 export const configStore =
-  apiStyle == ApiStyle.HuggingFace
+  apiStyle === ApiStyle.HuggingFace
     ? new HuggingFaceConfigStore()
     : new LinseerConfigStore();

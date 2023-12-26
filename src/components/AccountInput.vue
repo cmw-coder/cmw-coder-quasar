@@ -20,7 +20,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const account = computed({
   get: () => props.modelValue,
-  set: (value) => emit('update:modelValue', Number(value)),
+  set: (value) => emit('update:modelValue', value),
 });
 
 const accountInput = reactive({
@@ -29,7 +29,7 @@ const accountInput = reactive({
     if (!accountInput.content) {
       return false;
     }
-    return accountInput.content.length < 10;
+    return accountInput.content.length < 5;
   }),
   loading: false,
 });

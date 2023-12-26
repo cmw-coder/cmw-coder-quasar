@@ -5,6 +5,7 @@ import { CompletionInlineWindow } from 'main/components/CompletionInlineWindow';
 import { MainWindow } from 'main/components/MainWindow';
 import { PromptExtractor } from 'main/components/PromptExtractor';
 import { PromptProcessor } from 'main/components/PromptProcessor';
+import { PromptWindow } from 'main/components/PromptWindow';
 import { statisticsReporter } from 'main/components/StatisticsReporter';
 import { TrayIcon } from 'main/components/TrayIcon';
 import { registerWsMessage, startServer } from 'main/server';
@@ -28,6 +29,7 @@ import {
 if (app.requestSingleInstanceLock()) {
   const completionInlineWindow = new CompletionInlineWindow();
   const mainWindow = new MainWindow();
+  const promptWindow = new PromptWindow();
   const trayIcon = new TrayIcon();
 
   ipcMain.on(controlApiKey, (_, message: ControlMessage) => {
@@ -95,12 +97,15 @@ if (app.requestSingleInstanceLock()) {
           });
         }
       });
-      trayIcon.activate();
-      mainWindow.activate();
-      trayIcon.onClick(() => mainWindow.activate());
+
       completionInlineWindow.activate();
+      mainWindow.activate();
+      promptWindow.activate()
+      trayIcon.activate();
+
+      trayIcon.onClick(() => mainWindow.activate());
       if (configStore.apiStyle === ApiStyle.Linseer) {
-        configStore.onLogin = (userId) => mainWindow.login(userId);
+        configStore.onLogin = (userId) => promptWindow.login(userId);
         if (!(await configStore.getAccessToken())) {
           configStore.login();
         }

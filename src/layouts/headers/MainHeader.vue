@@ -1,19 +1,24 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
+import { useRoute } from 'vue-router';
 
 import DarkModeButton from 'components/DarkModeButton.vue';
 import { WindowType } from 'shared/types/WindowType';
 
 const { t } = useI18n();
+const { matched } = useRoute();
+
 const i18n = (relativePath: string) => {
   return t('layouts.headers.MainHeader.' + relativePath);
 };
 
+const { name } = matched[matched.length - 2];
+
 const emit = defineEmits(['toggle:left-drawer', 'toggle:right-drawer']);
 
-const hide = () => window.controlApi.hide(WindowType.Main);
+const hide = () => window.controlApi.hide(<WindowType>name);
 
-const minimize = () => window.controlApi.minimize(WindowType.Main);
+const minimize = () => window.controlApi.minimize(<WindowType>name);
 
 const toggleLeftDrawer = () => emit('toggle:left-drawer', true);
 

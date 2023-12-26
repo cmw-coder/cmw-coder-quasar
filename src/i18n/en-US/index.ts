@@ -27,6 +27,11 @@ export default {
     },
     footers: {},
     headers: {
+      FloatingHeader: {
+        labels: {
+          title: 'Comware Coder Assistant',
+        },
+      },
       MainHeader: {
         labels: {
           title: 'Comware Coder Assistant',
@@ -43,6 +48,11 @@ export default {
       tooltips: {
         copy: 'Copy to clipboard',
         insert: 'Insert to editor',
+      },
+    },
+    LoginPage: {
+      labels: {
+        title: 'Login to Use Linseer AI',
       },
     },
   },

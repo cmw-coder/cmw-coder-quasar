@@ -19,6 +19,16 @@ export interface ControlMessage {
   windowType: WindowType;
 }
 
+export class CloseControlMessage implements ControlMessage {
+  type = ControlType.Close;
+  data: undefined;
+  windowType: WindowType;
+
+  constructor(windowType: WindowType) {
+    this.windowType = windowType;
+  }
+}
+
 export class HideControlMessage implements ControlMessage {
   type = ControlType.Hide;
   data: undefined;
@@ -85,6 +95,7 @@ export class ToggleMaximizeControlMessage implements ControlMessage {
 // -------------------------------------------------------------------------------------------------------
 
 type ControlMessageUnion =
+  | CloseControlMessage
   | HideControlMessage
   | MinimizeControlMessage
   | MoveControlMessage
@@ -93,6 +104,7 @@ type ControlMessageUnion =
   | ToggleMaximizeControlMessage;
 
 interface ControlMessageMapping {
+  [ControlType.Close]: CloseControlMessage;
   [ControlType.Hide]: HideControlMessage;
   [ControlType.Minimize]: MinimizeControlMessage;
   [ControlType.Move]: MoveControlMessage;
