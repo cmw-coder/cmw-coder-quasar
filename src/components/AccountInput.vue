@@ -26,10 +26,10 @@ const account = computed({
 const accountInput = reactive({
   content: account,
   error: computed(() => {
-    if (!accountInput.content) {
+    if (!account.value) {
       return false;
     }
-    return accountInput.content.length < 5;
+    return account.value.length < 5;
   }),
   loading: false,
 });
