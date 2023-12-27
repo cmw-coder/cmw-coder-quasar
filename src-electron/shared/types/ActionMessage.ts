@@ -1,8 +1,7 @@
 import { LinseerConfigType, LinseerDataType } from 'main/stores/config/types';
 
 export enum ActionType {
-  CompletionInline = 'CompletionInline',
-  CompletionSnippet = 'CompletionInline',
+  CompletionDisplay = 'CompletionDisplay',
   DebugSync = 'DebugSync',
   StoreSave = 'StoreSave',
 }
@@ -12,17 +11,8 @@ export interface ActionMessage {
   data: unknown;
 }
 
-export class CompletionInlineActionMessage implements ActionMessage {
-  type = ActionType.CompletionInline;
-  data: string[];
-
-  constructor(data: string[]) {
-    this.data = data;
-  }
-}
-
-export class CompletionSnippetActionMessage implements ActionMessage {
-  type = ActionType.CompletionSnippet;
+export class CompletionDisplayActionMessage implements ActionMessage {
+  type = ActionType.CompletionDisplay;
   data: string[];
 
   constructor(data: string[]) {
@@ -67,8 +57,7 @@ export class StoreSaveActionMessage implements ActionMessage {
 }
 
 export interface ActionMessageMapping {
-  [ActionType.CompletionInline]: CompletionInlineActionMessage;
-  [ActionType.CompletionSnippet]: CompletionSnippetActionMessage;
+  [ActionType.CompletionDisplay]: CompletionDisplayActionMessage;
   [ActionType.DebugSync]: DebugSyncActionMessage;
   [ActionType.StoreSave]: StoreSaveActionMessage;
 }

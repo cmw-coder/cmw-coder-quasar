@@ -6,7 +6,7 @@ import { ActionType } from 'shared/types/ActionMessage';
 const completion = ref('');
 
 onMounted(() => {
-  window.actionApi.receive(ActionType.CompletionInline, (data) => {
+  window.actionApi.receive(ActionType.CompletionDisplay, (data) => {
     completion.value = data[0].split('\n')[0].trimEnd();
   });
 });

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 import AccountPanel from 'components/LoginPanels/AccountPanel.vue';
 import CodePanel from 'components/LoginPanels/CodePanel.vue';
@@ -10,6 +10,7 @@ import { LoginQuery } from 'types/queries';
 
 const { t } = useI18n();
 const { matched, query } = useRoute();
+const { replace } = useRouter();
 
 const i18n = (relativePath: string) => {
   return t('pages.LoginPage.' + relativePath);
@@ -28,6 +29,7 @@ const finish = () => {
   }
   if (name === WindowType.Floating) {
     window.controlApi.hide(WindowType.Floating);
+    replace('completions');
   }
 };
 </script>

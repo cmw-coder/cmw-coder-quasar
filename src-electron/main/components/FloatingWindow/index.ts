@@ -2,14 +2,16 @@ import { BrowserWindow } from 'electron';
 import { resolve } from 'path';
 
 import { bypassCors, historyToHash } from 'main/utils/common';
+import { sendToRenderer } from 'preload/types/ActionApi';
 import {
   ControlType,
   registerControlCallback,
   triggerControlCallback,
 } from 'preload/types/ControlApi';
+import { CompletionDisplayActionMessage } from 'shared/types/ActionMessage';
 import { WindowType } from 'shared/types/WindowType';
 
-export class PromptWindow {
+export class FloatingWindow {
   private readonly _type = WindowType.Floating;
   private _window: BrowserWindow | undefined;
 
@@ -18,6 +20,16 @@ export class PromptWindow {
       this._window.show();
     } else {
       this.create();
+    }
+  }
+
+  set completion(message: CompletionDisplayActionMessage) {
+    this.activate();
+    if (this._window) {
+      this._window.setSize(630, 560);
+      sendToRenderer(this._window, message);
+    } else {
+      console.warn('Floating window activate failed');
     }
   }
 
@@ -60,6 +72,13 @@ export class PromptWindow {
     });
 
     bypassCors(this._window);
+
+    this._window
+      ?.loadURL(
+        historyToHash(new URL('/floating/completions', process.env.APP_URL))
+          .href
+      )
+      .catch();
 
     this._window.webContents.openDevTools({ mode: 'undocked' });
 

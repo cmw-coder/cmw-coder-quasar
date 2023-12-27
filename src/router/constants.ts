@@ -14,11 +14,17 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('layouts/MainLayout.vue'),
     children: [
       {
-        name: 'login',
         path: 'login',
         components: {
           header: () => import('layouts/headers/FloatingHeader.vue'),
           default: () => import('pages/LoginPage.vue'),
+        },
+      },
+      {
+        path: 'completions',
+        components: {
+          header: () => import('layouts/headers/FloatingHeader.vue'),
+          default: () => import('pages/CompletionSnippetPage.vue'),
         },
       },
     ],

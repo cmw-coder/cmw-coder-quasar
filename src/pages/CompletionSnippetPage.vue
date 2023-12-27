@@ -4,18 +4,29 @@ import { onMounted, ref } from 'vue';
 import CodeBlock from 'components/CodeBlock.vue';
 import { ActionType } from 'shared/types/ActionMessage';
 
-const completion = ref('');
+const completions = ref<string[]>([]);
 
 onMounted(() => {
-  window.actionApi.receive(ActionType.CompletionSnippet, (data) => {
-    completion.value = data[0];
+  window.actionApi.receive(ActionType.CompletionDisplay, (data) => {
+    completions.value = data;
   });
 });
 </script>
 
 <template>
-  <q-page>
-    <code-block :src="completion" />
+  <q-page class="row justify-center q-pa-md">
+    <div class="col-10 column q-gutter-sm">
+      <div
+        v-for="(completion, index) in completions"
+        :key="index"
+        class="column q-gutter-xs"
+      >
+        <div class="text-grey text-subtitle1">
+          Completion ({{ index + 1 }}/{{ completions.length }}) :
+        </div>
+        <code-block :src="completion" />
+      </div>
+    </div>
   </q-page>
 </template>
 

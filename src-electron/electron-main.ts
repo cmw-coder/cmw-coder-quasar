@@ -5,7 +5,7 @@ import { CompletionInlineWindow } from 'main/components/CompletionInlineWindow';
 import { MainWindow } from 'main/components/MainWindow';
 import { PromptExtractor } from 'main/components/PromptExtractor';
 import { PromptProcessor } from 'main/components/PromptProcessor';
-import { PromptWindow } from 'main/components/PromptWindow';
+import { FloatingWindow } from 'main/components/FloatingWindow';
 import { statisticsReporter } from 'main/components/StatisticsReporter';
 import { TrayIcon } from 'main/components/TrayIcon';
 import { registerWsMessage, startServer } from 'main/server';
@@ -21,7 +21,10 @@ import {
 } from 'preload/types/ControlApi';
 
 import { actionApiKey, controlApiKey } from 'shared/types/constants';
-import { ActionMessage } from 'shared/types/ActionMessage';
+import {
+  ActionMessage,
+  CompletionDisplayActionMessage,
+} from 'shared/types/ActionMessage';
 import {
   CompletionGenerateServerMessage,
   WsAction,
@@ -31,7 +34,7 @@ import { triggerActionCallback } from 'preload/types/ActionApi';
 if (app.requestSingleInstanceLock()) {
   const completionInlineWindow = new CompletionInlineWindow();
   const mainWindow = new MainWindow();
-  const promptWindow = new PromptWindow();
+  const floatingWindow = new FloatingWindow();
   const trayIcon = new TrayIcon();
 
   ipcMain.on(actionApiKey, (_, message: ActionMessage) =>
@@ -88,6 +91,9 @@ if (app.requestSingleInstanceLock()) {
             decodedPrefix,
             projectId
           );
+          floatingWindow.completion = new CompletionDisplayActionMessage(
+            results
+          );
           return new CompletionGenerateServerMessage({
             completions: results.map((result) =>
               encode(result, 'gb2312').toString('base64')
@@ -105,13 +111,13 @@ if (app.requestSingleInstanceLock()) {
 
       completionInlineWindow.activate();
       mainWindow.activate();
-      promptWindow.activate();
+      floatingWindow.activate();
       trayIcon.activate();
 
       trayIcon.onClick(() => mainWindow.activate());
       if (configStore.apiStyle === ApiStyle.Linseer) {
         configStore.onLogin = (userId) =>
-          promptWindow.login(userId, mainWindow.isVisible);
+          floatingWindow.login(userId, mainWindow.isVisible);
         if (!(await configStore.getAccessToken())) {
           configStore.login();
         }
