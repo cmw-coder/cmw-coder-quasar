@@ -1,4 +1,4 @@
-import { ActionMessageMapping } from 'preload/types/ActionApi';
+import { ActionMessageMapping } from 'shared/types/ActionMessage';
 import { actionApiKey, controlApiKey } from 'shared/types/constants';
 import { WindowType } from 'shared/types/WindowType';
 
@@ -6,6 +6,7 @@ declare global {
   // noinspection JSUnusedGlobalSymbols
   interface Window {
     [controlApiKey]: {
+      close: (windowType: WindowType) => void;
       hide: (windowType: WindowType) => void;
       minimize: (windowType: WindowType) => void;
       move: (

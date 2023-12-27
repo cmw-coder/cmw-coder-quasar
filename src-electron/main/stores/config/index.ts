@@ -93,9 +93,8 @@ export class LinseerConfigStore {
   }
 
   set config(config: Partial<LinseerConfigType>) {
-    Object.entries(config).forEach(([key, value]) =>
-      this._store.set(key, value)
-    );
+    const currentConfig = this.config;
+    this._store.set('config', { ...currentConfig, ...config });
   }
 
   get data(): LinseerDataType {

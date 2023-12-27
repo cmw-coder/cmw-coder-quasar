@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue';
 
 import CodeBlock from 'components/CodeBlock.vue';
-import { ActionType } from 'shared/types/ActionType';
+import { ActionType } from 'shared/types/ActionMessage';
 
 const completion = ref('');
 

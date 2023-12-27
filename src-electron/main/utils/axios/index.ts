@@ -6,13 +6,8 @@ import {
   GenerateRequestData,
   GenerateResponseData,
   JudgmentData,
-  LoginData,
   RefreshData,
 } from 'main/utils/axios/types';
-
-const rdTestServiceProxy = axios.create({
-  baseURL: 'http://rdee.h3c.com/kong/RdTestServiceProxy-e',
-});
 
 const rdTestLoginService = axios.create({
   baseURL: 'http://rdee.h3c.com/kong/RdTestLoginService/api',
@@ -21,24 +16,6 @@ const rdTestLoginService = axios.create({
 const rdTestAiService = axios.create({
   baseURL: 'http://rdee.h3c.com/kong/RdTestAiService',
 });
-
-export const authCode = async (userId: string) => {
-  return await rdTestServiceProxy.get('/EpWeChatLogin/authCode', {
-    params: {
-      operation: 'AI',
-      userId,
-    },
-  });
-};
-
-export const login = async (userId: string, code: string) => {
-  return await rdTestServiceProxy.get<LoginData>('/EpWeChatLogin/login', {
-    params: {
-      code,
-      userId,
-    },
-  });
-};
 
 export const refreshToken = async (refreshToken: string) => {
   return await rdTestLoginService.post<RefreshData>(

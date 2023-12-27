@@ -52,15 +52,11 @@ export class CompletionInlineWindow {
     registerControlCallback(WindowType.Immersive, ControlType.Show, () =>
       this._window?.show()
     );
-    registerControlCallback(
-      WindowType.Immersive,
-      ControlType.Move,
-      (data) => {
-        if (this._window) {
-          const [currentX, currentY] = this._window.getPosition();
-          this._window?.setPosition(data.x ?? currentX, data.y ?? currentY);
-        }
+    registerControlCallback(WindowType.Immersive, ControlType.Move, (data) => {
+      if (this._window) {
+        const [currentX, currentY] = this._window.getPosition();
+        this._window?.setPosition(data.x ?? currentX, data.y ?? currentY);
       }
-    );
+    });
   }
 }

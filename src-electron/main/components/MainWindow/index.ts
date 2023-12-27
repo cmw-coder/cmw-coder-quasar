@@ -2,15 +2,14 @@ import { BrowserWindow } from 'electron';
 import { resolve } from 'path';
 
 import { registerWsMessage } from 'main/server';
-import {
-  DebugSyncActionMessage,
-  sendToRenderer,
-} from 'preload/types/ActionApi';
+import { sendToRenderer } from 'preload/types/ActionApi';
 import { ControlType, registerControlCallback } from 'preload/types/ControlApi';
 import { WsAction } from 'shared/types/WsMessage';
 import { WindowType } from 'shared/types/WindowType';
+import { DebugSyncActionMessage } from 'shared/types/ActionMessage';
 
 export class MainWindow {
+  private readonly _type = WindowType.Main;
   private _window: BrowserWindow | undefined;
 
   activate() {
@@ -21,6 +20,10 @@ export class MainWindow {
     }
   }
 
+  get isVisible() {
+    return (this._window?.isVisible() && !this._window?.isMinimized()) ?? false;
+  }
+
   private create() {
     this._window = new BrowserWindow({
       width: 630,
@@ -29,7 +32,6 @@ export class MainWindow {
       frame: false,
       icon: resolve(__dirname, 'icons/icon.png'), // taskbar icon
       webPreferences: {
-        contextIsolation: true,
         // More info: https://v2.quasar.dev/quasar-cli-vite/developing-electron-apps/electron-preload-script
         preload: resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD),
       },
@@ -41,7 +43,7 @@ export class MainWindow {
       }
     });
 
-    // this._window.webContents.openDevTools({ mode: 'undocked' });
+    this._window.webContents.openDevTools({ mode: 'undocked' });
 
     // this._window.webContents.on('devtools-opened', () => {
     //   this._window?.webContents.closeDevTools();
@@ -62,13 +64,16 @@ export class MainWindow {
       });
     });
 
-    registerControlCallback(WindowType.Main, ControlType.Hide, () =>
+    registerControlCallback(this._type, ControlType.Hide, () =>
       this._window?.hide()
     );
-    registerControlCallback(WindowType.Main, ControlType.Minimize, () =>
+    registerControlCallback(this._type, ControlType.Minimize, () =>
       this._window?.minimize()
     );
-    registerControlCallback(WindowType.Main, ControlType.ToggleMaximize, () => {
+    registerControlCallback(this._type, ControlType.Show, () =>
+      this._window?.show()
+    );
+    registerControlCallback(this._type, ControlType.ToggleMaximize, () => {
       if (this._window?.isMaximized()) {
         this._window?.unmaximize();
       } else {

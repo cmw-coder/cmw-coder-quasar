@@ -275,7 +275,6 @@ export class Range {
     return new Range(start.line, start.character, end.line, end.character);
   }
 
-
   /**
    * Test if the two ranges are touching in any way.
    */

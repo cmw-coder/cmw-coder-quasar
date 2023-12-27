@@ -20,11 +20,13 @@ import {
   triggerControlCallback,
 } from 'preload/types/ControlApi';
 
-import { controlApiKey } from 'shared/types/constants';
+import { actionApiKey, controlApiKey } from 'shared/types/constants';
+import { ActionMessage } from 'shared/types/ActionMessage';
 import {
   CompletionGenerateServerMessage,
   WsAction,
 } from 'shared/types/WsMessage';
+import { triggerActionCallback } from 'preload/types/ActionApi';
 
 if (app.requestSingleInstanceLock()) {
   const completionInlineWindow = new CompletionInlineWindow();
@@ -32,9 +34,12 @@ if (app.requestSingleInstanceLock()) {
   const promptWindow = new PromptWindow();
   const trayIcon = new TrayIcon();
 
-  ipcMain.on(controlApiKey, (_, message: ControlMessage) => {
-    triggerControlCallback(message.windowType, message.type, message.data);
-  });
+  ipcMain.on(actionApiKey, (_, message: ActionMessage) =>
+    triggerActionCallback(message.type, message.data)
+  );
+  ipcMain.on(controlApiKey, (_, message: ControlMessage) =>
+    triggerControlCallback(message.windowType, message.type, message.data)
+  );
   app.on('second-instance', () => {
     app.focus();
     mainWindow.activate();
@@ -100,12 +105,13 @@ if (app.requestSingleInstanceLock()) {
 
       completionInlineWindow.activate();
       mainWindow.activate();
-      promptWindow.activate()
+      promptWindow.activate();
       trayIcon.activate();
 
       trayIcon.onClick(() => mainWindow.activate());
       if (configStore.apiStyle === ApiStyle.Linseer) {
-        configStore.onLogin = (userId) => promptWindow.login(userId);
+        configStore.onLogin = (userId) =>
+          promptWindow.login(userId, mainWindow.isVisible);
         if (!(await configStore.getAccessToken())) {
           configStore.login();
         }

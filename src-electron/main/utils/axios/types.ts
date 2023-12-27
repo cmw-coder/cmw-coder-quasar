@@ -10,13 +10,6 @@ export interface JudgmentData {
   token: string | null;
 }
 
-export interface LoginData {
-  userId: string;
-  token: string;
-  refreshToken: string;
-  error: string | null;
-}
-
 export interface RefreshData {
   access_token: string;
   expires_in: number;

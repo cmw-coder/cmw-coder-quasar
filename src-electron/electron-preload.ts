@@ -1,12 +1,12 @@
 import { contextBridge, ipcRenderer } from 'electron';
 
 import {
-  ActionMessage,
   registerActionCallback,
   sendToMain,
   triggerActionCallback,
 } from 'preload/types/ActionApi';
 import {
+  CloseControlMessage,
   HideControlMessage,
   MinimizeControlMessage,
   MoveControlMessage,
@@ -15,10 +15,13 @@ import {
   ShowControlMessage,
   ToggleMaximizeControlMessage,
 } from 'preload/types/ControlApi';
+import { ActionMessage } from 'shared/types/ActionMessage';
 import { actionApiKey, controlApiKey } from 'shared/types/constants';
 import { WindowType } from 'shared/types/WindowType';
 
 contextBridge.exposeInMainWorld(controlApiKey, {
+  close: (windowType: WindowType) =>
+    sendControlAction(new CloseControlMessage(windowType)),
   hide: (windowType: WindowType) =>
     sendControlAction(new HideControlMessage(windowType)),
   minimize: (windowType: WindowType) =>
@@ -36,6 +39,7 @@ contextBridge.exposeInMainWorld(actionApiKey, {
   receive: registerActionCallback,
   send: sendToMain,
 });
+
 ipcRenderer.on(actionApiKey, (_, message: ActionMessage) =>
   triggerActionCallback(message.type, message.data)
 );

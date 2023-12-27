@@ -1,31 +1,52 @@
 import { boot } from 'quasar/wrappers';
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosResponse } from 'axios';
 
 declare module '@vue/runtime-core' {
+  // noinspection JSUnusedGlobalSymbols
   interface ComponentCustomProperties {
-    $axios: AxiosInstance;
-    $api: AxiosInstance;
+    $authCode: (userId: string) => Promise<AxiosResponse>;
+    $login: (userId: string, code: string) => Promise<AxiosResponse<LoginData>>;
   }
 }
 
-// Be careful when using SSR for cross-request state pollution
-// due to creating a Singleton instance here;
-// If any client changes this (global) instance, it might be a
-// good idea to move this instance creation inside of the
-// "export default () => {}" function below (which runs individually
-// for each client)
-const api = axios.create({ baseURL: 'https://api.example.com' });
+type LoginData =
+  | {
+      userId: null;
+      token: null;
+      refreshToken: null;
+      error: string;
+    }
+  | {
+      userId: string;
+      token: string;
+      refreshToken: string;
+      error: null;
+    };
 
-export default boot(({ app }) => {
-  // for use inside Vue files (Options API) through this.$axios and this.$api
-
-  app.config.globalProperties.$axios = axios;
-  // ^ ^ ^ this will allow you to use this.$axios (for Vue Options API form)
-  //       so you won't necessarily have to import axios in each vue file
-
-  app.config.globalProperties.$api = api;
-  // ^ ^ ^ this will allow you to use this.$api (for Vue Options API form)
-  //       so you can easily perform requests against your app's API
+const rdTestServiceProxy = axios.create({
+  baseURL: 'http://rdee.h3c.com/kong/RdTestServiceProxy-e',
 });
 
-export { api };
+export const authCode = async (userId: string) => {
+  return await rdTestServiceProxy.get('/EpWeChatLogin/authCode', {
+    params: {
+      operation: 'AI',
+      userId,
+    },
+  });
+};
+
+export const loginWithCode = async (userId: string, code: string) => {
+  return await rdTestServiceProxy.get<LoginData>('/EpWeChatLogin/login', {
+    params: {
+      code,
+      userId,
+    },
+  });
+};
+
+// noinspection JSUnusedGlobalSymbols
+export default boot(({ app }) => {
+  app.config.globalProperties.$authCode = authCode;
+  app.config.globalProperties.$login = loginWithCode;
+});

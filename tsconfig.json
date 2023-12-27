@@ -3,49 +3,20 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "app/*": [
-        "*"
-      ],
-      "assets/*": [
-        "src/assets/*"
-      ],
-      "boot/*": [
-        "src/boot/*"
-      ],
-      "components/*": [
-        "src/components/*"
-      ],
-      "css/*": [
-        "src/css/*"
-      ],
-      "layouts/*": [
-        "src/layouts/*"
-      ],
-      "pages/*": [
-        "src/pages/*"
-      ],
-      "router/*": [
-        "src/router/*"
-      ],
-      "shared/*": [
-        "src-electron/shared/*"
-      ],
-      "src/*": [
-        "src/*"
-      ],
-      "stores/*": [
-        "src/stores/*"
-      ],
-      "types/*": [
-        "src/types/*"
-      ],
-      "utils/*": [
-        "src/utils/*"
-      ]
+      "app/*": ["*"],
+      "assets/*": ["src/assets/*"],
+      "boot/*": ["src/boot/*"],
+      "components/*": ["src/components/*"],
+      "css/*": ["src/css/*"],
+      "layouts/*": ["src/layouts/*"],
+      "pages/*": ["src/pages/*"],
+      "router/*": ["src/router/*"],
+      "shared/*": ["src-electron/shared/*"],
+      "src/*": ["src/*"],
+      "stores/*": ["src/stores/*"],
+      "types/*": ["src/types/*"],
+      "utils/*": ["src/utils/*"]
     }
   },
-  "include": [
-    "src/**/*",
-    "src-electron/shared/**/*"
-  ]
+  "include": ["src/**/*", "src-electron/shared/**/*"]
 }

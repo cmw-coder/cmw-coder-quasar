@@ -1,45 +1,7 @@
 import { BrowserWindow, ipcRenderer } from 'electron';
 
-import { ActionType } from 'shared/types/ActionType';
+import { ActionMessageMapping, ActionType } from 'shared/types/ActionMessage';
 import { actionApiKey } from 'shared/types/constants';
-
-export interface ActionMessage {
-  type: ActionType;
-  data: unknown;
-}
-
-export class CompletionInlineActionMessage implements ActionMessage {
-  type = ActionType.CompletionInline;
-  data: string[];
-
-  constructor(data: string[]) {
-    this.data = data;
-  }
-}
-
-export class CompletionSnippetActionMessage implements ActionMessage {
-  type = ActionType.CompletionSnippet;
-  data: string[];
-
-  constructor(data: string[]) {
-    this.data = data;
-  }
-}
-
-export class DebugSyncActionMessage implements ActionMessage {
-  type = ActionType.DebugSync;
-  data: { content: string; path: string };
-
-  constructor(data: { content: string; path: string }) {
-    this.data = data;
-  }
-}
-
-export interface ActionMessageMapping {
-  [ActionType.CompletionInline]: CompletionInlineActionMessage;
-  [ActionType.CompletionSnippet]: CompletionSnippetActionMessage;
-  [ActionType.DebugSync]: DebugSyncActionMessage;
-}
 
 // -------------------------------------------------------------------------------------------------------
 // ↓↓↓↓↓↓↓↓↓↓                                   Local stuff                                     ↓↓↓↓↓↓↓↓↓↓

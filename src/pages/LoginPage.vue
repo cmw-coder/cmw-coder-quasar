@@ -3,8 +3,10 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 
-import AccountInput from 'components/AccountInput.vue';
+import AccountPanel from 'components/LoginPanels/AccountPanel.vue';
+import CodePanel from 'components/LoginPanels/CodePanel.vue';
 import { WindowType } from 'shared/types/WindowType';
+import { LoginQuery } from 'types/queries';
 
 const { t } = useI18n();
 const { matched, query } = useRoute();
@@ -14,36 +16,42 @@ const i18n = (relativePath: string) => {
 };
 
 const { name } = matched[matched.length - 2];
-if (name == WindowType.Floating) {
-  console.log('Floating');
-}
-console.log(query);
 
-const account = ref(query.userId?.toString() ?? '');
-const isLoading = ref(false);
+const loginQuery = new LoginQuery(query);
 
-const login = () => {
-  isLoading.value = true;
-  console.log(account.value);
-  setTimeout(() => {
-    isLoading.value = false;
-  }, 1000);
+const account = ref(loginQuery.userId);
+const tabIndex = ref(0);
+
+const finish = () => {
+  if (loginQuery.showMain) {
+    window.controlApi.show(WindowType.Main);
+  }
+  if (name === WindowType.Floating) {
+    window.controlApi.hide(WindowType.Floating);
+  }
 };
-
 </script>
 
 <template>
   <q-page class="row flex-center q-pa-lg">
-    <div class="col-10 column q-gutter-y-lg">
-      <div class="text-h4">{{ i18n('labels.title') }}</div>
-      <account-input v-model="account" :loading="isLoading" />
-      <q-btn
-        class="q-mt-md"
-        color="primary"
-        label="Login"
-        :loading="isLoading"
-        @click="login"
-      />
+    <div class="col-10 column">
+      <div class="q-gutter-y-lg">
+        <div class="text-bold text-center text-h2">
+          {{ i18n('labels.title') }}
+        </div>
+      </div>
+      <q-tab-panels class="transparent" animated keep-alive v-model="tabIndex">
+        <q-tab-panel :name="0">
+          <account-panel v-model="account" @navigate="tabIndex = 1" />
+        </q-tab-panel>
+        <q-tab-panel :name="1">
+          <code-panel
+            v-model="account"
+            @navigate="tabIndex = 0"
+            @finish="finish"
+          />
+        </q-tab-panel>
+      </q-tab-panels>
     </div>
   </q-page>
 </template>
