@@ -43,6 +43,7 @@ if (app.requestSingleInstanceLock()) {
   ipcMain.on(controlApiKey, (_, message: ControlMessage) =>
     triggerControlCallback(message.windowType, message.type, message.data)
   );
+
   app.on('second-instance', () => {
     app.focus();
     mainWindow.activate();
@@ -108,6 +109,9 @@ if (app.requestSingleInstanceLock()) {
           });
         }
       });
+      // registerWsMessage(WsAction.CompletionAccept, async (message) => {
+      //   return new CompletionAcceptServerMessage({ result: 'success' });
+      // });
 
       completionInlineWindow.activate();
       mainWindow.activate();

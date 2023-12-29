@@ -211,6 +211,9 @@ module.exports = configure((/* ctx */) => {
         electronDownload: {
           version: '22.3.27',
         },
+        win: {
+          icon: 'assets/icons/icon.ico',
+        },
       },
     },
 
