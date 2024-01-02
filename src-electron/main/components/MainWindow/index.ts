@@ -32,7 +32,7 @@ export class MainWindow {
       frame: false,
       icon: resolve(__dirname, 'icons/icon.png'), // taskbar icon
       webPreferences: {
-        // More info: https://v2.quasar.dev/quasar-cli-vite/developing-electron-apps/electron-preload-script
+        // devTools: false,
         preload: resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD),
       },
     });

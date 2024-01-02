@@ -17,9 +17,9 @@ export class TrayIcon {
   }
 
   private create() {
-    console.log(resolve(__dirname, 'icons/icon.ico'));
+    console.log(resolve(__dirname, 'favicon.ico'));
     this._tray = new Tray(
-      nativeImage.createFromPath(resolve(__dirname, 'icons/icon.ico'))
+      nativeImage.createFromPath(resolve(__dirname, 'favicon.ico'))
     );
     const contextMenu = Menu.buildFromTemplate([
       { label: 'Item1', type: 'radio' },

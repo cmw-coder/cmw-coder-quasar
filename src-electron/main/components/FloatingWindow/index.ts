@@ -1,7 +1,7 @@
 import { BrowserWindow } from 'electron';
 import { resolve } from 'path';
 
-import { bypassCors, historyToHash } from 'main/utils/common';
+import { bypassCors } from 'main/utils/common';
 import { sendToRenderer } from 'preload/types/ActionApi';
 import {
   ControlType,
@@ -47,18 +47,19 @@ export class FloatingWindow {
     this.activate();
     this._window?.center();
     this._window?.focus();
-    const url = new URL('/floating/login', process.env.APP_URL);
-    url.search = new URLSearchParams({
+    const searchString = new URLSearchParams({
       userId,
       showMain: mainIsVisible ? 'true' : 'false',
     }).toString();
-    this._window?.loadURL(historyToHash(url).href).catch();
+    this._window
+      ?.loadURL(`${process.env.APP_URL}#/floating/login?${searchString}`)
+      .catch();
   }
 
   private create() {
     this._window = new BrowserWindow({
-      width: 800,
-      height: 600,
+      width: 650,
+      height: 450,
       useContentSize: true,
       resizable: false,
       movable: true,
@@ -81,11 +82,10 @@ export class FloatingWindow {
     bypassCors(this._window);
 
     this._window
-      .loadURL(
-        historyToHash(new URL('/floating/completions', process.env.APP_URL))
-          .href
-      )
+      .loadURL(`${process.env.APP_URL}#/floating/completions`)
       .catch();
+
+    this._window.webContents.openDevTools({ mode: 'undocked' });
 
     // this._window.webContents.openDevTools({ mode: 'undocked' });
 

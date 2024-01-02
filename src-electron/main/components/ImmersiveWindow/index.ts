@@ -1,7 +1,6 @@
 import { BrowserWindow } from 'electron';
 import { resolve } from 'path';
 
-import { historyToHash } from 'main/utils/common';
 import { sendToRenderer } from 'preload/types/ActionApi';
 import { ControlType, registerControlCallback } from 'preload/types/ControlApi';
 import { WindowType } from 'shared/types/WindowType';
@@ -75,7 +74,7 @@ export class ImmersiveWindow {
       frame: false,
       transparent: true,
       webPreferences: {
-        devTools: false,
+        // devTools: false,
         preload: resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD),
       },
     });
@@ -83,11 +82,10 @@ export class ImmersiveWindow {
     this._window.setIgnoreMouseEvents(true);
 
     this._window
-      .loadURL(
-        historyToHash(new URL('/immersive/completions', process.env.APP_URL))
-          .href
-      )
+      .loadURL(`${process.env.APP_URL}#/immersive/completions`)
       .then();
+
+    this._window.webContents.openDevTools({ mode: 'undocked' });
 
     /* this._window.on('ready-to-show', () => {}); */
 
