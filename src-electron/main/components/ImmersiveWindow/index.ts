@@ -26,7 +26,8 @@ export class ImmersiveWindow {
     if (message.data.completions.length) {
       this.activate();
       if (this._window) {
-        this._window.setPosition(message.data.x, message.data.y - 3);
+        this._window.setSize(message.data.completions[0].length * 8, 21);
+        this._window.setPosition(message.data.x, message.data.y - 3, false);
         sendToRenderer(this._window, message);
       } else {
         console.warn('Immersive window activate failed');
@@ -58,7 +59,7 @@ export class ImmersiveWindow {
 
   private create() {
     this._window = new BrowserWindow({
-      width: 500,
+      width: 1080,
       height: 21,
       useContentSize: true,
       resizable: false,
@@ -74,7 +75,7 @@ export class ImmersiveWindow {
       frame: false,
       transparent: true,
       webPreferences: {
-        // devTools: false,
+        devTools: false,
         preload: resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD),
       },
     });
@@ -87,8 +88,6 @@ export class ImmersiveWindow {
           .href
       )
       .then();
-
-    this._window.webContents.openDevTools({ mode: 'undocked' });
 
     /* this._window.on('ready-to-show', () => {}); */
 

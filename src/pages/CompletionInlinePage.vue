@@ -10,7 +10,6 @@ onMounted(() => {
   window.actionApi.receive(ActionType.CompletionDisplay, (data) => {
     completion.value = data.completions[0] ?? '';
     cacheOffset.value = 0;
-    console.log(completion.value);
   });
   window.actionApi.receive(ActionType.CompletionUpdate, (isDelete) => {
     if (isDelete) {

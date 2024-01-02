@@ -23,7 +23,7 @@ const codeContent = computed(() => codeToHtml(props.src, 'c'));
 <template>
   <q-card v-if="codeContent.length" flat bordered>
     <q-card-section>
-      <div class="shiki-codes" v-html="codeContent" />
+      <div class="shiki-codes" v-html="codeContent" style="word-wrap: break-word"/>
     </q-card-section>
     <div class="column q-gutter-y-sm absolute-top-right q-pa-md">
       <q-btn color="grey" dense icon="content_copy" outline size="sm">
