@@ -16,28 +16,30 @@ export class LRUCache<T> {
   }
 
   public get(key: string): T | undefined {
-    if (this.cache.has(key)) {
-      const node = this.cache.get(key);
-      this.removeNode(node);
-      this.addToHead(node);
-      return node.value;
-    } else {
+    const node = this.cache.get(key);
+    if (!node) {
       return undefined;
     }
+    this.removeNode(node);
+    this.addToHead(node);
+    return node.value;
   }
 
   public put(key: string, value: T) {
-    if (this.cache.has(key)) {
-      const node = this.cache.get(key);
+    const node = this.cache.get(key);
+    if (node) {
       node.value = value;
       this.removeNode(node);
       this.addToHead(node);
     } else {
-      const node = new ListNode(key, value);
-      this.cache.set(key, node);
-      this.addToHead(node);
+      const newNode = new ListNode(key, value);
+      this.cache.set(key, newNode);
+      this.addToHead(newNode);
       if (this.cache.size > this.capacity) {
         const tail = this.tail;
+        if (!tail) {
+          return;
+        }
         this.cache.delete(tail.key);
         this.removeNode(tail);
       }
@@ -68,4 +70,9 @@ export class LRUCache<T> {
       this.tail = node;
     }
   }
+}
+
+export interface Completion {
+  content: string;
+  isSnippet: boolean;
 }

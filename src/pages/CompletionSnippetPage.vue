@@ -8,7 +8,7 @@ const completions = ref<string[]>([]);
 
 onMounted(() => {
   window.actionApi.receive(ActionType.CompletionDisplay, (data) => {
-    completions.value = data;
+    completions.value = data.completions;
   });
 });
 </script>

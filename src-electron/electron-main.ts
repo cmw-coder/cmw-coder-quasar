@@ -1,11 +1,11 @@
 import { app, ipcMain } from 'electron';
 import { decode, encode } from 'iconv-lite';
 
-import { CompletionInlineWindow } from 'main/components/CompletionInlineWindow';
+import { FloatingWindow } from 'main/components/FloatingWindow';
+import { ImmersiveWindow } from 'main/components/ImmersiveWindow';
 import { MainWindow } from 'main/components/MainWindow';
 import { PromptExtractor } from 'main/components/PromptExtractor';
 import { PromptProcessor } from 'main/components/PromptProcessor';
-import { FloatingWindow } from 'main/components/FloatingWindow';
 import { statisticsReporter } from 'main/components/StatisticsReporter';
 import { TrayIcon } from 'main/components/TrayIcon';
 import { registerWsMessage, startServer } from 'main/server';
@@ -24,15 +24,20 @@ import { actionApiKey, controlApiKey } from 'shared/types/constants';
 import {
   ActionMessage,
   CompletionDisplayActionMessage,
+  CompletionUpdateActionMessage,
 } from 'shared/types/ActionMessage';
 import {
+  CompletionCacheServerMessage,
+  CompletionCancelServerMessage,
   CompletionGenerateServerMessage,
+  ImmersiveHideServerMessage,
+  ImmersiveShowServerMessage,
   WsAction,
 } from 'shared/types/WsMessage';
 import { triggerActionCallback } from 'preload/types/ActionApi';
 
 if (app.requestSingleInstanceLock()) {
-  const completionInlineWindow = new CompletionInlineWindow();
+  const immersiveWindow = new ImmersiveWindow();
   const mainWindow = new MainWindow();
   const floatingWindow = new FloatingWindow();
   const trayIcon = new TrayIcon();
@@ -51,7 +56,16 @@ if (app.requestSingleInstanceLock()) {
   app.whenReady().then(() => {
     startServer().then(async () => {
       const promptProcessor = new PromptProcessor();
-      registerWsMessage(WsAction.CompletionGenerate, async (message) => {
+      registerWsMessage(WsAction.CompletionCache, ({ data }) => {
+        immersiveWindow.update(new CompletionUpdateActionMessage(data));
+        return new CompletionCacheServerMessage({ result: 'success' });
+      });
+      registerWsMessage(WsAction.CompletionCancel, () => {
+        immersiveWindow.completion = new CompletionDisplayActionMessage();
+        floatingWindow.completion = new CompletionDisplayActionMessage();
+        return new CompletionCancelServerMessage({ result: 'success' });
+      });
+      registerWsMessage(WsAction.CompletionGenerate, async ({ data }) => {
         const {
           caret,
           path,
@@ -60,7 +74,7 @@ if (app.requestSingleInstanceLock()) {
           suffix,
           symbolString,
           tabString,
-        } = message.data;
+        } = data;
         const decodedPath = decode(Buffer.from(path, 'base64'), 'gb2312');
         const decodedPrefix = decode(Buffer.from(prefix, 'base64'), 'gb2312');
         const decodedSuffix = decode(Buffer.from(suffix, 'base64'), 'gb2312');
@@ -92,12 +106,27 @@ if (app.requestSingleInstanceLock()) {
             decodedPrefix,
             projectId
           );
-          floatingWindow.completion = new CompletionDisplayActionMessage(
-            results
-          );
+          console.log(results);
+          immersiveWindow.completion = new CompletionDisplayActionMessage({
+            completions: results
+              .filter((result) => !result.isSnippet)
+              .map((result) => result.content),
+            x: caret.xPixel,
+            y: caret.yPixel,
+          });
+          floatingWindow.completion = new CompletionDisplayActionMessage({
+            completions: results
+              .filter((result) => result.isSnippet)
+              .map((result) => result.content),
+            x: caret.xPixel,
+            y: caret.yPixel,
+          });
           return new CompletionGenerateServerMessage({
             completions: results.map((result) =>
-              encode(result, 'gb2312').toString('base64')
+              encode(
+                result.isSnippet ? '1' + result.content : '0' + result.content,
+                'gb2312'
+              ).toString('base64')
             ),
             result: 'success',
           });
@@ -109,13 +138,29 @@ if (app.requestSingleInstanceLock()) {
           });
         }
       });
-      // registerWsMessage(WsAction.CompletionAccept, async (message) => {
+      registerWsMessage(WsAction.ImmersiveHide, () => {
+        immersiveWindow.hide();
+        return new ImmersiveHideServerMessage({ result: 'success' });
+      });
+      registerWsMessage(WsAction.ImmersiveShow, () => {
+        immersiveWindow.show();
+        return new ImmersiveShowServerMessage({ result: 'success' });
+      });
+      // registerWsMessage(WsAction.CompletionAccept, (message) => {
+      //   statisticsReporter.acceptCompletion(
+      //     message.data.completion,
+      //     Date.now(),
+      //     Date.now(),
+      //     "",
+      //     "",
+      //     ""
+      //   );
       //   return new CompletionAcceptServerMessage({ result: 'success' });
       // });
 
-      completionInlineWindow.activate();
-      mainWindow.activate();
       floatingWindow.activate();
+      immersiveWindow.activate();
+      mainWindow.activate();
       trayIcon.activate();
 
       trayIcon.onClick(() => mainWindow.activate());

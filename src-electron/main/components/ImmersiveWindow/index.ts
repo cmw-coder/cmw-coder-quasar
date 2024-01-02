@@ -1,18 +1,17 @@
 import { BrowserWindow } from 'electron';
 import { resolve } from 'path';
 
-import { bypassCors, historyToHash } from 'main/utils/common';
+import { historyToHash } from 'main/utils/common';
 import { sendToRenderer } from 'preload/types/ActionApi';
-import {
-  ControlType,
-  registerControlCallback,
-  triggerControlCallback,
-} from 'preload/types/ControlApi';
-import { CompletionDisplayActionMessage } from 'shared/types/ActionMessage';
+import { ControlType, registerControlCallback } from 'preload/types/ControlApi';
 import { WindowType } from 'shared/types/WindowType';
+import {
+  CompletionDisplayActionMessage,
+  CompletionUpdateActionMessage,
+} from 'shared/types/ActionMessage';
 
-export class FloatingWindow {
-  private readonly _type = WindowType.Floating;
+export class ImmersiveWindow {
+  private readonly _type = WindowType.Immersive;
   private _window: BrowserWindow | undefined;
 
   activate() {
@@ -27,10 +26,10 @@ export class FloatingWindow {
     if (message.data.completions.length) {
       this.activate();
       if (this._window) {
-        this._window.setSize(630, 560);
+        this._window.setPosition(message.data.x, message.data.y - 3);
         sendToRenderer(this._window, message);
       } else {
-        console.warn('Floating window activate failed');
+        console.warn('Immersive window activate failed');
       }
     } else {
       if (this._window && this._window.isVisible()) {
@@ -40,56 +39,58 @@ export class FloatingWindow {
     }
   }
 
-  login(userId: string, mainIsVisible: boolean) {
-    if (mainIsVisible) {
-      triggerControlCallback(WindowType.Main, ControlType.Hide, undefined);
-    }
+  update(message: CompletionUpdateActionMessage) {
     this.activate();
-    this._window?.center();
-    this._window?.focus();
-    const url = new URL('/floating/login', process.env.APP_URL);
-    url.search = new URLSearchParams({
-      userId,
-      showMain: mainIsVisible ? 'true' : 'false',
-    }).toString();
-    this._window?.loadURL(historyToHash(url).href).catch();
+    if (this._window) {
+      sendToRenderer(this._window, message);
+    } else {
+      console.warn('Immersive window activate failed');
+    }
+  }
+
+  hide() {
+    this._window?.hide();
+  }
+
+  show() {
+    this._window?.show();
   }
 
   private create() {
     this._window = new BrowserWindow({
-      width: 800,
-      height: 600,
+      width: 500,
+      height: 21,
       useContentSize: true,
       resizable: false,
-      movable: true,
+      movable: false,
       minimizable: false,
       maximizable: false,
       closable: false,
-      focusable: true,
+      focusable: false,
       alwaysOnTop: true,
       fullscreenable: false,
       skipTaskbar: true,
       show: false,
       frame: false,
-      transparent: false,
+      transparent: true,
       webPreferences: {
         // devTools: false,
         preload: resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD),
       },
     });
 
-    bypassCors(this._window);
+    this._window.setIgnoreMouseEvents(true);
 
     this._window
       .loadURL(
-        historyToHash(new URL('/floating/completions', process.env.APP_URL))
+        historyToHash(new URL('/immersive/completions', process.env.APP_URL))
           .href
       )
-      .catch();
+      .then();
 
-    // this._window.webContents.openDevTools({ mode: 'undocked' });
+    this._window.webContents.openDevTools({ mode: 'undocked' });
 
-    /*this._window.on('ready-to-show', () => {});*/
+    /* this._window.on('ready-to-show', () => {}); */
 
     registerControlCallback(this._type, ControlType.Hide, () =>
       this._window?.hide()
@@ -97,5 +98,11 @@ export class FloatingWindow {
     registerControlCallback(this._type, ControlType.Show, () =>
       this._window?.show()
     );
+    registerControlCallback(this._type, ControlType.Move, (data) => {
+      if (this._window) {
+        const [currentX, currentY] = this._window.getPosition();
+        this._window.setPosition(data.x ?? currentX, data.y ?? currentY);
+      }
+    });
   }
 }

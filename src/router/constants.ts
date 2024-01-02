@@ -35,15 +35,9 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('layouts/SimpleLayout.vue'),
     children: [
       {
-        path: 'completion/inline',
+        path: 'completions',
         components: {
           default: () => import('pages/CompletionInlinePage.vue'),
-        },
-      },
-      {
-        path: 'completion/snippet',
-        components: {
-          default: () => import('pages/CompletionSnippetPage.vue'),
         },
       },
     ],

@@ -7,6 +7,7 @@ import {
   SeparateTokens,
 } from 'main/stores/config/types';
 import { generate, generateRd } from 'main/utils/axios';
+import { Completion } from 'main/components/PromptProcessor/types';
 
 // Start with '//' or '#', or end with '{' or '*/'
 const detectRegex = /^(\/\/|#)|(\{|\*\/)$/;
@@ -39,7 +40,7 @@ export const processHuggingFaceApi = async (
   modelConfig: HuggingFaceModelConfigType,
   promptComponents: PromptComponents,
   isSnippet: boolean
-): Promise<string[]> => {
+): Promise<Completion[]> => {
   const { completionConfigs, separateTokens } = modelConfig;
   const completionConfig = isSnippet
     ? completionConfigs.snippet
@@ -94,7 +95,7 @@ export const processLinseerApi = async (
   promptComponents: PromptComponents,
   isSnippet: boolean,
   projectId: string
-): Promise<string[]> => {
+): Promise<Completion[]> => {
   const { completionConfigs, endpoint } = modelConfig;
   const completionConfig = isSnippet
     ? completionConfigs.snippet
@@ -138,7 +139,7 @@ const _processGeneratedSuggestions = (
   stopTokens: string[],
   generatedSuggestions: string[],
   isSnippet: boolean
-): string[] => {
+): Completion[] => {
   // TODO: Replace Date Created if needed.
   return (
     generatedSuggestions
@@ -175,10 +176,11 @@ const _processGeneratedSuggestions = (
         generatedSuggestion.replace(/\r\n|\n/g, '\\r\\n')
       )
       /// Construct the final suggestions.
-      .map((generatedSuggestion) =>
-        isSnippet
-          ? '1' + generatedSuggestion
-          : '0' + generatedSuggestion.split('\\r\\n')[0].trimEnd()
-      )
+      .map((generatedSuggestion) => ({
+        isSnippet,
+        content: isSnippet
+          ? generatedSuggestion
+          : generatedSuggestion.split('\\r\\n')[0].trimEnd(),
+      }))
   );
 };

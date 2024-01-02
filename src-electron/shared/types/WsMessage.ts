@@ -6,6 +6,8 @@ export enum WsAction {
   CompletionCancel = 'CompletionCancel',
   CompletionGenerate = 'CompletionGenerate',
   DebugSync = 'DebugSync',
+  ImmersiveHide = 'ImmersiveHide',
+  ImmersiveShow = 'ImmersiveShow',
 }
 
 export interface WsMessage {
@@ -14,7 +16,7 @@ export interface WsMessage {
   timestamp: number;
 }
 
-type StandardResult<T = Record<string, never>> =
+type StandardResult<T = unknown> =
   | {
       result: 'failure' | 'error';
       message: string;
@@ -38,14 +40,7 @@ export class CompletionAcceptServerMessage implements WsMessage {
 
 export interface CompletionCacheClientMessage extends WsMessage {
   action: WsAction.CompletionCache;
-  data:
-    | {
-        character: string;
-        isDelete: false;
-      }
-    | {
-        isDelete: true;
-      };
+  data: boolean;
 }
 
 export class CompletionCacheServerMessage implements WsMessage {
@@ -76,7 +71,7 @@ export class CompletionCancelServerMessage implements WsMessage {
 export interface CompletionGenerateClientMessage extends WsMessage {
   action: WsAction.CompletionGenerate;
   data: {
-    caret: CaretPosition;
+    caret: CaretPosition & { xPixel: number; yPixel: number };
     path: string;
     prefix: string;
     projectId: string;
@@ -104,12 +99,54 @@ export interface DebugSyncClientMessage extends WsMessage {
   };
 }
 
+export class DebugSyncServerMessage implements WsMessage {
+  action = WsAction.DebugSync;
+  data: StandardResult;
+  timestamp = Date.now();
+
+  constructor(data: StandardResult) {
+    this.data = data;
+  }
+}
+
+export interface ImmersiveHideClientMessage extends WsMessage {
+  action: WsAction.ImmersiveHide;
+  data: undefined;
+}
+
+export class ImmersiveHideServerMessage implements WsMessage {
+  action = WsAction.ImmersiveHide;
+  data: StandardResult;
+  timestamp = Date.now();
+
+  constructor(data: StandardResult) {
+    this.data = data;
+  }
+}
+
+export interface ImmersiveShowClientMessage extends WsMessage {
+  action: WsAction.ImmersiveShow;
+  data: undefined;
+}
+
+export class ImmersiveShowServerMessage implements WsMessage {
+  action = WsAction.ImmersiveShow;
+  data: StandardResult;
+  timestamp = Date.now();
+
+  constructor(data: StandardResult) {
+    this.data = data;
+  }
+}
+
 export interface WsClientMessageMapping {
   [WsAction.CompletionAccept]: CompletionAcceptClientMessage;
   [WsAction.CompletionCache]: CompletionCacheClientMessage;
   [WsAction.CompletionCancel]: CompletionCancelClientMessage;
   [WsAction.CompletionGenerate]: CompletionGenerateClientMessage;
   [WsAction.DebugSync]: DebugSyncClientMessage;
+  [WsAction.ImmersiveHide]: ImmersiveHideClientMessage;
+  [WsAction.ImmersiveShow]: ImmersiveShowClientMessage;
 }
 
 export interface WsServerMessageMapping {
@@ -117,5 +154,7 @@ export interface WsServerMessageMapping {
   [WsAction.CompletionCache]: CompletionCacheServerMessage;
   [WsAction.CompletionCancel]: CompletionCancelServerMessage;
   [WsAction.CompletionGenerate]: Promise<CompletionGenerateServerMessage>;
-  [WsAction.DebugSync]: void;
+  [WsAction.DebugSync]: DebugSyncServerMessage;
+  [WsAction.ImmersiveHide]: ImmersiveHideServerMessage;
+  [WsAction.ImmersiveShow]: ImmersiveShowServerMessage;
 }

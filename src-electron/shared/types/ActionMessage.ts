@@ -1,7 +1,9 @@
 import { LinseerConfigType, LinseerDataType } from 'main/stores/config/types';
+import { CompletionCacheClientMessage } from 'shared/types/WsMessage';
 
 export enum ActionType {
   CompletionDisplay = 'CompletionDisplay',
+  CompletionUpdate = 'CompletionUpdate',
   DebugSync = 'DebugSync',
   StoreSave = 'StoreSave',
 }
@@ -13,9 +15,28 @@ export interface ActionMessage {
 
 export class CompletionDisplayActionMessage implements ActionMessage {
   type = ActionType.CompletionDisplay;
-  data: string[];
+  data: {
+    completions: string[];
+    x: number;
+    y: number;
+  };
 
-  constructor(data: string[]) {
+  constructor(
+    data: { completions: string[]; x: number; y: number } = {
+      completions: [],
+      x: 0,
+      y: 0,
+    }
+  ) {
+    this.data = data;
+  }
+}
+
+export class CompletionUpdateActionMessage implements ActionMessage {
+  type = ActionType.CompletionUpdate;
+  data: CompletionCacheClientMessage['data'];
+
+  constructor(data: CompletionCacheClientMessage['data']) {
     this.data = data;
   }
 }
@@ -58,6 +79,7 @@ export class StoreSaveActionMessage implements ActionMessage {
 
 export interface ActionMessageMapping {
   [ActionType.CompletionDisplay]: CompletionDisplayActionMessage;
+  [ActionType.CompletionUpdate]: CompletionUpdateActionMessage;
   [ActionType.DebugSync]: DebugSyncActionMessage;
   [ActionType.StoreSave]: StoreSaveActionMessage;
 }

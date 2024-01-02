@@ -4,7 +4,7 @@ import { resolve } from 'path';
 import { registerWsMessage } from 'main/server';
 import { sendToRenderer } from 'preload/types/ActionApi';
 import { ControlType, registerControlCallback } from 'preload/types/ControlApi';
-import { WsAction } from 'shared/types/WsMessage';
+import { DebugSyncServerMessage, WsAction } from 'shared/types/WsMessage';
 import { WindowType } from 'shared/types/WindowType';
 import { DebugSyncActionMessage } from 'shared/types/ActionMessage';
 
@@ -61,6 +61,7 @@ export class MainWindow {
             new DebugSyncActionMessage(message.data)
           );
         }
+        return new DebugSyncServerMessage({ result: 'success' });
       });
     });
 

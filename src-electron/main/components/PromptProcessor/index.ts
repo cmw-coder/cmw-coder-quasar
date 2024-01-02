@@ -1,7 +1,7 @@
 import { createHash } from 'crypto';
 
 import { PromptComponents } from 'main/components/PromptExtractor/types';
-import { LRUCache } from 'main/components/PromptProcessor/types';
+import { Completion, LRUCache } from 'main/components/PromptProcessor/types';
 import {
   checkIsSnippet,
   processHuggingFaceApi,
@@ -11,13 +11,13 @@ import { ApiStyle } from 'main/types/model';
 import { configStore } from 'main/stores';
 
 export class PromptProcessor {
-  private _cache = new LRUCache<string[]>(100);
+  private _cache = new LRUCache<Completion[]>(100);
 
   async process(
     promptComponents: PromptComponents,
     prefix: string,
     projectId: string
-  ): Promise<string[]> {
+  ): Promise<Completion[]> {
     const cacheKey = createHash('sha1')
       .update(prefix.trimEnd())
       .digest('base64');
@@ -27,7 +27,7 @@ export class PromptProcessor {
     }
 
     const isSnippet = checkIsSnippet(prefix);
-    let processedSuggestions: string[] = [];
+    let processedSuggestions: Completion[] = [];
 
     try {
       if (configStore.apiStyle === ApiStyle.HuggingFace) {
