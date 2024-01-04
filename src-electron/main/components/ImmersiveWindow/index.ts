@@ -25,7 +25,7 @@ export class ImmersiveWindow {
     if (message.data.completions.length) {
       this.activate();
       if (this._window) {
-        this._window.setSize(message.data.completions[0].length * 9, 21);
+        this._window.setSize(message.data.completions[0].length * 9, 21, false);
         this._window.setPosition(message.data.x, message.data.y - 3, false);
         sendToRenderer(this._window, message);
       } else {
@@ -60,7 +60,7 @@ export class ImmersiveWindow {
     this._window = new BrowserWindow({
       height: 21,
       useContentSize: true,
-      minWidth: 100,
+      minWidth: 50,
       resizable: false,
       movable: false,
       minimizable: false,
@@ -79,15 +79,17 @@ export class ImmersiveWindow {
       },
     });
 
+    this._window.setAlwaysOnTop(true, 'pop-up-menu');
     this._window.setIgnoreMouseEvents(true);
 
     this._window
       .loadURL(`${process.env.APP_URL}#/immersive/completions`)
       .then();
 
-    // this._window.webContents.openDevTools({ mode: 'undocked' });
+    this._window.webContents.openDevTools({ mode: 'undocked' });
 
-    /* this._window.on('ready-to-show', () => {}); */
+    // this._window.on('ready-to-show', () => {
+    // });
 
     registerControlCallback(this._type, ControlType.Hide, () =>
       this._window?.hide()
