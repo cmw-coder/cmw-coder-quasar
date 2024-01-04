@@ -171,16 +171,12 @@ const _processGeneratedSuggestions = (
       })
       /// Filter out empty suggestions.
       .filter((generatedSuggestion) => generatedSuggestion.length > 0)
-      /// Replace line breaks with '\\r\\n'.
-      .map((generatedSuggestion) =>
-        generatedSuggestion.replace(/\r\n|\n/g, '\\r\\n')
-      )
       /// Construct the final suggestions.
       .map((generatedSuggestion) => ({
         isSnippet,
         content: isSnippet
           ? generatedSuggestion
-          : generatedSuggestion.split('\\r\\n')[0].trimEnd(),
+          : generatedSuggestion.split('\r\n')[0].trimEnd(),
       }))
   );
 };

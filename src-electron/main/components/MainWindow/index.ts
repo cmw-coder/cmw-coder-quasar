@@ -43,7 +43,7 @@ export class MainWindow {
       }
     });
 
-    this._window.webContents.openDevTools({ mode: 'undocked' });
+    // this._window.webContents.openDevTools({ mode: 'undocked' });
 
     // this._window.webContents.on('devtools-opened', () => {
     //   this._window?.webContents.closeDevTools();

@@ -37,6 +37,8 @@ import {
 import { triggerActionCallback } from 'preload/types/ActionApi';
 
 if (app.requestSingleInstanceLock()) {
+  app.disableHardwareAcceleration();
+
   const immersiveWindow = new ImmersiveWindow();
   const mainWindow = new MainWindow();
   const floatingWindow = new FloatingWindow();

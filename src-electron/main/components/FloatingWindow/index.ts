@@ -85,7 +85,7 @@ export class FloatingWindow {
       .loadURL(`${process.env.APP_URL}#/floating/completions`)
       .catch();
 
-    this._window.webContents.openDevTools({ mode: 'undocked' });
+    // this._window.webContents.openDevTools({ mode: 'undocked' });
 
     // this._window.webContents.openDevTools({ mode: 'undocked' });
 

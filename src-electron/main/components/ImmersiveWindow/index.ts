@@ -25,7 +25,7 @@ export class ImmersiveWindow {
     if (message.data.completions.length) {
       this.activate();
       if (this._window) {
-        this._window.setSize(message.data.completions[0].length * 8, 21);
+        this._window.setSize(message.data.completions[0].length * 9, 21);
         this._window.setPosition(message.data.x, message.data.y - 3, false);
         sendToRenderer(this._window, message);
       } else {
@@ -58,9 +58,9 @@ export class ImmersiveWindow {
 
   private create() {
     this._window = new BrowserWindow({
-      width: 1080,
       height: 21,
       useContentSize: true,
+      minWidth: 100,
       resizable: false,
       movable: false,
       minimizable: false,
@@ -85,7 +85,7 @@ export class ImmersiveWindow {
       .loadURL(`${process.env.APP_URL}#/immersive/completions`)
       .then();
 
-    this._window.webContents.openDevTools({ mode: 'undocked' });
+    // this._window.webContents.openDevTools({ mode: 'undocked' });
 
     /* this._window.on('ready-to-show', () => {}); */
 
