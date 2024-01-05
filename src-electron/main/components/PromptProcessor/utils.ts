@@ -171,6 +171,8 @@ const _processGeneratedSuggestions = (
       })
       /// Filter out empty suggestions.
       .filter((generatedSuggestion) => generatedSuggestion.length > 0)
+      /// Replace '\n' with '\r\n'.
+      .map((generatedSuggestion) => generatedSuggestion.replace(/\r?\n/g, '\r\n'))
       /// Construct the final suggestions.
       .map((generatedSuggestion) => ({
         isSnippet,
