@@ -14,7 +14,13 @@ export class CaretPosition {
   }
 }
 
+export enum CompletionType {
+  Function = 'Function',
+  Line = 'Line',
+  Snippet = 'Snippet',
+}
+
 export interface Completions {
   contents: string[];
-  type: 'function' | 'line' | 'snippet';
+  type: CompletionType;
 }

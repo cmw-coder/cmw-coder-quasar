@@ -111,12 +111,9 @@ if (app.requestSingleInstanceLock()) {
               caret.yPixel
             );
             return new CompletionGenerateServerMessage({
-              completions: {
-                contents: completions.contents.map((content) =>
-                  encode(content, 'gb2312').toString('base64')
-                ),
-                type: completions.type,
-              },
+              completions: completions.contents.map((content) =>
+                encode(content, 'gb2312').toString('base64')
+              ),
               result: 'success',
             });
           }

@@ -7,7 +7,7 @@ import {
   SeparateTokens,
 } from 'main/stores/config/types';
 import { generate, generateRd } from 'main/utils/axios';
-import { Completions } from 'shared/types/common';
+import { Completions, CompletionType } from 'shared/types/common';
 
 // Start with '//' or '#', or end with '{' or '*/'
 const detectRegex = /^(\/\/|#)|(\{|\*\/)$/;
@@ -81,7 +81,7 @@ export const processHuggingFaceApi = async (
       completionConfig.stopTokens,
       generatedSuggestions
     ),
-    type: isSnippet ? 'snippet' : 'line',
+    type: isSnippet ? CompletionType.Snippet : CompletionType.Line,
   };
 };
 
@@ -127,7 +127,7 @@ export const processLinseerApi = async (
       completionConfig.stopTokens,
       generatedSuggestions
     ),
-    type: isSnippet ? 'snippet' : 'line',
+    type: isSnippet ? CompletionType.Snippet : CompletionType.Line,
   };
 };
 

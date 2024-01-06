@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 
-import { Completions } from 'shared/types/common';
+import { CompletionType } from 'shared/types/common';
 import { ActionType } from 'shared/types/ActionMessage';
 
 const cacheOffset = ref(0);
 const contents = ref<string[]>([]);
-const type = ref<Completions['type']>('line');
+const type = ref<CompletionType>(CompletionType.Line);
 
 onMounted(() => {
   window.actionApi.receive(ActionType.CompletionSet, (data) => {
