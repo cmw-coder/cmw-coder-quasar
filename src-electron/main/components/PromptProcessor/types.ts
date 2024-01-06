@@ -71,8 +71,3 @@ export class LRUCache<T> {
     }
   }
 }
-
-export interface Completion {
-  content: string;
-  isSnippet: boolean;
-}

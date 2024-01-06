@@ -7,7 +7,7 @@ import {
   SeparateTokens,
 } from 'main/stores/config/types';
 import { generate, generateRd } from 'main/utils/axios';
-import { Completion } from 'main/components/PromptProcessor/types';
+import { Completions } from 'shared/types/common';
 
 // Start with '//' or '#', or end with '{' or '*/'
 const detectRegex = /^(\/\/|#)|(\{|\*\/)$/;
@@ -40,7 +40,7 @@ export const processHuggingFaceApi = async (
   modelConfig: HuggingFaceModelConfigType,
   promptComponents: PromptComponents,
   isSnippet: boolean
-): Promise<Completion[]> => {
+): Promise<Completions> => {
   const { completionConfigs, separateTokens } = modelConfig;
   const completionConfig = isSnippet
     ? completionConfigs.snippet
@@ -65,28 +65,24 @@ export const processHuggingFaceApi = async (
       top_p: 0.95,
     },
   });
-  const generatedSuggestions: string[] = [];
+  let generatedSuggestions: string[] = [];
   if (best_of_sequences && best_of_sequences.length) {
-    generatedSuggestions.push(
-      ...best_of_sequences.map((bestOfSequence) =>
-        isSnippet
-          ? bestOfSequence.generated_text
-          : bestOfSequence.generated_text.trimStart()
-      )
+    generatedSuggestions = best_of_sequences.map(
+      (bestOfSequence) => bestOfSequence.generated_text
     );
   } else {
-    generatedSuggestions.push(
-      isSnippet ? generated_text : generated_text.trimStart()
-    );
+    generatedSuggestions.push(generated_text);
   }
 
-  return _processGeneratedSuggestions(
-    promptComponents.prefix,
-    separateTokens,
-    completionConfig.stopTokens,
-    generatedSuggestions,
-    isSnippet
-  );
+  return {
+    contents: _processGeneratedSuggestions(
+      promptComponents.prefix,
+      separateTokens,
+      completionConfig.stopTokens,
+      generatedSuggestions
+    ),
+    type: isSnippet ? 'snippet' : 'line',
+  };
 };
 
 export const processLinseerApi = async (
@@ -95,7 +91,7 @@ export const processLinseerApi = async (
   promptComponents: PromptComponents,
   isSnippet: boolean,
   projectId: string
-): Promise<Completion[]> => {
+): Promise<Completions> => {
   const { completionConfigs, endpoint } = modelConfig;
   const completionConfig = isSnippet
     ? completionConfigs.snippet
@@ -124,22 +120,23 @@ export const processLinseerApi = async (
     .map((item) => item.text)
     .filter((completion) => completion.trim().length > 0);
 
-  return _processGeneratedSuggestions(
-    promptComponents.prefix,
-    undefined,
-    completionConfig.stopTokens,
-    generatedSuggestions,
-    isSnippet
-  );
+  return {
+    contents: _processGeneratedSuggestions(
+      promptComponents.prefix,
+      undefined,
+      completionConfig.stopTokens,
+      generatedSuggestions
+    ),
+    type: isSnippet ? 'snippet' : 'line',
+  };
 };
 
 const _processGeneratedSuggestions = (
   promptString: string,
   separateTokens: SeparateTokens | undefined,
   stopTokens: string[],
-  generatedSuggestions: string[],
-  isSnippet: boolean
-): Completion[] => {
+  generatedSuggestions: string[]
+): string[] => {
   // TODO: Replace Date Created if needed.
   return (
     generatedSuggestions
@@ -171,14 +168,13 @@ const _processGeneratedSuggestions = (
       })
       /// Filter out empty suggestions.
       .filter((generatedSuggestion) => generatedSuggestion.length > 0)
+      /// Replace '\t' with 4 spaces.
+      .map((generatedSuggestion) =>
+        generatedSuggestion.replace(/\t/g, ' '.repeat(4))
+      )
       /// Replace '\n' with '\r\n'.
-      .map((generatedSuggestion) => generatedSuggestion.replace(/\r?\n/g, '\r\n'))
-      /// Construct the final suggestions.
-      .map((generatedSuggestion) => ({
-        isSnippet,
-        content: isSnippet
-          ? generatedSuggestion
-          : generatedSuggestion.split('\r\n')[0].trimEnd(),
-      }))
+      .map((generatedSuggestion) =>
+        generatedSuggestion.replace(/\r?\n/g, '\r\n')
+      )
   );
 };

@@ -5,7 +5,7 @@ import { useI18n } from 'vue-i18n';
 
 import { loginWithCode } from 'boot/axios';
 import { sendAuthCode } from 'components/LoginPanels/utils';
-import { StoreSaveActionMessage } from 'shared/types/ActionMessage';
+import { ConfigStoreSaveActionMessage } from 'shared/types/ActionMessage';
 
 const { t } = useI18n();
 const { notify } = useQuasar();
@@ -69,7 +69,7 @@ const login = async () => {
       });
     } else {
       window.actionApi.send(
-        new StoreSaveActionMessage({
+        new ConfigStoreSaveActionMessage({
           type: 'config',
           data: {
             userId: data.userId,
@@ -77,7 +77,7 @@ const login = async () => {
         })
       );
       window.actionApi.send(
-        new StoreSaveActionMessage({
+        new ConfigStoreSaveActionMessage({
           type: 'data',
           data: {
             tokens: {

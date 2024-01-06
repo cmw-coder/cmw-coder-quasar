@@ -21,11 +21,7 @@ import {
 } from 'preload/types/ControlApi';
 
 import { actionApiKey, controlApiKey } from 'shared/types/constants';
-import {
-  ActionMessage,
-  CompletionDisplayActionMessage,
-  CompletionUpdateActionMessage,
-} from 'shared/types/ActionMessage';
+import { ActionMessage } from 'shared/types/ActionMessage';
 import {
   CompletionCacheServerMessage,
   CompletionCancelServerMessage,
@@ -58,13 +54,12 @@ if (app.requestSingleInstanceLock()) {
   app.whenReady().then(() => {
     startServer().then(async () => {
       const promptProcessor = new PromptProcessor();
-      registerWsMessage(WsAction.CompletionCache, ({ data }) => {
-        immersiveWindow.update(new CompletionUpdateActionMessage(data));
+      registerWsMessage(WsAction.CompletionCache, ({ data: isDelete }) => {
+        immersiveWindow.completionUpdate(isDelete);
         return new CompletionCacheServerMessage({ result: 'success' });
       });
       registerWsMessage(WsAction.CompletionCancel, () => {
-        immersiveWindow.completion = new CompletionDisplayActionMessage();
-        floatingWindow.completion = new CompletionDisplayActionMessage();
+        immersiveWindow.completionClear();
         return new CompletionCancelServerMessage({ result: 'success' });
       });
       registerWsMessage(WsAction.CompletionGenerate, async ({ data }) => {
@@ -103,34 +98,31 @@ if (app.requestSingleInstanceLock()) {
             new TextDocument(decodedPath),
             new Position(caret.line, caret.character)
           ).getPromptComponents(tabs, symbols, decodedPrefix, decodedSuffix);
-          const results = await promptProcessor.process(
+          const completions = await promptProcessor.process(
             prompt,
             decodedPrefix,
             projectId
           );
-          console.log(results);
-          immersiveWindow.completion = new CompletionDisplayActionMessage({
-            completions: results
-              .filter((result) => !result.isSnippet)
-              .map((result) => result.content),
-            x: caret.xPixel,
-            y: caret.yPixel,
-          });
-          floatingWindow.completion = new CompletionDisplayActionMessage({
-            completions: results
-              .filter((result) => result.isSnippet)
-              .map((result) => result.content),
-            x: caret.xPixel,
-            y: caret.yPixel,
-          });
+          console.log({ completions });
+          if (completions) {
+            immersiveWindow.completionSet(
+              completions,
+              caret.xPixel,
+              caret.yPixel
+            );
+            return new CompletionGenerateServerMessage({
+              completions: {
+                contents: completions.contents.map((content) =>
+                  encode(content, 'gb2312').toString('base64')
+                ),
+                type: completions.type,
+              },
+              result: 'success',
+            });
+          }
           return new CompletionGenerateServerMessage({
-            completions: results.map((result) =>
-              encode(
-                result.isSnippet ? '1' + result.content : '0' + result.content,
-                'gb2312'
-              ).toString('base64')
-            ),
-            result: 'success',
+            result: 'failure',
+            message: 'Completion Generate Failed, maybe need login first?',
           });
         } catch (e) {
           console.warn('route.completion.generate', e);

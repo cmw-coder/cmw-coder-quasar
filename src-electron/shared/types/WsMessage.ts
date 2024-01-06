@@ -1,4 +1,4 @@
-import { CaretPosition } from 'shared/types/common';
+import { CaretPosition, Completions } from 'shared/types/common';
 
 export enum WsAction {
   CompletionAccept = 'CompletionAccept',
@@ -83,10 +83,10 @@ export interface CompletionGenerateClientMessage extends WsMessage {
 
 export class CompletionGenerateServerMessage implements WsMessage {
   action = WsAction.CompletionGenerate;
-  data: StandardResult<{ completions: string[] }>;
+  data: StandardResult<{ completions: Completions }>;
   timestamp = Date.now();
 
-  constructor(data: StandardResult<{ completions: string[] }>) {
+  constructor(data: StandardResult<{ completions: Completions }>) {
     this.data = data;
   }
 }

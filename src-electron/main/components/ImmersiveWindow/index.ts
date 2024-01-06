@@ -3,11 +3,13 @@ import { resolve } from 'path';
 
 import { sendToRenderer } from 'preload/types/ActionApi';
 import { ControlType, registerControlCallback } from 'preload/types/ControlApi';
-import { WindowType } from 'shared/types/WindowType';
+import { Completions } from 'shared/types/common';
 import {
-  CompletionDisplayActionMessage,
+  CompletionClearActionMessage,
+  CompletionSetActionMessage,
   CompletionUpdateActionMessage,
 } from 'shared/types/ActionMessage';
+import { WindowType } from 'shared/types/WindowType';
 
 export class ImmersiveWindow {
   private readonly _type = WindowType.Immersive;
@@ -21,28 +23,32 @@ export class ImmersiveWindow {
     }
   }
 
-  set completion(message: CompletionDisplayActionMessage) {
-    if (message.data.completions.length) {
+  completionClear() {
+    if (this._window && this._window.isVisible()) {
+      this._window.hide();
+      sendToRenderer(this._window, new CompletionClearActionMessage());
+    }
+  }
+
+  completionSet(completions: Completions, x: number, y: number) {
+    if (completions.contents.length) {
       this.activate();
       if (this._window) {
-        this._window.setSize(message.data.completions[0].length * 9, 21, false);
-        this._window.setPosition(message.data.x, message.data.y - 3, false);
-        sendToRenderer(this._window, message);
+        this._window.setPosition(x, y - 3, false);
+        sendToRenderer(
+          this._window,
+          new CompletionSetActionMessage(completions)
+        );
       } else {
         console.warn('Immersive window activate failed');
-      }
-    } else {
-      if (this._window && this._window.isVisible()) {
-        this._window.hide();
-        sendToRenderer(this._window, message);
       }
     }
   }
 
-  update(message: CompletionUpdateActionMessage) {
+  completionUpdate(isDelete: boolean) {
     this.activate();
     if (this._window) {
-      sendToRenderer(this._window, message);
+      sendToRenderer(this._window, new CompletionUpdateActionMessage(isDelete));
     } else {
       console.warn('Immersive window activate failed');
     }
@@ -58,9 +64,9 @@ export class ImmersiveWindow {
 
   private create() {
     this._window = new BrowserWindow({
+      width: 3840,
       height: 21,
       useContentSize: true,
-      minWidth: 50,
       resizable: false,
       movable: false,
       minimizable: false,

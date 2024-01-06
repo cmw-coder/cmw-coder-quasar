@@ -2,6 +2,7 @@ import { BrowserWindow } from 'electron';
 import { resolve } from 'path';
 
 import { registerWsMessage } from 'main/server';
+import { dataStore } from 'main/stores';
 import { sendToRenderer } from 'preload/types/ActionApi';
 import { ControlType, registerControlCallback } from 'preload/types/ControlApi';
 import { DebugSyncServerMessage, WsAction } from 'shared/types/WsMessage';
@@ -25,12 +26,13 @@ export class MainWindow {
   }
 
   private create() {
+    const { height, show, width } = dataStore.window.main;
     this._window = new BrowserWindow({
-      width: 630,
-      height: 1120,
+      width,
+      height,
       useContentSize: true,
+      show,
       frame: false,
-      icon: resolve(__dirname, 'icons/icon.png'), // taskbar icon
       webPreferences: {
         // devTools: false,
         preload: resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD),
@@ -53,6 +55,22 @@ export class MainWindow {
       this._window = undefined;
     });
 
+    this._window.on('hide', () => {
+      const currentDataWindow = dataStore.window;
+      currentDataWindow.main.show = false;
+      dataStore.window = currentDataWindow;
+    });
+
+    this._window.on('resized', () => {
+      if (this._window) {
+        const [width, height] = this._window.getSize();
+        const currentDataWindow = dataStore.window;
+        currentDataWindow.main.width = width;
+        currentDataWindow.main.height = height;
+        dataStore.window = currentDataWindow;
+      }
+    });
+
     this._window.on('ready-to-show', async () => {
       registerWsMessage(WsAction.DebugSync, (message) => {
         if (this._window) {
@@ -63,6 +81,12 @@ export class MainWindow {
         }
         return new DebugSyncServerMessage({ result: 'success' });
       });
+    });
+
+    this._window.on('show', () => {
+      const currentDataWindow = dataStore.window;
+      currentDataWindow.main.show = true;
+      dataStore.window = currentDataWindow;
     });
 
     registerControlCallback(this._type, ControlType.Hide, () =>

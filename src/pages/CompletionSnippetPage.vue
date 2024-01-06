@@ -7,8 +7,8 @@ import { ActionType } from 'shared/types/ActionMessage';
 const completions = ref<string[]>([]);
 
 onMounted(() => {
-  window.actionApi.receive(ActionType.CompletionDisplay, (data) => {
-    completions.value = data.completions;
+  window.actionApi.receive(ActionType.CompletionSet, (data) => {
+    completions.value = data.contents;
   });
 });
 </script>

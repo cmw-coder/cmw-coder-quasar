@@ -13,3 +13,8 @@ export class CaretPosition {
     return this.line >= 0 && this.character >= 0;
   }
 }
+
+export interface Completions {
+  contents: string[];
+  type: 'function' | 'line' | 'snippet';
+}

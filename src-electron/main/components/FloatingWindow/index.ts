@@ -2,13 +2,11 @@ import { BrowserWindow } from 'electron';
 import { resolve } from 'path';
 
 import { bypassCors } from 'main/utils/common';
-import { sendToRenderer } from 'preload/types/ActionApi';
 import {
   ControlType,
   registerControlCallback,
   triggerControlCallback,
 } from 'preload/types/ControlApi';
-import { CompletionDisplayActionMessage } from 'shared/types/ActionMessage';
 import { WindowType } from 'shared/types/WindowType';
 
 export class FloatingWindow {
@@ -20,23 +18,6 @@ export class FloatingWindow {
       this._window.show();
     } else {
       this.create();
-    }
-  }
-
-  set completion(message: CompletionDisplayActionMessage) {
-    if (message.data.completions.length) {
-      this.activate();
-      if (this._window) {
-        this._window.setSize(630, 560);
-        sendToRenderer(this._window, message);
-      } else {
-        console.warn('Floating window activate failed');
-      }
-    } else {
-      if (this._window && this._window.isVisible()) {
-        this._window.hide();
-        sendToRenderer(this._window, message);
-      }
     }
   }
 

@@ -25,6 +25,7 @@ export class HuggingFaceConfigStore {
     this._store = new ElectronStore({
       clearInvalidConfig: true,
       defaults: huggingFaceStoreDefault,
+      name: 'config',
       schema: huggingFaceStoreSchema,
     });
     console.log(this._store.path);

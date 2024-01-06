@@ -1,11 +1,15 @@
 import { LinseerConfigType, LinseerDataType } from 'main/stores/config/types';
+import { DataWindowType } from 'main/stores/data/types';
 import { CompletionCacheClientMessage } from 'shared/types/WsMessage';
+import { Completions } from 'shared/types/common';
 
 export enum ActionType {
-  CompletionDisplay = 'CompletionDisplay',
+  CompletionClear = 'CompletionClear',
+  CompletionSet = 'CompletionSet',
   CompletionUpdate = 'CompletionUpdate',
+  ConfigStoreSave = 'ConfigStoreSave',
+  DataStoreSave = 'DataStoreSave',
   DebugSync = 'DebugSync',
-  StoreSave = 'StoreSave',
 }
 
 export interface ActionMessage {
@@ -13,21 +17,16 @@ export interface ActionMessage {
   data: unknown;
 }
 
-export class CompletionDisplayActionMessage implements ActionMessage {
-  type = ActionType.CompletionDisplay;
-  data: {
-    completions: string[];
-    x: number;
-    y: number;
-  };
+export class CompletionClearActionMessage implements ActionMessage {
+  type = ActionType.CompletionClear;
+  data: undefined;
+}
 
-  constructor(
-    data: { completions: string[]; x: number; y: number } = {
-      completions: [],
-      x: 0,
-      y: 0,
-    }
-  ) {
+export class CompletionSetActionMessage implements ActionMessage {
+  type = ActionType.CompletionSet;
+  data: Completions;
+
+  constructor(data: Completions) {
     this.data = data;
   }
 }
@@ -41,17 +40,8 @@ export class CompletionUpdateActionMessage implements ActionMessage {
   }
 }
 
-export class DebugSyncActionMessage implements ActionMessage {
-  type = ActionType.DebugSync;
-  data: { content: string; path: string };
-
-  constructor(data: { content: string; path: string }) {
-    this.data = data;
-  }
-}
-
-export class StoreSaveActionMessage implements ActionMessage {
-  type = ActionType.StoreSave;
+export class ConfigStoreSaveActionMessage implements ActionMessage {
+  type = ActionType.ConfigStoreSave;
   data:
     | {
         type: 'config';
@@ -77,9 +67,29 @@ export class StoreSaveActionMessage implements ActionMessage {
   }
 }
 
+export class DataStoreSaveActionMessage implements ActionMessage {
+  type = ActionType.DataStoreSave;
+  data: { type: 'window'; data: Partial<DataWindowType> };
+
+  constructor(data: { type: 'window'; data: Partial<DataWindowType> }) {
+    this.data = data;
+  }
+}
+
+export class DebugSyncActionMessage implements ActionMessage {
+  type = ActionType.DebugSync;
+  data: { content: string; path: string };
+
+  constructor(data: { content: string; path: string }) {
+    this.data = data;
+  }
+}
+
 export interface ActionMessageMapping {
-  [ActionType.CompletionDisplay]: CompletionDisplayActionMessage;
+  [ActionType.CompletionClear]: CompletionClearActionMessage;
+  [ActionType.CompletionSet]: CompletionSetActionMessage;
   [ActionType.CompletionUpdate]: CompletionUpdateActionMessage;
+  [ActionType.ConfigStoreSave]: ConfigStoreSaveActionMessage;
   [ActionType.DebugSync]: DebugSyncActionMessage;
-  [ActionType.StoreSave]: StoreSaveActionMessage;
+  [ActionType.DataStoreSave]: DataStoreSaveActionMessage;
 }

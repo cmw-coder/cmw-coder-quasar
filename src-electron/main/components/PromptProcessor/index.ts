@@ -1,23 +1,24 @@
 import { createHash } from 'crypto';
 
 import { PromptComponents } from 'main/components/PromptExtractor/types';
-import { Completion, LRUCache } from 'main/components/PromptProcessor/types';
+import { LRUCache } from 'main/components/PromptProcessor/types';
 import {
   checkIsSnippet,
   processHuggingFaceApi,
   processLinseerApi,
 } from 'main/components/PromptProcessor/utils';
-import { ApiStyle } from 'main/types/model';
 import { configStore } from 'main/stores';
+import { ApiStyle } from 'main/types/model';
+import { Completions } from 'shared/types/common';
 
 export class PromptProcessor {
-  private _cache = new LRUCache<Completion[]>(100);
+  private _cache = new LRUCache<Completions>(100);
 
   async process(
     promptComponents: PromptComponents,
     prefix: string,
     projectId: string
-  ): Promise<Completion[]> {
+  ): Promise<Completions | undefined> {
     const cacheKey = createHash('sha1')
       .update(prefix.trimEnd())
       .digest('base64');
@@ -27,36 +28,32 @@ export class PromptProcessor {
     }
 
     const isSnippet = checkIsSnippet(prefix);
-    let processedSuggestions: Completion[] = [];
+    let completions: Completions;
 
-    try {
-      if (configStore.apiStyle === ApiStyle.HuggingFace) {
-        processedSuggestions = await processHuggingFaceApi(
-          configStore.modelConfig,
-          promptComponents,
-          isSnippet
-        );
-      } else {
-        const accessToken = await configStore.getAccessToken();
-        if (!accessToken) {
-          configStore.login();
-          return [];
-        }
-        processedSuggestions = await processLinseerApi(
-          configStore.modelConfig,
-          accessToken,
-          promptComponents,
-          isSnippet,
-          projectId
-        );
+    if (configStore.apiStyle === ApiStyle.HuggingFace) {
+      completions = await processHuggingFaceApi(
+        configStore.modelConfig,
+        promptComponents,
+        isSnippet
+      );
+    } else {
+      const accessToken = await configStore.getAccessToken();
+      if (!accessToken) {
+        configStore.login();
+        return;
       }
-    } catch (e) {
-      console.warn('PromptProcessor.process.error', e);
+      completions = await processLinseerApi(
+        configStore.modelConfig,
+        accessToken,
+        promptComponents,
+        isSnippet,
+        projectId
+      );
     }
-    console.log('PromptProcessor.process.normal', processedSuggestions);
-    if (processedSuggestions.length) {
-      this._cache.put(cacheKey, processedSuggestions);
+    console.log('PromptProcessor.process.normal', completions);
+    if (completions.contents.length) {
+      this._cache.put(cacheKey, completions);
     }
-    return processedSuggestions;
+    return completions;
   }
 }

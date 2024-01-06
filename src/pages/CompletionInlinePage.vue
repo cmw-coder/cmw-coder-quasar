@@ -1,15 +1,19 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 
+import { Completions } from 'shared/types/common';
 import { ActionType } from 'shared/types/ActionMessage';
 
-const completion = ref('');
 const cacheOffset = ref(0);
+const contents = ref<string[]>([]);
+const type = ref<Completions['type']>('line');
 
 onMounted(() => {
-  window.actionApi.receive(ActionType.CompletionDisplay, (data) => {
-    completion.value = data.completions[0] ?? '';
+  window.actionApi.receive(ActionType.CompletionSet, (data) => {
     cacheOffset.value = 0;
+    contents.value = data.contents;
+    type.value = data.type;
+    console.log('Inline completions:', contents.value);
   });
   window.actionApi.receive(ActionType.CompletionUpdate, (isDelete) => {
     if (isDelete) {
@@ -22,9 +26,12 @@ onMounted(() => {
 </script>
 
 <template>
-  <q-page>
-    <div class="code-line text-grey">
-      {{ ' '.repeat(cacheOffset) + completion.substring(cacheOffset) }}
+  <q-page
+    class="overflow-hidden"
+    style="background-color: rgba(255, 0, 0, 0.75)"
+  >
+    <div class="code-line">
+      {{ ' '.repeat(cacheOffset) + (contents[0] ?? '').substring(cacheOffset) }}
     </div>
   </q-page>
 </template>
