@@ -83,7 +83,7 @@ if (app.requestSingleInstanceLock()) {
           decode(Buffer.from(tabString, 'base64'), 'gb2312')
         );
 
-        console.log({
+        console.log('WsAction.CompletionGenerate', {
           caret,
           path: decodedPath,
           prefix: decodedPrefix,
