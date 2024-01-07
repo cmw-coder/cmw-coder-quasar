@@ -76,10 +76,11 @@ export const processHuggingFaceApi = async (
 
   return {
     contents: _processGeneratedSuggestions(
+      generatedSuggestions,
+      isSnippet,
       promptComponents.prefix,
       separateTokens,
-      completionConfig.stopTokens,
-      generatedSuggestions
+      completionConfig.stopTokens
     ),
     type: isSnippet ? CompletionType.Snippet : CompletionType.Line,
   };
@@ -122,59 +123,62 @@ export const processLinseerApi = async (
 
   return {
     contents: _processGeneratedSuggestions(
+      generatedSuggestions,
+      isSnippet,
       promptComponents.prefix,
       undefined,
-      completionConfig.stopTokens,
-      generatedSuggestions
+      completionConfig.stopTokens
     ),
     type: isSnippet ? CompletionType.Snippet : CompletionType.Line,
   };
 };
 
 const _processGeneratedSuggestions = (
+  generatedSuggestions: string[],
+  isSnippet: boolean,
   promptString: string,
   separateTokens: SeparateTokens | undefined,
-  stopTokens: string[],
-  generatedSuggestions: string[]
+  stopTokens: string[]
 ): string[] => {
   // TODO: Replace Date Created if needed.
-  return (
-    generatedSuggestions
-      /// Filter out contents that are the same as the prompt.
-      .map((generatedSuggestion) =>
-        generatedSuggestion.substring(0, promptString.length) === promptString
-          ? generatedSuggestion.substring(promptString.length)
-          : generatedSuggestion
-      )
-      /// Filter out contents that are the same as the stop tokens.
-      .map((generatedSuggestion) => {
-        const combinedTokens = [...stopTokens];
-        if (separateTokens) {
-          const { start, end, middle } = separateTokens;
-          combinedTokens.push(start, end, middle);
-        }
-        const regExp = `(${combinedTokens
-          .map((token) => escapeStringRegexp(token))
-          .join('|')})`;
-        return generatedSuggestion.replace(new RegExp(regExp, 'g'), '');
-      })
-      /// Filter out leading empty lines.
-      .map((generatedSuggestion) => {
-        const lines = generatedSuggestion.split('\n');
-        const firstNonEmptyLineIndex = lines.findIndex(
-          (line) => line.trim().length > 0
-        );
-        return lines.slice(firstNonEmptyLineIndex).join('\n');
-      })
-      /// Filter out empty suggestions.
-      .filter((generatedSuggestion) => generatedSuggestion.length > 0)
-      /// Replace '\t' with 4 spaces.
-      .map((generatedSuggestion) =>
-        generatedSuggestion.replace(/\t/g, ' '.repeat(4))
-      )
-      /// Replace '\n' with '\r\n'.
-      .map((generatedSuggestion) =>
-        generatedSuggestion.replace(/\r?\n/g, '\r\n')
-      )
-  );
+  const result = generatedSuggestions
+    /// Filter out contents that are the same as the prompt.
+    .map((generatedSuggestion) =>
+      generatedSuggestion.substring(0, promptString.length) === promptString
+        ? generatedSuggestion.substring(promptString.length)
+        : generatedSuggestion
+    )
+    /// Filter out contents that are the same as the stop tokens.
+    .map((generatedSuggestion) => {
+      const combinedTokens = [...stopTokens];
+      if (separateTokens) {
+        const { start, end, middle } = separateTokens;
+        combinedTokens.push(start, end, middle);
+      }
+      const regExp = `(${combinedTokens
+        .map((token) => escapeStringRegexp(token))
+        .join('|')})`;
+      return generatedSuggestion.replace(new RegExp(regExp, 'g'), '');
+    })
+    /// Filter out leading empty lines.
+    .map((generatedSuggestion) => {
+      const lines = generatedSuggestion.split('\n');
+      const firstNonEmptyLineIndex = lines.findIndex(
+        (line) => line.trim().length > 0
+      );
+      return lines.slice(firstNonEmptyLineIndex).join('\n');
+    })
+    /// Filter out empty suggestions.
+    .filter((generatedSuggestion) => generatedSuggestion.length > 0)
+    /// Replace '\t' with 4 spaces.
+    .map((generatedSuggestion) =>
+      generatedSuggestion.replace(/\t/g, ' '.repeat(4))
+    )
+    /// Replace '\n' with '\r\n'.
+    .map((generatedSuggestion) =>
+      generatedSuggestion.replace(/\r?\n/g, '\r\n')
+    );
+  return isSnippet
+    ? result
+    : result.map((suggestion) => suggestion.split('\r\n')[0]);
 };

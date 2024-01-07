@@ -103,7 +103,6 @@ if (app.requestSingleInstanceLock()) {
             decodedPrefix,
             projectId
           );
-          console.log({ completions });
           if (completions) {
             immersiveWindow.completionSet(
               completions,
