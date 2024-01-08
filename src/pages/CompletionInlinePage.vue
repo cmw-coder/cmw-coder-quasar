@@ -28,9 +28,8 @@ onMounted(() => {
 <template>
   <q-page
     class="overflow-hidden"
-    style="background-color: rgba(255, 0, 0, 0.75)"
   >
-    <div class="code-line">
+    <div class="code-line text-grey">
       {{ ' '.repeat(cacheOffset) + (contents[0] ?? '').substring(cacheOffset) }}
     </div>
   </q-page>

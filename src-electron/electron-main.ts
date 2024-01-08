@@ -23,6 +23,7 @@ import {
 import { actionApiKey, controlApiKey } from 'shared/types/constants';
 import { ActionMessage } from 'shared/types/ActionMessage';
 import {
+  CompletionAcceptServerMessage,
   CompletionCacheServerMessage,
   CompletionCancelServerMessage,
   CompletionGenerateServerMessage,
@@ -54,6 +55,18 @@ if (app.requestSingleInstanceLock()) {
   app.whenReady().then(() => {
     startServer().then(async () => {
       const promptProcessor = new PromptProcessor();
+      registerWsMessage(WsAction.CompletionAccept, () => {
+        immersiveWindow.completionClear();
+        // statisticsReporter.acceptCompletion(
+        //   '',
+        //   Date.now(),
+        //   Date.now(),
+        //   '',
+        //   '',
+        //   ''
+        // );
+        return new CompletionAcceptServerMessage({ result: 'success' });
+      });
       registerWsMessage(WsAction.CompletionCache, ({ data: isDelete }) => {
         immersiveWindow.completionUpdate(isDelete);
         return new CompletionCacheServerMessage({ result: 'success' });
@@ -136,17 +149,6 @@ if (app.requestSingleInstanceLock()) {
         immersiveWindow.show();
         return new ImmersiveShowServerMessage({ result: 'success' });
       });
-      // registerWsMessage(WsAction.CompletionAccept, (message) => {
-      //   statisticsReporter.acceptCompletion(
-      //     message.data.completion,
-      //     Date.now(),
-      //     Date.now(),
-      //     "",
-      //     "",
-      //     ""
-      //   );
-      //   return new CompletionAcceptServerMessage({ result: 'success' });
-      // });
 
       floatingWindow.activate();
       immersiveWindow.activate();

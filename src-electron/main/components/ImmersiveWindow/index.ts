@@ -65,7 +65,7 @@ export class ImmersiveWindow {
   private create() {
     this._window = new BrowserWindow({
       width: 3840,
-      height: 21,
+      height: 2160,
       useContentSize: true,
       resizable: false,
       movable: false,
