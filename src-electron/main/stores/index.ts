@@ -8,6 +8,7 @@ let apiStyle: ApiStyle;
 
 // eslint-disable-next-line prefer-const
 apiStyle = ApiStyle.Linseer;
+// apiStyle = ApiStyle.HuggingFace;
 
 export const configStore =
   apiStyle === ApiStyle.HuggingFace

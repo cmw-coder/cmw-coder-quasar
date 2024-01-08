@@ -26,9 +26,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <q-page
-    class="overflow-hidden"
-  >
+  <q-page class="overflow-hidden">
     <div class="code-line text-grey">
       {{ ' '.repeat(cacheOffset) + (contents[0] ?? '').substring(cacheOffset) }}
     </div>

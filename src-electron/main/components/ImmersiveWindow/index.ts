@@ -92,10 +92,9 @@ export class ImmersiveWindow {
       .loadURL(`${process.env.APP_URL}#/immersive/completions`)
       .then();
 
-    this._window.webContents.openDevTools({ mode: 'undocked' });
-
-    // this._window.on('ready-to-show', () => {
-    // });
+    this._window.on('ready-to-show', () => {
+      this._window?.webContents.openDevTools({ mode: 'undocked' });
+    });
 
     registerControlCallback(this._type, ControlType.Hide, () =>
       this._window?.hide()
