@@ -21,14 +21,9 @@ export const huggingFaceStoreDefault: HuggingFaceStoreType = {
         completionConfigs: {
           function: {
             contextLimit: 1500,
-            endpoint: 'http://10.113.36.127:9191',
+            endpoint: 'http://10.113.36.104',
             maxTokenCount: 256,
-            stopTokens: [
-              '<fim_pad>',
-              '<|endoftext|>',
-              '\n}',
-              '<｜end▁of▁sentence｜>',
-            ],
+            stopTokens: ['<fim_pad>', '<|endoftext|>', '\n}'],
             suggestionCount: 1,
             temperature: 0.2,
           },
