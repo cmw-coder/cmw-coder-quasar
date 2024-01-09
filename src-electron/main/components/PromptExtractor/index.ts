@@ -7,9 +7,7 @@ import {
   IGNORE_RESERVED_KEYWORDS,
 } from 'main/components/PromptExtractor/constants';
 import {
-  PromptComponents,
-  PromptElement,
-  PromptType,
+  PromptElements,
   RelativeDefinition,
   SimilarSnippet,
   SimilarSnippetConfig,
@@ -33,7 +31,7 @@ export class PromptExtractor {
   private _similarSnippetConfig: SimilarSnippetConfig = {
     contextLines: 30,
     limit: 5,
-    minScore: 0.25,
+    minScore: 0.2,
   };
 
   constructor(document: TextDocument, position: Position) {
@@ -47,24 +45,13 @@ export class PromptExtractor {
     beforeCursor: string,
     afterCursor: string,
     similarSnippetCount = 1
-  ): Promise<PromptComponents> {
-    const prefixElements = Array<PromptElement>();
-    const result: PromptComponents = {
-      reponame: '',
-      filename: '',
-      prefix: '',
-      suffix: afterCursor,
-    };
-
-    prefixElements.push({
-      type: PromptType.LanguageMarker,
-      priority: 1,
-      value: `Language: ${this._document.languageId}`,
-    });
-
+  ): Promise<PromptElements> {
     const relativePath = getRelativePath(this._document.fileName);
-    result.reponame = dirname(relativePath);
-    result.filename = basename(relativePath);
+
+    const promptElements = new PromptElements(beforeCursor, afterCursor);
+    promptElements.file = basename(relativePath);
+    promptElements.folder = dirname(relativePath);
+    promptElements.language = this._document.languageId;
 
     const [allMostSimilarSnippets, relativeDefinitions] = await Promise.all([
       this._getSimilarSnippets(beforeCursor, afterCursor, openedTabs),
@@ -79,33 +66,21 @@ export class PromptExtractor {
       );
 
     if (mostSimilarSnippets.length) {
-      prefixElements.push({
-        type: PromptType.SimilarFile,
-        priority: 2,
-        value:
-          mostSimilarSnippets
-            .map((mostSimilarSnippet) => mostSimilarSnippet.content)
-            .join('\n') + '\n',
-      });
+      promptElements.similarSnippet =
+        mostSimilarSnippets
+          .map((mostSimilarSnippet) => mostSimilarSnippet.content)
+          .join('\r\n');
     }
-
-    prefixElements.push({
-      type: PromptType.BeforeCursor,
-      priority: 4,
-      value: beforeCursor,
-    });
 
     if (relativeDefinitions.length) {
       const remainingCharacters =
         6000 -
-        result.reponame.length -
-        result.filename.length -
-        result.suffix.length -
-        prefixElements.reduce(
-          (accumulatedCharacters, prefixElement) =>
-            accumulatedCharacters + prefixElement.value.length,
-          0
-        );
+        promptElements.file.length -
+        promptElements.folder.length -
+        promptElements.language.length -
+        promptElements.prefix.length -
+        (promptElements.similarSnippet?.length ?? 0) -
+        promptElements.suffix.length;
       const relativeDefinitionsTruncated = Array<RelativeDefinition>();
       let currentCharacters = 0;
       for (const relativeDefinition of relativeDefinitions) {
@@ -117,22 +92,13 @@ export class PromptExtractor {
           currentCharacters += relativeDefinition.content.length;
         }
       }
-      prefixElements.push({
-        type: PromptType.ImportedFile,
-        priority: 3,
-        value:
-          relativeDefinitionsTruncated
-            .map((relativeDefinition) => relativeDefinition.content)
-            .join('\n') + '\n',
-      });
+      promptElements.symbols =
+        relativeDefinitionsTruncated
+          .map((relativeDefinition) => relativeDefinition.content)
+          .join('\r\n');
     }
 
-    result.prefix = prefixElements
-      .sort((first, second) => first.priority - second.priority)
-      .map((prefixElement) => prefixElement.value)
-      .join('\n\n');
-
-    return result;
+    return promptElements;
   }
 
   private async _getRelativeDefinitions(

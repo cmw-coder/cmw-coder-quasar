@@ -1,6 +1,6 @@
 import escapeStringRegexp from 'escape-string-regexp';
 
-import { PromptComponents } from 'main/components/PromptExtractor/types';
+import { PromptElements } from 'main/components/PromptExtractor/types';
 import {
   HuggingFaceModelConfigType,
   LinseerModelConfigType,
@@ -12,39 +12,31 @@ import { Completions, CompletionType } from 'shared/types/common';
 // Start with '//' or '#', or end with '{' or '*/'
 const detectRegex = /^(\/\/|#)|(\{|\*\/)$/;
 
-export const checkIsSnippet = (prefix: string): boolean => {
-  const lastLine = prefix.trimEnd().split('\n').at(-1) ?? '';
-  return detectRegex.test(lastLine) && lastLine == lastLine.trimStart();
-};
-
-export const getPromptString = (
-  promptComponents: PromptComponents,
-  separateTokens: SeparateTokens
-): string => {
-  const { start, end, middle } = separateTokens;
-  const result = [];
-
-  if (promptComponents.reponame.length) {
-    result.push(`<reponame>${promptComponents.reponame}`);
+export const getCompletionType = (
+  promptElements: PromptElements
+): CompletionType => {
+  const lastLine = promptElements.prefix.trimEnd().split('\r\n').at(-1) ?? '';
+  if (detectRegex.test(lastLine.trim())) {
+    return CompletionType.Function;
   }
-  if (promptComponents.filename.length) {
-    result.push(`<filename>${promptComponents.filename}`);
+  if (promptElements.similarSnippet && promptElements.symbols) {
+    return CompletionType.Snippet;
   }
-  result.push(start + promptComponents.prefix);
-  result.push(end + promptComponents.suffix);
-  result.push(middle);
-  return result.join('');
+  return CompletionType.Line;
 };
 
 export const processHuggingFaceApi = async (
   modelConfig: HuggingFaceModelConfigType,
-  promptComponents: PromptComponents,
-  isSnippet: boolean
+  promptElements: PromptElements,
+  completionType: CompletionType
 ): Promise<Completions> => {
   const { completionConfigs, separateTokens } = modelConfig;
-  const completionConfig = isSnippet
-    ? completionConfigs.snippet
-    : completionConfigs.line;
+  const completionConfig =
+    completionType === CompletionType.Function
+      ? completionConfigs.function
+      : completionType === CompletionType.Line
+      ? completionConfigs.line
+      : completionConfigs.snippet;
   const { endpoint, maxTokenCount, stopTokens, suggestionCount, temperature } =
     completionConfig;
 
@@ -54,7 +46,7 @@ export const processHuggingFaceApi = async (
       generated_text,
     },
   } = await generate(endpoint, {
-    inputs: getPromptString(promptComponents, separateTokens),
+    inputs: promptElements.stringify(separateTokens),
     parameters: {
       best_of: suggestionCount,
       details: true,
@@ -77,26 +69,29 @@ export const processHuggingFaceApi = async (
   return {
     contents: _processGeneratedSuggestions(
       generatedSuggestions,
-      isSnippet,
-      promptComponents.prefix,
+      completionType,
+      promptElements.constructQuestion(),
       separateTokens,
       completionConfig.stopTokens
     ),
-    type: isSnippet ? CompletionType.Snippet : CompletionType.Line,
+    type: completionType,
   };
 };
 
 export const processLinseerApi = async (
   modelConfig: LinseerModelConfigType,
   accessToken: string,
-  promptComponents: PromptComponents,
-  isSnippet: boolean,
+  promptElements: PromptElements,
+  completionType: CompletionType,
   projectId: string
 ): Promise<Completions> => {
   const { completionConfigs, endpoint } = modelConfig;
-  const completionConfig = isSnippet
-    ? completionConfigs.snippet
-    : completionConfigs.line;
+  const completionConfig =
+    completionType === CompletionType.Function
+      ? completionConfigs.function
+      : completionType === CompletionType.Line
+      ? completionConfigs.line
+      : completionConfigs.snippet;
   const { maxTokenCount, stopTokens, subModelType, temperature } =
     completionConfig;
 
@@ -104,15 +99,16 @@ export const processLinseerApi = async (
     await generateRd(
       endpoint,
       {
-        question: promptComponents.prefix,
+        question: promptElements.constructQuestion(),
         model: subModelType,
         maxTokens: maxTokenCount,
         temperature: temperature,
         stop: stopTokens,
-        suffix: promptComponents.suffix,
+        suffix: promptElements.suffix,
         plugin: 'SI',
         profileModel: '百业灵犀-13B',
-        templateName: isSnippet ? 'LineCode' : 'ShortLineCode',
+        templateName:
+          completionType === CompletionType.Line ? 'ShortLineCode' : 'LineCode',
         subType: projectId,
       },
       accessToken
@@ -124,19 +120,19 @@ export const processLinseerApi = async (
   return {
     contents: _processGeneratedSuggestions(
       generatedSuggestions,
-      isSnippet,
-      promptComponents.prefix,
+      completionType,
+      promptElements.constructQuestion(),
       undefined,
       completionConfig.stopTokens
     ),
-    type: isSnippet ? CompletionType.Snippet : CompletionType.Line,
+    type: completionType,
   };
 };
 
 const _processGeneratedSuggestions = (
   generatedSuggestions: string[],
-  isSnippet: boolean,
-  promptString: string,
+  completionType: CompletionType,
+  promptQuestion: string,
   separateTokens: SeparateTokens | undefined,
   stopTokens: string[]
 ): string[] => {
@@ -144,8 +140,8 @@ const _processGeneratedSuggestions = (
   const result = generatedSuggestions
     /// Filter out contents that are the same as the prompt.
     .map((generatedSuggestion) =>
-      generatedSuggestion.substring(0, promptString.length) === promptString
-        ? generatedSuggestion.substring(promptString.length)
+      generatedSuggestion.substring(0, promptQuestion.length) === promptQuestion
+        ? generatedSuggestion.substring(promptQuestion.length)
         : generatedSuggestion
     )
     /// Filter out contents that are the same as the stop tokens.
@@ -178,7 +174,11 @@ const _processGeneratedSuggestions = (
     .map((generatedSuggestion) =>
       generatedSuggestion.replace(/\r?\n/g, '\r\n')
     );
-  return isSnippet
+  return completionType === CompletionType.Function
     ? result
-    : result.map((suggestion) => suggestion.split('\r\n')[0]);
+    : completionType === CompletionType.Line
+    ? result.map((suggestion) => suggestion.split('\r\n')[0])
+    : result.map((suggestion) =>
+        suggestion.split('\r\n').slice(0, 3).join('\r\n')
+      );
 };

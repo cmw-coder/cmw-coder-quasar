@@ -107,12 +107,12 @@ if (app.requestSingleInstanceLock()) {
 
         try {
           statisticsReporter.updateCaretPosition(caret);
-          const prompt = await new PromptExtractor(
+          const promptElements = await new PromptExtractor(
             new TextDocument(decodedPath),
             new Position(caret.line, caret.character)
           ).getPromptComponents(tabs, symbols, decodedPrefix, decodedSuffix);
           const completions = await promptProcessor.process(
-            prompt,
+            promptElements,
             decodedPrefix,
             projectId
           );

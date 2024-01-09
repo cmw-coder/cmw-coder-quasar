@@ -1,9 +1,9 @@
 import { createHash } from 'crypto';
 
-import { PromptComponents } from 'main/components/PromptExtractor/types';
+import { PromptElements } from 'main/components/PromptExtractor/types';
 import { LRUCache } from 'main/components/PromptProcessor/types';
 import {
-  checkIsSnippet,
+  getCompletionType,
   processHuggingFaceApi,
   processLinseerApi,
 } from 'main/components/PromptProcessor/utils';
@@ -15,7 +15,7 @@ export class PromptProcessor {
   private _cache = new LRUCache<Completions>(100);
 
   async process(
-    promptComponents: PromptComponents,
+    promptComponents: PromptElements,
     prefix: string,
     projectId: string
   ): Promise<Completions | undefined> {
@@ -27,14 +27,14 @@ export class PromptProcessor {
       return promptCached;
     }
 
-    const isSnippet = checkIsSnippet(prefix);
+    const completionType = getCompletionType(promptComponents);
     let completions: Completions;
 
     if (configStore.apiStyle === ApiStyle.HuggingFace) {
       completions = await processHuggingFaceApi(
         configStore.modelConfig,
         promptComponents,
-        isSnippet
+        completionType
       );
     } else {
       const accessToken = await configStore.getAccessToken();
@@ -46,7 +46,7 @@ export class PromptProcessor {
         configStore.modelConfig,
         accessToken,
         promptComponents,
-        isSnippet,
+        completionType,
         projectId
       );
     }
