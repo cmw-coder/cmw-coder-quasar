@@ -32,13 +32,16 @@ export class ImmersiveWindow {
 
   completionSet(completions: Completions, x: number, y: number) {
     if (completions.contents.length) {
-      this.activate();
+      if (!this._window) {
+        this.create();
+      }
       if (this._window) {
-        this._window.setPosition(x, y - 3, false);
         sendToRenderer(
           this._window,
           new CompletionSetActionMessage(completions)
         );
+        this._window.setPosition(x, y, false);
+        this._window.show();
       } else {
         console.warn('Immersive window activate failed');
       }
@@ -46,9 +49,12 @@ export class ImmersiveWindow {
   }
 
   completionUpdate(isDelete: boolean) {
-    this.activate();
+    if (!this._window) {
+      this.create();
+    }
     if (this._window) {
       sendToRenderer(this._window, new CompletionUpdateActionMessage(isDelete));
+      this._window.show();
     } else {
       console.warn('Immersive window activate failed');
     }
@@ -82,6 +88,7 @@ export class ImmersiveWindow {
       webPreferences: {
         // devTools: false,
         preload: resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD),
+        zoomFactor: 1.0,
       },
     });
 

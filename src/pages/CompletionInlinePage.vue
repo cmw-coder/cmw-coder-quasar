@@ -40,8 +40,8 @@ body.body--dark {
 
 .code-line {
   font-family: Consolas, monospace, serif;
-  font-size: 12px;
-  letter-spacing: 0.4px;
+  font-size: 9pt * 1.06;
+  padding-top: 7pt;
   white-space: pre;
 }
 </style>

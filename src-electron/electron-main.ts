@@ -98,9 +98,9 @@ if (app.requestSingleInstanceLock()) {
 
         console.log('WsAction.CompletionGenerate', {
           caret,
-          path,
-          prefix,
-          suffix,
+          path: decodedPath,
+          prefix: decodedPrefix,
+          suffix: decodedSuffix,
           symbols,
           tabs,
         });
