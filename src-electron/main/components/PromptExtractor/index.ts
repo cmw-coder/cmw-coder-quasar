@@ -31,7 +31,7 @@ export class PromptExtractor {
   private _similarSnippetConfig: SimilarSnippetConfig = {
     contextLines: 30,
     limit: 5,
-    minScore: 0.2,
+    minScore: 0.25,
   };
 
   constructor(document: TextDocument, position: Position) {
@@ -46,6 +46,7 @@ export class PromptExtractor {
     afterCursor: string,
     similarSnippetCount = 1
   ): Promise<PromptElements> {
+    openedTabs = openedTabs.filter((tab) => tab !== this._document.fileName);
     const relativePath = getRelativePath(this._document.fileName);
 
     const promptElements = new PromptElements(beforeCursor, afterCursor);
