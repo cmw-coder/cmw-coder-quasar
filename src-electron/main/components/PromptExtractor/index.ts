@@ -67,10 +67,9 @@ export class PromptExtractor {
       );
 
     if (mostSimilarSnippets.length) {
-      promptElements.similarSnippet =
-        mostSimilarSnippets
-          .map((mostSimilarSnippet) => mostSimilarSnippet.content)
-          .join('\r\n');
+      promptElements.similarSnippet = mostSimilarSnippets
+        .map((mostSimilarSnippet) => mostSimilarSnippet.content)
+        .join('\r\n');
     }
 
     if (relativeDefinitions.length) {
@@ -93,10 +92,9 @@ export class PromptExtractor {
           currentCharacters += relativeDefinition.content.length;
         }
       }
-      promptElements.symbols =
-        relativeDefinitionsTruncated
-          .map((relativeDefinition) => relativeDefinition.content)
-          .join('\r\n');
+      promptElements.symbols = relativeDefinitionsTruncated
+        .map((relativeDefinition) => relativeDefinition.content)
+        .join('\r\n');
     }
 
     return promptElements;

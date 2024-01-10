@@ -5,9 +5,8 @@ import { useSettingsStore } from 'stores/settings';
 const { initialize } = useHighlighter();
 const { applyDarkMode } = useSettingsStore();
 
-applyDarkMode();
-
 initialize().then();
+applyDarkMode();
 </script>
 
 <template>
