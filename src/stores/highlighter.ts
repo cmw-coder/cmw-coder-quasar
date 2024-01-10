@@ -40,6 +40,10 @@ export const useHighlighter = defineStore('highlighter', () => {
       ),
       {
         bg: 'transparent',
+        elements: {
+          pre: ({ className, style, children }) =>
+            `<pre class="${className}" style="${style};margin: 0" tabindex="0">${children}</pre>`,
+        },
       }
     );
   };
