@@ -75,6 +75,9 @@ export class FloatingWindow {
     registerControlCallback(this._type, ControlType.Hide, () =>
       this._window?.hide()
     );
+    registerControlCallback(this._type, ControlType.Reload, () =>
+      this._window?.reload()
+    );
     registerControlCallback(this._type, ControlType.Show, () =>
       this._window?.show()
     );

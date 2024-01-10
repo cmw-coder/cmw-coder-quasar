@@ -106,14 +106,17 @@ export class ImmersiveWindow {
     registerControlCallback(this._type, ControlType.Hide, () =>
       this._window?.hide()
     );
-    registerControlCallback(this._type, ControlType.Show, () =>
-      this._window?.show()
-    );
     registerControlCallback(this._type, ControlType.Move, (data) => {
       if (this._window) {
         const [currentX, currentY] = this._window.getPosition();
         this._window.setPosition(data.x ?? currentX, data.y ?? currentY);
       }
     });
+    registerControlCallback(this._type, ControlType.Reload, () =>
+      this._window?.reload()
+    );
+    registerControlCallback(this._type, ControlType.Show, () =>
+      this._window?.show()
+    );
   }
 }
