@@ -9,17 +9,17 @@ import {
 import { generate, generateRd } from 'main/utils/axios';
 import { Completions, CompletionType } from 'shared/types/common';
 
-// Start with '//' or '#', or end with '{' or '*/'
-const detectRegex = /^(\/\/|#)|(\{|\*\/)$/;
+// Start with '//' or '#' or '{' or '/*'
+const detectRegex = /^((\/\/)|(#)|(\{)|(\/\*))$/;
 
 export const getCompletionType = (
   promptElements: PromptElements
 ): CompletionType => {
   const lastLine = promptElements.prefix.trimEnd().split('\r\n').at(-1) ?? '';
-  if (detectRegex.test(lastLine.trim())) {
+  if (detectRegex.test(lastLine)) {
     return CompletionType.Function;
   }
-  if (promptElements.similarSnippet && promptElements.symbols) {
+  if (promptElements.similarSnippet) {
     return CompletionType.Snippet;
   }
   return CompletionType.Line;
