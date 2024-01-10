@@ -35,10 +35,10 @@ export class PromptElements {
     const { start, end, middle } = separateTokens;
     const result = Array<string>();
     if (this.folder) {
-      result.push(`<reponame>${this.folder}`);
+      result.push(`<REPO>${this.folder}`);
     }
     if (this.file) {
-      result.push(`<filename>${this.file}`);
+      result.push(`<FILENAME>${this.file}`);
     }
 
     result.push(start + this.constructQuestion());
