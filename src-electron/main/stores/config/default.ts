@@ -22,7 +22,7 @@ export const huggingFaceStoreDefault: HuggingFaceStoreType = {
           function: {
             contextLimit: 1500,
             endpoint: 'http://10.113.36.104',
-            maxTokenCount: 256,
+            maxTokenCount: 1024,
             stopTokens: ['<fim_pad>', '<|endoftext|>', '\n}'],
             suggestionCount: 1,
             temperature: 0.2,
@@ -30,11 +30,11 @@ export const huggingFaceStoreDefault: HuggingFaceStoreType = {
           line: {
             contextLimit: 1500,
             endpoint: 'http://10.113.36.127:9191',
-            maxTokenCount: 48,
+            maxTokenCount: 64,
             stopTokens: [
               '<fim_pad>',
               '<|endoftext|>',
-              '\n}',
+              '\r\n',
               '<｜end▁of▁sentence｜>',
             ],
             suggestionCount: 1,
@@ -43,11 +43,11 @@ export const huggingFaceStoreDefault: HuggingFaceStoreType = {
           snippet: {
             contextLimit: 1500,
             endpoint: 'http://10.113.36.127:9191',
-            maxTokenCount: 128,
+            maxTokenCount: 256,
             stopTokens: [
               '<fim_pad>',
               '<|endoftext|>',
-              '\n}',
+              '}',
               '<｜end▁of▁sentence｜>',
             ],
             suggestionCount: 1,
