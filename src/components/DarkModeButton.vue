@@ -2,6 +2,7 @@
 import { useSettingsStore } from 'stores/settings';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
+import { WindowType } from 'shared/types/WindowType';
 
 const { toggleDarkMode } = useSettingsStore();
 const { darkModeColorAndIcon } = storeToRefs(useSettingsStore());
@@ -9,6 +10,12 @@ const { darkModeColorAndIcon } = storeToRefs(useSettingsStore());
 const { t } = useI18n();
 const i18n = (relativePath: string) => {
   return t('components.DarkModeButton.' + relativePath);
+};
+
+const switchDarkMode = () => {
+  toggleDarkMode();
+  window.controlApi.reload(WindowType.Immersive);
+  window.controlApi.reload(WindowType.Floating);
 };
 </script>
 
@@ -18,7 +25,7 @@ const i18n = (relativePath: string) => {
     :text-color="darkModeColorAndIcon.color"
     flat
     round
-    @click="toggleDarkMode"
+    @click="switchDarkMode"
   >
     <q-tooltip
       anchor="center right"

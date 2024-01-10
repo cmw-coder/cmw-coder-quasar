@@ -8,6 +8,7 @@ export enum ControlType {
   Hide = 'Hide',
   Minimize = 'Minimize',
   Move = 'Move',
+  Reload = 'Reload',
   Resize = 'Resize',
   Show = 'Show',
   ToggleMaximize = 'ToggleMaximize',
@@ -60,6 +61,16 @@ export class MoveControlMessage implements ControlMessage {
   }
 }
 
+export class ReloadControlMessage implements ControlMessage {
+  type = ControlType.Reload;
+  data: undefined;
+  windowType: WindowType;
+
+  constructor(windowType: WindowType) {
+    this.windowType = windowType;
+  }
+}
+
 export class ResizeControlMessage implements ControlMessage {
   type = ControlType.Resize;
   data: { height?: number; width?: number };
@@ -108,6 +119,7 @@ interface ControlMessageMapping {
   [ControlType.Hide]: HideControlMessage;
   [ControlType.Minimize]: MinimizeControlMessage;
   [ControlType.Move]: MoveControlMessage;
+  [ControlType.Reload]: ReloadControlMessage;
   [ControlType.Resize]: ResizeControlMessage;
   [ControlType.Show]: ShowControlMessage;
   [ControlType.ToggleMaximize]: ToggleMaximizeControlMessage;

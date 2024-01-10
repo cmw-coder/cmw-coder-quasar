@@ -17,6 +17,7 @@ declare global {
         size: { width?: number; height?: number },
         windowType: WindowType
       ) => void;
+      reload: (windowType: WindowType) => void;
       show: (windowType: WindowType) => void;
       toggleMaximize: () => void;
     };

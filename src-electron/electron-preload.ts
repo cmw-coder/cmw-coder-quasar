@@ -10,6 +10,7 @@ import {
   HideControlMessage,
   MinimizeControlMessage,
   MoveControlMessage,
+  ReloadControlMessage,
   ResizeControlMessage,
   sendControlAction,
   ShowControlMessage,
@@ -28,6 +29,8 @@ contextBridge.exposeInMainWorld(controlApiKey, {
     sendControlAction(new MinimizeControlMessage(windowType)),
   move: (position: { x?: number; y?: number }, windowType: WindowType) =>
     sendControlAction(new MoveControlMessage(position, windowType)),
+  reload: (windowType: WindowType) =>
+    sendControlAction(new ReloadControlMessage(windowType)),
   resize: (size: { width?: number; height?: number }, windowType: WindowType) =>
     sendControlAction(new ResizeControlMessage(size, windowType)),
   show: (windowType: WindowType) =>
