@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 
-import { CompletionType } from 'shared/types/common';
 import { ActionType } from 'shared/types/ActionMessage';
 import { useHighlighter } from 'stores/highlighter';
 
@@ -9,7 +8,9 @@ const { codeToHtml } = useHighlighter();
 
 const cacheOffset = ref(0);
 const contents = ref<string[]>([]);
-const type = ref<CompletionType>(CompletionType.Line);
+const isMultiLine = computed(
+  () => (contents.value[0] ?? '').split('\r\n').length > 1
+);
 
 const codeContent = computed(() =>
   codeToHtml(
@@ -20,10 +21,13 @@ const codeContent = computed(() =>
 );
 
 onMounted(() => {
+  window.actionApi.receive(ActionType.CompletionClear, () => {
+    cacheOffset.value = 0;
+    contents.value = [];
+  });
   window.actionApi.receive(ActionType.CompletionSet, (data) => {
     cacheOffset.value = 0;
     contents.value = data.contents;
-    type.value = data.type;
     console.log('Inline completions:', contents.value);
   });
   window.actionApi.receive(ActionType.CompletionUpdate, (isDelete) => {
@@ -37,14 +41,12 @@ onMounted(() => {
 </script>
 
 <template>
-  <q-page class="overflow-hidden">
+  <q-page v-if="contents.length" class="overflow-hidden">
     <div class="row">
-      <div v-if="type === CompletionType.Line" class="code-line text-grey">
-        {{
-          ' '.repeat(cacheOffset) + (contents[0] ?? '').substring(cacheOffset)
-        }}
+      <div v-show="!isMultiLine" class="code-line text-grey">
+        {{ ' '.repeat(cacheOffset) + contents[0].substring(cacheOffset) }}
       </div>
-      <q-card v-if="type !== CompletionType.Line" class="code-snippet" bordered>
+      <q-card v-show="isMultiLine" class="code-snippet" bordered>
         <div v-html="codeContent" />
       </q-card>
     </div>
