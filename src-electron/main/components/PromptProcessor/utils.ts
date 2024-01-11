@@ -15,8 +15,14 @@ const detectRegex = /^((\/\/)|(#)|(\{)|(\/\*))$/;
 export const getCompletionType = (
   promptElements: PromptElements
 ): CompletionType => {
-  const lastLine = promptElements.prefix.trimEnd().split('\r\n').at(-1) ?? '';
-  if (detectRegex.test(lastLine)) {
+  const lastLine = promptElements.prefix.split('\r\n').at(-1) ?? '';
+  if (lastLine.trim().length > 0) {
+    return CompletionType.Line;
+  }
+
+  const lastNonEmptyLine =
+    promptElements.prefix.trimEnd().split('\r\n').at(-1) ?? '';
+  if (detectRegex.test(lastNonEmptyLine)) {
     return CompletionType.Function;
   }
   if (promptElements.similarSnippet) {
@@ -156,29 +162,47 @@ const _processGeneratedSuggestions = (
         .join('|')})`;
       return generatedSuggestion.replace(new RegExp(regExp, 'g'), '');
     })
-    /// Filter out leading empty lines.
-    .map((generatedSuggestion) => {
-      const lines = generatedSuggestion.split('\n');
-      const firstNonEmptyLineIndex = lines.findIndex(
-        (line) => line.trim().length > 0
-      );
-      return lines.slice(firstNonEmptyLineIndex).join('\n');
-    })
-    /// Filter out empty suggestions.
-    .filter((generatedSuggestion) => generatedSuggestion.length > 0)
     /// Replace '\t' with 4 spaces.
     .map((generatedSuggestion) =>
       generatedSuggestion.replace(/\t/g, ' '.repeat(4))
     )
-    /// Replace '\n' with '\r\n'.
+    /// Replace '\r' or '\n' with '\r\n'.
     .map((generatedSuggestion) =>
-      generatedSuggestion.replace(/\r?\n/g, '\r\n')
-    );
-  return completionType === CompletionType.Function
-    ? result
-    : completionType === CompletionType.Line
-    ? result.map((suggestion) => suggestion.split('\r\n')[0])
-    : result.map((suggestion) =>
-        suggestion.split('\r\n').slice(0, 3).join('\r\n')
+      generatedSuggestion.replace(/\r\n?/g, '\r\n').replace(/\r?\n/g, '\r\n')
+    )
+    /// Filter out leading empty lines.
+    .map((generatedSuggestion) => {
+      const lines = generatedSuggestion.split('\r\n');
+      const firstNonEmptyLineIndex = lines.findIndex(
+        (line) => line.trim().length > 0
       );
+      return lines.slice(firstNonEmptyLineIndex).join('\r\n');
+    })
+    /// Filter out empty suggestions.
+    .filter((generatedSuggestion) => generatedSuggestion.length > 0);
+
+  switch (completionType) {
+    case CompletionType.Function: {
+      return result;
+    }
+    case CompletionType.Line: {
+      return result.map((suggestion) => suggestion.split('\r\n')[0].trimEnd());
+    }
+    case CompletionType.Snippet: {
+      return result
+        .map((suggestion) => {
+          const lines = suggestion.split('\r\n').slice(0, 4);
+          const lastNonEmptyLineIndex = lines.findLastIndex(
+            (line) => line.trim().length > 0
+          );
+          if (lastNonEmptyLineIndex < 0) {
+            return '';
+          }
+          return lines
+            .slice(0, Math.min(3, lastNonEmptyLineIndex + 1))
+            .join('\r\n');
+        })
+        .filter((suggestion) => suggestion.length > 0);
+    }
+  }
 };
