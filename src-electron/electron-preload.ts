@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from 'electron';
+import { contextBridge, ipcRenderer, webFrame } from 'electron';
 
 import {
   registerActionCallback,
@@ -46,3 +46,6 @@ contextBridge.exposeInMainWorld(actionApiKey, {
 ipcRenderer.on(actionApiKey, (_, message: ActionMessage) =>
   triggerActionCallback(message.type, message.data)
 );
+
+webFrame.setZoomFactor(1);
+webFrame.setVisualZoomLevelLimits(0, 0);

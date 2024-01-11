@@ -1,7 +1,6 @@
 import { BrowserWindow } from 'electron';
 import { resolve } from 'path';
 
-import { dataStore } from 'main/stores';
 import { bypassCors } from 'main/utils/common';
 import {
   ControlType,
@@ -58,7 +57,6 @@ export class FloatingWindow {
       webPreferences: {
         // devTools: false,
         preload: resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD),
-        zoomFactor: 1 / dataStore.window.zoom,
       },
     });
 

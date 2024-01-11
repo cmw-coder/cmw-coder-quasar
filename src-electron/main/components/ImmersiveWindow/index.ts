@@ -93,7 +93,6 @@ export class ImmersiveWindow {
       webPreferences: {
         // devTools: false,
         preload: resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD),
-        zoomFactor: 1 / dataStore.window.zoom,
       },
     });
 
