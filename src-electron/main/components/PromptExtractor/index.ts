@@ -31,7 +31,7 @@ export class PromptExtractor {
   private _similarSnippetConfig: SimilarSnippetConfig = {
     contextLines: 30,
     limit: 5,
-    minScore: 0.25,
+    minScore: 0.45,
   };
 
   constructor(document: TextDocument, position: Position) {
@@ -65,6 +65,11 @@ export class PromptExtractor {
         (mostSimilarSnippet) =>
           mostSimilarSnippet.score > this._similarSnippetConfig.minScore
       );
+
+    console.log({
+      minScore: this._similarSnippetConfig.minScore,
+      mostSimilarSnippets,
+    });
 
     if (mostSimilarSnippets.length) {
       promptElements.similarSnippet = mostSimilarSnippets
