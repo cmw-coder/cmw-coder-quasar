@@ -4,6 +4,7 @@ export interface DataWindowType {
     show: boolean;
     width: number;
   };
+  zoom: number;
 }
 
 export interface DataStoreType {

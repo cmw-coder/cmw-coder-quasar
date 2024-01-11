@@ -19,6 +19,9 @@ const dataWindowSchema: Schema<DataWindowType> = {
       },
     },
   },
+  zoom: {
+    type: 'number',
+  },
 };
 
 export const dataStoreSchema: Schema<DataStoreType> = {

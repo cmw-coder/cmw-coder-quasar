@@ -36,6 +36,7 @@ export class MainWindow {
       webPreferences: {
         // devTools: false,
         preload: resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD),
+        zoomFactor: 1 / dataStore.window.zoom,
       },
     });
 
@@ -44,12 +45,6 @@ export class MainWindow {
         throw e;
       }
     });
-
-    // this._window.webContents.openDevTools({ mode: 'undocked' });
-
-    // this._window.webContents.on('devtools-opened', () => {
-    //   this._window?.webContents.closeDevTools();
-    // });
 
     this._window.on('closed', () => {
       this._window = undefined;

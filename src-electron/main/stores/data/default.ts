@@ -7,5 +7,6 @@ export const dataStoreDefault: DataStoreType = {
       show: true,
       width: 630,
     },
+    zoom: 1.0,
   },
 };

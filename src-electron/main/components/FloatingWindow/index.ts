@@ -1,6 +1,7 @@
 import { BrowserWindow } from 'electron';
 import { resolve } from 'path';
 
+import { dataStore } from 'main/stores';
 import { bypassCors } from 'main/utils/common';
 import {
   ControlType,
@@ -57,6 +58,7 @@ export class FloatingWindow {
       webPreferences: {
         // devTools: false,
         preload: resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD),
+        zoomFactor: 1 / dataStore.window.zoom,
       },
     });
 
@@ -65,12 +67,6 @@ export class FloatingWindow {
     this._window
       .loadURL(`${process.env.APP_URL}#/floating/completions`)
       .catch();
-
-    // this._window.webContents.openDevTools({ mode: 'undocked' });
-
-    // this._window.webContents.openDevTools({ mode: 'undocked' });
-
-    /*this._window.on('ready-to-show', () => {});*/
 
     registerControlCallback(this._type, ControlType.Hide, () =>
       this._window?.hide()

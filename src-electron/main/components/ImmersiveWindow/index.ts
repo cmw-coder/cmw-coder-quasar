@@ -1,6 +1,7 @@
 import { BrowserWindow } from 'electron';
 import { resolve } from 'path';
 
+import { dataStore } from 'main/stores';
 import { sendToRenderer } from 'preload/types/ActionApi';
 import { ControlType, registerControlCallback } from 'preload/types/ControlApi';
 import { Completions } from 'shared/types/common';
@@ -40,7 +41,11 @@ export class ImmersiveWindow {
           this._window,
           new CompletionSetActionMessage(completions)
         );
-        this._window.setPosition(x, y, false);
+        this._window.setPosition(
+          Math.round(x / dataStore.window.zoom),
+          Math.round(y / dataStore.window.zoom),
+          false
+        );
         this._window.show();
       } else {
         console.warn('Immersive window activate failed');
@@ -88,7 +93,7 @@ export class ImmersiveWindow {
       webPreferences: {
         // devTools: false,
         preload: resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD),
-        zoomFactor: 1.0,
+        zoomFactor: 1 / dataStore.window.zoom,
       },
     });
 
@@ -100,7 +105,9 @@ export class ImmersiveWindow {
       .then();
 
     this._window.on('ready-to-show', () => {
-      this._window?.webContents.openDevTools({ mode: 'undocked' });
+      if (this._window) {
+        this._window.webContents.openDevTools({ mode: 'undocked' });
+      }
     });
 
     registerControlCallback(this._type, ControlType.Hide, () =>
