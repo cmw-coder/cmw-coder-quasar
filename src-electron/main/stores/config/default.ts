@@ -22,7 +22,7 @@ export const huggingFaceStoreDefault: HuggingFaceStoreType = {
           function: {
             contextLimit: 1500,
             endpoint: 'http://10.113.36.104',
-            maxTokenCount: 2048,
+            maxTokenCount: 1024,
             stopTokens: ['<fim_pad>', '<|endoftext|>', '\n}'],
             suggestionCount: 1,
             temperature: 0.2,
@@ -30,7 +30,7 @@ export const huggingFaceStoreDefault: HuggingFaceStoreType = {
           line: {
             contextLimit: 1500,
             endpoint: 'http://10.113.36.111:8080',
-            maxTokenCount: 48,
+            maxTokenCount: 32,
             stopTokens: ['<fim_pad>', '<|endoftext|>'],
             suggestionCount: 1,
             temperature: 0.2,
@@ -38,7 +38,7 @@ export const huggingFaceStoreDefault: HuggingFaceStoreType = {
           snippet: {
             contextLimit: 1500,
             endpoint: 'http://10.113.36.111:8080',
-            maxTokenCount: 144,
+            maxTokenCount: 128,
             stopTokens: ['<fim_pad>', '<|endoftext|>', '}'],
             suggestionCount: 1,
             temperature: 0.2,
@@ -73,7 +73,7 @@ export const linseerConfigDefault: LinseerStoreType = {
         completionConfigs: {
           function: {
             contextLimit: 1500,
-            maxTokenCount: 2048,
+            maxTokenCount: 320,
             stopTokens: ['<fim_pad>', '<|endoftext|>', '</s>', '\n}'],
             subModelType: SubModelType['linseer-code-34b'],
             suggestionCount: 1,
@@ -81,7 +81,7 @@ export const linseerConfigDefault: LinseerStoreType = {
           },
           line: {
             contextLimit: 1500,
-            maxTokenCount: 48,
+            maxTokenCount: 10,
             stopTokens: ['<fim_pad>', '<|endoftext|>', '</s>'],
             subModelType: SubModelType['linseer-code-13b'],
             suggestionCount: 1,
@@ -89,7 +89,7 @@ export const linseerConfigDefault: LinseerStoreType = {
           },
           snippet: {
             contextLimit: 1500,
-            maxTokenCount: 144,
+            maxTokenCount: 40,
             stopTokens: ['<fim_pad>', '<|endoftext|>', '</s>', '}'],
             subModelType: SubModelType['linseer-code-34b'],
             suggestionCount: 1,
