@@ -8,6 +8,7 @@ import {
   triggerControlCallback,
 } from 'preload/types/ControlApi';
 import { WindowType } from 'shared/types/WindowType';
+import { configStore } from 'main/stores';
 
 export class FloatingWindow {
   private readonly _type = WindowType.Floating;
@@ -21,7 +22,7 @@ export class FloatingWindow {
     }
   }
 
-  login(userId: string, mainIsVisible: boolean) {
+  login(mainIsVisible: boolean) {
     if (mainIsVisible) {
       triggerControlCallback(WindowType.Main, ControlType.Hide, undefined);
     }
@@ -29,7 +30,7 @@ export class FloatingWindow {
     this._window?.center();
     this._window?.focus();
     const searchString = new URLSearchParams({
-      userId,
+      userId: configStore.config.userId,
       showMain: mainIsVisible ? 'true' : 'false',
     }).toString();
     this._window
@@ -61,10 +62,6 @@ export class FloatingWindow {
     });
 
     bypassCors(this._window);
-
-    this._window
-      .loadURL(`${process.env.APP_URL}#/floating/completions`)
-      .catch();
 
     registerControlCallback(this._type, ControlType.Hide, () =>
       this._window?.hide()

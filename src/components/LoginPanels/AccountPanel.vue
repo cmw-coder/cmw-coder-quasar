@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { useQuasar } from 'quasar';
-import { computed, reactive, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { sendAuthCode } from 'components/LoginPanels/utils';
+import AccountInput from 'components/AccountInput.vue';
 
 const { t } = useI18n();
 const { notify } = useQuasar();
@@ -27,16 +28,7 @@ const account = computed({
   set: (value) => emit('update:modelValue', value),
 });
 
-const accountInput = reactive({
-  content: account,
-  error: computed(() => {
-    if (!account.value || !account.value.length) {
-      return false;
-    }
-    return account.value.length < 5;
-  }),
-  loading: false,
-});
+const error = ref(false);
 
 const isLoading = ref(false);
 
@@ -63,30 +55,10 @@ const checkAccount = async () => {
     >
       {{ i18n('labels.description') }}
     </div>
-    <div class="column q-gutter-y-xs">
-      <div class="text-bold text-grey text-h6 q-px-xs">
-        {{ i18n('labels.account') }}
-      </div>
-      <q-input
-        clearable
-        dense
-        :error="accountInput.error"
-        :hint="i18n('hints.account')"
-        :loading="accountInput.loading"
-        :maxlength="10"
-        outlined
-        v-model="accountInput.content"
-      >
-        <template v-slot:error>
-          <div>
-            {{ i18n('errors.account') }}
-          </div>
-        </template>
-      </q-input>
-    </div>
+    <account-input v-model="account" @update:error="error = $event" />
     <q-btn
       color="primary"
-      :disable="!account || !account.length || accountInput.error"
+      :disable="!account || !account.length || error"
       :label="i18n('labels.continue')"
       :loading="isLoading"
       @click="checkAccount"

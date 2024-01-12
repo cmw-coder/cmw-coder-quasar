@@ -45,9 +45,9 @@ onMounted(() => {
 </style>
 
 <template>
-  <q-page class="row justify-evenly q-pa-lg">
-    <q-card class="col-10" flat>
-      <q-card-section class="text-h4 text-white text-center">
+  <q-page class="row justify-evenly q-pa-xl">
+    <q-card class="col-grow q-pa-lg">
+      <q-card-section class="text-h4 text-center">
         {{ i18n('labels.title') }}
       </q-card-section>
       <q-card-section class="text-h6 text-grey text-center">

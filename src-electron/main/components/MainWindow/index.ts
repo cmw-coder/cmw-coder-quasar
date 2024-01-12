@@ -2,12 +2,13 @@ import { BrowserWindow } from 'electron';
 import { resolve } from 'path';
 
 import { registerWsMessage } from 'main/server';
-import { dataStore } from 'main/stores';
+import { configStore, dataStore } from 'main/stores';
 import { sendToRenderer } from 'preload/types/ActionApi';
 import { ControlType, registerControlCallback } from 'preload/types/ControlApi';
 import { DebugSyncServerMessage, WsAction } from 'shared/types/WsMessage';
 import { WindowType } from 'shared/types/WindowType';
 import { DebugSyncActionMessage } from 'shared/types/ActionMessage';
+import { bypassCors } from 'main/utils/common';
 
 export class MainWindow {
   private readonly _type = WindowType.Main;
@@ -18,6 +19,22 @@ export class MainWindow {
       this._window.show();
     } else {
       this.create();
+    }
+  }
+
+  feedback() {
+    this.activate();
+    if (this._window) {
+      this._window.center();
+      this._window.focus();
+      const searchString = new URLSearchParams({
+        userId: configStore.config.userId,
+      }).toString();
+      this._window
+        .loadURL(`${process.env.APP_URL}#/main/feedback?${searchString}`)
+        .catch();
+    } else {
+      console.warn('Main window activate failed');
     }
   }
 
@@ -38,6 +55,8 @@ export class MainWindow {
         preload: resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD),
       },
     });
+
+    bypassCors(this._window);
 
     this._window.loadURL(process.env.APP_URL).catch((e) => {
       if (e.code !== 'ERR_ABORTED') {
@@ -66,15 +85,9 @@ export class MainWindow {
     });
 
     this._window.on('ready-to-show', async () => {
-      registerWsMessage(WsAction.DebugSync, (message) => {
-        if (this._window) {
-          sendToRenderer(
-            this._window,
-            new DebugSyncActionMessage(message.data)
-          );
-        }
-        return new DebugSyncServerMessage({ result: 'success' });
-      });
+      if (this._window) {
+        this._window.webContents.openDevTools({ mode: 'undocked' });
+      }
     });
 
     this._window.on('show', () => {
@@ -98,6 +111,13 @@ export class MainWindow {
       } else {
         this._window?.maximize();
       }
+    });
+
+    registerWsMessage(WsAction.DebugSync, (message) => {
+      if (this._window) {
+        sendToRenderer(this._window, new DebugSyncActionMessage(message.data));
+      }
+      return new DebugSyncServerMessage({ result: 'success' });
     });
   }
 }

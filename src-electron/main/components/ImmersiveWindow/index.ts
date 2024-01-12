@@ -105,7 +105,7 @@ export class ImmersiveWindow {
 
     this._window.on('ready-to-show', () => {
       if (this._window) {
-        this._window.webContents.openDevTools({ mode: 'undocked' });
+        // this._window.webContents.openDevTools({ mode: 'undocked' });
       }
     });
 

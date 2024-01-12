@@ -1,5 +1,16 @@
 export default {
   components: {
+    AccountInput: {
+      errors: {
+        account: 'Invalid account (Too short)',
+      },
+      hints: {
+        account: 'Please enter your H3C account (Job number)',
+      },
+      labels: {
+        account: 'Account',
+      },
+    },
     CodeBlock: {
       tooltips: {
         copy: 'Copy to clipboard',
@@ -83,6 +94,18 @@ export default {
       tooltips: {
         copy: 'Copy to clipboard',
         insert: 'Insert to editor',
+      },
+    },
+    FeedbackPage: {
+      labels: {
+        title: 'Issue Feedback',
+        account: 'Account',
+        description: 'Issue description',
+        images: 'Related Images',
+        submit: 'Submit',
+      },
+      hints: {
+        account: 'Please enter your H3C account (Job number)',
       },
     },
     LoginPage: {

@@ -24,7 +24,7 @@ export const routes: RouteRecordRaw[] = [
         path: 'completions',
         components: {
           header: () => import('layouts/headers/FloatingHeader.vue'),
-          default: () => import('pages/CompletionSnippetPage.vue'),
+          default: () => import('pages/CompletionFloatingPage.vue'),
         },
       },
     ],
@@ -37,7 +37,7 @@ export const routes: RouteRecordRaw[] = [
       {
         path: 'completions',
         components: {
-          default: () => import('pages/CompletionInlinePage.vue'),
+          default: () => import('pages/CompletionImmersivePage.vue'),
         },
       },
     ],
@@ -54,6 +54,13 @@ export const routes: RouteRecordRaw[] = [
           // leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
           default: () => import('pages/DashboardPage.vue'),
           // rightDrawer: () => import('layouts/drawers/RightMainDrawer.vue'),
+        },
+      },
+      {
+        path: 'feedback',
+        components: {
+          header: () => import('layouts/headers/MainHeader.vue'),
+          default: () => import('pages/FeedbackPage.vue'),
         },
       },
       {

@@ -23,6 +23,10 @@ type LoginData =
       error: null;
     };
 
+const rdTestAiService = axios.create({
+  baseURL: 'http://rdee.h3c.com/kong/RdTestAiService-b',
+});
+
 const rdTestServiceProxy = axios.create({
   baseURL: 'http://rdee.h3c.com/kong/RdTestServiceProxy-e',
 });
@@ -33,6 +37,32 @@ export const authCode = async (userId: string) => {
       operation: 'AI',
       userId,
     },
+  });
+};
+
+export const uploadImage = async (images: File[]) => {
+  const formData = new FormData();
+  images.forEach((image) => {
+    formData.append('files', image);
+  });
+  return await rdTestAiService.post<string[]>('/chatgpt/graph', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+};
+
+export const feedBack = async (
+  description: string,
+  userId: string,
+  version: string,
+  pictures?: string[]
+) => {
+  return await rdTestAiService.post<string>('/chatgpt/feedback', {
+    description,
+    userId,
+    version,
+    pictures,
   });
 };
 
