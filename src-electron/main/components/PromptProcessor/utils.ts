@@ -46,6 +46,19 @@ export const processHuggingFaceApi = async (
   const { endpoint, maxTokenCount, stopTokens, suggestionCount, temperature } =
     completionConfig;
 
+  console.log('processHuggingFaceApi', {
+    inputs: promptElements.stringify(separateTokens),
+    parameters: {
+      best_of: suggestionCount,
+      details: true,
+      do_sample: true,
+      max_new_tokens: maxTokenCount,
+      stop: stopTokens,
+      temperature: temperature,
+      top_p: 0.95,
+    },
+  });
+
   const {
     data: {
       details: { best_of_sequences },
