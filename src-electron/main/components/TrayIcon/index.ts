@@ -1,9 +1,11 @@
-import { app, Menu, nativeImage, Tray } from 'electron';
+import { Menu, MenuItemConstructorOptions, nativeImage, Tray } from 'electron';
 import { resolve } from 'path';
 
+import { MenuEntry } from 'main/components/TrayIcon/types';
 import packageJson from 'root/package.json';
 
 export class TrayIcon {
+  private _menuEntryMap = new Map<MenuEntry, () => void>();
   private _tray: Tray | undefined;
 
   activate() {
@@ -12,25 +14,23 @@ export class TrayIcon {
     }
   }
 
+  registerMenuEntry(entry: MenuEntry, callback: () => void) {
+    this._menuEntryMap.set(entry, callback);
+  }
+
   onClick(callback: () => void) {
     this._tray?.on('click', callback);
   }
 
   private create() {
-    console.log(resolve(__dirname, 'favicon.ico'));
     this._tray = new Tray(
       nativeImage.createFromPath(resolve(__dirname, 'favicon.ico'))
     );
     const contextMenu = Menu.buildFromTemplate([
-      { label: 'Item1', type: 'radio' },
-      { label: 'Item2', type: 'radio' },
-      { label: 'Item3', type: 'radio', checked: true },
+      this._createNormalItem(MenuEntry.Feedback, 'Feedback'),
+      this._createNormalItem(MenuEntry.About, 'About'),
       { type: 'separator' },
-      {
-        label: 'Exit',
-        type: 'normal',
-        click: () => app.exit(),
-      },
+      this._createNormalItem(MenuEntry.Quit, 'Quit'),
     ]);
     this._tray.displayBalloon({
       icon: nativeImage.createFromPath(resolve(__dirname, 'icons/icon.ico')),
@@ -39,5 +39,16 @@ export class TrayIcon {
     });
     this._tray.setContextMenu(contextMenu);
     this._tray.setToolTip(`Comware Coder v${packageJson.version}`);
+  }
+
+  private _createNormalItem(
+    menuEntry: MenuEntry,
+    label: string
+  ): MenuItemConstructorOptions {
+    return {
+      label,
+      type: 'normal',
+      click: () => this._menuEntryMap.get(menuEntry)?.(),
+    };
   }
 }

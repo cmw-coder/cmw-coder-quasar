@@ -1,5 +1,6 @@
 import { app, ipcMain } from 'electron';
 import { decode, encode } from 'iconv-lite';
+import { release, version } from 'os';
 
 import { FloatingWindow } from 'main/components/FloatingWindow';
 import { ImmersiveWindow } from 'main/components/ImmersiveWindow';
@@ -8,6 +9,7 @@ import { PromptExtractor } from 'main/components/PromptExtractor';
 import { PromptProcessor } from 'main/components/PromptProcessor';
 import { statisticsReporter } from 'main/components/StatisticsReporter';
 import { TrayIcon } from 'main/components/TrayIcon';
+import { MenuEntry } from 'main/components/TrayIcon/types';
 import { registerWsMessage, startServer } from 'main/server';
 import { configStore } from 'main/stores';
 import { ApiStyle } from 'main/types/model';
@@ -34,6 +36,11 @@ import {
 import { triggerActionCallback } from 'preload/types/ActionApi';
 
 if (app.requestSingleInstanceLock()) {
+  console.log(`OS version: ${version()} (${release()})`);
+  if (parseInt(release().split('.')[0]) < 10) {
+    app.disableHardwareAcceleration();
+  }
+
   const immersiveWindow = new ImmersiveWindow();
   const mainWindow = new MainWindow();
   const floatingWindow = new FloatingWindow();
@@ -154,9 +161,12 @@ if (app.requestSingleInstanceLock()) {
       trayIcon.activate();
 
       trayIcon.onClick(() => mainWindow.activate());
+      trayIcon.registerMenuEntry(MenuEntry.Feedback, () =>
+        mainWindow.feedback()
+      );
+      trayIcon.registerMenuEntry(MenuEntry.Quit, () => app.exit());
       if (configStore.apiStyle === ApiStyle.Linseer) {
-        configStore.onLogin = (userId) =>
-          floatingWindow.login(userId, mainWindow.isVisible);
+        configStore.onLogin = () => floatingWindow.login(mainWindow.isVisible);
         if (!(await configStore.getAccessToken())) {
           configStore.login();
         }
