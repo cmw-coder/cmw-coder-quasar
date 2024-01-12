@@ -28,7 +28,6 @@ export class HuggingFaceConfigStore {
       name: 'config',
       schema: huggingFaceStoreSchema,
     });
-    console.log(this._store.path);
   }
 
   get apiStyle() {
@@ -73,7 +72,7 @@ export class HuggingFaceConfigStore {
 }
 
 export class LinseerConfigStore {
-  private _loginHandler: ((userId: string) => void) | undefined;
+  private _loginHandler: (() => void) | undefined;
   private _store: ElectronStore<LinseerStoreType>;
 
   constructor() {
@@ -82,7 +81,6 @@ export class LinseerConfigStore {
       defaults: linseerConfigDefault,
       schema: linseerStoreSchema,
     });
-    console.log(this._store.path);
   }
 
   get apiStyle() {
@@ -126,12 +124,12 @@ export class LinseerConfigStore {
     return this.config.statistics;
   }
 
-  set onLogin(handler: (userId: string) => void) {
+  set onLogin(handler: () => void) {
     this._loginHandler = handler;
   }
 
   login() {
-    this._loginHandler?.(this.config.userId);
+    this._loginHandler?.();
   }
 
   async getAccessToken() {
