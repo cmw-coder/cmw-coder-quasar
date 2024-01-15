@@ -1,6 +1,7 @@
 import { ActionMessageMapping } from 'shared/types/ActionMessage';
-import { actionApiKey, controlApiKey } from 'shared/types/constants';
+import { actionApiKey, controlApiKey, elecAPI } from 'shared/types/constants';
 import { WindowType } from 'shared/types/WindowType';
+
 
 declare global {
   // noinspection JSUnusedGlobalSymbols
@@ -29,6 +30,11 @@ declare global {
       send: <T extends keyof ActionMessageMapping>(
         message: ActionMessageMapping[T]
       ) => void;
+    };
+    [elecAPI]: {
+      toInstall: () => void;
+      onUpdate: (callback:() => void) => void;
+      onDownloaded:(callback:() => void) => void;
     };
   }
 }

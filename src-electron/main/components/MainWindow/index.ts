@@ -25,6 +25,10 @@ export class MainWindow {
     return (this._window?.isVisible() && !this._window?.isMinimized()) ?? false;
   }
 
+  getWindowWebContents() {
+    return this._window?.webContents;
+  }
+
   private create() {
     const { height, show, width } = dataStore.window.main;
     this._window = new BrowserWindow({

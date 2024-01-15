@@ -214,6 +214,19 @@ module.exports = configure((/* ctx */) => {
         win: {
           icon: 'assets/icons/icon.ico',
         },
+        "nsis": {                          
+          // "oneClick": true,               //是否一键安装，默认为true
+          "language": "2052",              //安装语言，2052对应中文
+          // "perMachine": true,              //为当前系统的所有用户安装该应用程序
+          // "allowToChangeInstallationDirectory": true,   //允许用户选择安装目录
+          "runAfterFinish": true
+          },
+          "publish": [
+            {
+              "provider":"generic",
+              "url": "http://127.0.0.1:9005/"
+            }
+          ]
       },
     },
 

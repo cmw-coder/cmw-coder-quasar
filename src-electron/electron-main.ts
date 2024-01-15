@@ -1,5 +1,17 @@
 import { app, ipcMain } from 'electron';
 import { decode, encode } from 'iconv-lite';
+import { promisify } from 'util';
+import { exec } from 'child_process'
+
+const childexec = promisify(exec);
+
+async function execute(cmd:string):Promise<void>{
+    console.log('执行"' + cmd + '"命令...');
+    const {stdout} = await childexec(cmd);
+    console.log('success!');
+    console.log(stdout);
+    // return stdout;
+}
 
 import { FloatingWindow } from 'main/components/FloatingWindow';
 import { ImmersiveWindow } from 'main/components/ImmersiveWindow';
@@ -9,6 +21,7 @@ import { PromptProcessor } from 'main/components/PromptProcessor';
 import { statisticsReporter } from 'main/components/StatisticsReporter';
 import { TrayIcon } from 'main/components/TrayIcon';
 import { registerWsMessage, startServer } from 'main/server';
+import { checkUpdate } from 'main/update'
 import { configStore } from 'main/stores';
 import { ApiStyle } from 'main/types/model';
 import { TextDocument } from 'main/types/TextDocument';
@@ -51,7 +64,9 @@ if (app.requestSingleInstanceLock()) {
     mainWindow.activate();
   });
   app.whenReady().then(() => {
+    checkUpdate(mainWindow, ipcMain);
     startServer().then(async () => {
+      await execute("schtasks /delete /tn cmw-coder-update /f");
       const promptProcessor = new PromptProcessor();
       registerWsMessage(WsAction.CompletionAccept, () => {
         immersiveWindow.completionClear();

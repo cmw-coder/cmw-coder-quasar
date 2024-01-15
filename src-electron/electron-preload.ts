@@ -17,7 +17,7 @@ import {
   ToggleMaximizeControlMessage,
 } from 'preload/types/ControlApi';
 import { ActionMessage } from 'shared/types/ActionMessage';
-import { actionApiKey, controlApiKey } from 'shared/types/constants';
+import { actionApiKey, controlApiKey, elecAPI } from 'shared/types/constants';
 import { WindowType } from 'shared/types/WindowType';
 
 contextBridge.exposeInMainWorld(controlApiKey, {
@@ -38,6 +38,12 @@ contextBridge.exposeInMainWorld(controlApiKey, {
   toggleMaximize: () => sendControlAction(new ToggleMaximizeControlMessage()),
 });
 
+contextBridge.exposeInMainWorld(elecAPI, {
+  toInstall: () => ipcRenderer.invoke('install'),
+  onUpdate: (callback:any) => ipcRenderer.on('update', callback),
+  onDownloaded: (callback:any) => ipcRenderer.on('downloaded', callback),
+});
+
 contextBridge.exposeInMainWorld(actionApiKey, {
   receive: registerActionCallback,
   send: sendToMain,
@@ -49,3 +55,10 @@ ipcRenderer.on(actionApiKey, (_, message: ActionMessage) =>
 
 webFrame.setZoomFactor(1);
 webFrame.setVisualZoomLevelLimits(0, 0);
+
+window.elecAPI.onDownloaded(() => {
+  let res = confirm('新版本已下载，是否立即安装？');
+  if (res) {
+    window.elecAPI.toInstall();
+  }
+});
