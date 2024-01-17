@@ -12,7 +12,9 @@ import { ActionMessage } from 'shared/types/ActionMessage';
 export const initApplication = () => {
   console.log(`OS version: ${version()} (${release()})`);
   if (parseInt(release().split('.')[0]) < 10) {
-    console.warn('Windows version is lower than 10, disable hardware acceleration');
+    console.warn(
+      'Windows version is lower than 10, disable hardware acceleration'
+    );
     app.disableHardwareAcceleration();
   }
 };

@@ -1,7 +1,6 @@
-import { BrowserWindow } from 'electron';
+import { BrowserWindow, screen } from 'electron';
 import { resolve } from 'path';
 
-import { dataStore } from 'main/stores';
 import { sendToRenderer } from 'preload/types/ActionApi';
 import { ControlType, registerControlCallback } from 'preload/types/ControlApi';
 import {
@@ -43,11 +42,13 @@ export class ImmersiveWindow {
         this._window,
         new CompletionSetActionMessage({ completion, count })
       );
-      this._window.setPosition(
-        Math.round(position.x / dataStore.window.zoom),
-        Math.round(position.y / dataStore.window.zoom),
-        false
-      );
+      // this._window.setPosition(
+      //   Math.round(position.x / dataStore.window.zoom),
+      //   Math.round(position.y / dataStore.window.zoom),
+      //   false
+      // );
+      const screenPosition = screen.dipToScreenPoint(position);
+      this._window.setPosition(screenPosition.x, screenPosition.y, false);
       this._window.show();
     } else {
       console.warn('Immersive window activate failed');

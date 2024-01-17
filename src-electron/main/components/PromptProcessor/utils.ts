@@ -133,7 +133,7 @@ export const processLinseerApi = async (
     .map((item) => item.text)
     .filter((completion) => completion.trim().length > 0);
 
-  return  _processGeneratedSuggestions(
+  return _processGeneratedSuggestions(
     generatedSuggestions,
     completionType,
     promptElements.constructQuestion(),

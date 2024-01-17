@@ -46,7 +46,9 @@ export class PromptExtractor {
     afterCursor: string,
     similarSnippetCount = 1
   ): Promise<PromptElements> {
-    recentFiles = recentFiles.filter((fileName) => fileName !== this._document.fileName);
+    recentFiles = recentFiles.filter(
+      (fileName) => fileName !== this._document.fileName
+    );
     const relativePath = getRelativePath(this._document.fileName);
 
     const promptElements = new PromptElements(beforeCursor, afterCursor);
