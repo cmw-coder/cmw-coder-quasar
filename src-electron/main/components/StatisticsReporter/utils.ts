@@ -2,6 +2,7 @@ import {
   productLineMap,
   secondClassMap,
 } from 'main/components/StatisticsReporter/constants';
+import { configStore } from 'main/stores';
 import { HuggingFaceModelType, LinseerModelType } from 'main/types/model';
 
 export const constructData = (
@@ -10,7 +11,6 @@ export const constructData = (
   endTime: number,
   projectId: string,
   version: string,
-  username: string,
   modelType: HuggingFaceModelType | LinseerModelType,
   isAccept: boolean
 ) => {
@@ -24,7 +24,7 @@ export const constructData = (
     secondClass: secondClassMap.get(modelType),
     subType: projectId,
     type: 'AIGC',
-    user: username,
+    user: configStore.config.userId,
     userType: 'USER',
     productLine:
       modelType in LinseerModelType

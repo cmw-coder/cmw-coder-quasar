@@ -5,23 +5,30 @@ import { configStore } from 'main/stores';
 import { CaretPosition } from 'shared/types/common';
 
 class StatisticsReporter {
-  private _currentCursor: CaretPosition = new CaretPosition();
-  private _lastCursor: CaretPosition = new CaretPosition();
+  private _currentCursor: CaretPosition = { character: -1, line: -1 };
+  private _lastCursor: CaretPosition = { character: -1, line: -1 };
 
   async acceptCompletion(
     completion: string,
     startTime: number,
     endTime: number,
     projectId: string,
-    version: string,
-    username: string
+    version: string
   ) {
     if (
-      this._currentCursor.isValid() &&
+      this._currentCursor.character >= 0 &&
+      this._currentCursor.line >= 0 &&
       this._currentCursor.line == this._lastCursor.line
     ) {
       return;
     }
+    console.log('StatisticsReporter.acceptCompletion', {
+      completion,
+      startTime,
+      endTime,
+      projectId,
+      version,
+    });
     try {
       await axios
         .create({
@@ -35,7 +42,6 @@ class StatisticsReporter {
             endTime,
             projectId,
             version,
-            username,
             configStore.modelType,
             true
           )
@@ -50,15 +56,22 @@ class StatisticsReporter {
     startTime: number,
     endTime: number,
     projectId: string,
-    version: string,
-    username: string
+    version: string
   ) {
     if (
-      this._currentCursor.isValid() &&
+      this._currentCursor.character >= 0 &&
+      this._currentCursor.line >= 0 &&
       this._currentCursor.line == this._lastCursor.line
     ) {
       return;
     }
+    console.log('StatisticsReporter.generateCompletion', {
+      completion,
+      startTime,
+      endTime,
+      projectId,
+      version,
+    });
     try {
       await axios
         .create({
@@ -72,7 +85,6 @@ class StatisticsReporter {
             endTime,
             projectId,
             version,
-            username,
             configStore.modelType,
             false
           )
