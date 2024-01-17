@@ -1,13 +1,15 @@
-import { CaretPosition } from 'shared/types/common';
+import { CaretPosition, SymbolInfo } from 'shared/types/common';
 
 export enum WsAction {
   CompletionAccept = 'CompletionAccept',
   CompletionCache = 'CompletionCache',
   CompletionCancel = 'CompletionCancel',
   CompletionGenerate = 'CompletionGenerate',
+  CompletionSelect = 'CompletionSelect',
   DebugSync = 'DebugSync',
-  ImmersiveHide = 'ImmersiveHide',
-  ImmersiveShow = 'ImmersiveShow',
+  EditorFocusState = 'EditorFocusState',
+  EditorSwitchProject = 'EditorSwitchProject',
+  HandShake = 'HandShake',
 }
 
 export interface WsMessage {
@@ -25,17 +27,7 @@ type StandardResult<T = unknown> =
 
 export interface CompletionAcceptClientMessage extends WsMessage {
   action: WsAction.CompletionAccept;
-  data: undefined;
-}
-
-export class CompletionAcceptServerMessage implements WsMessage {
-  action = WsAction.CompletionAccept;
-  data: StandardResult;
-  timestamp = Date.now();
-
-  constructor(data: StandardResult) {
-    this.data = data;
-  }
+  data: string;
 }
 
 export interface CompletionCacheClientMessage extends WsMessage {
@@ -43,41 +35,20 @@ export interface CompletionCacheClientMessage extends WsMessage {
   data: boolean;
 }
 
-export class CompletionCacheServerMessage implements WsMessage {
-  action = WsAction.CompletionCache;
-  data: StandardResult;
-  timestamp = Date.now();
-
-  constructor(data: StandardResult) {
-    this.data = data;
-  }
-}
-
 export interface CompletionCancelClientMessage extends WsMessage {
   action: WsAction.CompletionCancel;
   data: undefined;
 }
 
-export class CompletionCancelServerMessage implements WsMessage {
-  action = WsAction.CompletionCancel;
-  data: StandardResult;
-  timestamp = Date.now();
-
-  constructor(data: StandardResult) {
-    this.data = data;
-  }
-}
-
 export interface CompletionGenerateClientMessage extends WsMessage {
   action: WsAction.CompletionGenerate;
   data: {
-    caret: CaretPosition & { xPixel: number; yPixel: number };
+    caret: CaretPosition;
     path: string;
     prefix: string;
-    projectId: string;
+    recentFiles: string[];
     suffix: string;
-    symbolString: string;
-    tabString: string;
+    symbols: SymbolInfo[];
   };
 }
 
@@ -91,6 +62,45 @@ export class CompletionGenerateServerMessage implements WsMessage {
   }
 }
 
+export interface CompletionSelectClientMessage extends WsMessage {
+  action: WsAction.CompletionGenerate;
+  data: {
+    completion: string;
+    count: {
+      index: number;
+      total: number;
+    };
+    position: {
+      x: number;
+      y: number;
+    };
+  };
+}
+
+export class CompletionSelectServerMessage implements WsMessage {
+  action = WsAction.CompletionSelect;
+  data: StandardResult<{
+    completion: string;
+    count: {
+      index: number;
+      total: number;
+    };
+  }>;
+  timestamp = Date.now();
+
+  constructor(
+    data: StandardResult<{
+      completion: string;
+      count: {
+        index: number;
+        total: number;
+      };
+    }>
+  ) {
+    this.data = data;
+  }
+}
+
 export interface DebugSyncClientMessage extends WsMessage {
   action: WsAction.DebugSync;
   data: {
@@ -99,62 +109,49 @@ export interface DebugSyncClientMessage extends WsMessage {
   };
 }
 
-export class DebugSyncServerMessage implements WsMessage {
-  action = WsAction.DebugSync;
-  data: StandardResult;
-  timestamp = Date.now();
-
-  constructor(data: StandardResult) {
-    this.data = data;
-  }
+export interface EditorFocusStateClientMessage extends WsMessage {
+  action: WsAction.EditorFocusState;
+  data: boolean;
 }
 
-export interface ImmersiveHideClientMessage extends WsMessage {
-  action: WsAction.ImmersiveHide;
-  data: undefined;
+export interface EditorSwitchProjectClientMessage extends WsMessage {
+  action: WsAction.EditorSwitchProject;
+  data: string;
 }
 
-export class ImmersiveHideServerMessage implements WsMessage {
-  action = WsAction.ImmersiveHide;
-  data: StandardResult;
-  timestamp = Date.now();
-
-  constructor(data: StandardResult) {
-    this.data = data;
-  }
+export interface HandShakeClientMessage extends WsMessage {
+  action: WsAction.HandShake;
+  data: { pid: number; version: string };
 }
 
-export interface ImmersiveShowClientMessage extends WsMessage {
-  action: WsAction.ImmersiveShow;
-  data: undefined;
-}
-
-export class ImmersiveShowServerMessage implements WsMessage {
-  action = WsAction.ImmersiveShow;
-  data: StandardResult;
-  timestamp = Date.now();
-
-  constructor(data: StandardResult) {
-    this.data = data;
-  }
-}
-
-export interface WsClientMessageMapping {
-  [WsAction.CompletionAccept]: CompletionAcceptClientMessage;
-  [WsAction.CompletionCache]: CompletionCacheClientMessage;
-  [WsAction.CompletionCancel]: CompletionCancelClientMessage;
-  [WsAction.CompletionGenerate]: CompletionGenerateClientMessage;
-  [WsAction.DebugSync]: DebugSyncClientMessage;
-  [WsAction.ImmersiveHide]: ImmersiveHideClientMessage;
-  [WsAction.ImmersiveShow]: ImmersiveShowClientMessage;
-}
-
-export interface WsServerMessageMapping {
-  [WsAction.CompletionAccept]: CompletionAcceptServerMessage;
-  [WsAction.CompletionCache]: CompletionCacheServerMessage;
-  [WsAction.CompletionCancel]: CompletionCancelServerMessage;
-  [WsAction.CompletionGenerate]: Promise<CompletionGenerateServerMessage>;
-  [WsAction.DebugSync]: DebugSyncServerMessage;
-  [WsAction.ImmersiveHide]: ImmersiveHideServerMessage;
-  [WsAction.ImmersiveShow]: ImmersiveShowServerMessage;
+export interface WsMessageMapping {
+  [WsAction.CompletionAccept]: {
+    client: CompletionAcceptClientMessage;
+    server: void;
+  };
+  [WsAction.CompletionCache]: {
+    client: CompletionCacheClientMessage;
+    server: void;
+  };
+  [WsAction.CompletionCancel]: {
+    client: CompletionCancelClientMessage;
+    server: void;
+  };
+  [WsAction.CompletionGenerate]: {
+    client: CompletionGenerateClientMessage;
+    server: Promise<CompletionGenerateServerMessage>;
+  };
+  [WsAction.CompletionSelect]: {
+    client: CompletionSelectClientMessage;
+    server: void;
+  };
+  [WsAction.DebugSync]: { client: DebugSyncClientMessage; server: void };
+  [WsAction.EditorFocusState]: {
+    client: EditorFocusStateClientMessage;
+    server: void;
+  };
+  [WsAction.EditorSwitchProject]: {
+    client: EditorSwitchProjectClientMessage;
+    server: void;
+  };
 }
