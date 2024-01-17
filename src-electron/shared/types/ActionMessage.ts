@@ -1,9 +1,9 @@
 import { LinseerConfigType, LinseerDataType } from 'main/stores/config/types';
-import { DataWindowType } from 'main/stores/data/types';
+import { DataProjectType, DataWindowType } from 'main/stores/data/types';
 import { CompletionCacheClientMessage } from 'shared/types/WsMessage';
-import { Completions } from 'shared/types/common';
 
 export enum ActionType {
+  ClientSetProjectId = 'ClientSetProjectId',
   CompletionClear = 'CompletionClear',
   CompletionSet = 'CompletionSet',
   CompletionUpdate = 'CompletionUpdate',
@@ -17,6 +17,19 @@ export interface ActionMessage {
   data: unknown;
 }
 
+export class ClientSetProjectIdActionMessage implements ActionMessage {
+  type = ActionType.ClientSetProjectId;
+  data: {
+    path: string;
+    pid: number;
+    projectId: string;
+  };
+
+  constructor(data: { path: string; pid: number; projectId: string }) {
+    this.data = data;
+  }
+}
+
 export class CompletionClearActionMessage implements ActionMessage {
   type = ActionType.CompletionClear;
   data: undefined;
@@ -24,9 +37,15 @@ export class CompletionClearActionMessage implements ActionMessage {
 
 export class CompletionSetActionMessage implements ActionMessage {
   type = ActionType.CompletionSet;
-  data: Completions;
+  data: {
+    completion: string;
+    count: { index: number; total: number };
+  };
 
-  constructor(data: Completions) {
+  constructor(data: {
+    completion: string;
+    count: { index: number; total: number };
+  }) {
     this.data = data;
   }
 }
@@ -69,9 +88,15 @@ export class ConfigStoreSaveActionMessage implements ActionMessage {
 
 export class DataStoreSaveActionMessage implements ActionMessage {
   type = ActionType.DataStoreSave;
-  data: { type: 'window'; data: Partial<DataWindowType> };
+  data:
+    | { type: 'project'; data: Partial<DataProjectType> }
+    | { type: 'window'; data: Partial<DataWindowType> };
 
-  constructor(data: { type: 'window'; data: Partial<DataWindowType> }) {
+  constructor(
+    data:
+      | { type: 'project'; data: Partial<DataProjectType> }
+      | { type: 'window'; data: Partial<DataWindowType> }
+  ) {
     this.data = data;
   }
 }
@@ -86,6 +111,7 @@ export class DebugSyncActionMessage implements ActionMessage {
 }
 
 export interface ActionMessageMapping {
+  [ActionType.ClientSetProjectId]: ClientSetProjectIdActionMessage;
   [ActionType.CompletionClear]: CompletionClearActionMessage;
   [ActionType.CompletionSet]: CompletionSetActionMessage;
   [ActionType.CompletionUpdate]: CompletionUpdateActionMessage;
