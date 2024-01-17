@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 
 import { ActionType } from 'shared/types/ActionMessage';
 import { useHighlighter } from 'stores/highlighter';
@@ -7,15 +7,19 @@ import { useHighlighter } from 'stores/highlighter';
 const { codeToHtml } = useHighlighter();
 
 const cacheOffset = ref(0);
-const contents = ref<string[]>([]);
+const completionCount = reactive({
+  index: 0,
+  total: 0,
+});
+const currentCompletion = ref('');
 const isMultiLine = computed(
-  () => (contents.value[0] ?? '').split('\r\n').length > 1
+  () => currentCompletion.value.split('\r\n').length > 1
 );
 
 const codeContent = computed(() =>
   codeToHtml(
     ' '.repeat(cacheOffset.value) +
-      (contents.value[0] ?? '').substring(cacheOffset.value),
+      currentCompletion.value.substring(cacheOffset.value),
     'c'
   )
 );
@@ -23,13 +27,20 @@ const codeContent = computed(() =>
 onMounted(() => {
   window.actionApi.receive(ActionType.CompletionClear, () => {
     cacheOffset.value = 0;
-    contents.value = [];
+    currentCompletion.value = '';
+    completionCount.index = 0;
+    completionCount.total = 0;
   });
-  window.actionApi.receive(ActionType.CompletionSet, (data) => {
-    cacheOffset.value = 0;
-    contents.value = data.contents;
-    console.log('Inline completions:', contents.value);
-  });
+  window.actionApi.receive(
+    ActionType.CompletionSet,
+    ({ completion, count }) => {
+      cacheOffset.value = 0;
+      currentCompletion.value = completion;
+      completionCount.index = count.index;
+      completionCount.total = count.total;
+      console.log('Inline completion:', currentCompletion.value);
+    }
+  );
   window.actionApi.receive(ActionType.CompletionUpdate, (isDelete) => {
     if (isDelete) {
       cacheOffset.value = cacheOffset.value > 0 ? cacheOffset.value - 1 : 0;
@@ -41,10 +52,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <q-page v-if="contents.length" class="overflow-hidden">
+  <q-page v-if="currentCompletion.length" class="overflow-hidden">
     <div class="row">
       <div v-show="!isMultiLine" class="code-line text-grey">
-        {{ ' '.repeat(cacheOffset) + contents[0].substring(cacheOffset) }}
+        {{ ' '.repeat(cacheOffset) + currentCompletion.substring(cacheOffset) }}
       </div>
       <q-card v-show="isMultiLine" class="code-snippet" bordered>
         <div v-html="codeContent" />
