@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { DateTime } from 'luxon';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
@@ -13,7 +14,11 @@ const { matched, query } = useRoute();
 const { replace } = useRouter();
 
 const i18n = (relativePath: string, data?: Record<string, unknown>) => {
-  return t('pages.ProjectIdPage.' + relativePath, data);
+  if (data) {
+    return t('pages.ProjectIdPage.' + relativePath, data);
+  } else {
+    return t('pages.ProjectIdPage.' + relativePath);
+  }
 };
 
 const { name } = matched[matched.length - 2];
@@ -37,7 +42,22 @@ const checkProjectId = async () => {
     new ClientSetProjectIdActionMessage({
       pid,
       path,
-      projectId,
+      projectId: projectId.value,
+    })
+  );
+  setTimeout(() => {
+    isLoading.value = false;
+    finish();
+  }, 1000);
+};
+
+const temporaryProjectId = () => {
+  isLoading.value = true;
+  window.actionApi.send(
+    new ClientSetProjectIdActionMessage({
+      pid,
+      path,
+      projectId: `Temp_${DateTime.now().toFormat('yyyyLLdd_HHmmss')}`,
     })
   );
   setTimeout(() => {
@@ -49,9 +69,9 @@ const checkProjectId = async () => {
 
 <template>
   <q-page class="row flex-center q-pa-lg">
-    <div class="col-10 column">
+    <div class="col-10 column q-gutter-y-sm">
       <div class="q-gutter-y-lg">
-        <div class="text-bold text-center text-h2">
+        <div class="text-bold text-center text-h3">
           {{ i18n('labels.title') }}
         </div>
       </div>
@@ -71,12 +91,18 @@ const checkProjectId = async () => {
         <project-id-input v-model="projectId" @update:error="error = $event" />
         <q-btn
           color="primary"
-          :disable="!account || !account.length || error"
+          :disable="!projectId || !projectId.length || error"
           :label="i18n('labels.confirm')"
           :loading="isLoading"
           @click="checkProjectId"
         />
-        <q-skeleton class="invisible" type="QBtn" />
+        <q-btn
+          color="primary"
+          flat
+          :label="i18n('labels.temporary')"
+          :loading="isLoading"
+          @click="temporaryProjectId"
+        />
       </div>
     </div>
   </q-page>
