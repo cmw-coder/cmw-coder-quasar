@@ -130,7 +130,8 @@ export default {
         description: 'Current project path: {path}',
         intro:
           'You need to provide Project ID in order to statistics your coding behavior.',
-        title: 'Setup Your New Project',
+        temporary: 'This is a temporary project',
+        title: 'Setup New Project',
       },
     },
   },
