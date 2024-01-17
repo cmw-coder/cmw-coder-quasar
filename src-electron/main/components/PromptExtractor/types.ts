@@ -18,9 +18,6 @@ export class PromptElements {
 
   constructQuestion() {
     const result = Array<string>();
-    if (this.language) {
-      result.push(`<language>${this.language}`);
-    }
     if (this.similarSnippet) {
       result.push(this.similarSnippet);
     }
@@ -40,7 +37,9 @@ export class PromptElements {
     if (this.file) {
       result.push(`<FILENAME>${this.file}`);
     }
-
+    if (this.language) {
+      result.push(`<LANGUAGE>${this.language}`);
+    }
     result.push(start + this.constructQuestion());
     result.push(end + this.suffix);
     result.push(middle);
