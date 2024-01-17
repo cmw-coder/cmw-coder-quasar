@@ -1,8 +1,6 @@
 import { promises } from 'fs';
 
-import {
-  REGEXP_WORD,
-} from 'main/components/PromptExtractor/constants';
+import { REGEXP_WORD } from 'main/components/PromptExtractor/constants';
 
 const { readFile } = promises;
 

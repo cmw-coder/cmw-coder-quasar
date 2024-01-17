@@ -50,7 +50,9 @@ export class PromptExtractor {
     const promptElements = new PromptElements(prefix, suffix);
     promptElements.language = this._document.languageId;
 
-    const relativePath = this._document.fileName.substring(this._project.length);
+    const relativePath = this._document.fileName.substring(
+      this._project.length
+    );
     promptElements.file = basename(relativePath);
     promptElements.folder = dirname(relativePath);
 

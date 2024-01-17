@@ -118,24 +118,22 @@ websocketManager.registerWsAction(
         prefix,
         projectId
       );
-      if (completions) {
-        if (completions.length) {
-          statisticsReporter
-            .generateCompletion(
-              completions[0],
-              Date.now(),
-              Date.now(),
-              projectId,
-              `${packageJson.version}${version}`
-            )
-            .catch();
-          return new CompletionGenerateServerMessage({
-            completions: completions.map((completion) =>
-              encode(completion, 'gbk').toString()
-            ),
-            result: 'success',
-          });
-        }
+      if (completions && completions.length) {
+        statisticsReporter
+          .generateCompletion(
+            completions[0],
+            Date.now(),
+            Date.now(),
+            projectId,
+            `${packageJson.version}${version}`
+          )
+          .catch();
+        return new CompletionGenerateServerMessage({
+          completions: completions.map((completion) =>
+            encode(completion, 'gbk').toString()
+          ),
+          result: 'success',
+        });
       }
       return new CompletionGenerateServerMessage({
         result: 'failure',
