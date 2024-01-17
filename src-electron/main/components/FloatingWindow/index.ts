@@ -22,6 +22,19 @@ export class FloatingWindow {
     }
   }
 
+  projectId(path: string, pid: number) {
+    this.activate();
+    this._window?.center();
+    this._window?.focus();
+    const searchString = new URLSearchParams({
+      path,
+      pid: pid.toString(),
+    }).toString();
+    this._window
+      ?.loadURL(`${process.env.APP_URL}#/floating/projectId?${searchString}`)
+      .catch();
+  }
+
   login(mainIsVisible: boolean) {
     if (mainIsVisible) {
       triggerControlCallback(WindowType.Main, ControlType.Hide, undefined);

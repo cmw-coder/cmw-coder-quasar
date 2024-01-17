@@ -14,6 +14,13 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('layouts/MainLayout.vue'),
     children: [
       {
+        path: 'projectId',
+        components: {
+          header: () => import('layouts/headers/FloatingHeader.vue'),
+          default: () => import('pages/ProjectIdPage.vue'),
+        },
+      },
+      {
         path: 'login',
         components: {
           header: () => import('layouts/headers/FloatingHeader.vue'),

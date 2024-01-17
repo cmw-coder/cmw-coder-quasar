@@ -18,3 +18,22 @@ export class LoginQuery {
     }
   }
 }
+
+export interface ProjectIdQuery {
+  path: string;
+  pid: number;
+}
+
+export class ProjectIdQuery {
+  path = '';
+  pid = 0;
+
+  constructor(query: LocationQuery) {
+    if (typeof query.path === 'string') {
+      this.path = query.path;
+    }
+    if (typeof query.pid === 'string') {
+      this.pid = parseInt(query.pid);
+    }
+  }
+}

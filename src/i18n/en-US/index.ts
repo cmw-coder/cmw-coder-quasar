@@ -65,6 +65,17 @@ export default {
         },
       },
     },
+    ProjectIdInput: {
+      errors: {
+        projectId: 'Invalid Project ID',
+      },
+      hints: {
+        projectId: 'Please enter project ID (NV number or TB number)',
+      },
+      labels: {
+        projectId: 'Project ID',
+      },
+    },
   },
   layouts: {
     drawers: {
@@ -111,6 +122,15 @@ export default {
     LoginPage: {
       labels: {
         title: 'Welcome',
+      },
+    },
+    ProjectIdPage: {
+      labels: {
+        confirm: 'Confirm',
+        description: 'Current project path: {path}',
+        intro:
+          'You need to provide Project ID in order to statistics your coding behavior.',
+        title: 'Setup Your New Project',
       },
     },
   },
