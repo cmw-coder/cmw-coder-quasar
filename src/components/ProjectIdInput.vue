@@ -47,7 +47,7 @@ const loading = ref(false);
       :error="error"
       :hint="i18n('hints.projectId')"
       :loading="loading"
-      :maxlength="7"
+      :maxlength="14"
       outlined
       v-model="projectId"
     >
