@@ -9,6 +9,7 @@ import {
   CompletionUpdateActionMessage,
 } from 'shared/types/ActionMessage';
 import { WindowType } from 'shared/types/WindowType';
+import { dataStore } from "main/stores";
 
 export class ImmersiveWindow {
   private readonly _type = WindowType.Immersive;
@@ -42,13 +43,13 @@ export class ImmersiveWindow {
         this._window,
         new CompletionSetActionMessage({ completion, count })
       );
-      // this._window.setPosition(
-      //   Math.round(position.x / dataStore.window.zoom),
-      //   Math.round(position.y / dataStore.window.zoom),
-      //   false
-      // );
-      const screenPosition = screen.dipToScreenPoint(position);
-      this._window.setPosition(screenPosition.x, screenPosition.y, false);
+      this._window.setPosition(
+        Math.round(position.x / dataStore.window.zoom),
+        Math.round(position.y / dataStore.window.zoom - 21.125),
+        false
+      );
+      // const dipPosition = screen.screenToDipPoint(position);
+      // this._window.setPosition(Math.round(dipPosition.x), Math.round(dipPosition.y - 21.125), false);
       this._window.show();
     } else {
       console.warn('Immersive window activate failed');
