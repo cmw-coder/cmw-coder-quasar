@@ -1,6 +1,7 @@
-import { BrowserWindow, screen } from 'electron';
+import { BrowserWindow } from 'electron';
 import { resolve } from 'path';
 
+import { dataStore } from 'main/stores';
 import { sendToRenderer } from 'preload/types/ActionApi';
 import { ControlType, registerControlCallback } from 'preload/types/ControlApi';
 import {
@@ -9,7 +10,6 @@ import {
   CompletionUpdateActionMessage,
 } from 'shared/types/ActionMessage';
 import { WindowType } from 'shared/types/WindowType';
-import { dataStore } from "main/stores";
 
 export class ImmersiveWindow {
   private readonly _type = WindowType.Immersive;
