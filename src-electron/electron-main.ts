@@ -1,5 +1,4 @@
 import { app } from 'electron';
-import { encode } from 'iconv-lite';
 
 import { FloatingWindow } from 'main/components/FloatingWindow';
 import { ImmersiveWindow } from 'main/components/ImmersiveWindow';
@@ -129,9 +128,7 @@ websocketManager.registerWsAction(
           )
           .catch();
         return new CompletionGenerateServerMessage({
-          completions: completions.map((completion) =>
-            encode(completion, 'gbk').toString()
-          ),
+          completions: completions,
           result: 'success',
         });
       }
