@@ -4,7 +4,6 @@ import { resolve } from 'path';
 import { dataStore } from 'main/stores';
 import { sendToRenderer } from 'preload/types/ActionApi';
 import { ControlType, registerControlCallback } from 'preload/types/ControlApi';
-import { Completions } from 'shared/types/common';
 import {
   CompletionClearActionMessage,
   CompletionSetActionMessage,
@@ -31,25 +30,27 @@ export class ImmersiveWindow {
     }
   }
 
-  completionSet(completions: Completions, x: number, y: number) {
-    if (completions.contents.length) {
-      if (!this._window) {
-        this.create();
-      }
-      if (this._window) {
-        sendToRenderer(
-          this._window,
-          new CompletionSetActionMessage(completions)
-        );
-        this._window.setPosition(
-          Math.round(x / dataStore.window.zoom),
-          Math.round(y / dataStore.window.zoom),
-          false
-        );
-        this._window.show();
-      } else {
-        console.warn('Immersive window activate failed');
-      }
+  completionSet(
+    completion: string,
+    count: { index: number; total: number },
+    position: { x: number; y: number }
+  ) {
+    if (!this._window) {
+      this.create();
+    }
+    if (this._window) {
+      sendToRenderer(
+        this._window,
+        new CompletionSetActionMessage({ completion, count })
+      );
+      this._window.setPosition(
+        Math.round(position.x / dataStore.window.zoom),
+        Math.round(position.y / dataStore.window.zoom),
+        false
+      );
+      this._window.show();
+    } else {
+      console.warn('Immersive window activate failed');
     }
   }
 
