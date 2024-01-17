@@ -44,7 +44,7 @@ trayIcon.registerMenuEntry(MenuEntry.Quit, () => app.exit());
 registerActionCallback(
   ActionType.ClientSetProjectId,
   ({ path, pid, projectId }) => {
-    dataStore.project.pathAndIdMapping[path] = projectId;
+    dataStore.setProjectId(path, projectId);
     websocketManager.setClientProjectId(pid, projectId);
   }
 );
@@ -87,8 +87,16 @@ websocketManager.registerWsAction(
         message: 'Completion Generate Failed, invalid client info.',
       });
     }
-    const { projectId, version } = clientInfo;
-    const { caret, path, prefix, recentFiles, suffix, symbols } = data;
+    const { version } = clientInfo;
+    const { caret, path, prefix, project, recentFiles, suffix, symbols } = data;
+    const projectId = dataStore.getProjectId(project);
+    if (!projectId) {
+      floatingWindow.projectId(project, pid);
+      return new CompletionGenerateServerMessage({
+        result: 'failure',
+        message: 'Completion Generate Failed, no valid project id',
+      });
+    }
     console.log('WsAction.CompletionGenerate', {
       caret,
       path,
@@ -101,9 +109,10 @@ websocketManager.registerWsAction(
     try {
       statisticsReporter.updateCaretPosition(caret);
       const promptElements = await new PromptExtractor(
+        project,
         new TextDocument(path),
         new Position(caret.line, caret.character)
-      ).getPromptComponents(recentFiles, symbols, prefix, suffix);
+      ).getPromptComponents(prefix, recentFiles, suffix, symbols);
       const completions = await promptProcessor.process(
         promptElements,
         prefix,
@@ -158,7 +167,7 @@ websocketManager.registerWsAction(
 websocketManager.registerWsAction(
   WsAction.EditorSwitchProject,
   ({ data: path }, pid) => {
-    const id = dataStore.project.pathAndIdMapping[path];
+    const id = dataStore.getProjectId(path);
     if (id) {
       websocketManager.setClientProjectId(pid, id);
     } else {

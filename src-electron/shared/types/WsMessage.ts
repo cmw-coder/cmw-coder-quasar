@@ -46,6 +46,7 @@ export interface CompletionGenerateClientMessage extends WsMessage {
     caret: CaretPosition;
     path: string;
     prefix: string;
+    project: string;
     recentFiles: string[];
     suffix: string;
     symbols: SymbolInfo[];
