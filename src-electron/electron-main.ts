@@ -1,6 +1,5 @@
-import { app, ipcMain } from 'electron';
-import { decode, encode } from 'iconv-lite';
-import { release, version } from 'os';
+import { app } from 'electron';
+import { encode } from 'iconv-lite';
 
 import { FloatingWindow } from 'main/components/FloatingWindow';
 import { ImmersiveWindow } from 'main/components/ImmersiveWindow';
@@ -10,169 +9,180 @@ import { PromptProcessor } from 'main/components/PromptProcessor';
 import { statisticsReporter } from 'main/components/StatisticsReporter';
 import { TrayIcon } from 'main/components/TrayIcon';
 import { MenuEntry } from 'main/components/TrayIcon/types';
-import { registerWsMessage, startServer } from 'main/server';
-import { configStore } from 'main/stores';
+import { websocketManager } from 'main/components/WebsocketManager';
+import { initApplication, initIpcMain } from 'main/init';
+import { configStore, dataStore } from 'main/stores';
 import { ApiStyle } from 'main/types/model';
 import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
-import { parseSymbolString, parseTabString } from 'main/utils/parser';
-
+import { registerActionCallback } from 'preload/types/ActionApi';
+import packageJson from 'root/package.json';
+import { ActionType } from 'shared/types/ActionMessage';
 import {
-  ControlMessage,
-  triggerControlCallback,
-} from 'preload/types/ControlApi';
-
-import { actionApiKey, controlApiKey } from 'shared/types/constants';
-import { ActionMessage } from 'shared/types/ActionMessage';
-import {
-  CompletionAcceptServerMessage,
-  CompletionCacheServerMessage,
-  CompletionCancelServerMessage,
   CompletionGenerateServerMessage,
-  ImmersiveHideServerMessage,
-  ImmersiveShowServerMessage,
   WsAction,
 } from 'shared/types/WsMessage';
-import { triggerActionCallback } from 'preload/types/ActionApi';
 
-if (app.requestSingleInstanceLock()) {
-  console.log(`OS version: ${version()} (${release()})`);
-  if (parseInt(release().split('.')[0]) < 10) {
-    app.disableHardwareAcceleration();
+if (!app.requestSingleInstanceLock()) {
+  app.quit();
+  process.exit(-1);
+}
+
+initApplication();
+initIpcMain();
+
+const floatingWindow = new FloatingWindow();
+const immersiveWindow = new ImmersiveWindow();
+const mainWindow = new MainWindow();
+const promptProcessor = new PromptProcessor();
+const trayIcon = new TrayIcon();
+
+trayIcon.onClick(() => mainWindow.activate());
+trayIcon.registerMenuEntry(MenuEntry.Feedback, () => mainWindow.feedback());
+trayIcon.registerMenuEntry(MenuEntry.Quit, () => app.exit());
+
+registerActionCallback(
+  ActionType.ClientSetProjectId,
+  ({ path, pid, projectId }) => {
+    dataStore.project.pathAndIdMapping[path] = projectId;
+    websocketManager.setClientProjectId(pid, projectId);
   }
+);
 
-  const immersiveWindow = new ImmersiveWindow();
-  const mainWindow = new MainWindow();
-  const floatingWindow = new FloatingWindow();
-  const trayIcon = new TrayIcon();
-
-  ipcMain.on(actionApiKey, (_, message: ActionMessage) =>
-    triggerActionCallback(message.type, message.data)
-  );
-  ipcMain.on(controlApiKey, (_, message: ControlMessage) =>
-    triggerControlCallback(message.windowType, message.type, message.data)
-  );
-
-  app.on('second-instance', () => {
-    app.focus();
-    mainWindow.activate();
-  });
-  app.whenReady().then(() => {
-    startServer().then(async () => {
-      const promptProcessor = new PromptProcessor();
-      registerWsMessage(WsAction.CompletionAccept, () => {
-        immersiveWindow.completionClear();
-        // statisticsReporter.acceptCompletion(
-        //   '',
-        //   Date.now(),
-        //   Date.now(),
-        //   '',
-        //   '',
-        //   ''
-        // );
-        return new CompletionAcceptServerMessage({ result: 'success' });
-      });
-      registerWsMessage(WsAction.CompletionCache, ({ data: isDelete }) => {
-        immersiveWindow.completionUpdate(isDelete);
-        return new CompletionCacheServerMessage({ result: 'success' });
-      });
-      registerWsMessage(WsAction.CompletionCancel, () => {
-        immersiveWindow.completionClear();
-        return new CompletionCancelServerMessage({ result: 'success' });
-      });
-      registerWsMessage(WsAction.CompletionGenerate, async ({ data }) => {
-        const {
-          caret,
-          path,
-          prefix,
+websocketManager.registerWsAction(
+  WsAction.CompletionAccept,
+  async ({ data }, pid) => {
+    const clientInfo = websocketManager.getClientInfo(pid);
+    if (clientInfo) {
+      const { projectId, version } = clientInfo;
+      immersiveWindow.completionClear();
+      statisticsReporter
+        .acceptCompletion(
+          data,
+          Date.now(),
+          Date.now(),
           projectId,
-          suffix,
-          symbolString,
-          tabString,
-        } = data;
-        const decodedPath = decode(Buffer.from(path, 'base64'), 'gb2312');
-        const decodedPrefix = decode(Buffer.from(prefix, 'base64'), 'gb2312');
-        const decodedSuffix = decode(Buffer.from(suffix, 'base64'), 'gb2312');
-
-        const symbols = parseSymbolString(
-          decode(Buffer.from(symbolString, 'base64'), 'gb2312')
-        );
-        const tabs = parseTabString(
-          decode(Buffer.from(tabString, 'base64'), 'gb2312')
-        );
-
-        console.log('WsAction.CompletionGenerate', {
-          caret,
-          path: decodedPath,
-          prefix: decodedPrefix,
-          suffix: decodedSuffix,
-          symbols,
-          tabs,
-        });
-
-        try {
-          statisticsReporter.updateCaretPosition(caret);
-          const promptElements = await new PromptExtractor(
-            new TextDocument(decodedPath),
-            new Position(caret.line, caret.character)
-          ).getPromptComponents(tabs, symbols, decodedPrefix, decodedSuffix);
-          const completions = await promptProcessor.process(
-            promptElements,
-            decodedPrefix,
-            projectId
-          );
-          if (completions) {
-            immersiveWindow.completionSet(
-              completions,
-              caret.xPixel,
-              caret.yPixel
-            );
-            return new CompletionGenerateServerMessage({
-              completions: completions.contents.map((content) =>
-                encode(content, 'gb2312').toString('base64')
-              ),
-              result: 'success',
-            });
-          }
-          return new CompletionGenerateServerMessage({
-            result: 'failure',
-            message: 'Completion Generate Failed, maybe need login first?',
-          });
-        } catch (e) {
-          console.warn('route.completion.generate', e);
-          return new CompletionGenerateServerMessage({
-            result: 'error',
-            message: (<Error>e).message,
-          });
-        }
+          `${packageJson.version}${version}`
+        )
+        .catch();
+    }
+  }
+);
+websocketManager.registerWsAction(
+  WsAction.CompletionCache,
+  ({ data: isDelete }) => {
+    immersiveWindow.completionUpdate(isDelete);
+  }
+);
+websocketManager.registerWsAction(WsAction.CompletionCancel, () => {
+  immersiveWindow.completionClear();
+});
+websocketManager.registerWsAction(
+  WsAction.CompletionGenerate,
+  async ({ data }, pid) => {
+    const clientInfo = websocketManager.getClientInfo(pid);
+    if (!clientInfo) {
+      return new CompletionGenerateServerMessage({
+        result: 'failure',
+        message: 'Completion Generate Failed, invalid client info.',
       });
-      registerWsMessage(WsAction.ImmersiveHide, () => {
-        immersiveWindow.hide();
-        return new ImmersiveHideServerMessage({ result: 'success' });
-      });
-      registerWsMessage(WsAction.ImmersiveShow, () => {
-        immersiveWindow.show();
-        return new ImmersiveShowServerMessage({ result: 'success' });
-      });
+    }
+    const { projectId, version } = clientInfo;
+    const { caret, path, prefix, recentFiles, suffix, symbols } = data;
+    console.log('WsAction.CompletionGenerate', {
+      caret,
+      path,
+      prefix,
+      recentFiles,
+      suffix,
+      symbols,
+    });
 
-      floatingWindow.activate();
-      immersiveWindow.activate();
-      mainWindow.activate();
-      trayIcon.activate();
-
-      trayIcon.onClick(() => mainWindow.activate());
-      trayIcon.registerMenuEntry(MenuEntry.Feedback, () =>
-        mainWindow.feedback()
+    try {
+      statisticsReporter.updateCaretPosition(caret);
+      const promptElements = await new PromptExtractor(
+        new TextDocument(path),
+        new Position(caret.line, caret.character)
+      ).getPromptComponents(recentFiles, symbols, prefix, suffix);
+      const completions = await promptProcessor.process(
+        promptElements,
+        prefix,
+        projectId
       );
-      trayIcon.registerMenuEntry(MenuEntry.Quit, () => app.exit());
-      if (configStore.apiStyle === ApiStyle.Linseer) {
-        configStore.onLogin = () => floatingWindow.login(mainWindow.isVisible);
-        if (!(await configStore.getAccessToken())) {
-          configStore.login();
+      if (completions) {
+        if (completions.length) {
+          statisticsReporter
+            .generateCompletion(
+              completions[0],
+              Date.now(),
+              Date.now(),
+              projectId,
+              `${packageJson.version}${version}`
+            )
+            .catch();
+          return new CompletionGenerateServerMessage({
+            completions: completions.map((completion) =>
+              encode(completion, 'gbk').toString()
+            ),
+            result: 'success',
+          });
         }
       }
-    });
-  });
-} else {
-  app.quit();
-}
+      return new CompletionGenerateServerMessage({
+        result: 'failure',
+        message: 'Completion Generate Failed, maybe need login first?',
+      });
+    } catch (e) {
+      console.warn('route.completion.generate', e);
+      return new CompletionGenerateServerMessage({
+        result: 'error',
+        message: (<Error>e).message,
+      });
+    }
+  }
+);
+websocketManager.registerWsAction(WsAction.CompletionSelect, ({ data }) => {
+  const { completion, count, position } = data;
+  immersiveWindow.completionSet(completion, count, position);
+});
+websocketManager.registerWsAction(
+  WsAction.EditorFocusState,
+  ({ data: isFocused }) => {
+    if (isFocused) {
+      immersiveWindow.show();
+    } else {
+      immersiveWindow.hide();
+    }
+  }
+);
+websocketManager.registerWsAction(
+  WsAction.EditorSwitchProject,
+  ({ data: path }, pid) => {
+    const id = dataStore.project.pathAndIdMapping[path];
+    if (id) {
+      websocketManager.setClientProjectId(pid, id);
+    } else {
+      floatingWindow.projectId(path, pid);
+    }
+  }
+);
+
+app.on('second-instance', () => {
+  app.focus();
+  mainWindow.activate();
+});
+app.whenReady().then(async () => {
+  floatingWindow.activate();
+  immersiveWindow.activate();
+  mainWindow.activate();
+  trayIcon.activate();
+
+  websocketManager.startServer();
+
+  if (configStore.apiStyle === ApiStyle.Linseer) {
+    configStore.onLogin = () => floatingWindow.login(mainWindow.isVisible);
+    if (!(await configStore.getAccessToken())) {
+      configStore.login();
+    }
+  }
+});
