@@ -53,8 +53,8 @@ export class FloatingWindow {
 
   private create() {
     this._window = new BrowserWindow({
-      width: 650,
-      height: 450,
+      width: 700,
+      height: 500,
       useContentSize: true,
       resizable: false,
       movable: true,
@@ -75,6 +75,14 @@ export class FloatingWindow {
     });
 
     bypassCors(this._window);
+
+    this._window.setAlwaysOnTop(true, 'pop-up-menu');
+
+    this._window.on('ready-to-show', async () => {
+      if (this._window) {
+        // this._window.webContents.openDevTools({ mode: 'undocked' });
+      }
+    });
 
     registerControlCallback(this._type, ControlType.Hide, () =>
       this._window?.hide()
