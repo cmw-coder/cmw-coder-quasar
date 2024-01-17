@@ -15,7 +15,6 @@ import {
 import {
   getAllOtherTabContents,
   getMostSimilarSnippetStartLine,
-  getRelativePath,
   separateTextByLine,
   tokenize,
 } from 'main/components/PromptExtractor/utils';
@@ -28,36 +27,39 @@ const { readFile } = promises;
 export class PromptExtractor {
   private _document: TextDocument;
   private readonly _position: Position;
+  private readonly _project: string;
   private _similarSnippetConfig: SimilarSnippetConfig = {
     contextLines: 30,
     limit: 5,
     minScore: 0.45,
   };
 
-  constructor(document: TextDocument, position: Position) {
+  constructor(project: string, document: TextDocument, position: Position) {
     this._document = document;
     this._position = position;
+    this._project = project;
   }
 
   async getPromptComponents(
+    prefix: string,
     recentFiles: string[],
+    suffix: string,
     symbols: SymbolInfo[],
-    beforeCursor: string,
-    afterCursor: string,
     similarSnippetCount = 1
   ): Promise<PromptElements> {
+    const promptElements = new PromptElements(prefix, suffix);
+    promptElements.language = this._document.languageId;
+
+    const relativePath = this._document.fileName.substring(this._project.length);
+    promptElements.file = basename(relativePath);
+    promptElements.folder = dirname(relativePath);
+
     recentFiles = recentFiles.filter(
       (fileName) => fileName !== this._document.fileName
     );
-    const relativePath = getRelativePath(this._document.fileName);
-
-    const promptElements = new PromptElements(beforeCursor, afterCursor);
-    promptElements.file = basename(relativePath);
-    promptElements.folder = dirname(relativePath);
-    promptElements.language = this._document.languageId;
 
     const [allMostSimilarSnippets, relativeDefinitions] = await Promise.all([
-      this._getSimilarSnippets(beforeCursor, afterCursor, recentFiles),
+      this._getSimilarSnippets(prefix, suffix, recentFiles),
       this._getRelativeDefinitions(symbols),
     ]);
 

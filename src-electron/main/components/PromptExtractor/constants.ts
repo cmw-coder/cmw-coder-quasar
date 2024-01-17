@@ -1,33 +1,3 @@
-export const ROOT_FOLDERS = [
-  'ACCESS',
-  'CRYPTO',
-  'DC',
-  'DEV',
-  'DLP',
-  'DPI',
-  'DRV_SIMSWITCH',
-  'DRV_SIMWARE9',
-  'FE',
-  'FW',
-  'IP',
-  'L2VPN',
-  'LAN',
-  'LB',
-  'LINK',
-  'LSM',
-  'MCAST',
-  'NETFWD',
-  'OFP',
-  'PSEC',
-  'PUBLIC',
-  'QACL',
-  'TEST',
-  'VOICE',
-  'VPN',
-  'WLAN',
-  'X86PLAT',
-];
-
 export const REGEXP_WORD = /[^a-zA-Z0-9]/;
 
 export const IGNORE_RESERVED_KEYWORDS = new Set([

@@ -2,20 +2,9 @@ import { promises } from 'fs';
 
 import {
   REGEXP_WORD,
-  ROOT_FOLDERS,
 } from 'main/components/PromptExtractor/constants';
 
 const { readFile } = promises;
-
-export const getRelativePath = (fullPath: string): string => {
-  let result: string = fullPath;
-  ROOT_FOLDERS.forEach((rootFolder) => {
-    if (fullPath.includes(rootFolder)) {
-      result = fullPath.substring(fullPath.indexOf(rootFolder));
-    }
-  });
-  return result;
-};
 
 export const getAllOtherTabContents = async (
   tabPaths: string[]
