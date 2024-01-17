@@ -40,13 +40,13 @@ export class PromptExtractor {
   }
 
   async getPromptComponents(
-    openedTabs: string[],
+    recentFiles: string[],
     symbols: SymbolInfo[],
     beforeCursor: string,
     afterCursor: string,
     similarSnippetCount = 1
   ): Promise<PromptElements> {
-    openedTabs = openedTabs.filter((tab) => tab !== this._document.fileName);
+    recentFiles = recentFiles.filter((fileName) => fileName !== this._document.fileName);
     const relativePath = getRelativePath(this._document.fileName);
 
     const promptElements = new PromptElements(beforeCursor, afterCursor);
@@ -55,7 +55,7 @@ export class PromptExtractor {
     promptElements.language = this._document.languageId;
 
     const [allMostSimilarSnippets, relativeDefinitions] = await Promise.all([
-      this._getSimilarSnippets(beforeCursor, afterCursor, openedTabs),
+      this._getSimilarSnippets(beforeCursor, afterCursor, recentFiles),
       this._getRelativeDefinitions(symbols),
     ]);
 
