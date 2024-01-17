@@ -9,16 +9,15 @@ import {
 } from 'main/components/PromptProcessor/utils';
 import { configStore } from 'main/stores';
 import { ApiStyle } from 'main/types/model';
-import { Completions } from 'shared/types/common';
 
 export class PromptProcessor {
-  private _cache = new LRUCache<Completions>(100);
+  private _cache = new LRUCache<string[]>(100);
 
   async process(
     promptComponents: PromptElements,
     prefix: string,
     projectId: string
-  ): Promise<Completions | undefined> {
+  ): Promise<string[] | undefined> {
     const cacheKey = createHash('sha1')
       .update(prefix.trimEnd())
       .digest('base64');
@@ -28,7 +27,7 @@ export class PromptProcessor {
     }
 
     const completionType = getCompletionType(promptComponents);
-    let completions: Completions;
+    let completions: string[];
 
     if (configStore.apiStyle === ApiStyle.HuggingFace) {
       completions = await processHuggingFaceApi(
@@ -51,7 +50,7 @@ export class PromptProcessor {
       );
     }
     console.log('PromptProcessor.process.normal', completions);
-    if (completions.contents.length) {
+    if (completions.length) {
       this._cache.put(cacheKey, completions);
     }
     return completions;

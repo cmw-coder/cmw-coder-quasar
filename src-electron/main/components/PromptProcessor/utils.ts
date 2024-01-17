@@ -7,7 +7,7 @@ import {
   SeparateTokens,
 } from 'main/stores/config/types';
 import { generate, generateRd } from 'main/utils/axios';
-import { Completions, CompletionType } from 'shared/types/common';
+import { CompletionType } from 'shared/types/common';
 
 // Start with '//' or '#' or '{' or '/*'
 const detectRegex = /^((\/\/)|(#)|(\{)|(\/\*))$/;
@@ -35,7 +35,7 @@ export const processHuggingFaceApi = async (
   modelConfig: HuggingFaceModelConfigType,
   promptElements: PromptElements,
   completionType: CompletionType
-): Promise<Completions> => {
+): Promise<string[]> => {
   const { completionConfigs, separateTokens } = modelConfig;
   const completionConfig =
     completionType === CompletionType.Function
@@ -85,16 +85,13 @@ export const processHuggingFaceApi = async (
     generatedSuggestions.push(generated_text);
   }
 
-  return {
-    contents: _processGeneratedSuggestions(
-      generatedSuggestions,
-      completionType,
-      promptElements.constructQuestion(),
-      separateTokens,
-      completionConfig.stopTokens
-    ),
-    type: completionType,
-  };
+  return _processGeneratedSuggestions(
+    generatedSuggestions,
+    completionType,
+    promptElements.constructQuestion(),
+    separateTokens,
+    completionConfig.stopTokens
+  );
 };
 
 export const processLinseerApi = async (
@@ -103,7 +100,7 @@ export const processLinseerApi = async (
   promptElements: PromptElements,
   completionType: CompletionType,
   projectId: string
-): Promise<Completions> => {
+): Promise<string[]> => {
   const { completionConfigs, endpoint } = modelConfig;
   const completionConfig =
     completionType === CompletionType.Function
@@ -136,16 +133,13 @@ export const processLinseerApi = async (
     .map((item) => item.text)
     .filter((completion) => completion.trim().length > 0);
 
-  return {
-    contents: _processGeneratedSuggestions(
-      generatedSuggestions,
-      completionType,
-      promptElements.constructQuestion(),
-      undefined,
-      completionConfig.stopTokens
-    ),
-    type: completionType,
-  };
+  return  _processGeneratedSuggestions(
+    generatedSuggestions,
+    completionType,
+    promptElements.constructQuestion(),
+    undefined,
+    completionConfig.stopTokens
+  );
 };
 
 const _processGeneratedSuggestions = (
