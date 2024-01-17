@@ -37,4 +37,14 @@ export class DataStore {
     const current = this.window;
     this._store.set('window', { ...current, ...value });
   }
+
+  getProjectId(path: string): string | undefined {
+    return this.project.pathAndIdMapping[path];
+  }
+
+  setProjectId(path: string, projectId: string) {
+    const current = this.project;
+    current.pathAndIdMapping[path] = projectId;
+    this.project = current;
+  }
 }
