@@ -13,23 +13,25 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.16.9",
-    "axios": "^1.6.2",
+    "axios": "^1.6.5",
     "electron-store": "^8.1.0",
     "iconv-lite": "^0.6.3",
+    "luxon": "^3.4.4",
     "pinia": "^2.1.7",
     "pinia-plugin-persistedstate": "^3.2.1",
-    "quasar": "^2.14.1",
+    "quasar": "^2.14.2",
     "shiki": "^0.14.7",
     "ts-transformer-keys": "^0.4.4",
-    "vue": "^3.3.12",
-    "vue-i18n": "^9.8.0",
+    "vue": "^3.4.14",
+    "vue-i18n": "^9.9.0",
     "vue-router": "^4.2.5",
-    "ws": "^8.15.1"
+    "ws": "^8.16.0"
   },
   "devDependencies": {
     "@intlify/vite-plugin-vue-i18n": "^3.4.0",
-    "@quasar/app-vite": "^1.7.1",
-    "@types/node": "^16.18.68",
+    "@quasar/app-vite": "^1.7.2",
+    "@types/luxon": "^3.4.1",
+    "@types/node": "^16.18.71",
     "@types/ws": "^8.5.10",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
@@ -38,9 +40,9 @@
     "electron-builder": "^24.9.1",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^8.10.0",
-    "eslint-plugin-vue": "^9.19.2",
+    "eslint-plugin-vue": "^9.20.1",
     "prettier": "^2.8.8",
-    "typescript": "^5.1.6"
+    "typescript": "^5.3.3"
   },
   "engines": {
     "node": "^20 || ^18 || ^16",
