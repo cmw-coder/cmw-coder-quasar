@@ -18,19 +18,26 @@ export const dataStore = new DataStore();
 
 registerActionCallback(ActionType.ConfigStoreSave, ({ type, data }) => {
   switch (type) {
-    case 'config':
+    case 'config': {
       configStore.config = data;
       break;
-    case 'data':
+    }
+    case 'data': {
       configStore.data = data;
       break;
+    }
   }
 });
 
 registerActionCallback(ActionType.DataStoreSave, ({ type, data }) => {
   switch (type) {
-    case 'window':
+    case 'project': {
+      dataStore.project = data;
+      break;
+    }
+    case 'window': {
       dataStore.window = data;
       break;
+    }
   }
 });

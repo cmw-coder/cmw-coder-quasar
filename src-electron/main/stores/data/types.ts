@@ -1,3 +1,7 @@
+export interface DataProjectType {
+  pathAndIdMapping: Record<string, string>;
+}
+
 export interface DataWindowType {
   main: {
     height: number;
@@ -8,5 +12,6 @@ export interface DataWindowType {
 }
 
 export interface DataStoreType {
+  project: DataProjectType;
   window: DataWindowType;
 }

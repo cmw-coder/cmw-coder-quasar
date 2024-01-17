@@ -1,6 +1,9 @@
 import { DataStoreType } from 'main/stores/data/types';
 
 export const dataStoreDefault: DataStoreType = {
+  project: {
+    pathAndIdMapping: {},
+  },
   window: {
     main: {
       height: 1120,

@@ -1,6 +1,19 @@
 import { Schema } from 'electron-store';
 
-import { DataStoreType, DataWindowType } from 'main/stores/data/types';
+import {
+  DataProjectType,
+  DataStoreType,
+  DataWindowType,
+} from 'main/stores/data/types';
+
+const dataProjectSchema: Schema<DataProjectType> = {
+  pathAndIdMapping: {
+    type: 'object',
+    additionalProperties: {
+      type: 'string',
+    },
+  },
+};
 
 const dataWindowSchema: Schema<DataWindowType> = {
   main: {
@@ -25,6 +38,12 @@ const dataWindowSchema: Schema<DataWindowType> = {
 };
 
 export const dataStoreSchema: Schema<DataStoreType> = {
+  project: {
+    type: 'object',
+    required: Object.keys(dataProjectSchema),
+    additionalProperties: false,
+    properties: dataProjectSchema,
+  },
   window: {
     type: 'object',
     required: Object.keys(dataWindowSchema),
