@@ -80,7 +80,7 @@ async function checkRemoteFileExists(url: string): Promise<boolean> {
 }
 
 async function isRunning():Promise<boolean> {
-  let cmd = 'tasklist';
+  const cmd = 'tasklist';
   const {stdout} = await childexec(cmd);
   return (stdout.toLowerCase().indexOf('insight3.exe') > -1) || (stdout.toLowerCase().indexOf('sourceinsight4.exe') > -1);
 }
