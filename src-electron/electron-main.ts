@@ -62,7 +62,7 @@ registerActionCallback(
   }
 );
 registerActionCallback(ActionType.UpdateFinish, () =>
-  autoUpdater.installUpdate()
+  checkUpdate()
 );
 registerActionCallback(ActionType.UpdateResponse, async (data) => {
   if (data) {
