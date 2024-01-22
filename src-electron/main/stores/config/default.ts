@@ -48,9 +48,9 @@ export const huggingFaceStoreDefault: HuggingFaceStoreType = {
           },
         },
         separateTokens: {
-          end: '<｜fim▁hole｜>',
-          middle: '<｜fim▁end｜>',
-          start: '<｜fim▁begin｜>',
+          end: '<fim_suffix>',
+          middle: '<fim_middle>',
+          start: '<fim_prefix>',
         },
       },
     ],
