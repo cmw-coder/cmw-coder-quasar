@@ -5,16 +5,30 @@ import { MenuEntry } from 'main/components/TrayIcon/types';
 import packageJson from 'root/package.json';
 
 export class TrayIcon {
-  private readonly _iconPath = process.env.PROD
-    ? resolve(__dirname, 'favicon.ico')
-    : resolve(__dirname, '../../src-electron/assets/icons/icon.ico');
+  private readonly _icon = nativeImage.createFromPath(
+    resolve(
+      __dirname,
+      process.env.PROD
+        ? 'favicon.ico'
+        : '../../src-electron/assets/icons/icon.ico'
+    )
+  );
   private _menuEntryMap = new Map<MenuEntry, () => void>();
+  private readonly _title = `Comware Coder v${packageJson.version}`;
   private _tray: Tray | undefined;
 
   activate() {
     if (!this._tray) {
       this.create();
     }
+  }
+
+  notify(content: string) {
+    this._tray?.displayBalloon({
+      icon: this._icon,
+      title: this._title,
+      content,
+    });
   }
 
   registerMenuEntry(entry: MenuEntry, callback: () => void) {
@@ -26,7 +40,7 @@ export class TrayIcon {
   }
 
   private create() {
-    this._tray = new Tray(nativeImage.createFromPath(this._iconPath));
+    this._tray = new Tray(this._icon);
     const contextMenu = Menu.buildFromTemplate([
       this._createNormalItem(MenuEntry.Feedback, 'Feedback'),
       this._createNormalItem(MenuEntry.About, 'About'),
@@ -34,8 +48,8 @@ export class TrayIcon {
       this._createNormalItem(MenuEntry.Quit, 'Quit'),
     ]);
     this._tray.displayBalloon({
-      icon: nativeImage.createFromPath(this._iconPath),
-      title: `Comware Coder v${packageJson.version}`,
+      icon: this._icon,
+      title: this._title,
       content: 'Click tray icon to open main window',
     });
     this._tray.setContextMenu(contextMenu);
