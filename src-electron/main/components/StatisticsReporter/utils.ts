@@ -14,8 +14,7 @@ export const constructData = (
   modelType: HuggingFaceModelType | LinseerModelType,
   isAccept: boolean
 ) => {
-  const isSnippet = completion[0] === '1';
-  const lines = isSnippet ? completion.substring(1).split('\\r\\n').length : 1;
+  const lineCount = completion.split('\r\n').length;
   const basicData = {
     begin: Math.floor(startTime / 1000),
     end: Math.floor(endTime / 1000),
@@ -35,9 +34,9 @@ export const constructData = (
   return [
     {
       ...basicData,
-      count: lines,
+      count: lineCount,
       firstClass: 'CODE',
-      skuName: isSnippet
+      skuName: lineCount > 1
         ? isAccept
           ? 'KEEP_MULTI'
           : 'GENE_MULTI'
