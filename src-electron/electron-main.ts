@@ -1,4 +1,4 @@
-import { app } from 'electron';
+import { app, dialog } from 'electron';
 
 import { AutoUpdater } from 'main/components/AutoUpdater';
 import { FloatingWindow } from 'main/components/FloatingWindow';
@@ -18,6 +18,10 @@ import { Position } from 'main/types/vscode/position';
 import { registerActionCallback } from 'preload/types/ActionApi';
 import packageJson from 'root/package.json';
 import { ActionType } from 'shared/types/ActionMessage';
+import { promisify } from 'util';
+import { exec } from 'child_process'
+
+const childexec = promisify(exec);
 import {
   CompletionGenerateServerMessage,
   WsAction,
@@ -57,13 +61,40 @@ registerActionCallback(
   }
 );
 registerActionCallback(ActionType.UpdateFinish, () =>
-  autoUpdater.installUpdate()
+  checkUpdate()
 );
 registerActionCallback(ActionType.UpdateResponse, async (data) => {
   if (data) {
     await autoUpdater.downloadUpdate();
   }
 });
+
+async function isRunning():Promise<boolean> {
+  let cmd = 'tasklist';
+  const {stdout} = await childexec(cmd);
+  return (stdout.toLowerCase().indexOf('insight3.exe') > -1) || (stdout.toLowerCase().indexOf('sourceinsight4.exe') > -1);
+}
+
+async function checkUpdate() {
+  trayIcon.notify('正在更新……');
+  //检查source insight 进程
+  const isRun = await isRunning();
+  //弹框提示 确定后才会checkUpdate
+  if (isRun) {
+    dialog.showMessageBox({
+      type: 'info',
+      title: '应用更新',
+      message: 'source insight正在运行请关闭后点击是安装最新插件',
+      buttons: ['是', '否']
+    }).then(async (buttonIndex) => {
+      if(buttonIndex.response == 0) {  //选择是，则退出程序，安装新版本
+        checkUpdate();
+      }
+    })
+  } else {
+    autoUpdater.installUpdate()
+  }
+}
 
 websocketManager.registerWsAction(
   WsAction.CompletionAccept,
