@@ -34,6 +34,13 @@ export const routes: RouteRecordRaw[] = [
           default: () => import('pages/CompletionFloatingPage.vue'),
         },
       },
+      {
+        path: 'update',
+        components: {
+          header: () => import('layouts/headers/FloatingHeader.vue'),
+          default: () => import('pages/UpdatePage.vue'),
+        },
+      },
     ],
   },
   {

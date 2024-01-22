@@ -1,14 +1,21 @@
 import { BrowserWindow } from 'electron';
+import { ProgressInfo, UpdateInfo } from 'electron-updater';
 import { resolve } from 'path';
 
+import { configStore } from 'main/stores';
 import { bypassCors } from 'main/utils/common';
+import { sendToRenderer } from 'preload/types/ActionApi';
 import {
   ControlType,
   registerControlCallback,
   triggerControlCallback,
 } from 'preload/types/ControlApi';
+import packageJson from 'root/package.json';
+import {
+  UpdateFinishActionMessage,
+  UpdateProgressActionMessage,
+} from 'shared/types/ActionMessage';
 import { WindowType } from 'shared/types/WindowType';
-import { configStore } from 'main/stores';
 
 export class FloatingWindow {
   private readonly _type = WindowType.Floating;
@@ -40,21 +47,55 @@ export class FloatingWindow {
       triggerControlCallback(WindowType.Main, ControlType.Hide, undefined);
     }
     this.activate();
-    this._window?.center();
-    this._window?.focus();
-    const searchString = new URLSearchParams({
-      userId: configStore.config.userId,
-      showMain: mainIsVisible ? 'true' : 'false',
-    }).toString();
-    this._window
-      ?.loadURL(`${process.env.APP_URL}#/floating/login?${searchString}`)
-      .catch();
+    if (this._window) {
+      this._window.center();
+      this._window.focus();
+      const searchString = new URLSearchParams({
+        userId: configStore.config.userId,
+        showMain: mainIsVisible ? 'true' : 'false',
+      }).toString();
+      this._window
+        .loadURL(`${process.env.APP_URL}#/floating/login?${searchString}`)
+        .catch();
+    }
+  }
+
+  updateFinish() {
+    if (this._window) {
+      sendToRenderer(this._window, new UpdateFinishActionMessage());
+    }
+  }
+
+  updateProgress(progressInfo: ProgressInfo) {
+    if (this._window) {
+      sendToRenderer(
+        this._window,
+        new UpdateProgressActionMessage(progressInfo)
+      );
+    }
+  }
+
+  updateShow(updateInfo: UpdateInfo) {
+    this.activate();
+    if (this._window) {
+      const { version, releaseDate } = updateInfo;
+      this._window.center();
+      this._window.focus();
+      const searchString = new URLSearchParams({
+        currentVersion: packageJson.version,
+        newVersion: version,
+        releaseDate,
+      }).toString();
+      this._window
+        .loadURL(`${process.env.APP_URL}#/floating/update?${searchString}`)
+        .catch();
+    }
   }
 
   private create() {
     this._window = new BrowserWindow({
-      width: 700,
-      height: 500,
+      width: 800,
+      height: 600,
       useContentSize: true,
       resizable: false,
       movable: true,

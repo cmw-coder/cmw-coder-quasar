@@ -22,7 +22,6 @@ const i18n = (relativePath: string, data?: Record<string, unknown>) => {
 };
 
 const { name } = matched[matched.length - 2];
-
 const { path, pid } = new ProjectIdQuery(query);
 
 const error = ref(false);

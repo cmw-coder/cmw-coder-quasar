@@ -10,6 +10,10 @@ export enum ActionType {
   ConfigStoreSave = 'ConfigStoreSave',
   DataStoreSave = 'DataStoreSave',
   DebugSync = 'DebugSync',
+  UpdateCheck = 'UpdateCheck',
+  UpdateFinish = 'UpdateFinish',
+  UpdateProgress = 'UpdateProgress',
+  UpdateResponse = 'UpdateResponse',
 }
 
 export interface ActionMessage {
@@ -110,6 +114,46 @@ export class DebugSyncActionMessage implements ActionMessage {
   }
 }
 
+export class UpdateCheckActionMessage implements ActionMessage {
+  type = ActionType.UpdateCheck;
+  data: undefined;
+}
+
+export class UpdateFinishActionMessage implements ActionMessage {
+  type = ActionType.UpdateFinish;
+  data: undefined;
+}
+
+export class UpdateProgressActionMessage implements ActionMessage {
+  type = ActionType.UpdateProgress;
+  data: {
+    total: number;
+    delta: number;
+    transferred: number;
+    percent: number;
+    bytesPerSecond: number;
+  };
+
+  constructor(data: {
+    total: number;
+    delta: number;
+    transferred: number;
+    percent: number;
+    bytesPerSecond: number;
+  }) {
+    this.data = data;
+  }
+}
+
+export class UpdateResponseActionMessage implements ActionMessage {
+  type = ActionType.UpdateResponse;
+  data: boolean;
+
+  constructor(data: boolean) {
+    this.data = data;
+  }
+}
+
 export interface ActionMessageMapping {
   [ActionType.ClientSetProjectId]: ClientSetProjectIdActionMessage;
   [ActionType.CompletionClear]: CompletionClearActionMessage;
@@ -118,4 +162,8 @@ export interface ActionMessageMapping {
   [ActionType.ConfigStoreSave]: ConfigStoreSaveActionMessage;
   [ActionType.DebugSync]: DebugSyncActionMessage;
   [ActionType.DataStoreSave]: DataStoreSaveActionMessage;
+  [ActionType.UpdateCheck]: UpdateCheckActionMessage;
+  [ActionType.UpdateFinish]: UpdateFinishActionMessage;
+  [ActionType.UpdateProgress]: UpdateProgressActionMessage;
+  [ActionType.UpdateResponse]: UpdateResponseActionMessage;
 }

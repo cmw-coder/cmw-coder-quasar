@@ -1,5 +1,6 @@
 import { app } from 'electron';
 
+import { AutoUpdater } from 'main/components/AutoUpdater';
 import { FloatingWindow } from 'main/components/FloatingWindow';
 import { ImmersiveWindow } from 'main/components/ImmersiveWindow';
 import { MainWindow } from 'main/components/MainWindow';
@@ -30,11 +31,19 @@ if (!app.requestSingleInstanceLock()) {
 initApplication();
 initIpcMain();
 
+const autoUpdater = new AutoUpdater(configStore.update);
 const floatingWindow = new FloatingWindow();
 const immersiveWindow = new ImmersiveWindow();
 const mainWindow = new MainWindow();
 const promptProcessor = new PromptProcessor();
 const trayIcon = new TrayIcon();
+
+autoUpdater.onAvailable((updateInfo) => floatingWindow.updateShow(updateInfo));
+autoUpdater.onDownloading((progressInfo) =>
+  floatingWindow.updateProgress(progressInfo)
+);
+
+autoUpdater.onFinish(() => floatingWindow.updateFinish());
 
 trayIcon.onClick(() => mainWindow.activate());
 trayIcon.registerMenuEntry(MenuEntry.Feedback, () => mainWindow.feedback());
@@ -47,6 +56,14 @@ registerActionCallback(
     websocketManager.setClientProjectId(pid, projectId);
   }
 );
+registerActionCallback(ActionType.UpdateFinish, () =>
+  autoUpdater.installUpdate()
+);
+registerActionCallback(ActionType.UpdateResponse, async (data) => {
+  if (data) {
+    await autoUpdater.downloadUpdate();
+  }
+});
 
 websocketManager.registerWsAction(
   WsAction.CompletionAccept,
@@ -95,6 +112,8 @@ websocketManager.registerWsAction(
         result: 'failure',
         message: 'Completion Generate Failed, no valid project id',
       });
+    } else {
+      websocketManager.setClientProjectId(pid, projectId);
     }
     console.log('WsAction.CompletionGenerate', {
       caret,
@@ -189,4 +208,12 @@ app.whenReady().then(async () => {
       configStore.login();
     }
   }
+
+  trayIcon.notify('正在检查更新……');
+  autoUpdater.checkUpdate().catch();
+
+  setInterval(() => {
+    trayIcon.notify('正在检查更新……');
+    autoUpdater.checkUpdate().catch();
+  }, 1000 * 3600 * 24);
 });

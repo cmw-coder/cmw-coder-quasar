@@ -22,6 +22,19 @@ import {
 } from 'main/types/model';
 
 const commonConfigSchema: Schema<CommonConfigType> = {
+  endpoints: {
+    type: 'object',
+    required: ['statistics', 'update'],
+    additionalProperties: false,
+    properties: {
+      statistics: {
+        type: 'string',
+      },
+      update: {
+        type: 'string',
+      },
+    },
+  },
   server: {
     type: 'object',
     required: ['host', 'port'],
@@ -34,9 +47,6 @@ const commonConfigSchema: Schema<CommonConfigType> = {
         type: 'number',
       },
     },
-  },
-  statistics: {
-    type: 'string',
   },
   userId: {
     type: 'string',

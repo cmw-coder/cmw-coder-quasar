@@ -134,5 +134,15 @@ export default {
         title: 'Setup New Project',
       },
     },
+    UpdatePage: {
+      labels: {
+        cancel: 'Not now',
+        confirm: 'Upgrade',
+        title: 'New version available',
+        currentVersion: 'Current version:',
+        newVersion: 'New version:',
+        releaseDate: 'Release date: {releaseDate}',
+      },
+    },
   },
 };

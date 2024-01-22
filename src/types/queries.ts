@@ -1,10 +1,5 @@
 import { LocationQuery } from 'vue-router';
 
-export interface LoginQuery {
-  userId: string;
-  showMain: boolean;
-}
-
 export class LoginQuery {
   userId = '';
   showMain = false;
@@ -19,11 +14,6 @@ export class LoginQuery {
   }
 }
 
-export interface ProjectIdQuery {
-  path: string;
-  pid: number;
-}
-
 export class ProjectIdQuery {
   path = '';
   pid = 0;
@@ -34,6 +24,24 @@ export class ProjectIdQuery {
     }
     if (typeof query.pid === 'string') {
       this.pid = parseInt(query.pid);
+    }
+  }
+}
+
+export class UpdateQuery {
+  currentVersion = '';
+  newVersion = '';
+  releaseDate = '';
+
+  constructor(query: LocationQuery) {
+    if (typeof query.currentVersion === 'string') {
+      this.currentVersion = query.currentVersion;
+    }
+    if (typeof query.newVersion === 'string') {
+      this.newVersion = query.newVersion;
+    }
+    if (typeof query.releaseDate === 'string') {
+      this.releaseDate = query.releaseDate;
     }
   }
 }

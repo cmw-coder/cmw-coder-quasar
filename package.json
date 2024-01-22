@@ -1,6 +1,6 @@
 {
   "name": "cmw-coder-quasar",
-  "version": "0.7.0",
+  "version": "1.0.0",
   "description": "Comware Coder based on Quasar framework",
   "productName": "Comware Coder",
   "author": "ParticleG <particle_g@outlook.com>",
@@ -9,12 +9,14 @@
     "lint": "eslint --ext .js,.ts,.vue ./",
     "format": "prettier --write \"**/*.{js,ts,vue,scss,html,md,json}\" --ignore-path .gitignore",
     "dev": "quasar dev -m electron",
-    "build": "quasar build -m electron"
+    "build": "quasar build -m electron",
+    "publish": "quasar build -m electron --publish"
   },
   "dependencies": {
     "@quasar/extras": "^1.16.9",
     "axios": "^1.6.5",
     "electron-store": "^8.1.0",
+    "electron-updater": "^6.1.7",
     "iconv-lite": "^0.6.3",
     "luxon": "^3.4.4",
     "pinia": "^2.1.7",

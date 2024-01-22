@@ -211,8 +211,27 @@ module.exports = configure((/* ctx */) => {
         electronDownload: {
           version: '22.3.27',
         },
+        nsis: {
+          multiLanguageInstaller: true,
+          perMachine: true,
+          // language: 2052,
+        },
         win: {
           icon: 'assets/icons/icon.ico',
+          publish: [
+            {
+              channel: 'release',
+              provider: 'generic',
+              // url: 'http://rdee.h3c.com/h3c-ai-assistant/plugin/sourceinsight/',
+              url: 'http://127.0.0.1:8080/',
+            },
+            {
+              channel: 'beta',
+              provider: 'generic',
+              // url: 'http://rdee.h3c.com/h3c-ai-assistant/plugin/sourceinsight/',
+              url: 'http://127.0.0.1:8080/',
+            },
+          ],
         },
       },
     },

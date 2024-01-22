@@ -67,7 +67,11 @@ export class HuggingFaceConfigStore {
   }
 
   get statistics() {
-    return this.config.statistics;
+    return this.config.endpoints.statistics;
+  }
+
+  get update() {
+    return this.config.endpoints.update;
   }
 }
 
@@ -121,7 +125,11 @@ export class LinseerConfigStore {
   }
 
   get statistics() {
-    return this.config.statistics;
+    return this.config.endpoints.statistics;
+  }
+
+  get update() {
+    return this.config.endpoints.update;
   }
 
   set onLogin(handler: () => void) {

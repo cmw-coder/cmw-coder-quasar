@@ -12,11 +12,14 @@ export interface SeparateTokens {
 }
 
 export interface CommonConfigType {
+  endpoints: {
+    statistics: string;
+    update: string;
+  };
   server: {
     host: string;
     port: number;
   };
-  statistics: string;
   userId: string;
 }
 
