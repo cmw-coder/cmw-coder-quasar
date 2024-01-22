@@ -24,7 +24,7 @@ export const huggingFaceStoreDefault: HuggingFaceStoreType = {
         completionConfigs: {
           function: {
             contextLimit: 1500,
-            endpoint: 'http://10.113.36.127:9191',
+            endpoint: 'http://10.113.36.104',
             maxTokenCount: 512,
             stopTokens: ['<fim_pad>', '<｜end▁of▁sentence｜>', '\n}'],
             suggestionCount: 1,
@@ -32,7 +32,7 @@ export const huggingFaceStoreDefault: HuggingFaceStoreType = {
           },
           line: {
             contextLimit: 1500,
-            endpoint: 'http://10.113.36.127:9191',
+            endpoint: 'http://10.113.36.104',
             maxTokenCount: 64,
             stopTokens: ['<fim_pad>', '<｜end▁of▁sentence｜>', '\r\n', '\n'],
             suggestionCount: 1,
@@ -40,7 +40,7 @@ export const huggingFaceStoreDefault: HuggingFaceStoreType = {
           },
           snippet: {
             contextLimit: 1500,
-            endpoint: 'http://10.113.36.127:9191',
+            endpoint: 'http://10.113.36.104',
             maxTokenCount: 96,
             stopTokens: ['<fim_pad>', '<｜end▁of▁sentence｜>', '}'],
             suggestionCount: 1,
