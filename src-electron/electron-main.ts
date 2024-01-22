@@ -20,6 +20,7 @@ import packageJson from 'root/package.json';
 import { ActionType } from 'shared/types/ActionMessage';
 import { promisify } from 'util';
 import { exec } from 'child_process'
+import axios from 'axios';
 
 const childexec = promisify(exec);
 import {
@@ -61,13 +62,22 @@ registerActionCallback(
   }
 );
 registerActionCallback(ActionType.UpdateFinish, () =>
-  checkUpdate()
+  autoUpdater.installUpdate()
 );
 registerActionCallback(ActionType.UpdateResponse, async (data) => {
   if (data) {
     await autoUpdater.downloadUpdate();
   }
 });
+
+async function checkRemoteFileExists(url: string): Promise<boolean> {
+  try {
+    const response = await axios.head(url);
+    return response.status === 200;
+  } catch (error) {
+    return false;
+  }
+}
 
 async function isRunning():Promise<boolean> {
   let cmd = 'tasklist';
@@ -79,8 +89,9 @@ async function checkUpdate() {
   trayIcon.notify('正在更新……');
   //检查source insight 进程
   const isRun = await isRunning();
+  const isDllExists = await checkRemoteFileExists(configStore.update + "/needUpdateDLL")
   //弹框提示 确定后才会checkUpdate
-  if (isRun) {
+  if (isRun && isDllExists) {
     dialog.showMessageBox({
       type: 'info',
       title: '应用更新',
