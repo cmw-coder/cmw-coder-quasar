@@ -1,4 +1,7 @@
+import axios from 'axios';
+import { exec } from 'child_process';
 import { app, dialog } from 'electron';
+import { promisify } from 'util';
 
 import { AutoUpdater } from 'main/components/AutoUpdater';
 import { FloatingWindow } from 'main/components/FloatingWindow';
@@ -18,15 +21,12 @@ import { Position } from 'main/types/vscode/position';
 import { registerActionCallback } from 'preload/types/ActionApi';
 import packageJson from 'root/package.json';
 import { ActionType } from 'shared/types/ActionMessage';
-import { promisify } from 'util';
-import { exec } from 'child_process'
-import axios from 'axios';
-
-const childexec = promisify(exec);
 import {
   CompletionGenerateServerMessage,
   WsAction,
 } from 'shared/types/WsMessage';
+
+const childExec = promisify(exec);
 
 if (!app.requestSingleInstanceLock()) {
   app.quit();
@@ -61,9 +61,7 @@ registerActionCallback(
     websocketManager.setClientProjectId(pid, projectId);
   }
 );
-registerActionCallback(ActionType.UpdateFinish, () =>
-  checkUpdate()
-);
+registerActionCallback(ActionType.UpdateFinish, () => checkUpdate());
 registerActionCallback(ActionType.UpdateResponse, async (data) => {
   if (data) {
     await autoUpdater.downloadUpdate();
@@ -79,31 +77,39 @@ async function checkRemoteFileExists(url: string): Promise<boolean> {
   }
 }
 
-async function isRunning():Promise<boolean> {
+async function isRunning(): Promise<boolean> {
   const cmd = 'tasklist';
-  const {stdout} = await childexec(cmd);
-  return (stdout.toLowerCase().indexOf('insight3.exe') > -1) || (stdout.toLowerCase().indexOf('sourceinsight4.exe') > -1);
+  const { stdout } = await childExec(cmd);
+  return (
+    stdout.toLowerCase().indexOf('insight3.exe') > -1 ||
+    stdout.toLowerCase().indexOf('sourceinsight4.exe') > -1
+  );
 }
 
 async function checkUpdate() {
   trayIcon.notify('正在更新……');
   //检查source insight 进程
   const isRun = await isRunning();
-  const isDllExists = await checkRemoteFileExists(configStore.update + "/needUpdateDLL")
+  const isDllExists = await checkRemoteFileExists(
+    configStore.update + '/needUpdateDLL'
+  );
   //弹框提示 确定后才会checkUpdate
   if (isRun && isDllExists) {
-    dialog.showMessageBox({
-      type: 'info',
-      title: '应用更新',
-      message: 'source insight正在运行请关闭后点击是安装最新插件',
-      buttons: ['是', '否']
-    }).then(async (buttonIndex) => {
-      if(buttonIndex.response == 0) {  //选择是，则退出程序，安装新版本
-        checkUpdate();
-      }
-    })
+    dialog
+      .showMessageBox({
+        type: 'info',
+        title: '应用更新',
+        message: 'source insight正在运行请关闭后点击是安装最新插件',
+        buttons: ['是', '否'],
+      })
+      .then(async (buttonIndex) => {
+        if (buttonIndex.response == 0) {
+          //选择是，则退出程序，安装新版本
+          await checkUpdate();
+        }
+      });
   } else {
-    autoUpdater.installUpdate()
+    autoUpdater.installUpdate();
   }
 }
 
