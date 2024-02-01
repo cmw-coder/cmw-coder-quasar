@@ -47,7 +47,7 @@ class StatisticsReporter {
           )
         );
     } catch (e) {
-      console.error('StatisticsReporter.accept', e);
+      console.error('StatisticsReporter.acceptFailed', e);
     }
   }
 
@@ -90,7 +90,7 @@ class StatisticsReporter {
           )
         );
     } catch (e) {
-      console.error('StatisticsReporter.generate', e);
+      console.error('StatisticsReporter.generateFailed', e);
     }
   }
 

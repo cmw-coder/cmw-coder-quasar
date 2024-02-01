@@ -1,10 +1,7 @@
-import escapeStringRegexp from 'escape-string-regexp';
-
 import { PromptElements } from 'main/components/PromptExtractor/types';
 import {
   HuggingFaceModelConfigType,
   LinseerModelConfigType,
-  SeparateTokens,
 } from 'main/stores/config/types';
 import { generate, generateRd } from 'main/utils/axios';
 import { CompletionType } from 'shared/types/common';
@@ -89,8 +86,6 @@ export const processHuggingFaceApi = async (
     generatedSuggestions,
     completionType,
     promptElements.constructQuestion(),
-    separateTokens,
-    completionConfig.stopTokens
   );
 };
 
@@ -137,8 +132,6 @@ export const processLinseerApi = async (
     generatedSuggestions,
     completionType,
     promptElements.constructQuestion(),
-    undefined,
-    completionConfig.stopTokens
   );
 };
 
@@ -146,8 +139,6 @@ const _processGeneratedSuggestions = (
   generatedSuggestions: string[],
   completionType: CompletionType,
   promptQuestion: string,
-  separateTokens: SeparateTokens | undefined,
-  stopTokens: string[]
 ): string[] => {
   // TODO: Replace Date Created if needed.
   const result = generatedSuggestions
@@ -157,18 +148,6 @@ const _processGeneratedSuggestions = (
         ? generatedSuggestion.substring(promptQuestion.length)
         : generatedSuggestion
     )
-    /// Filter out contents that are the same as the stop tokens.
-    .map((generatedSuggestion) => {
-      const combinedTokens = [...stopTokens];
-      if (separateTokens) {
-        const { start, end, middle } = separateTokens;
-        combinedTokens.push(start, end, middle);
-      }
-      const regExp = `(${combinedTokens
-        .map((token) => escapeStringRegexp(token))
-        .join('|')})`;
-      return generatedSuggestion.replace(new RegExp(regExp, 'g'), '');
-    })
     /// Replace '\t' with 4 spaces.
     .map((generatedSuggestion) =>
       generatedSuggestion.replace(/\t/g, ' '.repeat(4))
