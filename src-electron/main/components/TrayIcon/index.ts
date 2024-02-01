@@ -16,6 +16,7 @@ export class TrayIcon {
   private _menuEntryMap = new Map<MenuEntry, () => void>();
   private readonly _title = `Comware Coder v${packageJson.version}`;
   private _tray: Tray | undefined;
+  private _trayClickCallback: () => void = () => console.log('Tray clicked');
 
   activate() {
     if (!this._tray) {
@@ -36,11 +37,12 @@ export class TrayIcon {
   }
 
   onClick(callback: () => void) {
-    this._tray?.on('click', callback);
+    this._trayClickCallback = callback;
   }
 
   private create() {
     this._tray = new Tray(this._icon);
+    this._tray.on('click', this._trayClickCallback);
     const contextMenu = Menu.buildFromTemplate([
       this._createNormalItem(MenuEntry.Feedback, 'Feedback'),
       this._createNormalItem(MenuEntry.About, 'About'),
