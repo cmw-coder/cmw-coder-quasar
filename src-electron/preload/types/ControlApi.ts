@@ -5,6 +5,7 @@ import { WindowType } from 'shared/types/WindowType';
 
 export enum ControlType {
   Close = 'Close',
+  DevTools = 'DevTools',
   Hide = 'Hide',
   Minimize = 'Minimize',
   Move = 'Move',
@@ -22,6 +23,16 @@ export interface ControlMessage {
 
 export class CloseControlMessage implements ControlMessage {
   type = ControlType.Close;
+  data: undefined;
+  windowType: WindowType;
+
+  constructor(windowType: WindowType) {
+    this.windowType = windowType;
+  }
+}
+
+export class DevToolsControlMessage implements ControlMessage {
+  type = ControlType.DevTools;
   data: undefined;
   windowType: WindowType;
 
@@ -116,6 +127,7 @@ type ControlMessageUnion =
 
 interface ControlMessageMapping {
   [ControlType.Close]: CloseControlMessage;
+  [ControlType.DevTools]: DevToolsControlMessage;
   [ControlType.Hide]: HideControlMessage;
   [ControlType.Minimize]: MinimizeControlMessage;
   [ControlType.Move]: MoveControlMessage;

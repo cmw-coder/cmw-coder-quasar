@@ -9,6 +9,7 @@ import { ControlType, registerControlCallback } from 'preload/types/ControlApi';
 import { WsAction } from 'shared/types/WsMessage';
 import { WindowType } from 'shared/types/WindowType';
 import { DebugSyncActionMessage } from 'shared/types/ActionMessage';
+import { dataStoreDefault } from 'main/stores/data/default';
 
 export class MainWindow {
   private readonly _type = WindowType.Main;
@@ -96,11 +97,27 @@ export class MainWindow {
       dataStore.window = currentDataWindow;
     });
 
+    registerControlCallback(this._type, ControlType.DevTools, () =>
+      this._window?.webContents.openDevTools({ mode: 'undocked' })
+    );
     registerControlCallback(this._type, ControlType.Hide, () =>
       this._window?.hide()
     );
     registerControlCallback(this._type, ControlType.Minimize, () =>
       this._window?.minimize()
+    );
+    registerControlCallback(
+      this._type,
+      ControlType.Resize,
+      ({ width, height }) => {
+        if (this._window) {
+          const defaultSizes = dataStoreDefault.window.main;
+          this._window.setSize(
+            width ?? defaultSizes.width,
+            height ?? defaultSizes.height
+          );
+        }
+      }
     );
     registerControlCallback(this._type, ControlType.Show, () =>
       this._window?.show()

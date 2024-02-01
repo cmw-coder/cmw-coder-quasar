@@ -7,6 +7,7 @@ import {
 } from 'preload/types/ActionApi';
 import {
   CloseControlMessage,
+  DevToolsControlMessage,
   HideControlMessage,
   MinimizeControlMessage,
   MoveControlMessage,
@@ -23,6 +24,8 @@ import { WindowType } from 'shared/types/WindowType';
 contextBridge.exposeInMainWorld(controlApiKey, {
   close: (windowType: WindowType) =>
     sendControlAction(new CloseControlMessage(windowType)),
+  devTools: (windowType: WindowType) =>
+    sendControlAction(new DevToolsControlMessage(windowType)),
   hide: (windowType: WindowType) =>
     sendControlAction(new HideControlMessage(windowType)),
   minimize: (windowType: WindowType) =>

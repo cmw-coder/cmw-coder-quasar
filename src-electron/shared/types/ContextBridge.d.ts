@@ -7,6 +7,7 @@ declare global {
   interface Window {
     [controlApiKey]: {
       close: (windowType: WindowType) => void;
+      devTools: (windowType: WindowType) => void;
       hide: (windowType: WindowType) => void;
       minimize: (windowType: WindowType) => void;
       move: (
