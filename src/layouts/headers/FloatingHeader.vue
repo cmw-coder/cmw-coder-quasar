@@ -13,7 +13,7 @@ const i18n = (relativePath: string) => {
 <template>
   <q-header bordered class="bg-primary text-white">
     <q-bar v-if="platform.is.electron" class="q-electron-drag">
-      <q-icon name="laptop_chromebook" />
+      <q-icon name="mdi-assistant" />
       <div>{{ i18n('labels.title') }}</div>
       <q-space />
     </q-bar>

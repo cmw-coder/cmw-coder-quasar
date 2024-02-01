@@ -2,6 +2,7 @@
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 
+import { bus } from 'boot/bus';
 import DarkModeButton from 'components/DarkModeButton.vue';
 import { WindowType } from 'shared/types/WindowType';
 
@@ -14,25 +15,22 @@ const i18n = (relativePath: string) => {
 
 const { name } = matched[matched.length - 2];
 
-const emit = defineEmits(['toggle:left-drawer', 'toggle:right-drawer']);
+const defaultSize = () => window.controlApi.resize({}, <WindowType>name);
 
 const hide = () => window.controlApi.hide(<WindowType>name);
 
 const minimize = () => window.controlApi.minimize(<WindowType>name);
 
-const toggleLeftDrawer = () => emit('toggle:left-drawer', true);
-
 const toggleMaximize = () => window.controlApi.toggleMaximize();
-
-const toggleRightDrawer = () => emit('toggle:right-drawer', true);
 </script>
 
 <template>
   <q-header bordered class="bg-primary text-white">
     <q-bar v-if="$q.platform.is.electron" class="q-electron-drag q-pr-none">
-      <q-icon name="laptop_chromebook" />
+      <q-icon name="mdi-assistant" />
       <div>{{ i18n('labels.title') }}</div>
       <q-space />
+      <q-btn flat icon="mdi-resize" stretch @click="defaultSize" />
       <q-btn flat icon="mdi-minus" stretch @click="minimize" />
       <q-btn flat icon="crop_square" stretch @click="toggleMaximize" />
       <q-btn
@@ -44,14 +42,26 @@ const toggleRightDrawer = () => emit('toggle:right-drawer', true);
       />
     </q-bar>
     <q-toolbar>
-      <q-btn dense flat icon="menu" round @click="toggleLeftDrawer" />
+      <q-btn
+        dense
+        flat
+        icon="menu"
+        round
+        @click="bus.emit('drawer', 'left', 'toggle')"
+      />
       <q-toolbar-title>
         <q-avatar>
           <!--          <q-img src="~assets/svg/logo-simple-light.svg" />-->
         </q-avatar>
       </q-toolbar-title>
       <dark-mode-button />
-      <q-btn dense flat icon="menu" round @click="toggleRightDrawer" />
+      <q-btn
+        dense
+        flat
+        icon="menu"
+        round
+        @click="bus.emit('drawer', 'right', 'toggle')"
+      />
     </q-toolbar>
   </q-header>
 </template>
