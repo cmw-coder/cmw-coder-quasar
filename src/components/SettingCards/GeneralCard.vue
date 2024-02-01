@@ -3,7 +3,7 @@ import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
-import { darkModes, Theme, useSettingsStore } from 'stores/settings';
+import { themes, Theme, useSettingsStore } from 'stores/settings';
 
 const { theme, developerMode } = storeToRefs(useSettingsStore());
 const { t } = useI18n();
@@ -46,16 +46,16 @@ const selectTheme = (value: Theme) => {
         </template>
         <q-list>
           <q-item
-            v-for="(mode, key) in darkModes"
-            :key="key"
+            v-for="(theme, index) in themes"
+            :key="index"
             clickable
-            @click="selectTheme(mode)"
+            @click="selectTheme(theme)"
           >
             <q-item-section>
               {{ i18n(`labels.displayThemeOptions.${theme.name}`) }}
             </q-item-section>
             <q-item-section side>
-              <q-icon :name="mode.icon" :color="mode.color" />
+              <q-icon :name="theme.icon" :color="theme.color" />
             </q-item-section>
           </q-item>
         </q-list>

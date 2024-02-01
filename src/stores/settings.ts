@@ -11,29 +11,31 @@ export interface Theme {
   name: string;
 }
 
-export const darkModes: Record<string, Theme> = {
-  auto: {
+export const themes: Theme[] = [
+  {
     color: 'teal',
     darkMode: 'auto',
     icon: 'hdr_auto',
     name: 'auto',
   },
-  true: {
+  {
     color: 'yellow',
     darkMode: true,
     icon: 'dark_mode',
     name: 'dark',
   },
-  false: {
+  {
     color: 'orange',
     darkMode: false,
     icon: 'light_mode',
     name: 'light',
   },
-};
+];
 
 export const useSettingsStore = defineStore('settings', () => {
-  const theme = ref<Theme>(darkModes[Dark.mode.toString()]);
+  const theme = ref<Theme>(
+    themes.find((theme) => theme.darkMode === Dark.mode) ?? themes[0]
+  );
   const developerMode = ref(false);
   const isMobile = computed(() => Screen.lt.md);
 
@@ -45,9 +47,10 @@ export const useSettingsStore = defineStore('settings', () => {
   };
 
   const toggleDarkMode = () => {
-    const keys = Object.keys(darkModes);
-    const index = keys.indexOf(theme.value.darkMode.toString());
-    theme.value = darkModes[keys[(index + 1) % keys.length]];
+    const index = themes.findIndex(
+      (item) => item.darkMode === theme.value.darkMode
+    );
+    theme.value = themes[(index + 1) % themes.length];
     applyDarkMode();
   };
 
