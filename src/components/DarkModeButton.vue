@@ -5,7 +5,7 @@ import { useI18n } from 'vue-i18n';
 import { WindowType } from 'shared/types/WindowType';
 
 const { toggleDarkMode } = useSettingsStore();
-const { darkModeColorAndIcon } = storeToRefs(useSettingsStore());
+const { theme } = storeToRefs(useSettingsStore());
 
 const { t } = useI18n();
 const i18n = (relativePath: string) => {
@@ -21,8 +21,8 @@ const switchDarkMode = () => {
 
 <template>
   <q-btn
-    :icon="darkModeColorAndIcon.icon"
-    :text-color="darkModeColorAndIcon.color"
+    :icon="theme.icon"
+    :text-color="theme.color"
     flat
     round
     @click="switchDarkMode"
