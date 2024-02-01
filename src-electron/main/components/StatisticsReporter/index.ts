@@ -15,13 +15,8 @@ class StatisticsReporter {
     projectId: string,
     version: string
   ) {
-    if (
-      this._currentCursor.character >= 0 &&
-      this._currentCursor.line >= 0 &&
-      this._currentCursor.line == this._lastCursor.line
-    ) {
-      return;
-    }
+    this._currentCursor.character = -1;
+    this._currentCursor.line = -1;
     console.log('StatisticsReporter.acceptCompletion', {
       completion,
       startTime,
