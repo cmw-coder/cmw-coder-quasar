@@ -76,6 +76,32 @@ export default {
         projectId: 'Project ID',
       },
     },
+    SettingCards: {
+      GeneralCard: {
+        labels: {
+          developerOptions: 'Developer Options',
+          displayTheme: 'Display Theme',
+          displayThemeOptions: {
+            auto: 'Auto',
+            dark: 'Dark',
+            light: 'Light',
+          },
+          title: 'General',
+        },
+      },
+      UpdateCard: {
+        labels: {
+          appVersion: 'Application version',
+          checkForUpdate: 'Check for update immediately',
+          title: 'Update',
+        },
+        notifications: {
+          developerModeOngoing:
+            'Click {times} more times to enable developer mode',
+          developerModeEnabled: 'Developer mode enabled',
+        },
+      },
+    },
   },
   layouts: {
     drawers: {
@@ -142,34 +168,7 @@ export default {
         title: 'Setup New Project',
       },
     },
-    SettingsPage: {
-      notifications: {
-        developerModeOngoing:
-          'Click {times} more times to enable developer mode',
-        developerModeEnabled: 'Developer mode enabled',
-      },
-      settings: {
-        general: {
-          label: 'General',
-          displayTheme: {
-            label: 'Display Theme',
-            auto: 'Auto',
-            dark: 'Dark',
-            light: 'Light',
-          },
-          developerOptions: 'Developer Options',
-        },
-        update: {
-          label: 'Update',
-          checkForUpdate: {
-            label: 'Check for update immediately',
-          },
-          appVersion: {
-            label: 'Application version',
-          },
-        },
-      },
-    },
+    SettingsPage: {},
     UpdatePage: {
       labels: {
         cancel: 'Not now',
