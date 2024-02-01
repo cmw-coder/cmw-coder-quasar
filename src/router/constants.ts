@@ -6,7 +6,7 @@ export const routes: RouteRecordRaw[] = [
   {
     name: 'root',
     path: '/',
-    redirect: 'main/dashboard',
+    redirect: '/main',
   },
   {
     name: WindowType.Floating,
@@ -62,26 +62,40 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('layouts/MainLayout.vue'),
     children: [
       {
-        path: 'dashboard',
+        path: '',
+        redirect: '/main/chat',
+      },
+      {
+        path: 'chat',
         components: {
           header: () => import('layouts/headers/MainHeader.vue'),
-          // leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
-          default: () => import('pages/DashboardPage.vue'),
+          leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
+          default: () => import('pages/ChatPage.vue'),
           // rightDrawer: () => import('layouts/drawers/RightMainDrawer.vue'),
+        },
+      },
+      {
+        path: 'developer',
+        components: {
+          header: () => import('layouts/headers/MainHeader.vue'),
+          leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
+          default: () => import('pages/DeveloperPage.vue'),
         },
       },
       {
         path: 'feedback',
         components: {
           header: () => import('layouts/headers/MainHeader.vue'),
+          leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
           default: () => import('pages/FeedbackPage.vue'),
         },
       },
       {
-        path: 'login',
+        path: 'settings',
         components: {
           header: () => import('layouts/headers/MainHeader.vue'),
-          default: () => import('pages/LoginPage.vue'),
+          leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
+          default: () => import('pages/SettingsPage.vue'),
         },
       },
     ],

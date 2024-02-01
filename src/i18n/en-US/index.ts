@@ -79,7 +79,13 @@ export default {
   },
   layouts: {
     drawers: {
-      LeftMainDrawer: {},
+      LeftMainDrawer: {
+        navigations: {
+          chat: 'Chat',
+          feedback: 'Feedback',
+          settings: 'Settings',
+        },
+      },
       RightMainDrawer: {},
     },
     footers: {},
@@ -97,14 +103,16 @@ export default {
     },
   },
   pages: {
-    DashboardPage: {
+    ChatPage: {
       labels: {
         intro: 'AI assisted coding for H3C',
         title: 'Comware Coder Assistant',
       },
-      tooltips: {
-        copy: 'Copy to clipboard',
-        insert: 'Insert to editor',
+    },
+    DeveloperPage: {
+      labels: {
+        currentFile: 'Current File',
+        referenceFiles: 'Reference Files',
       },
     },
     FeedbackPage: {
@@ -132,6 +140,34 @@ export default {
           'You need to provide Project ID in order to statistics your coding behavior.',
         temporary: 'This is a temporary project',
         title: 'Setup New Project',
+      },
+    },
+    SettingsPage: {
+      notifications: {
+        developerModeOngoing:
+          'Click {times} more times to enable developer mode',
+        developerModeEnabled: 'Developer mode enabled',
+      },
+      settings: {
+        general: {
+          label: 'General',
+          displayTheme: {
+            label: 'Display Theme',
+            auto: 'Auto',
+            dark: 'Dark',
+            light: 'Light',
+          },
+          developerOptions: 'Developer Options',
+        },
+        update: {
+          label: 'Update',
+          checkForUpdate: {
+            label: 'Check for update immediately',
+          },
+          appVersion: {
+            label: 'Application version',
+          },
+        },
       },
     },
     UpdatePage: {

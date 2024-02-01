@@ -9,7 +9,7 @@ import { b64GbkToUtf8 } from 'utils/iconv';
 const { t } = useI18n();
 
 const i18n = (relativePath: string) => {
-  return t('pages.DashboardPage.' + relativePath);
+  return t('pages.ChatPage.' + relativePath);
 };
 
 const codeContent = ref('');

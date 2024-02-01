@@ -27,6 +27,16 @@ const finish = () => {
   if (loginQuery.showMain) {
     window.controlApi.show(WindowType.Main);
   }
+  switch (name) {
+    case WindowType.Floating: {
+      window.controlApi.hide(WindowType.Floating);
+      break;
+    }
+    case WindowType.Main: {
+      replace('completions');
+      break;
+    }
+  }
   if (name === WindowType.Floating) {
     window.controlApi.hide(WindowType.Floating);
     replace('completions');
