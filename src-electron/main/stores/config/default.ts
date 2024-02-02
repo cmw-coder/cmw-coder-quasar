@@ -25,7 +25,7 @@ export const huggingFaceStoreDefault: HuggingFaceStoreType = {
           function: {
             contextLimit: 1500,
             endpoint: 'http://10.113.36.104',
-            maxTokenCount: 512,
+            maxTokenCount: 1024,
             stopTokens: ['<fim_pad>', '<｜end▁of▁sentence｜>', '\n}'],
             suggestionCount: 1,
             temperature: 0.2,
@@ -87,7 +87,7 @@ export const linseerConfigDefault: LinseerStoreType = {
           },
           line: {
             contextLimit: 1500,
-            maxTokenCount: 10,
+            maxTokenCount: 15,
             stopTokens: ['<fim_pad>', '<|endoftext|>', '</s>'],
             subModelType: SubModelType['linseer-code-13b'],
             suggestionCount: 1,
