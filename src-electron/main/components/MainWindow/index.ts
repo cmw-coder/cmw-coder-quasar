@@ -24,6 +24,7 @@ export class MainWindow {
   }
 
   feedback() {
+    this._window?.close();
     this.activate();
     if (this._window) {
       this._window.center();
