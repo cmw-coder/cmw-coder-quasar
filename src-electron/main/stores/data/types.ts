@@ -1,5 +1,10 @@
 export interface DataProjectType {
-  pathAndIdMapping: Record<string, string>;
+  id: string,
+  lastAddedLines: number
+  svn: {
+    directory: string,
+    revision: number,
+  }[]
 }
 
 export interface DataWindowType {
@@ -12,6 +17,6 @@ export interface DataWindowType {
 }
 
 export interface DataStoreType {
-  project: DataProjectType;
+  project: Record<string, DataProjectType>;
   window: DataWindowType;
 }

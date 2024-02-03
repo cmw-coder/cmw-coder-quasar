@@ -7,10 +7,24 @@ import {
 } from 'main/stores/data/types';
 
 const dataProjectSchema: Schema<DataProjectType> = {
-  pathAndIdMapping: {
-    type: 'object',
-    additionalProperties: {
-      type: 'string',
+  id: {
+    type: 'string',
+  },
+  lastAddedLines: {
+    type: 'number',
+  },
+  svn: {
+    type: 'array',
+    items: {
+      type: 'object',
+      properties: {
+        directory: {
+          type: 'string',
+        },
+        revision: {
+          type: 'number',
+        },
+      },
     },
   },
 };
@@ -40,9 +54,12 @@ const dataWindowSchema: Schema<DataWindowType> = {
 export const dataStoreSchema: Schema<DataStoreType> = {
   project: {
     type: 'object',
-    required: Object.keys(dataProjectSchema),
-    additionalProperties: false,
-    properties: dataProjectSchema,
+    additionalProperties: {
+      type: 'object',
+      required: Object.keys(dataProjectSchema),
+      additionalProperties: false,
+      properties: dataProjectSchema,
+    },
   },
   window: {
     type: 'object',

@@ -93,12 +93,12 @@ export class ConfigStoreSaveActionMessage implements ActionMessage {
 export class DataStoreSaveActionMessage implements ActionMessage {
   type = ActionType.DataStoreSave;
   data:
-    | { type: 'project'; data: Partial<DataProjectType> }
+    | { type: 'project'; data: Record<string, DataProjectType> }
     | { type: 'window'; data: Partial<DataWindowType> };
 
   constructor(
     data:
-      | { type: 'project'; data: Partial<DataProjectType> }
+      | { type: 'project'; data: Record<string, DataProjectType> }
       | { type: 'window'; data: Partial<DataWindowType> }
   ) {
     this.data = data;

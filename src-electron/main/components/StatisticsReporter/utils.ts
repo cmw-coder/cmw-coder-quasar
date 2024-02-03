@@ -6,15 +6,15 @@ import { configStore } from 'main/stores';
 import { HuggingFaceModelType, LinseerModelType } from 'main/types/model';
 
 export const constructData = (
-  completion: string,
+  lineCount: number,
   startTime: number,
   endTime: number,
   projectId: string,
   version: string,
   modelType: HuggingFaceModelType | LinseerModelType,
-  isAccept: boolean
+  firstClass: string,
+  skuName: string,
 ) => {
-  const lineCount = completion.split('\r\n').length;
   const basicData = {
     begin: Math.floor(startTime / 1000),
     end: Math.floor(endTime / 1000),
@@ -35,14 +35,8 @@ export const constructData = (
     {
       ...basicData,
       count: lineCount,
-      firstClass: 'CODE',
-      skuName: lineCount > 1
-        ? isAccept
-          ? 'KEEP_MULTI'
-          : 'GENE_MULTI'
-        : isAccept
-        ? 'KEEP'
-        : 'GENE',
+      firstClass: firstClass,
+      skuName: skuName,
     },
   ];
 };

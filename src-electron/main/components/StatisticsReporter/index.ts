@@ -24,6 +24,7 @@ class StatisticsReporter {
       projectId,
       version,
     });
+    const lineLength = completion.split('\r\n').length;
     try {
       await axios
         .create({
@@ -32,13 +33,14 @@ class StatisticsReporter {
         .post(
           '/report/summary',
           constructData(
-            completion,
+            lineLength,
             startTime,
             endTime,
             projectId,
             version,
             configStore.modelType,
-            true
+            'CODE',
+            lineLength > 1 ? 'KEEP_MULTI' : 'KEEP'
           )
         );
     } catch (e) {
@@ -67,6 +69,7 @@ class StatisticsReporter {
       projectId,
       version,
     });
+    const lineLength = completion.split('\r\n').length;
     try {
       await axios
         .create({
@@ -75,17 +78,55 @@ class StatisticsReporter {
         .post(
           '/report/summary',
           constructData(
-            completion,
+            lineLength,
             startTime,
             endTime,
             projectId,
             version,
             configStore.modelType,
-            false
+            'CODE',
+            lineLength > 1 ? 'GENE_MULTI' : 'GENE'
           )
         );
     } catch (e) {
       console.error('StatisticsReporter.generateFailed', e);
+    }
+  }
+
+  async incrementLines(
+    count: number,
+    startTime: number,
+    endTime: number,
+    projectId: string,
+    version: string
+  ) {
+    console.log('StatisticsReporter.incrementLines', {
+      count,
+      startTime,
+      endTime,
+      projectId,
+      version,
+    });
+    try {
+      await axios
+        .create({
+          baseURL: configStore.statistics,
+        })
+        .post(
+          '/report/summary',
+          constructData(
+            count,
+            startTime,
+            endTime,
+            projectId,
+            version,
+            configStore.modelType,
+            'INC',
+            ''
+          )
+        );
+    } catch (e) {
+      console.error('StatisticsReporter.incrementLinesFailed', e);
     }
   }
 

@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { exec } from 'child_process';
 import { app, dialog } from 'electron';
+import { scheduleJob } from 'node-schedule';
 import { promisify } from 'util';
 
 import { AutoUpdater } from 'main/components/AutoUpdater';
@@ -13,7 +14,7 @@ import { statisticsReporter } from 'main/components/StatisticsReporter';
 import { TrayIcon } from 'main/components/TrayIcon';
 import { MenuEntry } from 'main/components/TrayIcon/types';
 import { websocketManager } from 'main/components/WebsocketManager';
-import { initApplication, initIpcMain } from 'main/init';
+import { initAdditionReport, initApplication, initIpcMain } from 'main/init';
 import { configStore, dataStore } from 'main/stores';
 import { ApiStyle } from 'main/types/model';
 import { TextDocument } from 'main/types/TextDocument';
@@ -33,6 +34,7 @@ if (!app.requestSingleInstanceLock()) {
   process.exit(-1);
 }
 
+initAdditionReport();
 initApplication();
 initIpcMain();
 
@@ -57,7 +59,7 @@ trayIcon.registerMenuEntry(MenuEntry.Quit, () => app.exit());
 registerActionCallback(
   ActionType.ClientSetProjectId,
   ({ path, pid, projectId }) => {
-    dataStore.setProjectId(path, projectId);
+    dataStore.setProjectId(path, projectId).catch();
     websocketManager.setClientProjectId(pid, projectId);
   }
 );
@@ -153,16 +155,20 @@ websocketManager.registerWsAction(
     }
     const { version } = clientInfo;
     const { caret, path, prefix, project, recentFiles, suffix, symbols } = data;
-    const projectId = dataStore.getProjectId(project);
-    if (!projectId) {
+    const projectData = dataStore.project[project];
+    if (!projectData) {
       floatingWindow.projectId(project, pid);
       return new CompletionGenerateServerMessage({
         result: 'failure',
         message: 'Completion Generate Failed, no valid project id',
       });
     } else {
-      websocketManager.setClientProjectId(pid, projectId);
+      if (!projectData.svn.length) {
+        dataStore.setProjectRevision(project).catch();
+      }
+      websocketManager.setClientProjectId(pid, projectData.id);
     }
+
     console.log('WsAction.CompletionGenerate', {
       caret,
       path,
@@ -182,7 +188,7 @@ websocketManager.registerWsAction(
       const completions = await promptProcessor.process(
         promptElements,
         prefix,
-        projectId
+        projectData.id
       );
       if (completions && completions.length) {
         statisticsReporter
@@ -190,7 +196,7 @@ websocketManager.registerWsAction(
             completions[0],
             Date.now(),
             Date.now(),
-            projectId,
+            projectData.id,
             `${packageJson.version}${version}`
           )
           .catch();
@@ -260,8 +266,14 @@ app.whenReady().then(async () => {
   trayIcon.notify('正在检查更新……');
   autoUpdater.checkUpdate().catch();
 
-  setInterval(() => {
-    trayIcon.notify('正在检查更新……');
-    autoUpdater.checkUpdate().catch();
-  }, 1000 * 3600 * 24);
+  scheduleJob(
+    {
+      hour: 4,
+      minute: 0,
+    },
+    () => {
+      trayIcon.notify('正在检查更新……');
+      autoUpdater.checkUpdate().catch();
+    }
+  );
 });
