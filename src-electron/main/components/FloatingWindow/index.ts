@@ -30,22 +30,32 @@ export class FloatingWindow {
   }
 
   projectId(path: string, pid: number) {
+    if (
+      this._window &&
+      !this._window.isMinimized() &&
+      this._window.isVisible()
+    ) {
+      return;
+    }
     this.activate();
-    this._window?.center();
-    this._window?.focus();
-    const searchString = new URLSearchParams({
-      path,
-      pid: pid.toString(),
-    }).toString();
-    this._window
-      ?.loadURL(`${process.env.APP_URL}#/floating/projectId?${searchString}`)
-      .catch();
+    if (this._window) {
+      this._window?.center();
+      this._window?.focus();
+      const searchString = new URLSearchParams({
+        path,
+        pid: pid.toString(),
+      }).toString();
+      this._window
+        ?.loadURL(`${process.env.APP_URL}#/floating/projectId?${searchString}`)
+        .catch();
+    }
   }
 
   login(mainIsVisible: boolean) {
     if (mainIsVisible) {
       triggerControlCallback(WindowType.Main, ControlType.Hide, undefined);
     }
+    this._window?.close();
     this.activate();
     if (this._window) {
       this._window.center();
@@ -76,6 +86,7 @@ export class FloatingWindow {
   }
 
   updateShow(updateInfo: UpdateInfo) {
+    this._window?.close();
     this.activate();
     if (this._window) {
       const { version, releaseDate } = updateInfo;
