@@ -11,7 +11,7 @@ import { DataProjectType } from 'main/stores/data/types';
 let apiStyle: ApiStyle;
 
 // eslint-disable-next-line prefer-const
-apiStyle = ApiStyle.HuggingFace;
+apiStyle = ApiStyle.Linseer;
 
 try {
   unlinkSync(join(process.env.APPDATA, 'Comware Coder/config.json'));
