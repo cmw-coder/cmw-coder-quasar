@@ -6,19 +6,21 @@ export const searchSvnDirectories = async (
   folder: string
 ): Promise<string[]> => {
   const directories: string[] = [];
-  const items = await fs.promises.readdir(folder);
-  for (const item of items) {
-    const filePath = resolve(folder, item);
-    const stats = await fs.promises.stat(filePath);
-    if (stats.isDirectory()) {
-      if (item === '.svn') {
-        console.log('Found svn directory:', folder);
-        directories.push(folder);
-      } else {
-        directories.push(...(await searchSvnDirectories(filePath)));
+  try {
+    const items = await fs.promises.readdir(folder);
+    for (const item of items) {
+      const filePath = resolve(folder, item);
+      const stats = await fs.promises.stat(filePath);
+      if (stats.isDirectory()) {
+        if (item === '.svn') {
+          console.log('Found svn directory:', folder);
+          directories.push(folder);
+        } else {
+          directories.push(...(await searchSvnDirectories(filePath)));
+        }
       }
     }
-  }
+  } catch {}
   return directories;
 };
 

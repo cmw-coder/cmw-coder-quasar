@@ -85,7 +85,7 @@ export const processHuggingFaceApi = async (
   return _processGeneratedSuggestions(
     generatedSuggestions,
     completionType,
-    promptElements.constructQuestion(),
+    promptElements.constructQuestion()
   );
 };
 
@@ -131,14 +131,14 @@ export const processLinseerApi = async (
   return _processGeneratedSuggestions(
     generatedSuggestions,
     completionType,
-    promptElements.constructQuestion(),
+    promptElements.constructQuestion()
   );
 };
 
 const _processGeneratedSuggestions = (
   generatedSuggestions: string[],
   completionType: CompletionType,
-  promptQuestion: string,
+  promptQuestion: string
 ): string[] => {
   // TODO: Replace Date Created if needed.
   const result = generatedSuggestions

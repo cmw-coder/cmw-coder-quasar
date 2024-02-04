@@ -16,26 +16,28 @@ apiStyle = ApiStyle.HuggingFace;
 try {
   unlinkSync(join(process.env.APPDATA, 'Comware Coder/config.json'));
 } catch {}
-const dataPath = join(process.env.APPDATA, 'Comware Coder/data.json');
-const dataJson = JSON.parse(readFileSync(dataPath).toString());
-if (dataJson.project.pathAndIdMapping) {
-  unlinkSync(dataPath);
-  const oldProjects = <{ pathAndIdMapping: Record<string, string> }>(
-    dataJson.project
-  );
-  const newProjects: Record<string, DataProjectType> = {};
-  for (const [path, id] of Object.entries(oldProjects.pathAndIdMapping)) {
-    if (existsSync(path)) {
-      newProjects[path] = {
-        id,
-        lastAddedLines: 0,
-        svn: [],
-      };
+try {
+  const dataPath = join(process.env.APPDATA, 'Comware Coder/data.json');
+  const dataJson = JSON.parse(readFileSync(dataPath).toString());
+  if (dataJson.project.pathAndIdMapping) {
+    unlinkSync(dataPath);
+    const oldProjects = <{ pathAndIdMapping: Record<string, string> }>(
+      dataJson.project
+    );
+    const newProjects: Record<string, DataProjectType> = {};
+    for (const [path, id] of Object.entries(oldProjects.pathAndIdMapping)) {
+      if (existsSync(path)) {
+        newProjects[path] = {
+          id,
+          lastAddedLines: 0,
+          svn: [],
+        };
+      }
     }
+    dataJson.project = newProjects;
+    writeFileSync(dataPath, JSON.stringify(dataJson));
   }
-  dataJson.project = newProjects;
-  writeFileSync(dataPath, JSON.stringify(dataJson));
-}
+} catch {}
 
 export const configStore =
   apiStyle === ApiStyle.HuggingFace

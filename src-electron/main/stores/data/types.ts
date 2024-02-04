@@ -1,10 +1,10 @@
 export interface DataProjectType {
-  id: string,
-  lastAddedLines: number
+  id: string;
+  lastAddedLines: number;
   svn: {
-    directory: string,
-    revision: number,
-  }[]
+    directory: string;
+    revision: number;
+  }[];
 }
 
 export interface DataWindowType {

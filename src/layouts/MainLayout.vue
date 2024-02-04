@@ -25,10 +25,7 @@ bus.on('drawer', (position, action) => {
 
 <template>
   <q-layout view="hHh LpR fFf">
-    <router-view
-      :mobile="screen.lt.md"
-      name="header"
-    />
+    <router-view :mobile="screen.lt.md" name="header" />
     <router-view
       :mobile="screen.lt.md"
       :model-value="leftDrawerOpen"
@@ -42,9 +39,6 @@ bus.on('drawer', (position, action) => {
       :model-value="rightDrawerOpen"
       name="rightDrawer"
     />
-    <router-view
-      :mobile="screen.lt.md"
-      name="footer"
-    />
+    <router-view :mobile="screen.lt.md" name="footer" />
   </q-layout>
 </template>

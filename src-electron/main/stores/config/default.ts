@@ -16,7 +16,7 @@ export const huggingFaceStoreDefault: HuggingFaceStoreType = {
   config: {
     endpoints: {
       statistics: 'http://10.113.36.121/kong/RdTestResourceStatistic',
-      update: 'http://10.113.36.121/h3c-ai-assistant/cmw-coder'
+      update: 'http://10.113.36.121/h3c-ai-assistant/cmw-coder',
     },
     modelConfigs: [
       {
