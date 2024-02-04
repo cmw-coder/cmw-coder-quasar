@@ -31,7 +31,7 @@ export default {
           account: 'Account',
           continue: 'Continue',
           description: 'You need to sign in in order to use this app.',
-          intro: 'Welcome to Comware Coder Assistant',
+          intro: 'Welcome to Comware Coder',
         },
         hints: {
           account: 'Please enter your H3C account (Job number)',
@@ -118,12 +118,12 @@ export default {
     headers: {
       FloatingHeader: {
         labels: {
-          title: 'Comware Coder Assistant',
+          title: 'Comware Coder',
         },
       },
       MainHeader: {
         labels: {
-          title: 'Comware Coder Assistant',
+          title: 'Comware Coder',
         },
       },
     },
@@ -132,7 +132,7 @@ export default {
     ChatPage: {
       labels: {
         intro: 'AI assisted coding for H3C',
-        title: 'Comware Coder Assistant',
+        title: 'Comware Coder',
       },
     },
     DeveloperPage: {
