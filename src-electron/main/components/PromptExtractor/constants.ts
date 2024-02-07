@@ -139,12 +139,9 @@ export const IGNORE_COMMON_WORD = new Set([
 export const IGNORE_COMWARE_INTERNAL = new Set([
   //* Comware Macros *//
   'DBGASSERT',
-  'IN',
   'INLINE',
-  'INOUT',
   'ISSU',
   'NOINLSTATIC',
-  'OUT',
   'STATIC',
   'STATICASSERT',
   //* Comware Naming Standards *//
