@@ -1,24 +1,42 @@
-import { LinseerConfigType, LinseerDataType } from 'main/stores/config/types';
+import {
+  HuggingFaceStoreType,
+  LinseerConfigType,
+  LinseerDataType,
+  LinseerStoreType,
+} from 'main/stores/config/types';
 import { DataProjectType, DataWindowType } from 'main/stores/data/types';
 import { CompletionCacheClientMessage } from 'shared/types/WsMessage';
 
 export enum ActionType {
+  ClientGetVersion = 'ClientGetVersion',
   ClientSetProjectId = 'ClientSetProjectId',
   CompletionClear = 'CompletionClear',
   CompletionSet = 'CompletionSet',
   CompletionUpdate = 'CompletionUpdate',
+  ConfigStoreLoad = 'ConfigStoreLoad',
   ConfigStoreSave = 'ConfigStoreSave',
+  DataStoreLoad = 'DataStoreLoad',
   DataStoreSave = 'DataStoreSave',
   DebugSync = 'DebugSync',
+  RouterReload = 'RouterReload',
   UpdateCheck = 'UpdateCheck',
+  UpdateDownload = 'UpdateDownload',
   UpdateFinish = 'UpdateFinish',
   UpdateProgress = 'UpdateProgress',
-  UpdateResponse = 'UpdateResponse',
 }
 
 export interface ActionMessage {
   type: ActionType;
   data: unknown;
+}
+
+export class ClientGetVersionActionMessage implements ActionMessage {
+  type = ActionType.ClientGetVersion;
+  data: string | undefined;
+
+  constructor(data?: string) {
+    this.data = data;
+  }
 }
 
 export class ClientSetProjectIdActionMessage implements ActionMessage {
@@ -63,6 +81,15 @@ export class CompletionUpdateActionMessage implements ActionMessage {
   }
 }
 
+export class ConfigStoreLoadActionMessage implements ActionMessage {
+  type = ActionType.ConfigStoreLoad;
+  data: LinseerStoreType | HuggingFaceStoreType | undefined;
+
+  constructor(data?: LinseerStoreType | HuggingFaceStoreType) {
+    this.data = data;
+  }
+}
+
 export class ConfigStoreSaveActionMessage implements ActionMessage {
   type = ActionType.ConfigStoreSave;
   data:
@@ -84,8 +111,17 @@ export class ConfigStoreSaveActionMessage implements ActionMessage {
       | {
           type: 'data';
           data: Partial<LinseerDataType>;
-        }
+        },
   ) {
+    this.data = data;
+  }
+}
+
+export class DataStoreLoadActionMessage implements ActionMessage {
+  type = ActionType.DataStoreLoad;
+  data: { type: 'project' } | { type: 'window' };
+
+  constructor(data: { type: 'project' } | { type: 'window' }) {
     this.data = data;
   }
 }
@@ -99,7 +135,7 @@ export class DataStoreSaveActionMessage implements ActionMessage {
   constructor(
     data:
       | { type: 'project'; data: Record<string, DataProjectType> }
-      | { type: 'window'; data: Partial<DataWindowType> }
+      | { type: 'window'; data: Partial<DataWindowType> },
   ) {
     this.data = data;
   }
@@ -112,6 +148,11 @@ export class DebugSyncActionMessage implements ActionMessage {
   constructor(data: { content: string; path: string }) {
     this.data = data;
   }
+}
+
+export class RouterReloadActionMessage implements ActionMessage {
+  type = ActionType.RouterReload;
+  data: undefined;
 }
 
 export class UpdateCheckActionMessage implements ActionMessage {
@@ -145,25 +186,25 @@ export class UpdateProgressActionMessage implements ActionMessage {
   }
 }
 
-export class UpdateResponseActionMessage implements ActionMessage {
-  type = ActionType.UpdateResponse;
-  data: boolean;
-
-  constructor(data: boolean) {
-    this.data = data;
-  }
+export class UpdateDownloadActionMessage implements ActionMessage {
+  type = ActionType.UpdateDownload;
+  data: undefined;
 }
 
 export interface ActionMessageMapping {
+  [ActionType.ClientGetVersion]: ClientGetVersionActionMessage;
   [ActionType.ClientSetProjectId]: ClientSetProjectIdActionMessage;
   [ActionType.CompletionClear]: CompletionClearActionMessage;
   [ActionType.CompletionSet]: CompletionSetActionMessage;
   [ActionType.CompletionUpdate]: CompletionUpdateActionMessage;
+  [ActionType.ConfigStoreLoad]: ConfigStoreLoadActionMessage;
   [ActionType.ConfigStoreSave]: ConfigStoreSaveActionMessage;
-  [ActionType.DebugSync]: DebugSyncActionMessage;
+  [ActionType.DataStoreLoad]: DataStoreLoadActionMessage;
   [ActionType.DataStoreSave]: DataStoreSaveActionMessage;
+  [ActionType.DebugSync]: DebugSyncActionMessage;
+  [ActionType.RouterReload]: RouterReloadActionMessage;
   [ActionType.UpdateCheck]: UpdateCheckActionMessage;
+  [ActionType.UpdateDownload]: UpdateDownloadActionMessage;
   [ActionType.UpdateFinish]: UpdateFinishActionMessage;
   [ActionType.UpdateProgress]: UpdateProgressActionMessage;
-  [ActionType.UpdateResponse]: UpdateResponseActionMessage;
 }
