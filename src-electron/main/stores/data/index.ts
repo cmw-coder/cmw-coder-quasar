@@ -1,57 +1,71 @@
+import Conf from 'conf';
 import ElectronStore from 'electron-store';
 import { existsSync } from 'fs';
 
 import { dataStoreDefault } from 'main/stores/data/default';
-import { dataStoreSchema } from 'main/stores/data/schema';
 import {
   DataProjectType,
   DataStoreType,
+  DataStoreTypeBefore_1_0_1,
+  DataStoreTypeBefore_1_0_2,
   DataWindowType,
 } from 'main/stores/data/types';
 import { getRevision, searchSvnDirectories } from 'main/utils/svn';
+
+const getAs = <T>(store: unknown, key: string): T => {
+  return <T>(<Conf>store).get(key);
+};
 
 export class DataStore {
   private _store: ElectronStore<DataStoreType>;
 
   constructor() {
-    this._store = new ElectronStore({
+    this._store = new ElectronStore<DataStoreType>({
       clearInvalidConfig: true,
       defaults: dataStoreDefault,
       migrations: {
-        '1.0.0': async (store) => {
-          console.log('DataStore migration from 1.0.0');
-          const oldProjects = <{ pathAndIdMapping: Record<string, string> }>(
-            (<never>store.get('project'))
+        '1.0.1': (store) => {
+          console.info('Migrating "data" store to 1.0.1 ...');
+          const oldProjects = getAs<DataStoreTypeBefore_1_0_1['project']>(
+            store,
+            'project'
           );
           if (oldProjects.pathAndIdMapping) {
-            const newProjects: Record<string, DataProjectType> = {};
-
+            const newProjects: DataStoreTypeBefore_1_0_2['project'] = {};
             for (const [path, id] of Object.entries(
               oldProjects.pathAndIdMapping
             )) {
               if (existsSync(path)) {
-                const svnDirectories = await searchSvnDirectories(path);
-                if (svnDirectories.length) {
-                  newProjects[path] = {
-                    id,
-                    lastAddedLines: 0,
-                    svn: await Promise.all(
-                      svnDirectories.map(async (svnDirectory) => ({
-                        directory: svnDirectory,
-                        revision: await getRevision(svnDirectory),
-                      }))
-                    ),
-                  };
-                }
+                newProjects[path] = {
+                  id,
+                  lastAddedLines: 0,
+                  revision: -1,
+                };
               }
             }
-
             store.set('project', newProjects);
           }
         },
+        '1.0.2': (store) => {
+          console.info('Migrating "data" store to 1.0.2 ...');
+          const oldProjects = getAs<DataStoreTypeBefore_1_0_2['project']>(
+            store,
+            'project'
+          );
+          const newProjects: DataStoreType['project'] = {};
+          for (const path in oldProjects) {
+            const { id, lastAddedLines } = oldProjects[path];
+            newProjects[path] = {
+              id,
+              lastAddedLines,
+              svn: [],
+            };
+          }
+          store.set('project', newProjects);
+        },
       },
       name: 'data',
-      schema: dataStoreSchema,
+      // schema: dataStoreSchema,
     });
   }
 

@@ -15,6 +15,7 @@ export const huggingFaceStoreDefault: HuggingFaceStoreType = {
   apiStyle: ApiStyle.HuggingFace,
   config: {
     endpoints: {
+      feedback: 'http://10.113.36.121/kong/RdTestAiService-b',
       statistics: 'http://10.113.36.121/kong/RdTestResourceStatistic',
       update: 'http://10.113.36.121/h3c-ai-assistant/cmw-coder',
     },
@@ -69,6 +70,7 @@ export const linseerConfigDefault: LinseerStoreType = {
   apiStyle: ApiStyle.Linseer,
   config: {
     endpoints: {
+      feedback: 'http://rdee.h3c.com/kong/RdTestAiService-b',
       statistics: 'http://rdee.h3c.com/kong/RdTestResourceStatistic',
       update: 'http://rdee.h3c.com/h3c-ai-assistant/plugin/sourceinsight',
     },

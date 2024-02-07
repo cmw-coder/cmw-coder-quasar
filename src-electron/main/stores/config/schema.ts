@@ -24,9 +24,12 @@ import {
 const commonConfigSchema: Schema<CommonConfigType> = {
   endpoints: {
     type: 'object',
-    required: ['statistics', 'update'],
+    required: ['feedback', 'statistics', 'update'],
     additionalProperties: false,
     properties: {
+      feedback: {
+        type: 'string',
+      },
       statistics: {
         type: 'string',
       },

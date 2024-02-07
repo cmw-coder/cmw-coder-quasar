@@ -5,10 +5,6 @@ import {
   linseerConfigDefault,
 } from 'main/stores/config/default';
 import {
-  huggingFaceStoreSchema,
-  linseerStoreSchema,
-} from 'main/stores/config/schema';
-import {
   HuggingFaceConfigType,
   HuggingFaceDataType,
   HuggingFaceStoreType,
@@ -25,9 +21,31 @@ export class HuggingFaceConfigStore {
     this._store = new ElectronStore({
       clearInvalidConfig: true,
       defaults: huggingFaceStoreDefault,
+      migrations: {
+        '1.0.1': (store) => {
+          console.info('Migrating "config" store to 1.0.1 ...');
+          const oldConfig = store.get('config');
+          oldConfig.modelConfigs.forEach(
+            (modelConfig) =>
+              (modelConfig.completionConfigs.function.maxTokenCount = 1024)
+          );
+          store.set('config', oldConfig);
+        },
+        '1.0.3': (store) => {
+          console.info('Migrating "config" store to 1.0.3 ...');
+          const oldConfig = store.get('config');
+          oldConfig.endpoints.feedback =
+            huggingFaceStoreDefault.config.endpoints.feedback;
+          store.set('config', oldConfig);
+        },
+      },
       name: 'config',
-      schema: huggingFaceStoreSchema,
+      // schema: huggingFaceStoreSchema,
     });
+  }
+
+  get store() {
+    return this._store.store;
   }
 
   get apiStyle() {
@@ -52,6 +70,10 @@ export class HuggingFaceConfigStore {
     this._store.set('data', { ...currentData, ...data });
   }
 
+  get endpoints() {
+    return this.config.endpoints;
+  }
+
   get modelConfig() {
     const { modelConfigs } = this.config;
     const { modelType } = this.data;
@@ -62,16 +84,7 @@ export class HuggingFaceConfigStore {
   }
 
   get modelType() {
-    // Sanitize modelType
     return this.modelConfig.modelType;
-  }
-
-  get statistics() {
-    return this.config.endpoints.statistics;
-  }
-
-  get update() {
-    return this.config.endpoints.update;
   }
 }
 
@@ -83,8 +96,31 @@ export class LinseerConfigStore {
     this._store = new ElectronStore({
       clearInvalidConfig: true,
       defaults: linseerConfigDefault,
-      schema: linseerStoreSchema,
+      migrations: {
+        '1.0.1': (store) => {
+          console.log('Migrating "config" store to 1.0.1 ...');
+          const oldConfig = store.get('config');
+          oldConfig.modelConfigs.forEach(
+            (modelConfig) =>
+              (modelConfig.completionConfigs.line.maxTokenCount = 15)
+          );
+          store.set('config', oldConfig);
+        },
+        '1.0.3': (store) => {
+          console.log('Migrating "config" store to 1.0.3 ...');
+          const oldConfig = store.get('config');
+          oldConfig.endpoints.feedback =
+            linseerConfigDefault.config.endpoints.feedback;
+          store.set('config', oldConfig);
+        },
+      },
+      name: 'config',
+      // schema: linseerStoreSchema,
     });
+  }
+
+  get store() {
+    return this._store.store;
   }
 
   get apiStyle() {
@@ -109,6 +145,10 @@ export class LinseerConfigStore {
     this._store.set('data', { ...currentData, ...data });
   }
 
+  get endpoints() {
+    return this.config.endpoints;
+  }
+
   get modelConfig() {
     const { modelConfigs } = this.config;
     const { modelType } = this.data;
@@ -119,17 +159,7 @@ export class LinseerConfigStore {
   }
 
   get modelType() {
-    // Sanitize modelType
-    const currentModelConfig = this.modelConfig;
-    return currentModelConfig.modelType;
-  }
-
-  get statistics() {
-    return this.config.endpoints.statistics;
-  }
-
-  get update() {
-    return this.config.endpoints.update;
+    return this.modelConfig.modelType;
   }
 
   set onLogin(handler: () => void) {
