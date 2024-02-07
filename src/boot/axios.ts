@@ -23,10 +23,6 @@ type LoginData =
       error: null;
     };
 
-const rdTestAiService = axios.create({
-  baseURL: 'http://rdee.h3c.com/kong/RdTestAiService-b',
-});
-
 const rdTestServiceProxy = axios.create({
   baseURL: 'http://rdee.h3c.com/kong/RdTestServiceProxy-e',
 });
@@ -40,30 +36,23 @@ export const authCode = async (userId: string) => {
   });
 };
 
-export const uploadImage = async (images: File[]) => {
-  const formData = new FormData();
-  images.forEach((image) => {
-    formData.append('files', image);
-  });
-  return await rdTestAiService.post<string[]>('/chatgpt/graph', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
-};
-
 export const feedBack = async (
+  endpoint: string,
   description: string,
   userId: string,
   version: string,
   pictures?: string[]
 ) => {
-  return await rdTestAiService.post<string>('/chatgpt/feedback', {
-    description,
-    userId,
-    version,
-    pictures,
-  });
+  return await axios
+    .create({
+      baseURL: endpoint,
+    })
+    .post<string>('/chatgpt/feedback', {
+      description,
+      userId,
+      version,
+      pictures,
+    });
 };
 
 export const loginWithCode = async (userId: string, code: string) => {
