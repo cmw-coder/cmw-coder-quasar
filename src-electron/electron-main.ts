@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { exec } from 'child_process';
-import { app, dialog } from 'electron';
+import { app, dialog, globalShortcut } from 'electron';
 import { scheduleJob } from 'node-schedule';
 import { promisify } from 'util';
 
@@ -19,7 +19,7 @@ import { configStore, dataStore } from 'main/stores';
 import { ApiStyle } from 'main/types/model';
 import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
-import { registerActionCallback } from 'preload/types/ActionApi';
+import { registerAction } from 'preload/types/ActionApi';
 import packageJson from 'root/package.json';
 import { ActionType } from 'shared/types/ActionMessage';
 import {
@@ -38,7 +38,7 @@ initAdditionReport();
 initApplication();
 initIpcMain();
 
-const autoUpdater = new AutoUpdater(configStore.update);
+const autoUpdater = new AutoUpdater(configStore.endpoints.update);
 const floatingWindow = new FloatingWindow();
 const immersiveWindow = new ImmersiveWindow();
 const mainWindow = new MainWindow();
@@ -47,28 +47,35 @@ const trayIcon = new TrayIcon();
 
 autoUpdater.onAvailable((updateInfo) => floatingWindow.updateShow(updateInfo));
 autoUpdater.onDownloading((progressInfo) =>
-  floatingWindow.updateProgress(progressInfo)
+  floatingWindow.updateProgress(progressInfo),
 );
 
 autoUpdater.onFinish(() => floatingWindow.updateFinish());
 
 trayIcon.onClick(() => mainWindow.activate());
-trayIcon.registerMenuEntry(MenuEntry.Feedback, () => mainWindow.feedback());
+trayIcon.registerMenuEntry(MenuEntry.Feedback, () => floatingWindow.feedback());
 trayIcon.registerMenuEntry(MenuEntry.Quit, () => app.exit());
 
-registerActionCallback(
+registerAction(
   ActionType.ClientSetProjectId,
+  `main.main.${ActionType.ClientSetProjectId}`,
   ({ path, pid, projectId }) => {
     dataStore.setProjectId(path, projectId).catch();
     websocketManager.setClientProjectId(pid, projectId);
-  }
+  },
 );
-registerActionCallback(ActionType.UpdateFinish, () => checkUpdate());
-registerActionCallback(ActionType.UpdateResponse, async (data) => {
-  if (data) {
+registerAction(
+  ActionType.UpdateDownload,
+  `main.main.${ActionType.UpdateDownload}`,
+  async () => {
     await autoUpdater.downloadUpdate();
-  }
-});
+  },
+);
+registerAction(
+  ActionType.UpdateFinish,
+  `main.main.${ActionType.UpdateFinish}`,
+  () => checkUpdate(),
+);
 
 async function checkRemoteFileExists(url: string): Promise<boolean> {
   try {
@@ -93,7 +100,7 @@ async function checkUpdate() {
   //检查source insight 进程
   const isRun = await isRunning();
   const isDllExists = await checkRemoteFileExists(
-    configStore.update + '/needUpdateDLL'
+    configStore.endpoints.update + '/needUpdateDLL',
   );
   //弹框提示 确定后才会checkUpdate
   if (isRun && isDllExists) {
@@ -128,17 +135,17 @@ websocketManager.registerWsAction(
           Date.now(),
           Date.now(),
           projectId,
-          `${packageJson.version}${version}`
+          `${packageJson.version}${version}`,
         )
         .catch();
     }
-  }
+  },
 );
 websocketManager.registerWsAction(
   WsAction.CompletionCache,
   ({ data: isDelete }) => {
     immersiveWindow.completionUpdate(isDelete);
-  }
+  },
 );
 websocketManager.registerWsAction(WsAction.CompletionCancel, () => {
   immersiveWindow.completionClear();
@@ -183,12 +190,12 @@ websocketManager.registerWsAction(
       const promptElements = await new PromptExtractor(
         project,
         new TextDocument(path),
-        new Position(caret.line, caret.character)
+        new Position(caret.line, caret.character),
       ).getPromptComponents(prefix, recentFiles, suffix, symbols);
       const completions = await promptProcessor.process(
         promptElements,
         prefix,
-        projectData.id
+        projectData.id,
       );
       if (completions && completions.length) {
         statisticsReporter
@@ -197,7 +204,7 @@ websocketManager.registerWsAction(
             Date.now(),
             Date.now(),
             projectData.id,
-            `${packageJson.version}${version}`
+            `${packageJson.version}${version}`,
           )
           .catch();
         return new CompletionGenerateServerMessage({
@@ -216,7 +223,7 @@ websocketManager.registerWsAction(
         message: (<Error>e).message,
       });
     }
-  }
+  },
 );
 websocketManager.registerWsAction(WsAction.CompletionSelect, ({ data }) => {
   const { completion, count, position } = data;
@@ -230,7 +237,7 @@ websocketManager.registerWsAction(
     } else {
       immersiveWindow.hide();
     }
-  }
+  },
 );
 websocketManager.registerWsAction(
   WsAction.EditorSwitchProject,
@@ -241,9 +248,26 @@ websocketManager.registerWsAction(
     } else {
       floatingWindow.projectId(path, pid);
     }
-  }
+  },
 );
 
+app.on('browser-window-blur', () => {
+  globalShortcut.unregisterAll();
+});
+app.on('browser-window-focus', () => {
+  globalShortcut.register('CommandOrControl+R', () => {
+    console.log('CommandOrControl+R is pressed: Shortcut Disabled');
+  });
+  globalShortcut.register('CommandOrControl+Shift+R', () => {
+    console.log('CommandOrControl+Shift+R is pressed: Shortcut Disabled');
+  });
+  globalShortcut.register('F5', () => {
+    console.log('F5 is pressed: Shortcut Disabled');
+  });
+  globalShortcut.register('Shift+F5', () => {
+    console.log('Shift+F5 is pressed: Shortcut Disabled');
+  });
+});
 app.on('second-instance', () => {
   app.focus();
   mainWindow.activate();
@@ -274,6 +298,6 @@ app.whenReady().then(async () => {
     () => {
       trayIcon.notify('正在检查更新……');
       autoUpdater.checkUpdate().catch();
-    }
+    },
   );
 });
