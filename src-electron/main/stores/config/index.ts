@@ -27,7 +27,7 @@ export class HuggingFaceConfigStore {
           const oldConfig = store.get('config');
           oldConfig.modelConfigs.forEach(
             (modelConfig) =>
-              (modelConfig.completionConfigs.function.maxTokenCount = 1024)
+              (modelConfig.completionConfigs.function.maxTokenCount = 1024),
           );
           store.set('config', oldConfig);
         },
@@ -102,7 +102,7 @@ export class LinseerConfigStore {
           const oldConfig = store.get('config');
           oldConfig.modelConfigs.forEach(
             (modelConfig) =>
-              (modelConfig.completionConfigs.line.maxTokenCount = 15)
+              (modelConfig.completionConfigs.line.maxTokenCount = 15),
           );
           store.set('config', oldConfig);
         },

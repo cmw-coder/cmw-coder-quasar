@@ -16,15 +16,15 @@ const completionCount = reactive({
 });
 const currentCompletion = ref('');
 const isMultiLine = computed(
-  () => currentCompletion.value.split('\r\n').length > 1
+  () => currentCompletion.value.split('\r\n').length > 1,
 );
 
 const codeContent = computed(() =>
   codeToHtml(
     ' '.repeat(cacheOffset.value) +
       currentCompletion.value.substring(cacheOffset.value),
-    'c'
-  )
+    'c',
+  ),
 );
 
 const actionApi = new ActionApi(baseName);

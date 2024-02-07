@@ -34,7 +34,7 @@ export const themes: Theme[] = [
 
 export const useSettingsStore = defineStore('settings', () => {
   const theme = ref<Theme>(
-    themes.find((theme) => theme.darkMode === Dark.mode) ?? themes[0]
+    themes.find((theme) => theme.darkMode === Dark.mode) ?? themes[0],
   );
   const developerMode = ref(false);
   const isMobile = computed(() => Screen.lt.md);
@@ -42,13 +42,13 @@ export const useSettingsStore = defineStore('settings', () => {
   const applyDarkMode = () => {
     Dark.set(theme.value.darkMode);
     AddressbarColor.set(
-      Dark.isActive ? getPaletteColor('grey-10') : getPaletteColor('grey-2')
+      Dark.isActive ? getPaletteColor('grey-10') : getPaletteColor('grey-2'),
     );
   };
 
   const toggleDarkMode = () => {
     const index = themes.findIndex(
-      (item) => item.darkMode === theme.value.darkMode
+      (item) => item.darkMode === theme.value.darkMode,
     );
     theme.value = themes[(index + 1) % themes.length];
     applyDarkMode();

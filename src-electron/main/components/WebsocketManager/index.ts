@@ -17,7 +17,7 @@ class WebsocketManager {
     WsAction,
     (
       message: WsMessageMapping[keyof WsMessageMapping]['client'],
-      pid: number
+      pid: number,
     ) => WsMessageMapping[keyof WsMessageMapping]['server']
   >();
   private _server: Server | undefined;
@@ -30,8 +30,8 @@ class WebsocketManager {
     wsAction: T,
     callback: (
       message: WsMessageMapping[T]['client'],
-      pid: number
-    ) => WsMessageMapping[T]['server']
+      pid: number,
+    ) => WsMessageMapping[T]['server'],
   ) {
     this._handlers.set(wsAction, callback);
   }

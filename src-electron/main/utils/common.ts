@@ -12,11 +12,11 @@ export const bypassCors = (window: BrowserWindow) =>
           ...details.responseHeaders,
         },
       });
-    }
+    },
   );
 
 export const folderLatestModificationTime = async (
-  dir: string
+  dir: string,
 ): Promise<Date> => {
   let latestTime = new Date(0);
   try {

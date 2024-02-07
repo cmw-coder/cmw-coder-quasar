@@ -12,11 +12,11 @@ declare global {
       minimize: (windowType: WindowType) => void;
       move: (
         position: { x?: number; y?: number },
-        windowType: WindowType
+        windowType: WindowType,
       ) => void;
       resize: (
         size: { width?: number; height?: number },
-        windowType: WindowType
+        windowType: WindowType,
       ) => void;
       reload: (windowType: WindowType) => void;
       show: (windowType: WindowType) => void;
@@ -24,19 +24,19 @@ declare global {
     };
     [actionApiKey]: {
       invoke: <T extends keyof ActionMessageMapping>(
-        message: ActionMessageMapping[T]
+        message: ActionMessageMapping[T],
       ) => Promise<ActionMessageMapping[T]>;
       register: <T extends keyof ActionMessageMapping>(
         actionType: T,
         name: string,
-        callback: (data: ActionMessageMapping[T]['data']) => void
+        callback: (data: ActionMessageMapping[T]['data']) => void,
       ) => void;
       send: <T extends keyof ActionMessageMapping>(
-        message: ActionMessageMapping[T]
+        message: ActionMessageMapping[T],
       ) => void;
       unregister: <T extends keyof ActionMessageMapping>(
         actionType: T,
-        name: string
+        name: string,
       ) => void;
     };
   }

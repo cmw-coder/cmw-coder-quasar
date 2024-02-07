@@ -89,7 +89,7 @@ export class ResizeControlMessage implements ControlMessage {
 
   constructor(
     dimension: { height?: number; width?: number },
-    windowType: WindowType
+    windowType: WindowType,
   ) {
     this.data = dimension;
     this.windowType = windowType;
@@ -148,7 +148,7 @@ const handlerMap = new Map<WindowType, Map<ControlType, GenericCallBack>>();
 export const registerControlCallback = <T extends keyof ControlMessageMapping>(
   windowType: WindowType,
   controlType: T,
-  callback: (data: ControlMessageMapping[T]['data']) => void
+  callback: (data: ControlMessageMapping[T]['data']) => void,
 ) => {
   if (handlerMap.has(windowType)) {
     handlerMap.get(windowType)?.set(controlType, callback);
@@ -160,7 +160,7 @@ export const registerControlCallback = <T extends keyof ControlMessageMapping>(
 export const triggerControlCallback = (
   windowType: WindowType,
   controlType: ControlType,
-  data: unknown
+  data: unknown,
 ) => {
   handlerMap.get(windowType)?.get(controlType)?.(<never>data);
 };

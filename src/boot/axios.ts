@@ -41,7 +41,7 @@ export const feedBack = async (
   description: string,
   userId: string,
   version: string,
-  pictures?: string[]
+  pictures?: string[],
 ) => {
   return await axios
     .create({

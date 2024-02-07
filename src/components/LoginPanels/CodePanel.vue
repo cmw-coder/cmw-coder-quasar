@@ -74,7 +74,7 @@ const login = async () => {
           data: {
             userId: data.userId,
           },
-        })
+        }),
       );
       window.actionApi.send(
         new ConfigStoreSaveActionMessage({
@@ -85,7 +85,7 @@ const login = async () => {
               refresh: data.refreshToken,
             },
           },
-        })
+        }),
       );
       notify({
         type: 'positive',

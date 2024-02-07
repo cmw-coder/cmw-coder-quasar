@@ -10,8 +10,8 @@ export class TrayIcon {
       __dirname,
       process.env.PROD
         ? 'favicon.ico'
-        : '../../src-electron/assets/icons/icon.ico'
-    )
+        : '../../src-electron/assets/icons/icon.ico',
+    ),
   );
   private _menuEntryMap = new Map<MenuEntry, () => void>();
   private readonly _title = `Comware Coder v${packageJson.version}`;
@@ -60,7 +60,7 @@ export class TrayIcon {
 
   private _createNormalItem(
     menuEntry: MenuEntry,
-    label: string
+    label: string,
   ): MenuItemConstructorOptions {
     return {
       label,

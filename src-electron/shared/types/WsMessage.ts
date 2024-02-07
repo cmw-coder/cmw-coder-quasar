@@ -96,7 +96,7 @@ export class CompletionSelectServerMessage implements WsMessage {
         index: number;
         total: number;
       };
-    }>
+    }>,
   ) {
     this.data = data;
   }

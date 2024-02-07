@@ -16,7 +16,7 @@ export class PromptProcessor {
   async process(
     promptComponents: PromptElements,
     prefix: string,
-    projectId: string
+    projectId: string,
   ): Promise<string[] | undefined> {
     const cacheKey = createHash('sha1')
       .update(prefix.trimEnd())
@@ -33,7 +33,7 @@ export class PromptProcessor {
       completions = await processHuggingFaceApi(
         configStore.modelConfig,
         promptComponents,
-        completionType
+        completionType,
       );
     } else {
       const accessToken = await configStore.getAccessToken();
@@ -46,7 +46,7 @@ export class PromptProcessor {
         accessToken,
         promptComponents,
         completionType,
-        projectId
+        projectId,
       );
     }
     console.log('PromptProcessor.process.normal', completions);

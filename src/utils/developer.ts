@@ -160,18 +160,18 @@ export interface SimilarSnippet {
 export const tokenize = (
   rawText: string,
   ignoreRules: Array<Set<string>>,
-  splitPattern: RegExp = REGEXP_WORD
+  splitPattern: RegExp = REGEXP_WORD,
 ): Set<string> => {
   let tokens = rawText.split(splitPattern).filter((token) => token.length > 0);
   ignoreRules.forEach(
-    (ignoreRule) => (tokens = tokens.filter((token) => !ignoreRule.has(token)))
+    (ignoreRule) => (tokens = tokens.filter((token) => !ignoreRule.has(token))),
   );
   return new Set(tokens);
 };
 export const getMostSimilarSnippetStartLine = (
   candidateTokens: Array<Set<string>>,
   referenceTokens: Set<string>,
-  windowSize: number
+  windowSize: number,
 ): {
   startLine: number;
   score: number;
@@ -192,14 +192,14 @@ export const getMostSimilarSnippetStartLine = (
         .reduce(
           (accumulatedTokens, targetLineTokens) =>
             accumulatedTokens.concat([...targetLineTokens]),
-          Array<string>()
-        )
+          Array<string>(),
+        ),
     );
 
     const intersectionTokens = new Set(
       [...windowedCandidateTokens].filter((targetToken) =>
-        referenceTokens.has(targetToken)
-      )
+        referenceTokens.has(targetToken),
+      ),
     );
 
     const currentScore =

@@ -52,7 +52,7 @@ const selectCurrentFile = (file?: File) => {
 
 const separateTextByLine = (
   rawText: string,
-  removeComments = false
+  removeComments = false,
 ): string[] => {
   if (removeComments) {
     rawText = rawText.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
@@ -83,8 +83,8 @@ const getReferenceFileLines = () =>
           };
           reader.readAsText(file, 'gbk');
         });
-      }
-    )
+      },
+    ),
   );
 
 const calculate = async () => {
@@ -92,7 +92,7 @@ const calculate = async () => {
     const currentFileLines = currentFileContent.value.split('\n');
     const selectedCurrentFileLines = currentFileLines.splice(
       startLine.value - 1,
-      endLine.value - startLine.value + 1
+      endLine.value - startLine.value + 1,
     );
     const referenceFileContents = await getReferenceFileLines();
     referenceFileContents.push({
@@ -109,14 +109,14 @@ const calculate = async () => {
             IGNORE_RESERVED_KEYWORDS,
             IGNORE_COMMON_WORD,
             IGNORE_COMWARE_INTERNAL,
-          ])
+          ]),
         ),
         tokenize(selectedCurrentFileLines.join('\n'), [
           IGNORE_RESERVED_KEYWORDS,
           IGNORE_COMMON_WORD,
           IGNORE_COMWARE_INTERNAL,
         ]),
-        separateTextByLine(selectedCurrentFileLines.join('\n'), true).length
+        separateTextByLine(selectedCurrentFileLines.join('\n'), true).length,
       );
       const currentMostSimilarSnippet: SimilarSnippet = {
         path,
@@ -127,7 +127,7 @@ const calculate = async () => {
             startLine,
             startLine +
               separateTextByLine(selectedCurrentFileLines.join('\n'), true)
-                .length
+                .length,
           )
           .join('\n'),
       };

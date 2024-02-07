@@ -10,12 +10,12 @@ export class ActionApi {
 
   register<T extends keyof ActionMessageMapping>(
     actionType: T,
-    callback: (data: ActionMessageMapping[T]['data']) => void
+    callback: (data: ActionMessageMapping[T]['data']) => void,
   ): void {
     window.actionApi.register(
       actionType,
       this._baseName + actionType,
-      callback
+      callback,
     );
     this._registeredActionTypes.add(actionType);
   }
@@ -24,7 +24,7 @@ export class ActionApi {
     for (const registeredActionType of this._registeredActionTypes) {
       window.actionApi.unregister(
         registeredActionType,
-        this._baseName + registeredActionType
+        this._baseName + registeredActionType,
       );
     }
     this._registeredActionTypes.clear();

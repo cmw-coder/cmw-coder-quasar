@@ -25,7 +25,7 @@ export const refreshToken = async (refreshToken: string) => {
       params: {
         refreshToken,
       },
-    }
+    },
   );
 };
 
@@ -48,7 +48,7 @@ export const generate = async (baseURL: string, data: GenerateRequestData) => {
 export const generateRd = async (
   baseURL: string,
   data: GenerateRdRequestData,
-  accessToken: string
+  accessToken: string,
 ) => {
   return await axios
     .create({

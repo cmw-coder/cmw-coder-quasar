@@ -4,7 +4,7 @@ import { boot } from 'quasar/wrappers';
 export const bus = new EventBus<{
   drawer: (
     position: 'left' | 'right',
-    action: 'close' | 'open' | 'toggle'
+    action: 'close' | 'open' | 'toggle',
   ) => void;
 }>();
 

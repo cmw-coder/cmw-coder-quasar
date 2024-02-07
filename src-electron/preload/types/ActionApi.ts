@@ -24,7 +24,7 @@ export class ActionApi {
 
   register<T extends keyof ActionMessageMapping>(
     actionType: T,
-    callback: (data: ActionMessageMapping[T]['data']) => void
+    callback: (data: ActionMessageMapping[T]['data']) => void,
   ): void {
     registerAction(actionType, this._baseName + actionType, callback);
     this._registeredActionTypes.add(actionType);
@@ -39,7 +39,7 @@ export class ActionApi {
 }
 
 export const invokeToMain = async <T extends keyof ActionMessageMapping>(
-  message: ActionMessageMapping[T]
+  message: ActionMessageMapping[T],
 ): Promise<ActionMessageMapping[T]> => {
   return await ipcRenderer.invoke(actionApiKey, message);
 };
@@ -47,7 +47,7 @@ export const invokeToMain = async <T extends keyof ActionMessageMapping>(
 export const registerAction = <T extends keyof ActionMessageMapping>(
   actionType: T,
   name: string,
-  callback: (data: ActionMessageMapping[T]['data']) => void
+  callback: (data: ActionMessageMapping[T]['data']) => void,
 ): void => {
   const handlers = handlerMap.get(actionType);
   if (handlers) {
@@ -58,14 +58,14 @@ export const registerAction = <T extends keyof ActionMessageMapping>(
 };
 
 export const sendToMain = <T extends keyof ActionMessageMapping>(
-  message: ActionMessageMapping[T]
+  message: ActionMessageMapping[T],
 ): void => {
   ipcRenderer.send(actionApiKey, message);
 };
 
 export const sendToRenderer = <T extends keyof ActionMessageMapping>(
   window: BrowserWindow,
-  message: ActionMessageMapping[T]
+  message: ActionMessageMapping[T],
 ): void => {
   window.webContents.send(actionApiKey, message);
 };
@@ -76,7 +76,7 @@ export const triggerAction = (actionType: ActionType, data: unknown): void => {
 
 export const unregisterAction = <T extends keyof ActionMessageMapping>(
   actionType: T,
-  name: string
+  name: string,
 ): void => {
   const handlers = handlerMap.get(actionType);
   if (handlers) {

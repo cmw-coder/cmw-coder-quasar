@@ -3,7 +3,7 @@ import fs from 'fs';
 import { resolve } from 'path';
 
 export const searchSvnDirectories = async (
-  folder: string
+  folder: string,
 ): Promise<string[]> => {
   const directories: string[] = [];
   try {
@@ -37,7 +37,7 @@ export const getRevision = async (path: string): Promise<number> => {
 
 export const getAddedLines = async (
   path: string,
-  revision: number
+  revision: number,
 ): Promise<string[]> => {
   try {
     const client = new SVNClient();
@@ -45,7 +45,7 @@ export const getAddedLines = async (
       'diff',
       ['-r', revision.toString(), path],
       undefined,
-      true
+      true,
     );
     return diff
       .split(/\r?\n/)

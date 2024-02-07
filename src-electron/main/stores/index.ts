@@ -30,7 +30,7 @@ registerAction(
         break;
       }
     }
-  }
+  },
 );
 
 registerAction(
@@ -47,5 +47,5 @@ registerAction(
         break;
       }
     }
-  }
+  },
 );

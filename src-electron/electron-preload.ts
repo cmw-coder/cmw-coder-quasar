@@ -51,7 +51,7 @@ contextBridge.exposeInMainWorld(actionApiKey, {
 });
 
 ipcRenderer.on(actionApiKey, (_, message: ActionMessage) =>
-  triggerAction(message.type, message.data)
+  triggerAction(message.type, message.data),
 );
 
 webFrame.setZoomFactor(1);

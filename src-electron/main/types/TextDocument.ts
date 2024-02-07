@@ -33,7 +33,7 @@ export class TextDocument {
         lineNumber,
         0,
         lineNumber,
-        text.length + 1
+        text.length + 1,
       ),
       firstNonWhitespaceCharacterIndex: text.search(/\S/),
       isEmptyOrWhitespace: text.trim().length === 0,
@@ -52,7 +52,7 @@ export class TextDocument {
     const linesBefore = this._content.substring(0, offset).split('\n');
     return new Position(
       linesBefore.length - 1,
-      offset - linesBefore.slice(0, -1).join('\n').length
+      offset - linesBefore.slice(0, -1).join('\n').length,
     );
   }
 
@@ -62,7 +62,7 @@ export class TextDocument {
     }
     return this._content.substring(
       this.offsetAt(range.start),
-      this.offsetAt(range.end)
+      this.offsetAt(range.end),
     );
   }
 
@@ -77,7 +77,7 @@ export class TextDocument {
       startPosition.line,
       startPosition.character,
       endPosition.line,
-      endPosition.character
+      endPosition.character,
     );
   }
 
@@ -86,7 +86,7 @@ export class TextDocument {
     return offset < 0
       ? this.positionAt(0)
       : offset >= this._content.length
-      ? this.positionAt(this._content.length - 1)
-      : position;
+        ? this.positionAt(this._content.length - 1)
+        : position;
   }
 }

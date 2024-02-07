@@ -37,13 +37,13 @@ const reportProjectAdditions = async () => {
             await Promise.all(
               svn.map(
                 async ({ directory, revision }) =>
-                  await getAddedLines(directory, revision)
-              )
+                  await getAddedLines(directory, revision),
+              ),
             )
           ).reduce((acc, val) => acc.concat(val), []),
           lastAddedLines,
         };
-      })
+      }),
     )
   )
     .filter((result) => result.additions.length > 0)
@@ -54,7 +54,7 @@ const reportProjectAdditions = async () => {
         Date.now(),
         Date.now(),
         id,
-        packageJson.version
+        packageJson.version,
       );
     });
 };
@@ -65,7 +65,7 @@ export const initAdditionReport = (): Job => {
       hour: 3,
       minute: 0,
     },
-    reportProjectAdditions
+    reportProjectAdditions,
   );
 };
 
@@ -75,9 +75,9 @@ export const initApplication = () => {
 
 export const initIpcMain = () => {
   ipcMain.on(actionApiKey, (_, message: ActionMessage) =>
-    triggerAction(message.type, message.data)
+    triggerAction(message.type, message.data),
   );
   ipcMain.on(controlApiKey, (_, message: ControlMessage) =>
-    triggerControlCallback(message.windowType, message.type, message.data)
+    triggerControlCallback(message.windowType, message.type, message.data),
   );
 };

@@ -10,7 +10,7 @@ import { CompletionType } from 'shared/types/common';
 const detectRegex = /^((\/\/)|(#)|(\{)|(\/\*))$/;
 
 export const getCompletionType = (
-  promptElements: PromptElements
+  promptElements: PromptElements,
 ): CompletionType => {
   const lastLine = promptElements.prefix.split('\r\n').at(-1) ?? '';
   if (lastLine.trim().length > 0) {
@@ -31,15 +31,15 @@ export const getCompletionType = (
 export const processHuggingFaceApi = async (
   modelConfig: HuggingFaceModelConfigType,
   promptElements: PromptElements,
-  completionType: CompletionType
+  completionType: CompletionType,
 ): Promise<string[]> => {
   const { completionConfigs, separateTokens } = modelConfig;
   const completionConfig =
     completionType === CompletionType.Function
       ? completionConfigs.function
       : completionType === CompletionType.Line
-      ? completionConfigs.line
-      : completionConfigs.snippet;
+        ? completionConfigs.line
+        : completionConfigs.snippet;
   const { endpoint, maxTokenCount, stopTokens, suggestionCount, temperature } =
     completionConfig;
 
@@ -76,7 +76,7 @@ export const processHuggingFaceApi = async (
   let generatedSuggestions: string[] = [];
   if (best_of_sequences && best_of_sequences.length) {
     generatedSuggestions = best_of_sequences.map(
-      (bestOfSequence) => bestOfSequence.generated_text
+      (bestOfSequence) => bestOfSequence.generated_text,
     );
   } else {
     generatedSuggestions.push(generated_text);
@@ -85,7 +85,7 @@ export const processHuggingFaceApi = async (
   return _processGeneratedSuggestions(
     generatedSuggestions,
     completionType,
-    promptElements.constructQuestion()
+    promptElements.constructQuestion(),
   );
 };
 
@@ -94,15 +94,15 @@ export const processLinseerApi = async (
   accessToken: string,
   promptElements: PromptElements,
   completionType: CompletionType,
-  projectId: string
+  projectId: string,
 ): Promise<string[]> => {
   const { completionConfigs, endpoint } = modelConfig;
   const completionConfig =
     completionType === CompletionType.Function
       ? completionConfigs.function
       : completionType === CompletionType.Line
-      ? completionConfigs.line
-      : completionConfigs.snippet;
+        ? completionConfigs.line
+        : completionConfigs.snippet;
   const { maxTokenCount, stopTokens, subModelType, temperature } =
     completionConfig;
 
@@ -122,7 +122,7 @@ export const processLinseerApi = async (
           completionType === CompletionType.Line ? 'ShortLineCode' : 'LineCode',
         subType: projectId,
       },
-      accessToken
+      accessToken,
     )
   ).data
     .map((item) => item.text)
@@ -131,14 +131,14 @@ export const processLinseerApi = async (
   return _processGeneratedSuggestions(
     generatedSuggestions,
     completionType,
-    promptElements.constructQuestion()
+    promptElements.constructQuestion(),
   );
 };
 
 const _processGeneratedSuggestions = (
   generatedSuggestions: string[],
   completionType: CompletionType,
-  promptQuestion: string
+  promptQuestion: string,
 ): string[] => {
   // TODO: Replace Date Created if needed.
   const result = generatedSuggestions
@@ -146,21 +146,21 @@ const _processGeneratedSuggestions = (
     .map((generatedSuggestion) =>
       generatedSuggestion.substring(0, promptQuestion.length) === promptQuestion
         ? generatedSuggestion.substring(promptQuestion.length)
-        : generatedSuggestion
+        : generatedSuggestion,
     )
     /// Replace '\t' with 4 spaces.
     .map((generatedSuggestion) =>
-      generatedSuggestion.replace(/\t/g, ' '.repeat(4))
+      generatedSuggestion.replace(/\t/g, ' '.repeat(4)),
     )
     /// Replace '\r' or '\n' with '\r\n'.
     .map((generatedSuggestion) =>
-      generatedSuggestion.replace(/\r\n?/g, '\r\n').replace(/\r?\n/g, '\r\n')
+      generatedSuggestion.replace(/\r\n?/g, '\r\n').replace(/\r?\n/g, '\r\n'),
     )
     /// Filter out leading empty lines.
     .map((generatedSuggestion) => {
       const lines = generatedSuggestion.split('\r\n');
       const firstNonEmptyLineIndex = lines.findIndex(
-        (line) => line.trim().length > 0
+        (line) => line.trim().length > 0,
       );
       return lines.slice(firstNonEmptyLineIndex).join('\r\n');
     })
@@ -179,7 +179,7 @@ const _processGeneratedSuggestions = (
         .map((suggestion) => {
           const lines = suggestion.split('\r\n').slice(0, 4);
           const lastNonEmptyLineIndex = lines.findLastIndex(
-            (line) => line.trim().length > 0
+            (line) => line.trim().length > 0,
           );
           if (lastNonEmptyLineIndex < 0) {
             return '';

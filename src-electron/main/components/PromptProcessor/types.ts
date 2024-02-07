@@ -2,7 +2,10 @@ class ListNode<T> {
   public prev: ListNode<T> | null = null;
   public next: ListNode<T> | null = null;
 
-  constructor(public key: string, public value: T) {}
+  constructor(
+    public key: string,
+    public value: T,
+  ) {}
 }
 
 export class LRUCache<T> {

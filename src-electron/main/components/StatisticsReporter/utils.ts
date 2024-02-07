@@ -13,7 +13,7 @@ export const constructData = (
   version: string,
   modelType: HuggingFaceModelType | LinseerModelType,
   firstClass: string,
-  skuName: string
+  skuName: string,
 ) => {
   const basicData = {
     begin: Math.floor(startTime / 1000),

@@ -5,7 +5,7 @@ import { authCode } from 'boot/axios';
 
 export const sendAuthCode = async (
   userId: string,
-  i18n: (relativePath: string) => string
+  i18n: (relativePath: string) => string,
 ): Promise<QNotifyCreateOptions> => {
   try {
     await authCode(userId);
