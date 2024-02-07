@@ -3,12 +3,16 @@ import { onMounted, ref } from 'vue';
 
 import CodeBlock from 'components/CodeBlock.vue';
 import { ActionType } from 'shared/types/ActionMessage';
+import { ActionApi } from 'types/ActionApi';
 
-const completions = ref<string[]>([]);
+const baseName = 'pages.CompletionFloatingPage.';
 
+const completion = ref('');
+
+const actionApi = new ActionApi(baseName);
 onMounted(() => {
-  window.actionApi.receive(ActionType.CompletionSet, (data) => {
-    completions.value = data.contents;
+  actionApi.register(ActionType.CompletionSet, (data) => {
+    completion.value = data.completion;
   });
 });
 </script>
@@ -16,16 +20,7 @@ onMounted(() => {
 <template>
   <q-page class="row justify-center q-pa-md">
     <div class="col-10 column q-gutter-sm">
-      <div
-        v-for="(completion, index) in completions"
-        :key="index"
-        class="column q-gutter-xs"
-      >
-        <div class="text-grey text-subtitle1">
-          Completion ({{ index + 1 }}/{{ completions.length }}) :
-        </div>
-        <code-block :src="completion" />
-      </div>
+      <code-block :src="completion" />
     </div>
   </q-page>
 </template>
