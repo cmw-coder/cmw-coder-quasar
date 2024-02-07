@@ -1,27 +1,30 @@
 <script setup lang="ts">
 import { format } from 'quasar';
-import { onMounted, reactive, ref } from 'vue';
+import { onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
 import {
   ActionType,
   UpdateFinishActionMessage,
-  UpdateResponseActionMessage,
+  UpdateDownloadActionMessage,
 } from 'shared/types/ActionMessage';
 import { WindowType } from 'shared/types/WindowType';
+import { ActionApi } from 'types/ActionApi';
 import { UpdateQuery } from 'types/queries';
+
+const baseName = 'pages.UpdatePage.';
 
 const { humanStorageSize } = format;
 const { t } = useI18n();
 const { matched, query } = useRoute();
-const { replace } = useRouter();
+const { back } = useRouter();
 
 const i18n = (relativePath: string, data?: Record<string, unknown>) => {
   if (data) {
-    return t('pages.UpdatePage.' + relativePath, data);
+    return t(baseName + relativePath, data);
   } else {
-    return t('pages.UpdatePage.' + relativePath);
+    return t(baseName + relativePath);
   }
 };
 
@@ -40,18 +43,24 @@ const progress = reactive({
 
 const updateResponse = (confirmed: boolean) => {
   isUpdating.value = confirmed;
-  window.actionApi.send(new UpdateResponseActionMessage(confirmed));
+  if (confirmed) {
+    window.actionApi.send(new UpdateDownloadActionMessage());
+  } else if (name === WindowType.Floating) {
+    window.controlApi.hide(WindowType.Floating);
+  } else {
+    back();
+  }
 };
 
+const actionApi = new ActionApi(baseName);
 onMounted(() => {
-  window.actionApi.receive(ActionType.UpdateFinish, () => {
+  actionApi.register(ActionType.UpdateFinish, () => {
     window.actionApi.send(new UpdateFinishActionMessage());
     if (name === WindowType.Floating) {
       window.controlApi.hide(WindowType.Floating);
-      replace('completions');
     }
   });
-  window.actionApi.receive(
+  actionApi.register(
     ActionType.UpdateProgress,
     ({ total, delta, transferred, percent, bytesPerSecond }) => {
       progress.total = total;
@@ -59,8 +68,11 @@ onMounted(() => {
       progress.transferred = transferred;
       progress.percent = percent;
       progress.bytesPerSecond = bytesPerSecond;
-    }
+    },
   );
+});
+onBeforeUnmount(() => {
+  actionApi.unregister();
 });
 </script>
 

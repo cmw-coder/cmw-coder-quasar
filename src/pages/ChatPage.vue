@@ -1,23 +1,30 @@
 <script setup lang="ts">
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { onMounted, ref } from 'vue';
 
 import CodeBlock from 'components/CodeBlock.vue';
 import { ActionType } from 'shared/types/ActionMessage';
 import { b64GbkToUtf8 } from 'utils/iconv';
+import { ActionApi } from 'types/ActionApi';
+
+const baseName = 'pages.ChatPage.';
 
 const { t } = useI18n();
 
 const i18n = (relativePath: string) => {
-  return t('pages.ChatPage.' + relativePath);
+  return t(baseName + relativePath);
 };
 
 const codeContent = ref('');
 
+const actionApi = new ActionApi(baseName);
 onMounted(() => {
-  window.actionApi.receive(ActionType.DebugSync, (data) => {
+  actionApi.register(ActionType.DebugSync, (data) => {
     codeContent.value = b64GbkToUtf8(data.content);
   });
+});
+onBeforeUnmount(() => {
+  actionApi.unregister();
 });
 </script>
 

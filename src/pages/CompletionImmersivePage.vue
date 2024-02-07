@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 
 import { ActionType } from 'shared/types/ActionMessage';
 import { useHighlighter } from 'stores/highlighter';
+import { ActionApi } from 'types/ActionApi';
+
+const baseName = 'pages.CompletionImmersivePage.';
 
 const { codeToHtml } = useHighlighter();
 
@@ -24,30 +27,31 @@ const codeContent = computed(() =>
   )
 );
 
+const actionApi = new ActionApi(baseName);
 onMounted(() => {
-  window.actionApi.receive(ActionType.CompletionClear, () => {
+  actionApi.register(ActionType.CompletionClear, () => {
     cacheOffset.value = 0;
     currentCompletion.value = '';
     completionCount.index = 0;
     completionCount.total = 0;
   });
-  window.actionApi.receive(
-    ActionType.CompletionSet,
-    ({ completion, count }) => {
-      cacheOffset.value = 0;
-      currentCompletion.value = completion;
-      completionCount.index = count.index;
-      completionCount.total = count.total;
-      console.log('Inline completion:', currentCompletion.value);
-    }
-  );
-  window.actionApi.receive(ActionType.CompletionUpdate, (isDelete) => {
+  actionApi.register(ActionType.CompletionSet, ({ completion, count }) => {
+    cacheOffset.value = 0;
+    currentCompletion.value = completion;
+    completionCount.index = count.index;
+    completionCount.total = count.total;
+    console.log('Inline completion:', currentCompletion.value);
+  });
+  actionApi.register(ActionType.CompletionUpdate, (isDelete) => {
     if (isDelete) {
       cacheOffset.value = cacheOffset.value > 0 ? cacheOffset.value - 1 : 0;
     } else {
       cacheOffset.value += 1;
     }
   });
+});
+onBeforeUnmount(() => {
+  actionApi.unregister();
 });
 </script>
 
