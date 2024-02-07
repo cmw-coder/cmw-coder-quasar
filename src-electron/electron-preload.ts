@@ -1,9 +1,11 @@
 import { contextBridge, ipcRenderer, webFrame } from 'electron';
 
 import {
-  registerActionCallback,
+  invokeToMain,
+  registerAction,
   sendToMain,
-  triggerActionCallback,
+  triggerAction,
+  unregisterAction,
 } from 'preload/types/ActionApi';
 import {
   CloseControlMessage,
@@ -42,12 +44,14 @@ contextBridge.exposeInMainWorld(controlApiKey, {
 });
 
 contextBridge.exposeInMainWorld(actionApiKey, {
-  receive: registerActionCallback,
+  invoke: invokeToMain,
+  register: registerAction,
   send: sendToMain,
+  unregister: unregisterAction,
 });
 
 ipcRenderer.on(actionApiKey, (_, message: ActionMessage) =>
-  triggerActionCallback(message.type, message.data)
+  triggerAction(message.type, message.data)
 );
 
 webFrame.setZoomFactor(1);
