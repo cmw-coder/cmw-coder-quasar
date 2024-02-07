@@ -18,6 +18,9 @@ const i18n = (relativePath: string, data?: Record<string, unknown>) => {
 <template>
   <q-page class="row justify-evenly q-pa-xl">
     <div class="column col-grow q-gutter-y-md">
+      <div class="text-h4">
+        {{ i18n('labels.title') }}
+      </div>
       <GeneralCard />
       <UpdateCard />
     </div>

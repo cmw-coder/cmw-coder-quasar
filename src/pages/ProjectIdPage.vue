@@ -2,7 +2,7 @@
 import { DateTime } from 'luxon';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 
 import ProjectIdInput from 'components/ProjectIdInput.vue';
 import { WindowType } from 'shared/types/WindowType';
@@ -11,7 +11,6 @@ import { ClientSetProjectIdActionMessage } from 'shared/types/ActionMessage';
 
 const { t } = useI18n();
 const { matched, query } = useRoute();
-const { replace } = useRouter();
 
 const i18n = (relativePath: string, data?: Record<string, unknown>) => {
   if (data) {
@@ -31,7 +30,6 @@ const projectId = ref('');
 const finish = () => {
   if (name === WindowType.Floating) {
     window.controlApi.hide(WindowType.Floating);
-    replace('completions');
   }
 };
 
@@ -42,7 +40,7 @@ const checkProjectId = async () => {
       pid,
       path,
       projectId: projectId.value,
-    })
+    }),
   );
   setTimeout(() => {
     isLoading.value = false;
@@ -57,7 +55,7 @@ const temporaryProjectId = () => {
       pid,
       path,
       projectId: `Temp_${DateTime.now().toFormat('yyyyLLdd_HHmmss')}`,
-    })
+    }),
   );
   setTimeout(() => {
     isLoading.value = false;
