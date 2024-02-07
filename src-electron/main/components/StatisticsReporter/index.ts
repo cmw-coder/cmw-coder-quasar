@@ -5,6 +5,9 @@ import { configStore } from 'main/stores';
 import { CaretPosition } from 'shared/types/common';
 
 class StatisticsReporter {
+  private _api = axios.create({
+    baseURL: configStore.endpoints.statistics,
+  });
   private _currentCursor: CaretPosition = { character: -1, line: -1 };
   private _lastCursor: CaretPosition = { character: -1, line: -1 };
 
@@ -13,7 +16,7 @@ class StatisticsReporter {
     startTime: number,
     endTime: number,
     projectId: string,
-    version: string
+    version: string,
   ) {
     this._currentCursor.character = -1;
     this._currentCursor.line = -1;
@@ -26,23 +29,19 @@ class StatisticsReporter {
     });
     const lineLength = completion.split('\r\n').length;
     try {
-      await axios
-        .create({
-          baseURL: configStore.statistics,
-        })
-        .post(
-          '/report/summary',
-          constructData(
-            lineLength,
-            startTime,
-            endTime,
-            projectId,
-            version,
-            configStore.modelType,
-            'CODE',
-            lineLength > 1 ? 'KEEP_MULTI' : 'KEEP'
-          )
-        );
+      await this._api.post(
+        '/report/summary',
+        constructData(
+          lineLength,
+          startTime,
+          endTime,
+          projectId,
+          version,
+          configStore.modelType,
+          'CODE',
+          lineLength > 1 ? 'KEEP_MULTI' : 'KEEP',
+        ),
+      );
     } catch (e) {
       console.error('StatisticsReporter.acceptFailed', e);
     }
@@ -53,7 +52,7 @@ class StatisticsReporter {
     startTime: number,
     endTime: number,
     projectId: string,
-    version: string
+    version: string,
   ) {
     if (
       this._currentCursor.character >= 0 &&
@@ -71,23 +70,19 @@ class StatisticsReporter {
     });
     const lineLength = completion.split('\r\n').length;
     try {
-      await axios
-        .create({
-          baseURL: configStore.statistics,
-        })
-        .post(
-          '/report/summary',
-          constructData(
-            lineLength,
-            startTime,
-            endTime,
-            projectId,
-            version,
-            configStore.modelType,
-            'CODE',
-            lineLength > 1 ? 'GENE_MULTI' : 'GENE'
-          )
-        );
+      await this._api.post(
+        '/report/summary',
+        constructData(
+          lineLength,
+          startTime,
+          endTime,
+          projectId,
+          version,
+          configStore.modelType,
+          'CODE',
+          lineLength > 1 ? 'GENE_MULTI' : 'GENE',
+        ),
+      );
     } catch (e) {
       console.error('StatisticsReporter.generateFailed', e);
     }
@@ -98,7 +93,7 @@ class StatisticsReporter {
     startTime: number,
     endTime: number,
     projectId: string,
-    version: string
+    version: string,
   ) {
     console.log('StatisticsReporter.incrementLines', {
       count,
@@ -108,23 +103,19 @@ class StatisticsReporter {
       version,
     });
     try {
-      await axios
-        .create({
-          baseURL: configStore.statistics,
-        })
-        .post(
-          '/report/summary',
-          constructData(
-            count,
-            startTime,
-            endTime,
-            projectId,
-            version,
-            configStore.modelType,
-            'INC',
-            ''
-          )
-        );
+      await this._api.post(
+        '/report/summary',
+        constructData(
+          count,
+          startTime,
+          endTime,
+          projectId,
+          version,
+          configStore.modelType,
+          'INC',
+          '',
+        ),
+      );
     } catch (e) {
       console.error('StatisticsReporter.incrementLinesFailed', e);
     }
