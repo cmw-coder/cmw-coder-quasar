@@ -125,6 +125,12 @@ export default {
         labels: {
           title: 'Comware Coder',
         },
+        tooltips: {
+          close: 'Close',
+          defaultSize: 'Restore default size',
+          minimize: 'Minimize',
+          toggleMaximize: 'Toggle maximize',
+        },
       },
     },
   },
@@ -147,10 +153,15 @@ export default {
         account: 'Account',
         description: 'Issue description',
         images: 'Related Images',
+        cancel: 'Cancel',
         submit: 'Submit',
       },
       hints: {
         account: 'Please enter your H3C account (Job number)',
+      },
+      notifications: {
+        feedbackSuccess: 'Feedback submitted',
+        feedbackFailed: 'Feedback failed',
       },
     },
     LoginPage: {
@@ -168,7 +179,11 @@ export default {
         title: 'Setup New Project',
       },
     },
-    SettingsPage: {},
+    SettingsPage: {
+      labels: {
+        title: 'Settings',
+      },
+    },
     UpdatePage: {
       labels: {
         cancel: 'Not now',

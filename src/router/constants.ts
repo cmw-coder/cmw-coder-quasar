@@ -14,10 +14,17 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('layouts/MainLayout.vue'),
     children: [
       {
-        path: 'projectId',
+        path: 'completions',
         components: {
           header: () => import('layouts/headers/FloatingHeader.vue'),
-          default: () => import('pages/ProjectIdPage.vue'),
+          default: () => import('pages/CompletionFloatingPage.vue'),
+        },
+      },
+      {
+        path: 'feedback',
+        components: {
+          header: () => import('layouts/headers/FloatingHeader.vue'),
+          default: () => import('pages/FeedbackPage.vue'),
         },
       },
       {
@@ -28,10 +35,10 @@ export const routes: RouteRecordRaw[] = [
         },
       },
       {
-        path: 'completions',
+        path: 'projectId',
         components: {
           header: () => import('layouts/headers/FloatingHeader.vue'),
-          default: () => import('pages/CompletionFloatingPage.vue'),
+          default: () => import('pages/ProjectIdPage.vue'),
         },
       },
       {
@@ -62,6 +69,7 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('layouts/MainLayout.vue'),
     children: [
       {
+        name: 'mainRoot',
         path: '',
         redirect: '/main/chat',
       },
