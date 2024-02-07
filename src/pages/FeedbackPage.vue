@@ -1,20 +1,39 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { useQuasar } from 'quasar';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRoute, useRouter } from 'vue-router';
 
 import { feedBack } from 'boot/axios';
 import AccountInput from 'components/AccountInput.vue';
+import {
+  ActionType,
+  ClientGetVersionActionMessage,
+  ConfigStoreLoadActionMessage,
+} from 'shared/types/ActionMessage';
+import { ActionApi } from 'types/ActionApi';
+import { WindowType } from 'shared/types/WindowType';
+
+const baseName = 'pages.FeedbackPage.';
 
 const { t } = useI18n();
+const { notify } = useQuasar();
+const { matched } = useRoute();
+const { back } = useRouter();
 
 const i18n = (relativePath: string) => {
-  return t('pages.FeedbackPage.' + relativePath);
+  return t(baseName + relativePath);
 };
 
+const { name } = matched[matched.length - 2];
+
 const description = ref('');
+const endpoint = ref('');
 const error = ref(false);
 const images = ref<string[]>([]);
+const loading = ref(false);
 const userId = ref('');
+const version = ref('');
 
 const onFailed = (info: { files: readonly File[]; xhr: XMLHttpRequest }) => {
   console.log('onFailed', info);
@@ -25,15 +44,66 @@ const onUploaded = (info: { files: readonly File[]; xhr: XMLHttpRequest }) => {
   }
 };
 
+const closeWindow = () => window.controlApi.hide(WindowType.Floating);
+
 const submit = async () => {
-  const { data } = await feedBack(
-    description.value,
-    userId.value,
-    'SourceInsight 0.7.0',
-    images.value
-  );
-  console.log(data);
+  loading.value = true;
+  try {
+    const { data } = await feedBack(
+      endpoint.value,
+      description.value,
+      userId.value,
+      'SourceInsight 0.7.0',
+      images.value,
+    );
+    notify({
+      type: 'positive',
+      message: i18n('notifications.feedbackSuccess'),
+      caption: data,
+    });
+    setTimeout(() => {
+      switch (name) {
+        case WindowType.Floating: {
+          closeWindow();
+          break;
+        }
+        case WindowType.Main: {
+          back();
+          break;
+        }
+        default: {
+          break;
+        }
+      }
+    }, 2000);
+  } catch (e) {
+    console.warn(e);
+    notify({
+      type: 'negative',
+      message: i18n('notifications.feedbackFailed'),
+    });
+  }
+  loading.value = false;
 };
+
+const actionApi = new ActionApi(baseName);
+onMounted(() => {
+  actionApi.register(ActionType.ClientGetVersion, (data) => {
+    if (data) {
+      version.value = data;
+    }
+  });
+  actionApi.register(ActionType.ConfigStoreLoad, (data) => {
+    if (data) {
+      endpoint.value = data.config.endpoints.feedback;
+    }
+  });
+  window.actionApi.send(new ClientGetVersionActionMessage());
+  window.actionApi.send(new ConfigStoreLoadActionMessage());
+});
+onBeforeUnmount(() => {
+  actionApi.unregister();
+});
 </script>
 
 <template>
@@ -64,25 +134,38 @@ const submit = async () => {
           <q-uploader
             class="full-width"
             batch
+            :disable="!endpoint.length || loading"
             field-name="files"
             multiple
-            url="http://rdee.h3c.com/kong/RdTestAiService-b/chatgpt/graph"
+            :url="`${endpoint}/chatgpt/graph`"
             @failed="onFailed"
             @uploaded="onUploaded"
           />
         </div>
       </q-card-section>
-      <q-card-section class="column">
+      <q-card-section class="row q-gutter-x-md">
         <q-btn
+          v-if="name === WindowType.Floating"
+          class="col-grow"
+          flat
+          :label="i18n('labels.cancel')"
+          :loading="loading"
+          @click="closeWindow"
+        />
+        <q-btn
+          class="col-grow"
           color="primary"
           :disable="
-            !userId ||
-            !userId.length ||
             !description ||
             !description.length ||
+            !endpoint.length ||
+            !userId ||
+            !userId.length ||
+            !version.length ||
             error
           "
           :label="i18n('labels.submit')"
+          :loading="loading"
           @click="submit"
         />
       </q-card-section>
