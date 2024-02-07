@@ -6,7 +6,7 @@ import { statisticsReporter } from 'main/components/StatisticsReporter';
 import { dataStore } from 'main/stores';
 import { folderLatestModificationTime } from 'main/utils/common';
 import { getAddedLines } from 'main/utils/svn';
-import { triggerActionCallback } from 'preload/types/ActionApi';
+import { triggerAction } from 'preload/types/ActionApi';
 import {
   ControlMessage,
   triggerControlCallback,
@@ -60,7 +60,6 @@ const reportProjectAdditions = async () => {
 };
 
 export const initAdditionReport = (): Job => {
-  reportProjectAdditions().catch();
   return scheduleJob(
     {
       hour: 3,
@@ -76,7 +75,7 @@ export const initApplication = () => {
 
 export const initIpcMain = () => {
   ipcMain.on(actionApiKey, (_, message: ActionMessage) =>
-    triggerActionCallback(message.type, message.data)
+    triggerAction(message.type, message.data)
   );
   ipcMain.on(controlApiKey, (_, message: ControlMessage) =>
     triggerControlCallback(message.windowType, message.type, message.data)
