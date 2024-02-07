@@ -1,6 +1,6 @@
 import { SeparateTokens } from 'main/stores/config/types';
 
-export interface PromptElements {
+export class PromptElements {
   file?: string;
   folder?: string;
   language?: string;
@@ -8,9 +8,7 @@ export interface PromptElements {
   similarSnippet?: string;
   suffix: string;
   symbols?: string;
-}
 
-export class PromptElements {
   constructor(prefix: string, suffix: string) {
     this.prefix = prefix;
     this.suffix = suffix;
