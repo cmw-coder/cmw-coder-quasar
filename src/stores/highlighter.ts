@@ -1,15 +1,15 @@
 import { defineStore } from 'pinia';
 import { Dark } from 'quasar';
-import { Lang, renderToHtml, Theme } from 'shiki';
-import { computed, reactive } from 'vue';
+import { BundledLanguage, BundledTheme } from 'shiki';
+import { reactive } from 'vue';
 
 import { highlighter } from 'boot/extension';
 
 interface Config {
-  langs: Lang[];
+  langs: BundledLanguage[];
   theme: {
-    dark: Theme;
-    light: Theme;
+    dark: BundledTheme;
+    light: BundledTheme;
   };
 }
 
@@ -22,30 +22,15 @@ export const useHighlighter = defineStore('highlighter', () => {
     },
   });
 
-  const backgroundColor = computed(() =>
-    highlighter.getBackgroundColor(
-      Dark.isActive ? config.theme.dark : config.theme.light
-    )
-  );
-
-  const codeToHtml = (code: string, lang: Lang) => {
+  const codeToHtml = (code: string, lang: BundledLanguage) => {
     if (!code.length) {
       return '';
     }
-    return renderToHtml(
-      highlighter.codeToThemedTokens(
-        code,
-        lang,
-        Dark.isActive ? config.theme.dark : config.theme.light
-      ),
-      {
-        bg: 'transparent',
-        elements: {
-          pre: ({ className, style, children }) =>
-            `<pre class="${className}" style="${style};margin: 0" tabindex="0">${children}</pre>`,
-        },
-      }
-    );
+    return highlighter.codeToHtml(code, {
+      lang,
+      theme: Dark.isActive ? config.theme.dark : config.theme.light,
+      // colorReplacements: { 'editor-background': 'transparent' },
+    });
   };
 
   const initialize = async () => {
@@ -70,7 +55,6 @@ export const useHighlighter = defineStore('highlighter', () => {
   };
 
   return {
-    backgroundColor,
     config,
     codeToHtml,
     initialize,
