@@ -4,7 +4,7 @@ import { resolve } from 'path';
 
 import { configStore } from 'main/stores';
 import { bypassCors } from 'main/utils/common';
-import { sendToRenderer } from 'preload/types/ActionApi';
+import { ActionApi, sendToRenderer } from 'preload/types/ActionApi';
 import {
   ControlType,
   registerControlCallback,
@@ -12,12 +12,18 @@ import {
 } from 'preload/types/ControlApi';
 import packageJson from 'root/package.json';
 import {
+  ActionType,
+  ClientGetVersionActionMessage,
+  ConfigStoreLoadActionMessage,
+  RouterReloadActionMessage,
   UpdateFinishActionMessage,
   UpdateProgressActionMessage,
 } from 'shared/types/ActionMessage';
 import { WindowType } from 'shared/types/WindowType';
 
 export class FloatingWindow {
+  private readonly _actionApi = new ActionApi('main.FloatingWindow.');
+  private _currentRoute = '';
   private readonly _type = WindowType.Floating;
   private _window: BrowserWindow | undefined;
 
@@ -25,29 +31,21 @@ export class FloatingWindow {
     if (this._window) {
       this._window.show();
     } else {
-      this.create();
+      this._create();
     }
   }
 
-  projectId(path: string, pid: number) {
-    if (
-      this._window &&
-      !this._window.isMinimized() &&
-      this._window.isVisible()
-    ) {
-      return;
-    }
+  feedback() {
     this.activate();
     if (this._window) {
-      this._window?.center();
-      this._window?.focus();
-      const searchString = new URLSearchParams({
-        path,
-        pid: pid.toString(),
-      }).toString();
-      this._window
-        ?.loadURL(`${process.env.APP_URL}#/floating/projectId?${searchString}`)
-        .catch();
+      this._window.setSize(600, 850);
+      this._window.center();
+      this._window.focus();
+      this._loadUrl('/floating/feedback', {
+        userId: configStore.config.userId,
+      });
+    } else {
+      console.warn('Floating window activate failed');
     }
   }
 
@@ -55,18 +53,27 @@ export class FloatingWindow {
     if (mainIsVisible) {
       triggerControlCallback(WindowType.Main, ControlType.Hide, undefined);
     }
-    this._window?.close();
     this.activate();
     if (this._window) {
       this._window.center();
       this._window.focus();
-      const searchString = new URLSearchParams({
+      this._loadUrl('/floating/login', {
         userId: configStore.config.userId,
-        showMain: mainIsVisible ? 'true' : 'false',
-      }).toString();
-      this._window
-        .loadURL(`${process.env.APP_URL}#/floating/login?${searchString}`)
-        .catch();
+        showMain: mainIsVisible,
+      });
+    } else {
+      console.warn('Floating window activate failed');
+    }
+  }
+
+  projectId(path: string, pid: number) {
+    this.activate();
+    if (this._window) {
+      this._window.center();
+      this._window.focus();
+      this._loadUrl('/floating/projectId', { path, pid });
+    } else {
+      console.warn('Floating window activate failed');
     }
   }
 
@@ -80,13 +87,12 @@ export class FloatingWindow {
     if (this._window) {
       sendToRenderer(
         this._window,
-        new UpdateProgressActionMessage(progressInfo)
+        new UpdateProgressActionMessage(progressInfo),
       );
     }
   }
 
   updateShow(updateInfo: UpdateInfo) {
-    this._window?.close();
     this.activate();
     if (this._window) {
       const { version, releaseDate } = updateInfo;
@@ -103,7 +109,7 @@ export class FloatingWindow {
     }
   }
 
-  private create() {
+  private _create() {
     this._window = new BrowserWindow({
       width: 800,
       height: 600,
@@ -130,20 +136,69 @@ export class FloatingWindow {
 
     this._window.setAlwaysOnTop(true, 'pop-up-menu');
 
-    this._window.on('ready-to-show', async () => {
+    this._window.once('ready-to-show', () => {
       if (this._window) {
         // this._window.webContents.openDevTools({ mode: 'undocked' });
+        this._window.show();
+      }
+    });
+
+    this._actionApi.register(ActionType.ClientGetVersion, () => {
+      if (this._window) {
+        sendToRenderer(
+          this._window,
+          new ClientGetVersionActionMessage(packageJson.version),
+        );
+      }
+    });
+    this._actionApi.register(ActionType.ConfigStoreLoad, () => {
+      if (this._window) {
+        sendToRenderer(
+          this._window,
+          new ConfigStoreLoadActionMessage(configStore.store),
+        );
       }
     });
 
     registerControlCallback(this._type, ControlType.Hide, () =>
-      this._window?.hide()
+      this._window?.hide(),
     );
-    registerControlCallback(this._type, ControlType.Reload, () =>
-      this._window?.reload()
-    );
+    registerControlCallback(this._type, ControlType.Reload, () => {
+      if (this._window) {
+        sendToRenderer(this._window, new RouterReloadActionMessage());
+      }
+    });
     registerControlCallback(this._type, ControlType.Show, () =>
-      this._window?.show()
+      this._window?.show(),
     );
+  }
+
+  private _loadUrl<
+    T extends {
+      toString: (radix?: number) => string;
+    },
+  >(route: string, searchParams?: Record<string, string | T>) {
+    if (!this._window) {
+      return;
+    }
+    if (this._currentRoute === route) {
+      sendToRenderer(this._window, new RouterReloadActionMessage());
+    } else {
+      let url = `${process.env.APP_URL}#${route}`;
+      if (searchParams) {
+        for (const key in searchParams) {
+          if (typeof searchParams[key] !== 'string') {
+            searchParams[key] = searchParams[key].toString();
+          }
+        }
+        url += `?${new URLSearchParams(
+          <Record<string, string>>searchParams,
+        ).toString()}`;
+      }
+      this._window
+        .loadURL(url)
+        .then(() => (this._currentRoute = route))
+        .catch((e) => console.log(e));
+    }
   }
 }

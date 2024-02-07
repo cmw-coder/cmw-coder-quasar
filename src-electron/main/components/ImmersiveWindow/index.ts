@@ -8,6 +8,7 @@ import {
   CompletionClearActionMessage,
   CompletionSetActionMessage,
   CompletionUpdateActionMessage,
+  RouterReloadActionMessage,
 } from 'shared/types/ActionMessage';
 import { WindowType } from 'shared/types/WindowType';
 
@@ -33,7 +34,7 @@ export class ImmersiveWindow {
   completionSet(
     completion: string,
     count: { index: number; total: number },
-    position: { x: number; y: number }
+    position: { x: number; y: number },
   ) {
     if (!this._window) {
       this.create();
@@ -41,12 +42,12 @@ export class ImmersiveWindow {
     if (this._window) {
       sendToRenderer(
         this._window,
-        new CompletionSetActionMessage({ completion, count })
+        new CompletionSetActionMessage({ completion, count }),
       );
       this._window.setPosition(
         Math.round(position.x / dataStore.window.zoom),
         Math.round(position.y / dataStore.window.zoom - 21.125),
-        false
+        false,
       );
       // const dipPosition = screen.screenToDipPoint(position);
       // this._window.setPosition(Math.round(dipPosition.x), Math.round(dipPosition.y - 21.125), false);
@@ -113,7 +114,7 @@ export class ImmersiveWindow {
     });
 
     registerControlCallback(this._type, ControlType.Hide, () =>
-      this._window?.hide()
+      this._window?.hide(),
     );
     registerControlCallback(this._type, ControlType.Move, (data) => {
       if (this._window) {
@@ -121,11 +122,13 @@ export class ImmersiveWindow {
         this._window.setPosition(data.x ?? currentX, data.y ?? currentY);
       }
     });
-    registerControlCallback(this._type, ControlType.Reload, () =>
-      this._window?.reload()
-    );
+    registerControlCallback(this._type, ControlType.Reload, () => {
+      if (this._window) {
+        sendToRenderer(this._window, new RouterReloadActionMessage());
+      }
+    });
     registerControlCallback(this._type, ControlType.Show, () =>
-      this._window?.show()
+      this._window?.show(),
     );
   }
 }
