@@ -26,6 +26,7 @@ import {
   CompletionGenerateServerMessage,
   WsAction,
 } from 'shared/types/WsMessage';
+import { timer } from "main/utils/timer";
 
 const childExec = promisify(exec);
 
@@ -153,6 +154,7 @@ websocketManager.registerWsAction(WsAction.CompletionCancel, () => {
 websocketManager.registerWsAction(
   WsAction.CompletionGenerate,
   async ({ data }, pid) => {
+    timer.add('CompletionGenerate', 'ReceiveWebsocketMessage');
     const clientInfo = websocketManager.getClientInfo(pid);
     if (!clientInfo) {
       return new CompletionGenerateServerMessage({
@@ -176,6 +178,8 @@ websocketManager.registerWsAction(
       websocketManager.setClientProjectId(pid, projectData.id);
     }
 
+    timer.add('CompletionGenerate', 'ParseMessageData');
+
     console.log('WsAction.CompletionGenerate', {
       caret,
       path,
@@ -192,11 +196,15 @@ websocketManager.registerWsAction(
         new TextDocument(path),
         new Position(caret.line, caret.character),
       ).getPromptComponents(prefix, recentFiles, suffix, symbols);
+      timer.add('CompletionGenerate', 'CalculatePromptComponents');
       const completions = await promptProcessor.process(
         promptElements,
         prefix,
         projectData.id,
       );
+      timer.add('CompletionGenerate', 'RetrieveCompletions');
+      console.log(timer.parse('CompletionGenerate'));
+      timer.remove('CompletionGenerate');
       if (completions && completions.length) {
         statisticsReporter
           .generateCompletion(
