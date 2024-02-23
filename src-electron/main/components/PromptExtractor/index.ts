@@ -21,6 +21,7 @@ import {
 import { SymbolInfo } from 'main/types/SymbolInfo';
 import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
+import { timer } from 'main/utils/timer';
 
 const { readFile } = promises;
 
@@ -59,6 +60,8 @@ export class PromptExtractor {
     recentFiles = recentFiles.filter(
       (fileName) => fileName !== this._document.fileName,
     );
+
+    timer.add('CompletionGenerate', 'CalculatedFileFolder');
 
     const [allMostSimilarSnippets, relativeDefinitions] = await Promise.all([
       this._getSimilarSnippets(prefix, suffix, recentFiles),
@@ -114,7 +117,7 @@ export class PromptExtractor {
   private async _getRelativeDefinitions(
     symbols: SymbolInfo[],
   ): Promise<RelativeDefinition[]> {
-    return Promise.all(
+    const result = Promise.all(
       symbols.map(async ({ path, startLine, endLine }) => ({
         path,
         content: (
@@ -128,6 +131,10 @@ export class PromptExtractor {
           .join('\n'),
       })),
     );
+
+    timer.add('CompletionGenerate', 'GotRelativeDefinitions');
+
+    return result;
   }
 
   private async _getSimilarSnippets(
@@ -188,6 +195,8 @@ export class PromptExtractor {
 
       mostSimilarSnippets.push(currentMostSimilarSnippet);
     });
+
+    timer.add('CompletionGenerate', 'GotSimilarSnippets');
 
     return mostSimilarSnippets
       .sort((first, second) => first.score - second.score)

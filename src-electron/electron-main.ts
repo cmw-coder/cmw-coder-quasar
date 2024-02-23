@@ -19,6 +19,7 @@ import { configStore, dataStore } from 'main/stores';
 import { ApiStyle } from 'main/types/model';
 import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
+import { timer } from 'main/utils/timer';
 import { registerAction } from 'preload/types/ActionApi';
 import packageJson from 'root/package.json';
 import { ActionType } from 'shared/types/ActionMessage';
@@ -26,7 +27,6 @@ import {
   CompletionGenerateServerMessage,
   WsAction,
 } from 'shared/types/WsMessage';
-import { timer } from "main/utils/timer";
 
 const childExec = promisify(exec);
 
@@ -154,7 +154,7 @@ websocketManager.registerWsAction(WsAction.CompletionCancel, () => {
 websocketManager.registerWsAction(
   WsAction.CompletionGenerate,
   async ({ data }, pid) => {
-    timer.add('CompletionGenerate', 'ReceiveWebsocketMessage');
+    timer.add('CompletionGenerate', 'ReceivedWebsocketMessage');
     const clientInfo = websocketManager.getClientInfo(pid);
     if (!clientInfo) {
       return new CompletionGenerateServerMessage({
@@ -178,7 +178,7 @@ websocketManager.registerWsAction(
       websocketManager.setClientProjectId(pid, projectData.id);
     }
 
-    timer.add('CompletionGenerate', 'ParseMessageData');
+    timer.add('CompletionGenerate', 'ParsedMessageData');
 
     console.log('WsAction.CompletionGenerate', {
       caret,
@@ -196,13 +196,13 @@ websocketManager.registerWsAction(
         new TextDocument(path),
         new Position(caret.line, caret.character),
       ).getPromptComponents(prefix, recentFiles, suffix, symbols);
-      timer.add('CompletionGenerate', 'CalculatePromptComponents');
+      timer.add('CompletionGenerate', 'CalculatedPromptComponents');
       const completions = await promptProcessor.process(
         promptElements,
         prefix,
         projectData.id,
       );
-      timer.add('CompletionGenerate', 'RetrieveCompletions');
+      timer.add('CompletionGenerate', 'RetrievedCompletions');
       console.log(timer.parse('CompletionGenerate'));
       timer.remove('CompletionGenerate');
       if (completions && completions.length) {

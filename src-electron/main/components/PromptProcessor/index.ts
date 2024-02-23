@@ -9,6 +9,7 @@ import {
 } from 'main/components/PromptProcessor/utils';
 import { configStore } from 'main/stores';
 import { ApiStyle } from 'main/types/model';
+import { timer } from 'main/utils/timer';
 
 export class PromptProcessor {
   private _cache = new LRUCache<string[]>(100);
@@ -25,6 +26,8 @@ export class PromptProcessor {
     if (promptCached) {
       return promptCached;
     }
+
+    timer.add('CompletionGenerate', 'CheckedCache');
 
     const completionType = getCompletionType(promptComponents);
     let completions: string[];
