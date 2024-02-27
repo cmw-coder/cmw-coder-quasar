@@ -138,16 +138,18 @@ export class PromptExtractor {
   }
 
   private async _getSimilarSnippets(
-    beforeCursor: string,
-    afterCursor: string,
-    openedTabs: string[],
+    prefix: string,
+    suffix: string,
+    recentFiles: string[],
   ): Promise<SimilarSnippet[]> {
-    const currentDocumentLines = this._getRemainedContents(
-      beforeCursor,
-      afterCursor,
-    );
+    const prefixLines = prefix.split(/\r?\n/);
+    const lastValidCodeLine =
+      prefixLines.findLastIndex((line) => /^\/\/.*|^.*\*\/$/.test(line)) + 1;
+    prefix = prefixLines.slice(lastValidCodeLine).join('\r\n');
 
-    const tabLines = (await getAllOtherTabContents(openedTabs)).map(
+    const currentDocumentLines = this._getRemainedContents(prefix, suffix);
+
+    const tabLines = (await getAllOtherTabContents(recentFiles)).map(
       (tabContent) => ({
         path: tabContent.path,
         lines: separateTextByLine(tabContent.content, true),
@@ -175,12 +177,12 @@ export class PromptExtractor {
             IGNORE_COMWARE_INTERNAL,
           ]),
         ),
-        tokenize(beforeCursor, [
+        tokenize(prefix, [
           IGNORE_RESERVED_KEYWORDS,
           IGNORE_COMMON_WORD,
           IGNORE_COMWARE_INTERNAL,
         ]),
-        separateTextByLine(beforeCursor, true).length,
+        separateTextByLine(prefix, true).length,
       );
       const currentMostSimilarSnippet: SimilarSnippet = {
         path,
@@ -188,7 +190,7 @@ export class PromptExtractor {
         content: lines
           .slice(
             startLine,
-            startLine + separateTextByLine(beforeCursor, true).length + 10,
+            startLine + separateTextByLine(prefix, true).length + 10,
           )
           .join('\n'),
       };
@@ -205,8 +207,8 @@ export class PromptExtractor {
   }
 
   private _getRemainedContents(
-    beforeCursor: string,
-    afterCursor: string,
+    prefix: string,
+    suffix: string,
   ): {
     before: string[];
     after: string[];
@@ -217,14 +219,12 @@ export class PromptExtractor {
       before: separateTextByLine(
         rawText.slice(
           0,
-          this._document.offsetAt(this._position) - beforeCursor.length,
+          this._document.offsetAt(this._position) - prefix.length,
         ),
         true,
       ),
       after: separateTextByLine(
-        rawText.slice(
-          this._document.offsetAt(this._position) + afterCursor.length,
-        ),
+        rawText.slice(this._document.offsetAt(this._position) + suffix.length),
         true,
       ),
     };

@@ -1,4 +1,4 @@
-import { promises } from 'fs';
+import { existsSync, promises } from 'fs';
 
 import { REGEXP_WORD } from 'main/components/PromptExtractor/constants';
 
@@ -7,12 +7,16 @@ const { readFile } = promises;
 export const getAllOtherTabContents = async (
   tabPaths: string[],
 ): Promise<{ path: string; content: string }[]> => {
-  return (await Promise.all(tabPaths.map((tabPath) => readFile(tabPath)))).map(
-    (tabContent, index) => ({
-      path: tabPaths[index],
-      content: tabContent.toString(),
-    }),
-  );
+  return (
+    await Promise.all(
+      tabPaths
+        .filter((tabPath) => existsSync(tabPath))
+        .map((tabPath) => readFile(tabPath)),
+    )
+  ).map((tabContent, index) => ({
+    path: tabPaths[index],
+    content: tabContent.toString(),
+  }));
 };
 
 export const isStartWithCapital = (word: string): boolean => {
