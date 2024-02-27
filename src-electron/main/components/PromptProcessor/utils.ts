@@ -6,8 +6,8 @@ import {
 import { generate, generateRd } from 'main/utils/axios';
 import { CompletionType } from 'shared/types/common';
 
-// Start with '//' or '#' or '{' or '/*'
-const detectRegex = /^((\/\/)|(#)|(\{)|(\/\*))$/;
+// Start with '//' or '#' or '{' or '/*', or is '***/'
+const detectRegex = /^\/\/|^#|^\{|^\/\*|^\*+\/$/;
 
 export const getCompletionType = (
   promptElements: PromptElements,
