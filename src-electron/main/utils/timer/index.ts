@@ -59,13 +59,13 @@ class Timer {
     const lastRecord = records.at(-1);
     if (firstRecord && lastRecord) {
       const totalDuration = firstRecord.timePoint.until(lastRecord.timePoint);
-      const title = `Category '${category}' costs ${totalDuration.toDuration().toHuman()}, details: \n`;
+      const title = `Category '${category}' costs ${totalDuration.toDuration().toMillis()}ms, details: \n`;
       return (
         title +
         records
           .map(
             (record) =>
-              `${' '.repeat(indent)}'${record.name}' costs ${record.duration.toHuman()}`,
+              `${' '.repeat(indent)}'${record.name}' costs ${record.duration.toMillis()}ms`,
           )
           .join('\n')
       );
