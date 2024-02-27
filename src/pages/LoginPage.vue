@@ -29,17 +29,13 @@ const finish = () => {
   }
   switch (name) {
     case WindowType.Floating: {
-      window.controlApi.hide(WindowType.Floating);
+      window.controlApi.close(WindowType.Floating);
       break;
     }
     case WindowType.Main: {
       replace('completions');
       break;
     }
-  }
-  if (name === WindowType.Floating) {
-    window.controlApi.hide(WindowType.Floating);
-    replace('completions');
   }
 };
 </script>

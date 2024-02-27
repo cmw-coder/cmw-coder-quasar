@@ -160,6 +160,13 @@ export class FloatingWindow {
       }
     });
 
+    registerControlCallback(this._type, ControlType.Close, () => {
+      if (this._window) {
+        this._window?.destroy();
+        this._window = undefined;
+        this._currentRoute = '';
+      }
+    });
     registerControlCallback(this._type, ControlType.Hide, () =>
       this._window?.hide(),
     );

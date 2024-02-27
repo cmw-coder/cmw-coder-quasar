@@ -29,7 +29,7 @@ const projectId = ref('');
 
 const finish = () => {
   if (name === WindowType.Floating) {
-    window.controlApi.hide(WindowType.Floating);
+    window.controlApi.close(WindowType.Floating);
   }
 };
 
