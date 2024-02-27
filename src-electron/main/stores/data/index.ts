@@ -96,23 +96,18 @@ export class DataStore {
     if (current[path]) {
       current[path].id = projectId;
     } else {
-      const data = await Promise.all(
+      current[path] = {
+        id: projectId,
+        lastAddedLines: 0,
+        svn: [],
+      };
+      this.project = current;
+      current[path].svn = await Promise.all(
         (await searchSvnDirectories(path)).map(async (svnDirectory) => ({
           directory: svnDirectory,
           revision: await getRevision(svnDirectory),
         })),
       );
-      console.log('setProjectId', data);
-      current[path] = {
-        id: projectId,
-        lastAddedLines: 0,
-        svn: await Promise.all(
-          (await searchSvnDirectories(path)).map(async (svnDirectory) => ({
-            directory: svnDirectory,
-            revision: await getRevision(svnDirectory),
-          })),
-        ),
-      };
     }
     this.project = current;
   }
