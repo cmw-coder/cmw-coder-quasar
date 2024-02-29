@@ -5,6 +5,7 @@ import {
 } from 'main/stores/config/types';
 import { generate, generateRd } from 'main/utils/axios';
 import { CompletionType } from 'shared/types/common';
+import { CanceledError } from 'axios';
 
 // Start with '//' or '#' or '{' or '/*', or is '***/'
 const detectRegex = /^\/\/|^#|^\{|^\/\*|^\*+\/$/;
@@ -17,7 +18,7 @@ export const completionsPostProcess = (
   return completions.map((completion) => {
     const lines = completion.split(/\r?\n/);
     const sameContentIndex = lines.findIndex(
-      (line) => line.trim() === firstSuffixLine,
+      (line) => line.trim().length > 2 && line.trim() === firstSuffixLine,
     );
     return sameContentIndex === -1
       ? completion
@@ -48,6 +49,7 @@ export const processHuggingFaceApi = async (
   modelConfig: HuggingFaceModelConfigType,
   promptElements: PromptElements,
   completionType: CompletionType,
+  abortSignal: AbortSignal,
 ): Promise<string[]> => {
   const { completionConfigs, separateTokens } = modelConfig;
   const completionConfig =
@@ -59,37 +61,52 @@ export const processHuggingFaceApi = async (
   const { endpoint, maxTokenCount, stopTokens, suggestionCount, temperature } =
     completionConfig;
 
-  const {
-    data: {
-      details: { best_of_sequences },
-      generated_text,
-    },
-  } = await generate(endpoint, {
-    inputs: promptElements.stringify(separateTokens),
-    parameters: {
-      best_of: suggestionCount,
-      details: true,
-      do_sample: true,
-      max_new_tokens: maxTokenCount,
-      stop: stopTokens,
-      temperature: temperature,
-      top_p: 0.95,
-    },
-  });
-  let generatedSuggestions: string[] = [];
-  if (best_of_sequences && best_of_sequences.length) {
-    generatedSuggestions = best_of_sequences.map(
-      (bestOfSequence) => bestOfSequence.generated_text,
+  try {
+    const {
+      data: {
+        details: { best_of_sequences },
+        generated_text,
+      },
+    } = await generate(
+      endpoint,
+      {
+        inputs: promptElements.stringify(separateTokens),
+        parameters: {
+          best_of: suggestionCount,
+          details: true,
+          do_sample: true,
+          max_new_tokens: maxTokenCount,
+          stop: stopTokens,
+          temperature: temperature,
+          top_p: 0.95,
+        },
+      },
+      abortSignal,
     );
-  } else {
-    generatedSuggestions.push(generated_text);
+    let generatedSuggestions: string[] = [];
+    if (best_of_sequences && best_of_sequences.length) {
+      generatedSuggestions = best_of_sequences.map(
+        (bestOfSequence) => bestOfSequence.generated_text,
+      );
+    } else {
+      generatedSuggestions.push(generated_text);
+    }
+    return _processGeneratedSuggestions(
+      generatedSuggestions,
+      completionType,
+      promptElements.constructQuestion(),
+    );
+  } catch (error) {
+    if (error instanceof CanceledError) {
+      console.log(
+        'PromptProcessor.process.processHuggingFaceApi',
+        'Request aborted',
+      );
+    } else {
+      console.warn(error);
+    }
   }
-
-  return _processGeneratedSuggestions(
-    generatedSuggestions,
-    completionType,
-    promptElements.constructQuestion(),
-  );
+  return [];
 };
 
 export const processLinseerApi = async (
@@ -98,6 +115,7 @@ export const processLinseerApi = async (
   promptElements: PromptElements,
   completionType: CompletionType,
   projectId: string,
+  abortSignal: AbortSignal,
 ): Promise<string[]> => {
   const { completionConfigs, endpoint } = modelConfig;
   const completionConfig =
@@ -109,33 +127,48 @@ export const processLinseerApi = async (
   const { maxTokenCount, stopTokens, subModelType, temperature } =
     completionConfig;
 
-  const generatedSuggestions = (
-    await generateRd(
-      endpoint,
-      {
-        question: promptElements.constructQuestion(),
-        model: subModelType,
-        maxTokens: maxTokenCount,
-        temperature: temperature,
-        stop: stopTokens,
-        suffix: promptElements.suffix,
-        plugin: 'SI',
-        profileModel: '百业灵犀-13B',
-        templateName:
-          completionType === CompletionType.Line ? 'ShortLineCode' : 'LineCode',
-        subType: projectId,
-      },
-      accessToken,
-    )
-  ).data
-    .map((item) => item.text)
-    .filter((completion) => completion.trim().length > 0);
+  try {
+    const generatedSuggestions = (
+      await generateRd(
+        endpoint,
+        {
+          question: promptElements.constructQuestion(),
+          model: subModelType,
+          maxTokens: maxTokenCount,
+          temperature: temperature,
+          stop: stopTokens,
+          suffix: promptElements.suffix,
+          plugin: 'SI',
+          profileModel: '百业灵犀-13B',
+          templateName:
+            completionType === CompletionType.Line
+              ? 'ShortLineCode'
+              : 'LineCode',
+          subType: projectId,
+        },
+        accessToken,
+        abortSignal,
+      )
+    ).data
+      .map((item) => item.text)
+      .filter((completion) => completion.trim().length > 0);
 
-  return _processGeneratedSuggestions(
-    generatedSuggestions,
-    completionType,
-    promptElements.constructQuestion(),
-  );
+    return _processGeneratedSuggestions(
+      generatedSuggestions,
+      completionType,
+      promptElements.constructQuestion(),
+    );
+  } catch (error) {
+    if (error instanceof CanceledError) {
+      console.log(
+        'PromptProcessor.process.processLinseerApi',
+        'Request aborted',
+      );
+    } else {
+      console.warn(error);
+    }
+  }
+  return [];
 };
 
 const _processGeneratedSuggestions = (

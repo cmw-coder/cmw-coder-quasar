@@ -37,10 +37,15 @@ export const judgment = async (token: string) => {
   });
 };
 
-export const generate = async (baseURL: string, data: GenerateRequestData) => {
+export const generate = async (
+  baseURL: string,
+  data: GenerateRequestData,
+  signal?: AbortSignal,
+) => {
   return await axios
     .create({
       baseURL,
+      signal,
     })
     .post<GenerateResponseData>('/generate', data);
 };
@@ -49,10 +54,12 @@ export const generateRd = async (
   baseURL: string,
   data: GenerateRdRequestData,
   accessToken: string,
+  signal?: AbortSignal,
 ) => {
   return await axios
     .create({
       baseURL,
+      signal,
     })
     .post<GenerateRdResponseData[]>('/generateCode', data, {
       headers: {
