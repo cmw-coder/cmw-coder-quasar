@@ -19,10 +19,6 @@ export const getAllOtherTabContents = async (
   }));
 };
 
-export const isStartWithCapital = (word: string): boolean => {
-  return word.charCodeAt(0) >= 65 && word.charCodeAt(0) <= 90;
-};
-
 export const separateTextByLine = (
   rawText: string,
   removeComments = false,
