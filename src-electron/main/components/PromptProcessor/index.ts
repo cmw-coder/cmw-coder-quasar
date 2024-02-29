@@ -3,6 +3,7 @@ import { createHash } from 'crypto';
 import { PromptElements } from 'main/components/PromptExtractor/types';
 import { LRUCache } from 'main/components/PromptProcessor/types';
 import {
+  completionsPostProcess,
   getCompletionType,
   processHuggingFaceApi,
   processLinseerApi,
@@ -15,27 +16,27 @@ export class PromptProcessor {
   private _cache = new LRUCache<string[]>(100);
 
   async process(
-    promptComponents: PromptElements,
-    prefix: string,
+    promptElements: PromptElements,
     projectId: string,
   ): Promise<string[] | undefined> {
     const cacheKey = createHash('sha1')
-      .update(prefix.trimEnd())
+      .update(promptElements.prefix.trimEnd())
       .digest('base64');
-    const promptCached = this._cache.get(cacheKey);
-    if (promptCached) {
-      return promptCached;
+    const completionCached = this._cache.get(cacheKey);
+    if (completionCached) {
+      console.log('PromptProcessor.process.cacheHit', completionCached);
+      return completionsPostProcess(completionCached, promptElements);
     }
 
     timer.add('CompletionGenerate', 'CheckedCache');
 
-    const completionType = getCompletionType(promptComponents);
+    const completionType = getCompletionType(promptElements);
     let completions: string[];
 
     if (configStore.apiStyle === ApiStyle.HuggingFace) {
       completions = await processHuggingFaceApi(
         configStore.modelConfig,
-        promptComponents,
+        promptElements,
         completionType,
       );
     } else {
@@ -47,14 +48,15 @@ export class PromptProcessor {
       completions = await processLinseerApi(
         configStore.modelConfig,
         accessToken,
-        promptComponents,
+        promptElements,
         completionType,
         projectId,
       );
     }
-    console.log('PromptProcessor.process.normal', completions);
+    console.log('PromptProcessor.process.cacheMiss', completions);
     if (completions.length) {
       this._cache.put(cacheKey, completions);
+      completions = completionsPostProcess(completions, promptElements);
     }
     return completions;
   }

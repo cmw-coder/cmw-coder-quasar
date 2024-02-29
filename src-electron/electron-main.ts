@@ -199,7 +199,6 @@ websocketManager.registerWsAction(
       timer.add('CompletionGenerate', 'CalculatedPromptComponents');
       const completions = await promptProcessor.process(
         promptElements,
-        prefix,
         projectData.id,
       );
       timer.add('CompletionGenerate', 'RetrievedCompletions');

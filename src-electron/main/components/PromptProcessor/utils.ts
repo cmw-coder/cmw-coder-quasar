@@ -9,6 +9,22 @@ import { CompletionType } from 'shared/types/common';
 // Start with '//' or '#' or '{' or '/*', or is '***/'
 const detectRegex = /^\/\/|^#|^\{|^\/\*|^\*+\/$/;
 
+export const completionsPostProcess = (completions: string[], promptElements: PromptElements) => {
+  const firstSuffixLine = promptElements.suffix
+    .trim()
+    .split(/\r?\n/)[0]
+    .trim();
+  return completions.map((completion) => {
+    const lines = completion.split(/\r?\n/);
+    const sameContentIndex = lines.findIndex(
+      (line) => line.trim() === firstSuffixLine,
+    );
+    return sameContentIndex === -1
+      ? completion
+      : lines.slice(0, sameContentIndex).join('\r\n');
+  });
+}
+
 export const getCompletionType = (
   promptElements: PromptElements,
 ): CompletionType => {
@@ -42,19 +58,6 @@ export const processHuggingFaceApi = async (
         : completionConfigs.snippet;
   const { endpoint, maxTokenCount, stopTokens, suggestionCount, temperature } =
     completionConfig;
-
-  console.log('processHuggingFaceApi', {
-    inputs: promptElements.stringify(separateTokens),
-    parameters: {
-      best_of: suggestionCount,
-      details: true,
-      do_sample: true,
-      max_new_tokens: maxTokenCount,
-      stop: stopTokens,
-      temperature: temperature,
-      top_p: 0.95,
-    },
-  });
 
   const {
     data: {
@@ -177,7 +180,7 @@ const _processGeneratedSuggestions = (
     case CompletionType.Snippet: {
       return result
         .map((suggestion) => {
-          const lines = suggestion.split('\r\n').slice(0, 4);
+          const lines = suggestion.split('\r\n').slice(0, 5);
           const lastNonEmptyLineIndex = lines.findLastIndex(
             (line) => line.trim().length > 0,
           );
@@ -185,7 +188,7 @@ const _processGeneratedSuggestions = (
             return '';
           }
           return lines
-            .slice(0, Math.min(3, lastNonEmptyLineIndex + 1))
+            .slice(0, Math.min(4, lastNonEmptyLineIndex + 1))
             .join('\r\n');
         })
         .filter((suggestion) => suggestion.length > 0);
