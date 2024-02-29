@@ -9,11 +9,11 @@ import { CompletionType } from 'shared/types/common';
 // Start with '//' or '#' or '{' or '/*', or is '***/'
 const detectRegex = /^\/\/|^#|^\{|^\/\*|^\*+\/$/;
 
-export const completionsPostProcess = (completions: string[], promptElements: PromptElements) => {
-  const firstSuffixLine = promptElements.suffix
-    .trim()
-    .split(/\r?\n/)[0]
-    .trim();
+export const completionsPostProcess = (
+  completions: string[],
+  promptElements: PromptElements,
+) => {
+  const firstSuffixLine = promptElements.suffix.trim().split(/\r?\n/)[0].trim();
   return completions.map((completion) => {
     const lines = completion.split(/\r?\n/);
     const sameContentIndex = lines.findIndex(
@@ -23,7 +23,7 @@ export const completionsPostProcess = (completions: string[], promptElements: Pr
       ? completion
       : lines.slice(0, sameContentIndex).join('\r\n');
   });
-}
+};
 
 export const getCompletionType = (
   promptElements: PromptElements,
