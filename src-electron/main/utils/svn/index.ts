@@ -27,12 +27,17 @@ export const searchSvnDirectories = async (
 export const getRevision = async (path: string): Promise<number> => {
   try {
     const client = new SVNClient();
-    const revision = await client.getRevision(path);
-    console.log(`Revision for ${path}, ${revision}`);
-    return revision;
-  } catch {
-    return -1;
+    client.setConfig({ silent: true });
+    const info = await client.info(path);
+    const revision = info.match(/Last Changed Rev: (\d+)/)?.[1];
+    if (revision) {
+      console.log(`Revision for ${path}: ${revision}`);
+      return parseInt(revision);
+    }
+  } catch (e) {
+    console.log('Get revision failed', e);
   }
+  return -1;
 };
 
 export const getAddedLines = async (
@@ -41,6 +46,7 @@ export const getAddedLines = async (
 ): Promise<string[]> => {
   try {
     const client = new SVNClient();
+    client.setConfig({ silent: true });
     const diff = await client.cmd(
       'diff',
       ['-r', revision.toString(), path],
