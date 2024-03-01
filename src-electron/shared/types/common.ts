@@ -14,4 +14,5 @@ export interface SymbolInfo {
   name: string;
   path: string;
   startLine: number;
+  type: string;
 }
