@@ -87,26 +87,27 @@ export class PromptExtractor {
     }
 
     if (relativeDefinitions.length) {
-      const remainingCharacters =
-        6000 -
-        promptElements.file.length -
-        promptElements.folder.length -
-        promptElements.language.length -
-        promptElements.prefix.length -
-        (promptElements.similarSnippet?.length ?? 0) -
-        promptElements.suffix.length;
-      const relativeDefinitionsTruncated = Array<RelativeDefinition>();
-      let currentCharacters = 0;
-      for (const relativeDefinition of relativeDefinitions) {
-        if (
-          currentCharacters + relativeDefinition.content.length <=
-          remainingCharacters
-        ) {
-          relativeDefinitionsTruncated.push(relativeDefinition);
-          currentCharacters += relativeDefinition.content.length;
-        }
-      }
-      promptElements.symbols = relativeDefinitionsTruncated
+      // const remainingCharacters =
+      //   6000 -
+      //   promptElements.file.length -
+      //   promptElements.folder.length -
+      //   promptElements.language.length -
+      //   promptElements.prefix.length -
+      //   (promptElements.similarSnippet?.length ?? 0) -
+      //   promptElements.suffix.length;
+      // const relativeDefinitionsTruncated = Array<RelativeDefinition>();
+      // let currentCharacters = 0;
+      // for (const relativeDefinition of relativeDefinitions) {
+      //   if (
+      //     currentCharacters + relativeDefinition.content.length <=
+      //     remainingCharacters
+      //   ) {
+      //     relativeDefinitionsTruncated.push(relativeDefinition);
+      //     currentCharacters += relativeDefinition.content.length;
+      //   }
+      // }
+
+      promptElements.symbols = relativeDefinitions
         .map((relativeDefinition) => relativeDefinition.content)
         .join('\r\n');
     }
@@ -126,9 +127,9 @@ export class PromptExtractor {
           })
         )
           .toString()
-          .split('\n')
+          .split(/\r?\n/)
           .slice(startLine, endLine + 1)
-          .join('\n'),
+          .join('\r\n'),
       })),
     );
 
