@@ -57,9 +57,6 @@
         abort
       ${EndIf}
     ${EndIf}
-    MessageBox MB_YESNO|MB_ICONEXCLAMATION "$INSTDIR\resources\assets\proxy\*"
-    MessageBox MB_YESNO|MB_ICONEXCLAMATION '"$SI4_LOCATION\cmw-coder-loader.exe" /uninstall'
-    MessageBox MB_YESNO|MB_ICONEXCLAMATION '"$SI4_LOCATION\cmw-coder-loader.exe" /install'
     Sleep 1000
     CopyFiles /FILESONLY "$INSTDIR\resources\assets\proxy\*" "$SI4_LOCATION"
     Sleep 1000
