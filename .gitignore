@@ -35,3 +35,7 @@ yarn-error.log*
 
 # local .env files
 .env.local*
+
+# Dynamic assets
+/src-electron/assets/proxy/loaderdll.dll
+/src-electron/assets/proxy/zlib1.dll
