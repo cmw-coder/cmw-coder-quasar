@@ -19,7 +19,7 @@ module.exports = configure((/* ctx */) => {
       // exclude: [],
       // rawOptions: {},
       warnings: true,
-      errors: true
+      errors: true,
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/prefetch-feature
@@ -44,14 +44,14 @@ module.exports = configure((/* ctx */) => {
       // 'roboto-font-latin-ext', // this or either 'roboto-font', NEVER both!
 
       'roboto-font', // optional, you are not bound to it
-      'material-icons' // optional, you are not bound to it
+      'material-icons', // optional, you are not bound to it
     ],
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#build
     build: {
       target: {
         browser: ['esnext', 'edge89', 'firefox89', 'chrome89', 'safari15'],
-        node: 'node16'
+        node: 'node16',
       },
 
       vueRouterMode: 'hash', // available values: 'hash', 'history'
@@ -77,7 +77,7 @@ module.exports = configure((/* ctx */) => {
         router: path.join(__dirname, './src/router'),
         shared: path.join(__dirname, './src-electron/shared'),
         types: path.join(__dirname, './src/types'),
-        utils: path.join(__dirname, './src/utils')
+        utils: path.join(__dirname, './src/utils'),
       },
 
       viteVuePluginOptions: {},
@@ -94,16 +94,16 @@ module.exports = configure((/* ctx */) => {
             runtimeOnly: false,
 
             // you need to set i18n resource including paths!
-            include: path.resolve(__dirname, './src/i18n/**')
-          }
-        ]
-      ]
+            include: path.resolve(__dirname, './src/i18n/**'),
+          },
+        ],
+      ],
     },
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#devServer
     devServer: {
       // https: true
-      open: false // opens a browser window automatically
+      open: false, // opens a browser window automatically
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#framework
@@ -126,8 +126,8 @@ module.exports = configure((/* ctx */) => {
         'Loading',
         'LocalStorage',
         'Notify',
-        'SessionStorage'
-      ]
+        'SessionStorage',
+      ],
     },
 
     // animations: 'all', // --- includes all animations
@@ -163,8 +163,8 @@ module.exports = configure((/* ctx */) => {
       // (gets superseded if process.env.PORT is specified at runtime)
 
       middlewares: [
-        'render' // keep this as the last one
-      ]
+        'render', // keep this as the last one
+      ],
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/developing-pwa/configuring-pwa
@@ -173,7 +173,7 @@ module.exports = configure((/* ctx */) => {
       injectPwaMetaTags: true,
       swFilename: 'sw.js',
       manifestFilename: 'manifest.json',
-      useCredentialsForManifestTag: false
+      useCredentialsForManifestTag: false,
       // useFilenameHashes: true,
       // extendGenerateSWOptions (cfg) {}
       // extendInjectManifestOptions (cfg) {},
@@ -188,7 +188,7 @@ module.exports = configure((/* ctx */) => {
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/developing-capacitor-apps/configuring-capacitor
     capacitor: {
-      hideSplashscreen: true
+      hideSplashscreen: true,
     },
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/developing-electron-apps/configuring-electron
@@ -209,18 +209,18 @@ module.exports = configure((/* ctx */) => {
         // https://www.electron.build/configuration/configuration
         appId: 'cmw-coder-quasar',
         electronDownload: {
-          version: '22.3.27'
+          version: '22.3.27',
         },
         extraResources: [
           {
             from: 'src-electron/assets/proxy/',
-            to: 'assets/proxy'
-          }
+            to: 'assets/proxy',
+          },
         ],
         nsis: {
           include: 'assets/installer/script.nsh',
           multiLanguageInstaller: true,
-          perMachine: true
+          perMachine: true,
         },
         win: {
           icon: 'assets/icons/icon.ico',
@@ -229,25 +229,25 @@ module.exports = configure((/* ctx */) => {
               channel: 'release',
               provider: 'generic',
               // url: 'http://rdee.h3c.com/h3c-ai-assistant/plugin/sourceinsight/',
-              url: 'http://127.0.0.1:8080/'
+              url: 'http://127.0.0.1:8080/',
             },
             {
               channel: 'beta',
               provider: 'generic',
               // url: 'http://rdee.h3c.com/h3c-ai-assistant/plugin/sourceinsight/',
-              url: 'http://127.0.0.1:8080/'
-            }
-          ]
-        }
-      }
+              url: 'http://127.0.0.1:8080/',
+            },
+          ],
+        },
+      },
     },
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/developing-browser-extensions/configuring-bex
     bex: {
-      contentScripts: ['my-content-script']
+      contentScripts: ['my-content-script'],
 
       // extendBexScriptsConf (esbuildConf) {}
       // extendBexManifestJson (json) {}
-    }
+    },
   };
 });

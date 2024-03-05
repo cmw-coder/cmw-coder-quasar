@@ -41,7 +41,7 @@ export class PromptProcessor {
         configStore.modelConfig,
         promptElements,
         completionType,
-        this._abortController.signal
+        this._abortController.signal,
       );
     } else {
       const accessToken = await configStore.getAccessToken();
@@ -56,7 +56,7 @@ export class PromptProcessor {
         promptElements,
         completionType,
         projectId,
-        this._abortController.signal
+        this._abortController.signal,
       );
     }
     this._abortController = undefined;
