@@ -164,6 +164,19 @@ websocketManager.registerWsAction(
     }
     const { version } = clientInfo;
     const { caret, path, prefix, project, recentFiles, suffix, symbols } = data;
+
+    console.log('WsAction.CompletionGenerate', {
+      caret,
+      path,
+      prefix,
+      project,
+      recentFiles,
+      suffix,
+      symbols,
+    });
+
+    timer.add('CompletionGenerate', 'ParsedMessageData');
+
     const projectData = dataStore.project[project];
     if (!projectData) {
       floatingWindow.projectId(project, pid);
@@ -178,16 +191,7 @@ websocketManager.registerWsAction(
       websocketManager.setClientProjectId(pid, projectData.id);
     }
 
-    timer.add('CompletionGenerate', 'ParsedMessageData');
-
-    console.log('WsAction.CompletionGenerate', {
-      caret,
-      path,
-      prefix,
-      recentFiles,
-      suffix,
-      symbols,
-    });
+    timer.add('CompletionGenerate', 'GotProjectData');
 
     try {
       statisticsReporter.updateCaretPosition(caret);
