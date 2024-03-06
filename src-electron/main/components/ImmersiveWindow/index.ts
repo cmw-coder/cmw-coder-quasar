@@ -31,7 +31,7 @@ export class ImmersiveWindow {
     }
   }
 
-  completionSet(
+  completionSelect(
     completion: string,
     count: { index: number; total: number },
     position: { x: number; y: number },

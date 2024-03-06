@@ -238,7 +238,7 @@ websocketManager.registerWsAction(
 );
 websocketManager.registerWsAction(WsAction.CompletionSelect, ({ data }) => {
   const { completion, count, position } = data;
-  immersiveWindow.completionSet(completion, count, position);
+  immersiveWindow.completionSelect(completion, count, position);
 });
 websocketManager.registerWsAction(
   WsAction.EditorFocusState,
