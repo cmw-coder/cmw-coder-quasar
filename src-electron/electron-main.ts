@@ -30,13 +30,8 @@ import {
   WsAction,
 } from 'shared/types/WsMessage';
 
-if (!app.requestSingleInstanceLock()) {
-  app.quit();
-  process.exit(-1);
-}
-
-initAdditionReport();
 initApplication();
+initAdditionReport();
 initIpcMain();
 
 const autoUpdater = new AutoUpdater(configStore.endpoints.update);
@@ -117,15 +112,6 @@ websocketManager.registerWsAction(
   async ({ data }, pid) => {
     const { caret, path, prefix, project, recentFiles, suffix, symbols } = data;
     const actionId = statisticsReporter.completionBegin(caret);
-    console.debug('WsAction.CompletionGenerate', {
-      caret,
-      path,
-      prefix,
-      project,
-      recentFiles,
-      suffix,
-      symbols,
-    });
 
     try {
       const { id: projectId } = getProjectData(project);

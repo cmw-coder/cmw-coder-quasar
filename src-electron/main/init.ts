@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron';
+import { app, ipcMain } from 'electron';
 import { Job, scheduleJob } from 'node-schedule';
 import { release, version } from 'os';
 
@@ -71,6 +71,13 @@ export const initAdditionReport = (): Job => {
 
 export const initApplication = () => {
   console.log(`OS version: ${version()} (${release()})`);
+  if (!app.requestSingleInstanceLock()) {
+    app.quit();
+    process.exit(-1);
+  }
+  app.setLoginItemSettings({
+    openAtLogin: true,
+  });
 };
 
 export const initIpcMain = () => {

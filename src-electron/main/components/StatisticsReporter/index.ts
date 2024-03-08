@@ -73,16 +73,20 @@ class StatisticsReporter {
     if (
       data.position.character >= 0 &&
       data.position.line >= 0 &&
-      data.position.line == this._lastCursorPosition.line
+      data.position.line != this._lastCursorPosition.line
     ) {
-      return;
+      // TODO: Check if this works
+      this._lastCursorPosition = data.position;
+      console.debug('StatisticsReporter.completionCancel', {
+        completions: data.completions,
+        position: data.position,
+        projectId: data.projectId,
+        timelines: data.timelines,
+        version,
+      });
+
+      // TODO: Implement the rest of this method
     }
-    // TODO: Check if this works
-    this._lastCursorPosition = data.position;
-    console.debug('StatisticsReporter.completionCancel', { ...data, version });
-
-    // TODO: Implement the rest of this method
-
     this.completionAbort(actionId);
   }
 
@@ -110,7 +114,10 @@ class StatisticsReporter {
       data.position.line != this._lastCursorPosition.line
     ) {
       console.debug('StatisticsReporter.completionSelected', {
-        ...data,
+        completions: data.completions,
+        position: data.position,
+        projectId: data.projectId,
+        timelines: data.timelines,
         version,
       });
       const lineLength = candidate.split('\r\n').length;
@@ -171,7 +178,10 @@ class StatisticsReporter {
     }
 
     console.debug('StatisticsReporter.acceptCompletion', {
-      ...data,
+      completions: data.completions,
+      position: data.position,
+      projectId: data.projectId,
+      timelines: data.timelines,
       version,
     });
 
@@ -196,6 +206,8 @@ class StatisticsReporter {
     } catch (e) {
       console.error('StatisticsReporter.acceptFailed', e);
     }
+
+    this.completionAbort(actionId);
   }
 
   async incrementLines(

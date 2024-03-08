@@ -75,7 +75,7 @@ export class PromptExtractor {
           mostSimilarSnippet.score > this._similarSnippetConfig.minScore,
       );
 
-    console.log({
+    console.log('PromptExtractor.getPromptComponents', {
       minScore: this._similarSnippetConfig.minScore,
       mostSimilarSnippets,
     });
