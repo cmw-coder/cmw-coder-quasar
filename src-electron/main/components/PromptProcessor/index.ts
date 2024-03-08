@@ -20,7 +20,7 @@ export class PromptProcessor {
   async process(
     promptElements: PromptElements,
     projectId: string,
-  ): Promise<Completions| undefined> {
+  ): Promise<Completions | undefined> {
     const cacheKey = createHash('sha1')
       .update(promptElements.prefix.trimEnd())
       .digest('base64');
