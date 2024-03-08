@@ -1,4 +1,5 @@
 import { CaretPosition, SymbolInfo } from 'shared/types/common';
+import { Completions } from 'main/components/PromptProcessor/types';
 
 export enum WsAction {
   CompletionAccept = 'CompletionAccept',
@@ -18,7 +19,7 @@ export interface WsMessage {
   timestamp: number;
 }
 
-type StandardResult<T = unknown> =
+export type StandardResult<T = unknown> =
   | {
       result: 'failure' | 'error';
       message: string;
@@ -27,7 +28,10 @@ type StandardResult<T = unknown> =
 
 export interface CompletionAcceptClientMessage extends WsMessage {
   action: WsAction.CompletionAccept;
-  data: string;
+  data: {
+    actionId: string;
+    index: number;
+  };
 }
 
 export interface CompletionCacheClientMessage extends WsMessage {
@@ -37,7 +41,10 @@ export interface CompletionCacheClientMessage extends WsMessage {
 
 export interface CompletionCancelClientMessage extends WsMessage {
   action: WsAction.CompletionCancel;
-  data: undefined;
+  data: {
+    actionId: string;
+    explicit: boolean;
+  };
 }
 
 export interface CompletionGenerateClientMessage extends WsMessage {
@@ -55,10 +62,12 @@ export interface CompletionGenerateClientMessage extends WsMessage {
 
 export class CompletionGenerateServerMessage implements WsMessage {
   action = WsAction.CompletionGenerate;
-  data: StandardResult<{ completions: string[] }>;
+  data: StandardResult<{ actionId: string; completions: Completions }>;
   timestamp = Date.now();
 
-  constructor(data: StandardResult<{ completions: string[] }>) {
+  constructor(
+    data: StandardResult<{ actionId: string; completions: Completions }>,
+  ) {
     this.data = data;
   }
 }
@@ -66,11 +75,8 @@ export class CompletionGenerateServerMessage implements WsMessage {
 export interface CompletionSelectClientMessage extends WsMessage {
   action: WsAction.CompletionGenerate;
   data: {
-    completion: string;
-    count: {
-      index: number;
-      total: number;
-    };
+    actionId: string;
+    index: number;
     position: {
       x: number;
       y: number;
@@ -140,7 +146,7 @@ export interface WsMessageMapping {
   };
   [WsAction.CompletionGenerate]: {
     client: CompletionGenerateClientMessage;
-    server: Promise<CompletionGenerateServerMessage>;
+    server: Promise<CompletionGenerateServerMessage | void>;
   };
   [WsAction.CompletionSelect]: {
     client: CompletionSelectClientMessage;

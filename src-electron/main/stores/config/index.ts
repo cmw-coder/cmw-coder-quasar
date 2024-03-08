@@ -89,7 +89,6 @@ export class HuggingFaceConfigStore {
 }
 
 export class LinseerConfigStore {
-  private _loginHandler: (() => void) | undefined;
   private _store: ElectronStore<LinseerStoreType>;
 
   constructor() {
@@ -160,14 +159,6 @@ export class LinseerConfigStore {
 
   get modelType() {
     return this.modelConfig.modelType;
-  }
-
-  set onLogin(handler: () => void) {
-    this._loginHandler = handler;
-  }
-
-  login() {
-    this._loginHandler?.();
   }
 
   async getAccessToken() {
