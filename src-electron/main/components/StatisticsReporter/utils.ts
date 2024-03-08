@@ -3,7 +3,7 @@ import {
   secondClassMap,
 } from 'main/components/StatisticsReporter/constants';
 import { configStore } from 'main/stores';
-import { HuggingFaceModelType, LinseerModelType } from 'main/types/model';
+import { HuggingFaceModelType, LinseerModelType } from 'shared/types/model';
 
 export const constructData = (
   lineCount: number,

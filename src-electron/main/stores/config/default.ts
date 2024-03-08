@@ -9,7 +9,7 @@ import {
   HuggingFaceModelType,
   LinseerModelType,
   SubModelType,
-} from 'main/types/model';
+} from 'shared/types/model';
 
 export const huggingFaceStoreDefault: HuggingFaceStoreType = {
   apiStyle: ApiStyle.HuggingFace,
@@ -92,6 +92,66 @@ export const linseerConfigDefault: LinseerStoreType = {
             maxTokenCount: 15,
             stopTokens: ['<fim_pad>', '<|endoftext|>', '</s>'],
             subModelType: SubModelType['linseer-code-13b'],
+            suggestionCount: 1,
+            temperature: 0.2,
+          },
+          snippet: {
+            contextLimit: 1500,
+            maxTokenCount: 40,
+            stopTokens: ['<fim_pad>', '<|endoftext|>', '</s>', '}'],
+            subModelType: SubModelType['linseer-code-34b'],
+            suggestionCount: 1,
+            temperature: 0.2,
+          },
+        },
+      },
+      {
+        endpoint: 'http://rdee.h3c.com/kong/RdTestAiService/chatgpt',
+        modelType: LinseerModelType.Linseer_SR88Driver,
+        completionConfigs: {
+          function: {
+            contextLimit: 1500,
+            maxTokenCount: 320,
+            stopTokens: ['<fim_pad>', '<|endoftext|>', '</s>', '\n}'],
+            subModelType: SubModelType['linseer-code-34b'],
+            suggestionCount: 1,
+            temperature: 0.2,
+          },
+          line: {
+            contextLimit: 1500,
+            maxTokenCount: 15,
+            stopTokens: ['<fim_pad>', '<|endoftext|>', '</s>'],
+            subModelType: SubModelType['linseer-code-13b-sr88drv'],
+            suggestionCount: 1,
+            temperature: 0.2,
+          },
+          snippet: {
+            contextLimit: 1500,
+            maxTokenCount: 40,
+            stopTokens: ['<fim_pad>', '<|endoftext|>', '</s>', '}'],
+            subModelType: SubModelType['linseer-code-34b'],
+            suggestionCount: 1,
+            temperature: 0.2,
+          },
+        },
+      },
+      {
+        endpoint: 'http://rdee.h3c.com/kong/RdTestAiService/chatgpt',
+        modelType: LinseerModelType.Linseer_CClsw,
+        completionConfigs: {
+          function: {
+            contextLimit: 1500,
+            maxTokenCount: 320,
+            stopTokens: ['<fim_pad>', '<|endoftext|>', '</s>', '\n}'],
+            subModelType: SubModelType['linseer-code-34b'],
+            suggestionCount: 1,
+            temperature: 0.2,
+          },
+          line: {
+            contextLimit: 1500,
+            maxTokenCount: 15,
+            stopTokens: ['<fim_pad>', '<|endoftext|>', '</s>'],
+            subModelType: SubModelType['linseer-code-13b-cclsw'],
             suggestionCount: 1,
             temperature: 0.2,
           },

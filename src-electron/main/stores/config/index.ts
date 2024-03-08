@@ -112,6 +112,12 @@ export class LinseerConfigStore {
             linseerConfigDefault.config.endpoints.feedback;
           store.set('config', oldConfig);
         },
+        '1.0.4': (store) => {
+          console.log('Migrating "config" store to 1.0.4 ...');
+          const oldConfig = store.get('config');
+          oldConfig.modelConfigs = linseerConfigDefault.config.modelConfigs;
+          store.set('config', oldConfig);
+        },
       },
       name: 'config',
       // schema: linseerStoreSchema,

@@ -19,7 +19,7 @@ import {
   HuggingFaceModelType,
   LinseerModelType,
   SubModelType,
-} from 'main/types/model';
+} from 'shared/types/model';
 
 const commonConfigSchema: Schema<CommonConfigType> = {
   endpoints: {

@@ -1,8 +1,8 @@
 import { HuggingFaceConfigStore, LinseerConfigStore } from 'main/stores/config';
 import { DataStore } from 'main/stores/data';
-import { ApiStyle } from 'main/types/model';
 import { registerAction } from 'preload/types/ActionApi';
 import { ActionType } from 'shared/types/ActionMessage';
+import { ApiStyle } from 'shared/types/model';
 
 let apiStyle: ApiStyle;
 

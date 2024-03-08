@@ -13,7 +13,6 @@ import { MenuEntry } from 'main/components/TrayIcon/types';
 import { websocketManager } from 'main/components/WebsocketManager';
 import { initAdditionReport, initApplication, initIpcMain } from 'main/init';
 import { configStore, dataStore } from 'main/stores';
-import { ApiStyle } from 'main/types/model';
 import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
 import {
@@ -23,6 +22,7 @@ import {
 } from 'main/utils/completion';
 import { timer } from 'main/utils/timer';
 import { registerAction } from 'preload/types/ActionApi';
+import { ApiStyle } from 'shared/types/model';
 import { ActionType } from 'shared/types/ActionMessage';
 import {
   CompletionGenerateServerMessage,

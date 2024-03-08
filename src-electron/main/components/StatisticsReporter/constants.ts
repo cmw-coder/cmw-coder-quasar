@@ -1,4 +1,4 @@
-import { HuggingFaceModelType, LinseerModelType } from 'main/types/model';
+import { HuggingFaceModelType, LinseerModelType } from 'shared/types/model';
 
 export const secondClassMap = new Map<
   HuggingFaceModelType | LinseerModelType,

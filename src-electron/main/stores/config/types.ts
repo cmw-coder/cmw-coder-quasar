@@ -3,7 +3,7 @@ import {
   HuggingFaceModelType,
   LinseerModelType,
   SubModelType,
-} from 'main/types/model';
+} from 'shared/types/model';
 
 export interface SeparateTokens {
   end: string;

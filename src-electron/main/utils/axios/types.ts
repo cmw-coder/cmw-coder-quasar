@@ -1,4 +1,4 @@
-import { SubModelType } from 'main/types/model';
+import { SubModelType } from 'shared/types/model';
 
 export interface JudgmentData {
   code: number;

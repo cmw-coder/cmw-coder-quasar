@@ -9,9 +9,9 @@ import {
   processLinseerApi,
 } from 'main/components/PromptProcessor/utils';
 import { configStore } from 'main/stores';
-import { ApiStyle } from 'main/types/model';
 import { CompletionErrorCause } from 'main/utils/completion';
 import { timer } from 'main/utils/timer';
+import { ApiStyle } from 'shared/types/model';
 
 export class PromptProcessor {
   private _abortController?: AbortController;
