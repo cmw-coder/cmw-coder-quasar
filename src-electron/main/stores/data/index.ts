@@ -124,15 +124,6 @@ export class DataStore {
     const current = this.project;
     if (current[path]) {
       const svnDirectories = await searchSvnDirectories(path);
-      console.log(
-        'setProjectRevision',
-        await Promise.all(
-          svnDirectories.map(async (svnDirectory) => ({
-            directory: svnDirectory,
-            revision: await getRevision(svnDirectory),
-          })),
-        ),
-      );
       current[path].svn = await Promise.all(
         svnDirectories.map(async (svnDirectory) => ({
           directory: svnDirectory,
