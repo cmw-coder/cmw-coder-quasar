@@ -30,6 +30,9 @@ const dataProjectSchema: Schema<DataProjectType> = {
 };
 
 const dataWindowSchema: Schema<DataWindowType> = {
+  dipMapping: {
+    type: 'boolean',
+  },
   main: {
     type: 'object',
     required: ['height', 'show', 'width'],
@@ -45,9 +48,6 @@ const dataWindowSchema: Schema<DataWindowType> = {
         type: 'number',
       },
     },
-  },
-  zoom: {
-    type: 'number',
   },
 };
 

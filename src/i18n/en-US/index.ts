@@ -90,6 +90,7 @@ export default {
             [LinseerModelType.Linseer_CClsw]: 'Linseer for CClsw Team',
           },
           currentModel: 'Current model',
+          dipMapping: 'Auto DPI scaling',
           fontSize: 'Font size',
           title: 'Code Completion',
         },

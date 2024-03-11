@@ -1,4 +1,4 @@
-import { BrowserWindow } from 'electron';
+import { BrowserWindow, screen } from 'electron';
 import { resolve } from 'path';
 
 import { dataStore } from 'main/stores';
@@ -44,13 +44,14 @@ export class ImmersiveWindow {
         this._window,
         new CompletionSetActionMessage({ completion, count }),
       );
+      if (dataStore.window.dipMapping) {
+        position = screen.screenToDipPoint(position);
+      }
       this._window.setPosition(
-        Math.round(position.x / dataStore.window.zoom),
-        Math.round(position.y / dataStore.window.zoom - 21.125),
+        Math.round(position.x),
+        Math.round(position.y - 30),
         false,
       );
-      // const dipPosition = screen.screenToDipPoint(position);
-      // this._window.setPosition(Math.round(dipPosition.x), Math.round(dipPosition.y - 21.125), false);
       this._window.show();
     } else {
       console.warn('Immersive window activate failed');
@@ -110,10 +111,16 @@ export class ImmersiveWindow {
 
     this._window.on('ready-to-show', () => {
       if (this._window) {
-        // this._window.webContents.openDevTools({ mode: 'undocked' });
+        this._window.webContents.openDevTools({ mode: 'undocked' });
       }
     });
 
+    registerControlCallback(this._type, ControlType.Close, () => {
+      if (this._window) {
+        this._window.destroy();
+        this._window = undefined;
+      }
+    });
     registerControlCallback(this._type, ControlType.Hide, () =>
       this._window?.hide(),
     );

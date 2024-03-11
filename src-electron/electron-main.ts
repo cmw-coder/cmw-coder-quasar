@@ -6,6 +6,7 @@ import { FloatingWindow } from 'main/components/FloatingWindow';
 import { ImmersiveWindow } from 'main/components/ImmersiveWindow';
 import { MainWindow } from 'main/components/MainWindow';
 import { PromptExtractor } from 'main/components/PromptExtractor';
+import { RawInputs } from 'main/components/PromptExtractor/types';
 import { PromptProcessor } from 'main/components/PromptProcessor';
 import { statisticsReporter } from 'main/components/StatisticsReporter';
 import { TrayIcon } from 'main/components/TrayIcon';
@@ -13,8 +14,6 @@ import { MenuEntry } from 'main/components/TrayIcon/types';
 import { websocketManager } from 'main/components/WebsocketManager';
 import { initAdditionReport, initApplication, initIpcMain } from 'main/init';
 import { configStore, dataStore } from 'main/stores';
-import { TextDocument } from 'main/types/TextDocument';
-import { Position } from 'main/types/vscode/position';
 import {
   CompletionErrorCause,
   getClientVersion,
@@ -38,6 +37,7 @@ const autoUpdater = new AutoUpdater(configStore.endpoints.update);
 const floatingWindow = new FloatingWindow();
 const immersiveWindow = new ImmersiveWindow();
 const mainWindow = new MainWindow();
+const promptExtractor = new PromptExtractor();
 const promptProcessor = new PromptProcessor();
 const trayIcon = new TrayIcon();
 
@@ -110,7 +110,7 @@ websocketManager.registerWsAction(
 websocketManager.registerWsAction(
   WsAction.CompletionGenerate,
   async ({ data }, pid) => {
-    const { caret, path, prefix, project, recentFiles, suffix, symbols } = data;
+    const { caret, project } = data;
     const actionId = statisticsReporter.completionBegin(caret);
 
     try {
@@ -118,11 +118,9 @@ websocketManager.registerWsAction(
       websocketManager.setClientProjectId(pid, projectId);
       statisticsReporter.completionUpdateProjectId(actionId, projectId);
 
-      const promptElements = await new PromptExtractor(
-        project,
-        new TextDocument(path),
-        new Position(caret.line, caret.character),
-      ).getPromptComponents(prefix, recentFiles, suffix, symbols);
+      const promptElements = await promptExtractor.getPromptComponents(
+        new RawInputs(data),
+      );
       statisticsReporter.completionUpdatePromptElements(
         actionId,
         promptElements,

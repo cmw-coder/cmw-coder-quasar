@@ -1,6 +1,3 @@
-import { promises } from 'fs';
-import { basename, dirname } from 'path';
-
 import {
   IGNORE_COMMON_WORD,
   IGNORE_COMWARE_INTERNAL,
@@ -8,82 +5,56 @@ import {
 } from 'main/components/PromptExtractor/constants';
 import {
   PromptElements,
-  RelativeDefinition,
+  RawInputs,
   SimilarSnippet,
   SimilarSnippetConfig,
 } from 'main/components/PromptExtractor/types';
 import {
+  codeStripEnd,
   getAllOtherTabContents,
+  getContentsAroundContext,
   getMostSimilarSnippetStartLine,
   separateTextByLine,
   tokenize,
 } from 'main/components/PromptExtractor/utils';
-import { SymbolInfo } from 'main/types/SymbolInfo';
 import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
 import { timer } from 'main/utils/timer';
 
-const { readFile } = promises;
-
 export class PromptExtractor {
-  private _document: TextDocument;
-  private readonly _position: Position;
-  private readonly _project: string;
   private _similarSnippetConfig: SimilarSnippetConfig = {
     contextLines: 30,
-    limit: 5,
     minScore: 0.45,
   };
   private _slowRecentFiles: string[] = [];
 
-  constructor(project: string, document: TextDocument, position: Position) {
-    this._document = document;
-    this._position = position;
-    this._project = project;
-  }
-
   async getPromptComponents(
-    prefix: string,
-    recentFiles: string[],
-    suffix: string,
-    symbols: SymbolInfo[],
-    similarSnippetCount = 1,
+    inputs: RawInputs,
+    similarSnippetCount: number = 1,
   ): Promise<PromptElements> {
-    const promptElements = new PromptElements(prefix, suffix);
-    promptElements.language = this._document.languageId;
-
-    const relativePath = this._document.fileName.substring(
-      this._project.length,
-    );
-    promptElements.file = basename(relativePath);
-    promptElements.folder = dirname(relativePath);
-
-    recentFiles = recentFiles.filter(
-      (fileName) => fileName !== this._document.fileName,
-    );
-
+    const { elements, document, position, recentFiles } = inputs;
     timer.add('CompletionGenerate', 'CalculatedFileFolder');
 
-    const [allMostSimilarSnippets, relativeDefinitions] = await Promise.all([
-      this._getSimilarSnippets(prefix, suffix, recentFiles),
-      this._getRelativeDefinitions(symbols),
+    const [similarSnippets, relativeDefinitions] = await Promise.all([
+      this._getSimilarSnippets(
+        document,
+        position,
+        elements.prefix,
+        elements.suffix,
+        recentFiles,
+      ),
+      inputs.relativeDefinitions,
     ]);
 
-    const mostSimilarSnippets = allMostSimilarSnippets
-      .slice(0, similarSnippetCount)
-      .filter(
-        (mostSimilarSnippet) =>
-          mostSimilarSnippet.score > this._similarSnippetConfig.minScore,
-      );
-
+    const similarSnippetsSliced = similarSnippets.slice(0, similarSnippetCount);
     console.log('PromptExtractor.getPromptComponents', {
       minScore: this._similarSnippetConfig.minScore,
-      mostSimilarSnippets,
+      mostSimilarSnippets: similarSnippetsSliced,
     });
 
-    if (mostSimilarSnippets.length) {
-      promptElements.similarSnippet = mostSimilarSnippets
-        .map((mostSimilarSnippet) => mostSimilarSnippet.content)
+    if (similarSnippetsSliced.length) {
+      elements.similarSnippet = similarSnippetsSliced
+        .map((similarSnippet) => similarSnippet.content)
         .join('\r\n');
     }
 
@@ -108,48 +79,32 @@ export class PromptExtractor {
       //   }
       // }
 
-      promptElements.symbols = relativeDefinitions
+      elements.symbols = relativeDefinitions
         .map((relativeDefinition) => relativeDefinition.content)
         .join('\r\n');
     }
 
-    return promptElements;
-  }
-
-  private async _getRelativeDefinitions(
-    symbols: SymbolInfo[],
-  ): Promise<RelativeDefinition[]> {
-    const result = Promise.all(
-      symbols.map(async ({ path, startLine, endLine }) => ({
-        path,
-        content: (
-          await readFile(path, {
-            flag: 'r',
-          })
-        )
-          .toString()
-          .split(/\r?\n/)
-          .slice(startLine, endLine + 1)
-          .join('\r\n'),
-      })),
-    );
-
-    timer.add('CompletionGenerate', 'GotRelativeDefinitions');
-
-    return result;
+    return elements;
   }
 
   private async _getSimilarSnippets(
+    document: TextDocument,
+    position: Position,
     prefix: string,
     suffix: string,
     recentFiles: string[],
   ): Promise<SimilarSnippet[]> {
+    console.log({
+      slowRecentFiles: this._slowRecentFiles,
+      currentRecentFiles: recentFiles,
+    });
     if (this._slowRecentFiles.length !== 0) {
       if (
         !this._slowRecentFiles.some(
           (slowFile) => !recentFiles.includes(slowFile),
         )
       ) {
+        timer.add('CompletionGenerate', 'GotSimilarSnippets');
         return [];
       }
       this._slowRecentFiles = [];
@@ -157,31 +112,31 @@ export class PromptExtractor {
     }
 
     const startTime = Date.now();
-    const prefixLines = prefix.split(/\r?\n/);
-    const lastValidCodeLine =
-      prefixLines.findLastIndex((line) => /^\/\/.*|^.*\*\/$/.test(line)) + 1;
-    prefix = prefixLines.slice(lastValidCodeLine).join('\r\n');
-
-    const currentDocumentLines = this._getRemainedContents(prefix, suffix);
-
     const tabLines = (await getAllOtherTabContents(recentFiles)).map(
       (tabContent) => ({
         path: tabContent.path,
         lines: separateTextByLine(tabContent.content, true),
       }),
     );
+    const contentsAroundContext = getContentsAroundContext(
+      document,
+      position,
+      codeStripEnd(prefix),
+      suffix,
+    );
+
     tabLines.push(
       {
-        path: this._document.fileName,
-        lines: currentDocumentLines.before,
+        path: document.fileName,
+        lines: contentsAroundContext.before,
       },
       {
-        path: this._document.fileName,
-        lines: currentDocumentLines.after,
+        path: document.fileName,
+        lines: contentsAroundContext.after,
       },
     );
 
-    const mostSimilarSnippets = Array<SimilarSnippet>();
+    const similarSnippets = Array<SimilarSnippet>();
 
     tabLines.forEach(({ path, lines }) => {
       const { score, startLine } = getMostSimilarSnippetStartLine(
@@ -210,10 +165,8 @@ export class PromptExtractor {
           .join('\n'),
       };
 
-      mostSimilarSnippets.push(currentMostSimilarSnippet);
+      similarSnippets.push(currentMostSimilarSnippet);
     });
-
-    timer.add('CompletionGenerate', 'GotSimilarSnippets');
 
     const endTime = Date.now();
     if (endTime - startTime > 1000) {
@@ -224,33 +177,14 @@ export class PromptExtractor {
       this._slowRecentFiles = recentFiles;
     }
 
-    return mostSimilarSnippets
+    timer.add('CompletionGenerate', 'GotSimilarSnippets');
+
+    return similarSnippets
+      .filter(
+        (similarSnippet) =>
+          similarSnippet.score > this._similarSnippetConfig.minScore,
+      )
       .sort((first, second) => first.score - second.score)
-      .reverse()
-      .slice(0, this._similarSnippetConfig.limit);
-  }
-
-  private _getRemainedContents(
-    prefix: string,
-    suffix: string,
-  ): {
-    before: string[];
-    after: string[];
-  } {
-    const rawText = this._document.getText();
-
-    return {
-      before: separateTextByLine(
-        rawText.slice(
-          0,
-          this._document.offsetAt(this._position) - prefix.length,
-        ),
-        true,
-      ),
-      after: separateTextByLine(
-        rawText.slice(this._document.offsetAt(this._position) + suffix.length),
-        true,
-      ),
-    };
+      .reverse();
   }
 }

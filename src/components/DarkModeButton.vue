@@ -14,8 +14,8 @@ const i18n = (relativePath: string) => {
 
 const switchDarkMode = () => {
   toggleDarkMode();
-  window.controlApi.reload(WindowType.Immersive);
   window.controlApi.reload(WindowType.Floating);
+  window.controlApi.reload(WindowType.Immersive);
 };
 </script>
 

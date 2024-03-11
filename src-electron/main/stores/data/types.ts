@@ -8,12 +8,12 @@ export interface DataProjectType {
 }
 
 export interface DataWindowType {
+  dipMapping: boolean;
   main: {
     height: number;
     show: boolean;
     width: number;
   };
-  zoom: number;
 }
 
 export interface DataStoreType {
@@ -46,6 +46,28 @@ export interface DataStoreTypeBefore_1_0_2 {
       id: string;
       lastAddedLines: number;
       revision: number;
+    }
+  >;
+  window: {
+    main: {
+      height: number;
+      show: boolean;
+      width: number;
+    };
+    zoom: number;
+  };
+}
+
+export interface DataStoreTypeBefore_1_0_4 {
+  project: Record<
+    string,
+    {
+      id: string;
+      lastAddedLines: number;
+      svn: {
+        directory: string;
+        revision: number;
+      }[];
     }
   >;
   window: {

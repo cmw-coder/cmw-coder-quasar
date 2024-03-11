@@ -4,7 +4,11 @@ import {
   LinseerDataType,
   LinseerStoreType,
 } from 'main/stores/config/types';
-import { DataProjectType, DataWindowType } from 'main/stores/data/types';
+import {
+  DataProjectType,
+  DataStoreType,
+  DataWindowType,
+} from 'main/stores/data/types';
 import { CompletionCacheClientMessage } from 'shared/types/WsMessage';
 
 export enum ActionType {
@@ -109,9 +113,9 @@ export class ConfigStoreSaveActionMessage implements ActionMessage {
 
 export class DataStoreLoadActionMessage implements ActionMessage {
   type = ActionType.DataStoreLoad;
-  data: { type: 'project' } | { type: 'window' };
+  data: DataStoreType | undefined;
 
-  constructor(data: { type: 'project' } | { type: 'window' }) {
+  constructor(data?: DataStoreType) {
     this.data = data;
   }
 }

@@ -8,6 +8,7 @@ import {
   DataStoreType,
   DataStoreTypeBefore_1_0_1,
   DataStoreTypeBefore_1_0_2,
+  DataStoreTypeBefore_1_0_4,
   DataWindowType,
 } from 'main/stores/data/types';
 import { getRevision, searchSvnDirectories } from 'main/utils/svn';
@@ -63,10 +64,25 @@ export class DataStore {
           }
           store.set('project', newProjects);
         },
+        '1.0.4': (store) => {
+          console.log('Migrating "data" store to 1.0.4 ...');
+          const { main } = getAs<DataStoreTypeBefore_1_0_4['window']>(
+            store,
+            'window',
+          );
+          store.set('window', {
+            dipMapping: false,
+            main,
+          });
+        },
       },
       name: 'data',
       // schema: dataStoreSchema,
     });
+  }
+
+  get store() {
+    return this._store.store;
   }
 
   get project(): Record<string, DataProjectType> {

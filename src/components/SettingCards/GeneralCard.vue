@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import { themes, Theme, useSettingsStore } from 'stores/settings';
+import { WindowType } from 'shared/types/WindowType';
 
 const { theme, developerMode } = storeToRefs(useSettingsStore());
 const { t } = useI18n();
@@ -21,6 +22,8 @@ const i18n = (relativePath: string, data?: Record<string, unknown>) => {
 const selectTheme = (value: Theme) => {
   theme.value = value;
   applyDarkMode();
+  window.controlApi.reload(WindowType.Floating);
+  window.controlApi.reload(WindowType.Immersive);
 };
 </script>
 

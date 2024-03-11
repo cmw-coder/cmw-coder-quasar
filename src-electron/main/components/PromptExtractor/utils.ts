@@ -1,8 +1,17 @@
 import { existsSync, promises } from 'fs';
 
 import { REGEXP_WORD } from 'main/components/PromptExtractor/constants';
+import { TextDocument } from 'main/types/TextDocument';
+import { Position } from 'main/types/vscode/position';
 
 const { readFile } = promises;
+
+export const codeStripEnd = (input: string): string => {
+  const lines = input.split(/\r?\n/);
+  const lastValidCodeLine =
+    lines.findLastIndex((line) => /^\/\/.*|^.*\*\/$/.test(line)) + 1;
+  return lines.slice(lastValidCodeLine).join('\r\n');
+};
 
 export const getAllOtherTabContents = async (
   tabPaths: string[],
@@ -17,6 +26,29 @@ export const getAllOtherTabContents = async (
     path: tabPaths[index],
     content: tabContent.toString(),
   }));
+};
+
+export const getContentsAroundContext = (
+  document: TextDocument,
+  position: Position,
+  prefix: string,
+  suffix: string,
+): {
+  before: string[];
+  after: string[];
+} => {
+  const rawText = document.getText();
+
+  return {
+    before: separateTextByLine(
+      rawText.slice(0, document.offsetAt(position) - prefix.length),
+      true,
+    ),
+    after: separateTextByLine(
+      rawText.slice(document.offsetAt(position) + suffix.length),
+      true,
+    ),
+  };
 };
 
 export const separateTextByLine = (

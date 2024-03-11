@@ -5,18 +5,16 @@ import { websocketManager } from 'main/components/WebsocketManager';
 import { configStore, dataStore } from 'main/stores';
 import { dataStoreDefault } from 'main/stores/data/default';
 import { bypassCors } from 'main/utils/common';
-import {
-  ActionApi,
-  sendToRenderer,
-} from 'preload/types/ActionApi';
+import { ActionApi, sendToRenderer } from 'preload/types/ActionApi';
 import { ControlType, registerControlCallback } from 'preload/types/ControlApi';
-import { WsAction } from 'shared/types/WsMessage';
-import { WindowType } from 'shared/types/WindowType';
 import {
   ActionType,
   ConfigStoreLoadActionMessage,
+  DataStoreLoadActionMessage,
   DebugSyncActionMessage,
 } from 'shared/types/ActionMessage';
+import { WsAction } from 'shared/types/WsMessage';
+import { WindowType } from 'shared/types/WindowType';
 
 export class MainWindow {
   private readonly _actionApi = new ActionApi('main.MainWindow.');
@@ -90,6 +88,14 @@ export class MainWindow {
         sendToRenderer(
           this._window,
           new ConfigStoreLoadActionMessage(configStore.store),
+        );
+      }
+    });
+    this._actionApi.register(ActionType.DataStoreLoad, () => {
+      if (this._window) {
+        sendToRenderer(
+          this._window,
+          new DataStoreLoadActionMessage(dataStore.store),
         );
       }
     });

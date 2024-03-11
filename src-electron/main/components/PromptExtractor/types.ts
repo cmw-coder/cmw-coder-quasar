@@ -1,4 +1,12 @@
+import { readFile } from 'fs/promises';
+import { basename, dirname } from 'path';
+
 import { SeparateTokens } from 'main/stores/config/types';
+import { SymbolInfo } from 'main/types/SymbolInfo';
+import { TextDocument } from 'main/types/TextDocument';
+import { Position } from 'main/types/vscode/position';
+import { timer } from 'main/utils/timer';
+import { CompletionGenerateClientMessage } from 'shared/types/WsMessage';
 
 export class PromptElements {
   file?: string;
@@ -45,11 +53,6 @@ export class PromptElements {
   }
 }
 
-export interface RelativeDefinition {
-  path: string;
-  content: string;
-}
-
 export interface SimilarSnippet {
   path: string;
   score: number;
@@ -58,15 +61,53 @@ export interface SimilarSnippet {
 
 export interface SimilarSnippetConfig {
   contextLines: number;
-  limit: number;
   minScore: number;
 }
 
-export enum SupportedSymbol {
-  //! Remove function definitions for now
-  Enum = 'Enum',
-  Interface = 'Interface',
-  Array = 'Array',
-  Object = 'Object',
-  Struct = 'Struct',
+export class RawInputs {
+  document: TextDocument;
+  elements: PromptElements;
+  position: Position;
+  project: string;
+  recentFiles: string[];
+  symbols: SymbolInfo[];
+
+  constructor(rawData: CompletionGenerateClientMessage['data']) {
+    const { caret, path, prefix, project, recentFiles, suffix, symbols } =
+      rawData;
+    this.document = new TextDocument(path);
+    this.elements = new PromptElements(prefix, suffix);
+    this.position = new Position(caret.line, caret.character);
+    this.project = project;
+    this.recentFiles = recentFiles.filter(
+      (fileName) => fileName !== this.document.fileName,
+    );
+    this.symbols = symbols;
+
+    const relativePath = this.document.fileName.substring(this.project.length);
+    this.elements.language = this.document.languageId;
+    this.elements.file = basename(relativePath);
+    this.elements.folder = dirname(relativePath);
+  }
+
+  get relativeDefinitions() {
+    const result = Promise.all(
+      this.symbols.map(async ({ path, startLine, endLine }) => ({
+        path,
+        content: (
+          await readFile(path, {
+            flag: 'r',
+          })
+        )
+          .toString()
+          .split(/\r?\n/)
+          .slice(startLine, endLine + 1)
+          .join('\r\n'),
+      })),
+    );
+
+    timer.add('CompletionGenerate', 'GotRelativeDefinitions');
+
+    return result;
+  }
 }
