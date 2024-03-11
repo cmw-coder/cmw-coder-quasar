@@ -8,7 +8,6 @@ import { DataProjectType, DataWindowType } from 'main/stores/data/types';
 import { CompletionCacheClientMessage } from 'shared/types/WsMessage';
 
 export enum ActionType {
-  ClientGetVersion = 'ClientGetVersion',
   ClientSetProjectId = 'ClientSetProjectId',
   CompletionClear = 'CompletionClear',
   CompletionSet = 'CompletionSet',
@@ -28,15 +27,6 @@ export enum ActionType {
 export interface ActionMessage {
   type: ActionType;
   data: unknown;
-}
-
-export class ClientGetVersionActionMessage implements ActionMessage {
-  type = ActionType.ClientGetVersion;
-  data: string | undefined;
-
-  constructor(data?: string) {
-    this.data = data;
-  }
 }
 
 export class ClientSetProjectIdActionMessage implements ActionMessage {
@@ -192,7 +182,6 @@ export class UpdateDownloadActionMessage implements ActionMessage {
 }
 
 export interface ActionMessageMapping {
-  [ActionType.ClientGetVersion]: ClientGetVersionActionMessage;
   [ActionType.ClientSetProjectId]: ClientSetProjectIdActionMessage;
   [ActionType.CompletionClear]: CompletionClearActionMessage;
   [ActionType.CompletionSet]: CompletionSetActionMessage;

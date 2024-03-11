@@ -1,3 +1,5 @@
+import { HuggingFaceModelType, LinseerModelType } from 'shared/types/model';
+
 export default {
   components: {
     AccountInput: {
@@ -77,6 +79,21 @@ export default {
       },
     },
     SettingCards: {
+      CompletionCard: {
+        labels: {
+          availableModels: {
+            [HuggingFaceModelType.ComwareV1]: 'Comware V1',
+            [HuggingFaceModelType.ComwareV2]: 'Comware V2',
+            [LinseerModelType.Linseer]: 'Linseer',
+            [LinseerModelType.Linseer_SR88Driver]:
+              'Linseer for SR88 Driver Team',
+            [LinseerModelType.Linseer_CClsw]: 'Linseer for CClsw Team',
+          },
+          currentModel: 'Current model',
+          fontSize: 'Font size',
+          title: 'Code Completion',
+        },
+      },
       GeneralCard: {
         labels: {
           developerOptions: 'Developer Options',

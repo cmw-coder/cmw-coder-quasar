@@ -4,11 +4,11 @@ import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
+import packageJson from 'app/package.json';
 import { feedBack } from 'boot/axios';
 import AccountInput from 'components/AccountInput.vue';
 import {
   ActionType,
-  ClientGetVersionActionMessage,
   ConfigStoreLoadActionMessage,
 } from 'shared/types/ActionMessage';
 import { ActionApi } from 'types/ActionApi';
@@ -33,7 +33,7 @@ const error = ref(false);
 const images = ref<string[]>([]);
 const loading = ref(false);
 const userId = ref('');
-const version = ref('');
+const version = ref(packageJson.version);
 
 const onFailed = (info: { files: readonly File[]; xhr: XMLHttpRequest }) => {
   console.log('onFailed', info);
@@ -88,17 +88,11 @@ const submit = async () => {
 
 const actionApi = new ActionApi(baseName);
 onMounted(() => {
-  actionApi.register(ActionType.ClientGetVersion, (data) => {
-    if (data) {
-      version.value = data;
-    }
-  });
   actionApi.register(ActionType.ConfigStoreLoad, (data) => {
     if (data) {
       endpoint.value = data.config.endpoints.feedback;
     }
   });
-  window.actionApi.send(new ClientGetVersionActionMessage());
   window.actionApi.send(new ConfigStoreLoadActionMessage());
 });
 onBeforeUnmount(() => {

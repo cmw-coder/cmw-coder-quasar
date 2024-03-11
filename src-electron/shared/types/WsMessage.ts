@@ -1,11 +1,13 @@
 import { CaretPosition, SymbolInfo } from 'shared/types/common';
 import { Completions } from 'main/components/PromptProcessor/types';
+import { KeptRatio } from 'main/components/StatisticsReporter/types';
 
 export enum WsAction {
   CompletionAccept = 'CompletionAccept',
   CompletionCache = 'CompletionCache',
   CompletionCancel = 'CompletionCancel',
   CompletionGenerate = 'CompletionGenerate',
+  CompletionKept = 'CompletionKept',
   CompletionSelect = 'CompletionSelect',
   DebugSync = 'DebugSync',
   EditorFocusState = 'EditorFocusState',
@@ -70,6 +72,15 @@ export class CompletionGenerateServerMessage implements WsMessage {
   ) {
     this.data = data;
   }
+}
+
+export interface CompletionKeptClientMessage extends WsMessage {
+  action: WsAction.CompletionKept;
+  data: {
+    actionId: string;
+    count: number;
+    ratio: KeptRatio;
+  };
 }
 
 export interface CompletionSelectClientMessage extends WsMessage {
@@ -147,6 +158,10 @@ export interface WsMessageMapping {
   [WsAction.CompletionGenerate]: {
     client: CompletionGenerateClientMessage;
     server: Promise<CompletionGenerateServerMessage | void>;
+  };
+  [WsAction.CompletionKept]: {
+    client: CompletionKeptClientMessage;
+    server: void;
   };
   [WsAction.CompletionSelect]: {
     client: CompletionSelectClientMessage;

@@ -80,7 +80,7 @@ websocketManager.registerWsAction(
     immersiveWindow.completionClear();
     try {
       statisticsReporter
-        .acceptCompletion(actionId, index, getClientVersion(pid))
+        .completionAccept(actionId, index, getClientVersion(pid))
         .catch();
     } catch {
       statisticsReporter.completionAbort(actionId);
@@ -116,14 +116,14 @@ websocketManager.registerWsAction(
     try {
       const { id: projectId } = getProjectData(project);
       websocketManager.setClientProjectId(pid, projectId);
-      statisticsReporter.generationUpdateProjectId(actionId, projectId);
+      statisticsReporter.completionUpdateProjectId(actionId, projectId);
 
       const promptElements = await new PromptExtractor(
         project,
         new TextDocument(path),
         new Position(caret.line, caret.character),
       ).getPromptComponents(prefix, recentFiles, suffix, symbols);
-      statisticsReporter.generationUpdatePromptElements(
+      statisticsReporter.completionUpdatePromptElements(
         actionId,
         promptElements,
       );
@@ -172,6 +172,16 @@ websocketManager.registerWsAction(
     }
   },
 );
+websocketManager.registerWsAction(WsAction.CompletionKept, ({ data }, pid) => {
+  const { actionId, count, ratio } = data;
+  try {
+    statisticsReporter
+      .completionKept(actionId, count, ratio, getClientVersion(pid))
+      .catch();
+  } catch {
+    statisticsReporter.completionAbort(actionId);
+  }
+});
 websocketManager.registerWsAction(
   WsAction.CompletionSelect,
   ({ data }, pid) => {

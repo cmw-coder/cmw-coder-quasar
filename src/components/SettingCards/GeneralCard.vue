@@ -30,7 +30,7 @@ const selectTheme = (value: Theme) => {
       {{ i18n('labels.title') }}
     </q-card-section>
     <q-list bordered separator>
-      <q-expansion-item clickable>
+      <q-expansion-item clickable group="settingGroup">
         <template v-slot:header>
           <q-item-section>
             {{ i18n('labels.displayTheme') }}

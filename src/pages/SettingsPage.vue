@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 
+import CompletionCard from 'components/SettingCards/CompletionCard.vue';
 import GeneralCard from 'components/SettingCards/GeneralCard.vue';
 import UpdateCard from 'components/SettingCards/UpdateCard.vue';
 
@@ -22,6 +23,7 @@ const i18n = (relativePath: string, data?: Record<string, unknown>) => {
         {{ i18n('labels.title') }}
       </div>
       <GeneralCard />
+      <CompletionCard />
       <UpdateCard />
     </div>
   </q-page>

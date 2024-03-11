@@ -34,6 +34,7 @@ export class PromptExtractor {
     limit: 5,
     minScore: 0.45,
   };
+  private _slowRecentFiles: string[] = [];
 
   constructor(project: string, document: TextDocument, position: Position) {
     this._document = document;
@@ -143,6 +144,19 @@ export class PromptExtractor {
     suffix: string,
     recentFiles: string[],
   ): Promise<SimilarSnippet[]> {
+    if (this._slowRecentFiles.length !== 0) {
+      if (
+        !this._slowRecentFiles.some(
+          (slowFile) => !recentFiles.includes(slowFile),
+        )
+      ) {
+        return [];
+      }
+      this._slowRecentFiles = [];
+      console.info('PromptExtractor._getSimilarSnippets.enable');
+    }
+
+    const startTime = Date.now();
     const prefixLines = prefix.split(/\r?\n/);
     const lastValidCodeLine =
       prefixLines.findLastIndex((line) => /^\/\/.*|^.*\*\/$/.test(line)) + 1;
@@ -200,6 +214,15 @@ export class PromptExtractor {
     });
 
     timer.add('CompletionGenerate', 'GotSimilarSnippets');
+
+    const endTime = Date.now();
+    if (endTime - startTime > 1000) {
+      console.info(
+        'PromptExtractor._getSimilarSnippets.disable',
+        endTime - startTime,
+      );
+      this._slowRecentFiles = recentFiles;
+    }
 
     return mostSimilarSnippets
       .sort((first, second) => first.score - second.score)

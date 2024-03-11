@@ -5,6 +5,7 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
+import packageJson from 'app/package.json';
 import { useSettingsStore } from 'stores/settings';
 import { UpdateCheckActionMessage } from 'shared/types/ActionMessage';
 
@@ -23,7 +24,7 @@ const i18n = (relativePath: string, data?: Record<string, unknown>) => {
 
 const checkForUpdateLoading = ref(false);
 const developerModeCounter = ref(0);
-const version = ref('1.0.1');
+const version = ref(packageJson.version);
 
 const checkForUpdate = () => {
   checkForUpdateLoading.value = true;

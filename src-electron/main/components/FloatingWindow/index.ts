@@ -13,7 +13,6 @@ import {
 import packageJson from 'root/package.json';
 import {
   ActionType,
-  ClientGetVersionActionMessage,
   ConfigStoreLoadActionMessage,
   RouterReloadActionMessage,
   UpdateFinishActionMessage,
@@ -143,14 +142,6 @@ export class FloatingWindow {
       }
     });
 
-    this._actionApi.register(ActionType.ClientGetVersion, () => {
-      if (this._window) {
-        sendToRenderer(
-          this._window,
-          new ClientGetVersionActionMessage(packageJson.version),
-        );
-      }
-    });
     this._actionApi.register(ActionType.ConfigStoreLoad, () => {
       if (this._window) {
         sendToRenderer(

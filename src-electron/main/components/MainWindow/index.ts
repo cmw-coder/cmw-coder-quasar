@@ -5,14 +5,15 @@ import { websocketManager } from 'main/components/WebsocketManager';
 import { configStore, dataStore } from 'main/stores';
 import { dataStoreDefault } from 'main/stores/data/default';
 import { bypassCors } from 'main/utils/common';
-import { ActionApi, sendToRenderer } from 'preload/types/ActionApi';
+import {
+  ActionApi,
+  sendToRenderer,
+} from 'preload/types/ActionApi';
 import { ControlType, registerControlCallback } from 'preload/types/ControlApi';
-import packageJson from 'root/package.json';
 import { WsAction } from 'shared/types/WsMessage';
 import { WindowType } from 'shared/types/WindowType';
 import {
   ActionType,
-  ClientGetVersionActionMessage,
   ConfigStoreLoadActionMessage,
   DebugSyncActionMessage,
 } from 'shared/types/ActionMessage';
@@ -84,14 +85,6 @@ export class MainWindow {
       dataStore.window = currentDataWindow;
     });
 
-    this._actionApi.register(ActionType.ClientGetVersion, () => {
-      if (this._window) {
-        sendToRenderer(
-          this._window,
-          new ClientGetVersionActionMessage(packageJson.version),
-        );
-      }
-    });
     this._actionApi.register(ActionType.ConfigStoreLoad, () => {
       if (this._window) {
         sendToRenderer(
