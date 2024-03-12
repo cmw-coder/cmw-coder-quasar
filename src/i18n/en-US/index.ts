@@ -91,7 +91,6 @@ export default {
           },
           currentModel: 'Current model',
           dipMapping: 'Auto DPI scaling',
-          fontSize: 'Font size',
           title: 'Code Completion',
         },
       },

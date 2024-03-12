@@ -49,16 +49,16 @@ const selectTheme = (value: Theme) => {
         </template>
         <q-list>
           <q-item
-            v-for="(theme, index) in themes"
+            v-for="(item, index) in themes"
             :key="index"
             clickable
-            @click="selectTheme(theme)"
+            @click="selectTheme(item)"
           >
             <q-item-section>
-              {{ i18n(`labels.displayThemeOptions.${theme.name}`) }}
+              {{ i18n(`labels.displayThemeOptions.${item.name}`) }}
             </q-item-section>
             <q-item-section side>
-              <q-icon :name="theme.icon" :color="theme.color" />
+              <q-icon :name="item.icon" :color="item.color" />
             </q-item-section>
           </q-item>
         </q-list>

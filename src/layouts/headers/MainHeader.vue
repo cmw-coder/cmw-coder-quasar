@@ -3,7 +3,6 @@ import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 
 import { bus } from 'boot/bus';
-import DarkModeButton from 'components/DarkModeButton.vue';
 import { WindowType } from 'shared/types/WindowType';
 
 const { t } = useI18n();
@@ -70,7 +69,6 @@ const toggleMaximize = () => window.controlApi.toggleMaximize();
           <!--          <q-img src="~assets/svg/logo-simple-light.svg" />-->
         </q-avatar>
       </q-toolbar-title>
-      <dark-mode-button />
       <q-btn
         dense
         flat

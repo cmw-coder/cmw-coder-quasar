@@ -261,11 +261,7 @@ class StatisticsReporter {
     }
   }
 
-  async copiedLines(
-    count: number,
-    projectId: string,
-    version: string,
-  ) {
+  async copiedLines(count: number, projectId: string, version: string) {
     console.log('StatisticsReporter.copiedLines', {
       count,
       projectId,
