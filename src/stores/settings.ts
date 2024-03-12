@@ -33,7 +33,6 @@ export const themes: Theme[] = [
 ];
 
 export const useSettingsStore = defineStore('settings', () => {
-  const fontSize = ref(9);
   const theme = ref<Theme>(
     themes.find((theme) => theme.darkMode === Dark.mode) ?? themes[0],
   );
@@ -56,7 +55,6 @@ export const useSettingsStore = defineStore('settings', () => {
   };
 
   return {
-    fontSize,
     theme,
     developerMode,
     isMobile,

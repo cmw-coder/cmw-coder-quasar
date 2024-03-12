@@ -1,16 +1,34 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia';
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 
 import { ActionType } from 'shared/types/ActionMessage';
 import { useHighlighter } from 'stores/highlighter';
-import { useSettingsStore } from 'stores/settings';
 import { ActionApi } from 'types/ActionApi';
 
 const baseName = 'pages.CompletionImmersivePage.';
 
+const fontSizeTable: Record<number, number> = {
+  12: 0.91,
+  14: 0.91,
+  16: 0.91,
+  17: 0.963,
+  18: 0.91,
+  20: 0.91,
+  22: 0.992,
+  26: 0.91,
+  30: 0.91,
+  34: 0.91,
+  38: 0.91,
+  40: 0.91,
+  42: 0.91,
+  48: 0.947,
+  52: 0.91,
+  64: 0.91,
+  74: 0.934,
+  104: 0.927,
+};
+
 const { codeToHtml } = useHighlighter();
-const { fontSize } = storeToRefs(useSettingsStore());
 
 const cacheOffset = ref(0);
 const completionCount = reactive({
@@ -18,18 +36,20 @@ const completionCount = reactive({
   total: 0,
 });
 const currentCompletion = ref('');
+const height = ref(0);
+const fontSize = computed(() =>
+  fontSizeTable[height.value]
+    ? fontSizeTable[height.value] * height.value
+    : -0.000000000506374957617199 * height.value ** 6 +
+      0.000000123078838391882 * height.value ** 5 -
+      0.0000118441038684185 * height.value ** 4 +
+      0.000574698566099494 * height.value ** 3 -
+      0.0147437317361461 * height.value ** 2 +
+      1.09720488138051 * height.value,
+);
 const isMultiLine = computed(
   () => currentCompletion.value.split('\r\n').length > 1,
 );
-
-const transform = computed(() => {
-  const scaleX = -0.0017530120481928 * fontSize.value + 1.0398602409639;
-  const scaleY = -0.0021124497991968 * fontSize.value + 1.0074489959839;
-  const offsetX = 0.011991807228916 * fontSize.value + 0.18793785542169;
-  const offsetY = -0.95 * fontSize.value + 22.34;
-  return `scale(${scaleX}, ${scaleY}) translate(${offsetX}pt, ${offsetY}pt)`;
-});
-
 const codeContent = computed(() =>
   codeToHtml(
     ' '.repeat(cacheOffset.value) +
@@ -46,13 +66,17 @@ onMounted(() => {
     completionCount.index = 0;
     completionCount.total = 0;
   });
-  actionApi.register(ActionType.CompletionSet, ({ completion, count }) => {
-    cacheOffset.value = 0;
-    currentCompletion.value = completion;
-    completionCount.index = count.index;
-    completionCount.total = count.total;
-    console.log(transform.value);
-  });
+  actionApi.register(
+    ActionType.CompletionSet,
+    ({ completion, count, fontHeight }) => {
+      cacheOffset.value = 0;
+      currentCompletion.value = completion;
+      completionCount.index = count.index;
+      completionCount.total = count.total;
+      height.value = fontHeight;
+      console.log({ height: height.value, fontSize: fontSize.value });
+    },
+  );
   actionApi.register(ActionType.CompletionUpdate, (isDelete) => {
     if (isDelete) {
       cacheOffset.value = cacheOffset.value > 0 ? cacheOffset.value - 1 : 0;
@@ -75,22 +99,20 @@ onBeforeUnmount(() => {
         style="white-space: pre"
         :style="{
           fontFamily: 'Consolas',
-          fontSize: `${fontSize}pt`,
-          transform: transform,
-          transformOrigin: 'center left',
+          fontSize: `${fontSize}px`,
+          lineHeight: `${height - 1}px`,
         }"
       >
         {{ ' '.repeat(0) + currentCompletion.substring(0) }}
       </div>
       <q-card
         v-show="isMultiLine"
-        class="code-snippet"
         bordered
         style="font-family: monospace, serif; opacity: 90%"
         :style="{
           fontFamily: 'Consolas',
-          fontSize: `${fontSize * 1.06}pt`,
-          lineHeight: '10pt',
+          fontSize: `${fontSize}pt`,
+          lineHeight: `${height - 1}px`,
           // marginTop: `${fontSize}pt - 1px`,
           // paddingTop: '7pt',
         }"

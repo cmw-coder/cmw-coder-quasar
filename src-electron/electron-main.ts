@@ -183,7 +183,11 @@ websocketManager.registerWsAction(WsAction.CompletionKept, ({ data }, pid) => {
 websocketManager.registerWsAction(
   WsAction.CompletionSelect,
   ({ data }, pid) => {
-    const { actionId, index, position } = data;
+    const {
+      actionId,
+      index,
+      dimensions: { height, x, y },
+    } = data;
     try {
       const candidate = statisticsReporter.completionSelected(
         actionId,
@@ -194,7 +198,8 @@ websocketManager.registerWsAction(
         immersiveWindow.completionSelect(
           candidate,
           { index, total: statisticsReporter.completionCount(actionId) },
-          position,
+          height,
+          { x, y },
         );
       }
     } catch {

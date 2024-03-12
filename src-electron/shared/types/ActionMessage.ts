@@ -56,11 +56,13 @@ export class CompletionSetActionMessage implements ActionMessage {
   data: {
     completion: string;
     count: { index: number; total: number };
+    fontHeight: number;
   };
 
   constructor(data: {
     completion: string;
     count: { index: number; total: number };
+    fontHeight: number;
   }) {
     this.data = data;
   }

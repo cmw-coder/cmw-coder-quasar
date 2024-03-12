@@ -88,7 +88,8 @@ export interface CompletionSelectClientMessage extends WsMessage {
   data: {
     actionId: string;
     index: number;
-    position: {
+    dimensions: {
+      height: number;
       x: number;
       y: number;
     };

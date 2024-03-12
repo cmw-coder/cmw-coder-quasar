@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia';
-import { QExpansionItem, QInput } from 'quasar';
+import { QExpansionItem } from 'quasar';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -16,13 +15,10 @@ import {
   DataStoreSaveActionMessage,
 } from 'shared/types/ActionMessage';
 import { HuggingFaceModelType, LinseerModelType } from 'shared/types/model';
-import { WindowType } from 'shared/types/WindowType';
-import { useSettingsStore } from 'stores/settings';
 import { ActionApi } from 'types/ActionApi';
 
 const baseName = 'components.SettingCards.CompletionCard.';
 
-const { fontSize } = storeToRefs(useSettingsStore());
 const { t } = useI18n();
 
 const i18n = (relativePath: string, data?: Record<string, unknown>) => {
@@ -39,9 +35,6 @@ const modelSelectItem = ref<QExpansionItem>();
 const modelType = ref<HuggingFaceModelType | LinseerModelType>();
 const dipMapping = ref<boolean>();
 const dipMappingUpdating = ref(false);
-const currentFontSize = ref(0);
-
-currentFontSize.value = fontSize.value;
 
 const updateModelType = (model: HuggingFaceModelType | LinseerModelType) => {
   modelUpdating.value = true;
@@ -77,13 +70,6 @@ const updateDipMapping = (value: boolean) => {
     },
     300 + Math.random() * 700,
   );
-};
-
-const updateFontSize = (value: null | number | string) => {
-  fontSize.value = (typeof value === 'string' ? parseInt(value) : value) ?? 0;
-  console.log('fontSize:', fontSize.value);
-  window.controlApi.close(WindowType.Floating);
-  window.controlApi.close(WindowType.Immersive);
 };
 
 const actionApi = new ActionApi(baseName);
@@ -162,23 +148,6 @@ onBeforeUnmount(() => {
               @update:model-value="updateDipMapping($event)"
             />
           </div>
-        </q-item-section>
-      </q-item>
-      <q-item tag="label">
-        <q-item-section>
-          {{ i18n('labels.fontSize') }}
-        </q-item-section>
-        <q-item-section side>
-          <q-input
-            :autofocus="false"
-            dense
-            filled
-            square
-            type="number"
-            :model-value="fontSize"
-            @update:model-value="updateFontSize($event)"
-            style="max-width: 6rem"
-          />
         </q-item-section>
       </q-item>
     </q-list>

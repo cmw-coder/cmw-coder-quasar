@@ -34,22 +34,29 @@ export class ImmersiveWindow {
   completionSelect(
     completion: string,
     count: { index: number; total: number },
+    height: number,
     position: { x: number; y: number },
   ) {
     if (!this._window) {
       this.create();
     }
     if (this._window) {
-      sendToRenderer(
-        this._window,
-        new CompletionSetActionMessage({ completion, count }),
-      );
       if (dataStore.window.dipMapping) {
+        height = screen.screenToDipPoint({ x: 0, y: height }).y;
         position = screen.screenToDipPoint(position);
       }
+      sendToRenderer(
+        this._window,
+        new CompletionSetActionMessage({
+          completion,
+          count,
+          fontHeight: height,
+        }),
+      );
+
       this._window.setPosition(
         Math.round(position.x),
-        Math.round(position.y - 30),
+        Math.round(position.y),
         false,
       );
       this._window.show();
