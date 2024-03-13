@@ -96,9 +96,8 @@ onBeforeUnmount(() => {
       <div
         v-show="!isMultiLine"
         class="text-grey"
-        style="white-space: pre"
+        style="font-family: Consolas, monospace, serif; white-space: pre"
         :style="{
-          fontFamily: 'Consolas',
           fontSize: `${fontSize}px`,
           lineHeight: `${height - 1}px`,
         }"
@@ -108,16 +107,13 @@ onBeforeUnmount(() => {
       <q-card
         v-show="isMultiLine"
         bordered
-        style="font-family: monospace, serif; opacity: 90%"
+        style="font-family: Consolas, monospace, serif; opacity: 80%"
         :style="{
-          fontFamily: 'Consolas',
-          fontSize: `${fontSize}pt`,
+          fontSize: `${fontSize}px`,
           lineHeight: `${height - 1}px`,
-          // marginTop: `${fontSize}pt - 1px`,
-          // paddingTop: '7pt',
         }"
       >
-        <div v-html="codeContent" />
+        <div v-html="codeContent" style="margin-top: -1em" />
       </q-card>
     </div>
   </q-page>
