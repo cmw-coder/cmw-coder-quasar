@@ -66,12 +66,12 @@ export class DataStore {
         },
         '1.0.4': (store) => {
           console.log('Migrating "data" store to 1.0.4 ...');
-          const { main } = getAs<DataStoreTypeBefore_1_0_4['window']>(
+          const { main, zoom } = getAs<DataStoreTypeBefore_1_0_4['window']>(
             store,
             'window',
           );
           store.set('window', {
-            dipMapping: false,
+            dipMapping: zoom !== 1,
             main,
           });
         },

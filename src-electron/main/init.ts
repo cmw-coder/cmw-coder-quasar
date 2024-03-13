@@ -4,6 +4,7 @@ import { release, version } from 'os';
 
 import { statisticsReporter } from 'main/components/StatisticsReporter';
 import { dataStore } from 'main/stores';
+import { BaseWindow } from 'main/types/BaseWindow';
 import { folderLatestModificationTime } from 'main/utils/common';
 import { getAddedLines } from 'main/utils/svn';
 import { triggerAction } from 'preload/types/ActionApi';
@@ -88,3 +89,11 @@ export const initIpcMain = () => {
     triggerControlCallback(message.windowType, message.type, message.data),
   );
 };
+
+export const initWindowDestroyInterval = (baseWindow: BaseWindow) =>
+  setInterval(
+    () => {
+      baseWindow.destroy();
+    },
+    1000 * 60 * 30,
+  );

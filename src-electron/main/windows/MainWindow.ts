@@ -4,6 +4,7 @@ import { resolve } from 'path';
 import { websocketManager } from 'main/components/WebsocketManager';
 import { configStore, dataStore } from 'main/stores';
 import { dataStoreDefault } from 'main/stores/data/default';
+import { BaseWindow } from 'main/types/BaseWindow';
 import { bypassCors } from 'main/utils/common';
 import { ActionApi, sendToRenderer } from 'preload/types/ActionApi';
 import { ControlType, registerControlCallback } from 'preload/types/ControlApi';
@@ -16,24 +17,18 @@ import {
 import { WsAction } from 'shared/types/WsMessage';
 import { WindowType } from 'shared/types/WindowType';
 
-export class MainWindow {
+export class MainWindow extends BaseWindow {
   private readonly _actionApi = new ActionApi('main.MainWindow.');
-  private readonly _type = WindowType.Main;
-  private _window: BrowserWindow | undefined;
 
-  activate() {
-    if (this._window) {
-      this._window.show();
-    } else {
-      this.create();
-    }
+  constructor() {
+    super(WindowType.Main);
   }
 
   get isVisible() {
     return (this._window?.isVisible() && !this._window?.isMinimized()) ?? false;
   }
 
-  private create() {
+  protected create() {
     const { height, show, width } = dataStore.window.main;
     this._window = new BrowserWindow({
       width,

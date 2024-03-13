@@ -103,7 +103,7 @@ onBeforeUnmount(() => {
           lineHeight: `${height - 1}px`,
         }"
       >
-        {{ ' '.repeat(0) + currentCompletion.substring(0) }}
+        {{ ' '.repeat(cacheOffset) + currentCompletion.substring(cacheOffset) }}
       </div>
       <q-card
         v-show="isMultiLine"

@@ -2,6 +2,7 @@ import { BrowserWindow, screen } from 'electron';
 import { resolve } from 'path';
 
 import { dataStore } from 'main/stores';
+import { BaseWindow } from 'main/types/BaseWindow';
 import { sendToRenderer } from 'preload/types/ActionApi';
 import { ControlType, registerControlCallback } from 'preload/types/ControlApi';
 import {
@@ -12,16 +13,9 @@ import {
 } from 'shared/types/ActionMessage';
 import { WindowType } from 'shared/types/WindowType';
 
-export class ImmersiveWindow {
-  private readonly _type = WindowType.Immersive;
-  private _window: BrowserWindow | undefined;
-
-  activate() {
-    if (this._window) {
-      this._window.show();
-    } else {
-      this.create();
-    }
+export class ImmersiveWindow extends BaseWindow {
+  constructor() {
+    super(WindowType.Immersive);
   }
 
   completionClear() {
@@ -85,7 +79,7 @@ export class ImmersiveWindow {
     this._window?.show();
   }
 
-  private create() {
+  protected create() {
     this._window = new BrowserWindow({
       width: 3840,
       height: 2160,
@@ -105,7 +99,6 @@ export class ImmersiveWindow {
       webPreferences: {
         // devTools: false,
         preload: resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD),
-        backgroundThrottling: false,
       },
     });
 
@@ -118,7 +111,7 @@ export class ImmersiveWindow {
 
     this._window.on('ready-to-show', () => {
       if (this._window) {
-        this._window.webContents.openDevTools({ mode: 'undocked' });
+        // this._window.webContents.openDevTools({ mode: 'undocked' });
       }
     });
 

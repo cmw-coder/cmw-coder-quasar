@@ -3,6 +3,7 @@ import { ProgressInfo, UpdateInfo } from 'electron-updater';
 import { resolve } from 'path';
 
 import { configStore } from 'main/stores';
+import { BaseWindow } from 'main/types/BaseWindow';
 import { bypassCors } from 'main/utils/common';
 import { ActionApi, sendToRenderer } from 'preload/types/ActionApi';
 import {
@@ -20,18 +21,12 @@ import {
 } from 'shared/types/ActionMessage';
 import { WindowType } from 'shared/types/WindowType';
 
-export class FloatingWindow {
+export class FloatingWindow extends BaseWindow {
   private readonly _actionApi = new ActionApi('main.FloatingWindow.');
   private _currentRoute = '';
-  private readonly _type = WindowType.Floating;
-  private _window: BrowserWindow | undefined;
 
-  activate() {
-    if (this._window) {
-      this._window.show();
-    } else {
-      this._create();
-    }
+  constructor() {
+    super(WindowType.Floating);
   }
 
   feedback() {
@@ -108,7 +103,7 @@ export class FloatingWindow {
     }
   }
 
-  private _create() {
+  protected create() {
     this._window = new BrowserWindow({
       width: 800,
       height: 600,

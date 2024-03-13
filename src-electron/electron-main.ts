@@ -2,9 +2,6 @@ import { app, globalShortcut } from 'electron';
 import { scheduleJob } from 'node-schedule';
 
 import { AutoUpdater } from 'main/components/AutoUpdater';
-import { FloatingWindow } from 'main/components/FloatingWindow';
-import { ImmersiveWindow } from 'main/components/ImmersiveWindow';
-import { MainWindow } from 'main/components/MainWindow';
 import { PromptExtractor } from 'main/components/PromptExtractor';
 import { RawInputs } from 'main/components/PromptExtractor/types';
 import { PromptProcessor } from 'main/components/PromptProcessor';
@@ -12,7 +9,12 @@ import { statisticsReporter } from 'main/components/StatisticsReporter';
 import { TrayIcon } from 'main/components/TrayIcon';
 import { MenuEntry } from 'main/components/TrayIcon/types';
 import { websocketManager } from 'main/components/WebsocketManager';
-import { initAdditionReport, initApplication, initIpcMain } from 'main/init';
+import {
+  initAdditionReport,
+  initApplication,
+  initIpcMain,
+  initWindowDestroyInterval,
+} from 'main/init';
 import { configStore, dataStore } from 'main/stores';
 import {
   CompletionErrorCause,
@@ -20,6 +22,9 @@ import {
   getProjectData,
 } from 'main/utils/completion';
 import { timer } from 'main/utils/timer';
+import { FloatingWindow } from 'main/windows/FloatingWindow';
+import { ImmersiveWindow } from 'main/windows/ImmersiveWindow';
+import { MainWindow } from 'main/windows/MainWindow';
 import { registerAction } from 'preload/types/ActionApi';
 import { ApiStyle } from 'shared/types/model';
 import { ActionType } from 'shared/types/ActionMessage';
@@ -40,6 +45,8 @@ const mainWindow = new MainWindow();
 const promptExtractor = new PromptExtractor();
 const promptProcessor = new PromptProcessor();
 const trayIcon = new TrayIcon();
+
+let immersiveWindowDestroyInterval = initWindowDestroyInterval(immersiveWindow);
 
 autoUpdater.onAvailable((updateInfo) => floatingWindow.updateShow(updateInfo));
 autoUpdater.onDownloading((progressInfo) =>
@@ -110,6 +117,9 @@ websocketManager.registerWsAction(
 websocketManager.registerWsAction(
   WsAction.CompletionGenerate,
   async ({ data }, pid) => {
+    clearInterval(immersiveWindowDestroyInterval);
+    immersiveWindowDestroyInterval = initWindowDestroyInterval(immersiveWindow);
+
     const { caret, project } = data;
     const actionId = statisticsReporter.completionBegin(caret);
 
