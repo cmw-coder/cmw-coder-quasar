@@ -16,51 +16,50 @@ import packageJson from 'root/package.json';
 import { actionApiKey, controlApiKey } from 'shared/types/constants';
 import { ActionMessage } from 'shared/types/ActionMessage';
 
-const reportProjectAdditions = async () => {
-  return (
+const reportProjectAdditions = async () =>
+  (
     await Promise.all(
-      Object.entries(dataStore.project).map(async (project) => {
-        const [path, data] = project;
-        const { id, lastAddedLines, svn } = data;
-        const lastModificationTime = await folderLatestModificationTime(path);
-        if (Date.now() - lastModificationTime.getTime() > 1000 * 3600 * 24) {
-          return {
-            path,
-            id,
-            additions: [],
-            lastAddedLines,
-          };
-        }
-        return {
+      Object.entries(dataStore.project).map(
+        async ([path, { id, lastAddedLines, svn }]) => ({
           path,
           id,
-          additions: (
-            await Promise.all(
-              svn.map(
-                async ({ directory, revision }) =>
-                  await getAddedLines(directory, revision),
-              ),
-            )
-          ).reduce((acc, val) => acc.concat(val), []),
+          addedLines:
+            Date.now() - (await folderLatestModificationTime(path)).getTime() >
+            1000 * 3600 * 24
+              ? (
+                  await Promise.all(
+                    svn.map(
+                      async ({ directory, revision }) =>
+                        await getAddedLines(directory, revision),
+                    ),
+                  )
+                ).reduce((acc, val) => acc.concat(val), []).length
+              : 0,
           lastAddedLines,
-        };
-      }),
+        }),
+      ),
     )
   )
-    .filter((result) => result.additions.length > 0)
-    .forEach(({ path, id, additions, lastAddedLines }) => {
-      dataStore.setProjectLastAddedLines(path, additions.length);
+    .filter(({ addedLines }) => addedLines > 0)
+    .forEach(({ path, id, addedLines, lastAddedLines }) => {
+      console.log('reportProjectAdditions', {
+        path,
+        id,
+        addedLines,
+        lastAddedLines,
+      });
+      dataStore.setProjectLastAddedLines(path, addedLines);
       statisticsReporter.incrementLines(
-        additions.length - lastAddedLines,
+        addedLines - lastAddedLines,
         Date.now(),
         Date.now(),
         id,
         packageJson.version,
       );
     });
-};
 
 export const initAdditionReport = (): Job => {
+  reportProjectAdditions().catch();
   return scheduleJob(
     {
       hour: 3,

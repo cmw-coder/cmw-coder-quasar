@@ -19,7 +19,7 @@ const i18n = (relativePath: string, data?: Record<string, unknown>) => {
   }
 };
 
-const selectTheme = (value: Theme) => {
+const updateTheme = (value: Theme) => {
   theme.value = value;
   applyDarkMode();
   window.controlApi.reload(WindowType.Floating);
@@ -52,7 +52,7 @@ const selectTheme = (value: Theme) => {
             v-for="(item, index) in themes"
             :key="index"
             clickable
-            @click="selectTheme(item)"
+            @click="updateTheme(item)"
           >
             <q-item-section>
               {{ i18n(`labels.displayThemeOptions.${item.name}`) }}
