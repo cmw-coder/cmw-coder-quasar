@@ -24,7 +24,7 @@ jobs:
           echo "commit-hash=$COMMIT_HASH" >> $GITHUB_OUTPUT
 
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     needs: get-info
     env:
       OUTPUT_FOLDER: ./dist/electron/Packaged
