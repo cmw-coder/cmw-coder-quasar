@@ -217,7 +217,6 @@ module.exports = configure((/* ctx */) => {
             to: 'assets/proxy',
           },
         ],
-        npmRebuild: false,
         nsis: {
           include: 'assets/installer/script.nsh',
           multiLanguageInstaller: true,
@@ -241,6 +240,7 @@ module.exports = configure((/* ctx */) => {
           ],
         },
       },
+      unPackagedInstallParams: ['--no-frozen-lockfile']
     },
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/developing-browser-extensions/configuring-bex
