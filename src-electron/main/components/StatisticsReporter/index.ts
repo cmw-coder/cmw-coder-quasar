@@ -154,26 +154,27 @@ class StatisticsReporter {
       });
 
       if (data.completions && data.elements && data.projectId) {
+        const requestData: CollectionData = {
+          createTime: data.timelines.startGenerate.toFormat(
+            'yyyy-MM-dd HH:mm:ss',
+          ),
+          prefix: data.elements.prefix,
+          suffix: data.elements.suffix,
+          path: data.elements.file ?? '',
+          similarSnippet: data.elements.similarSnippet ?? '',
+          symbolList: data.elements.symbols ? [data.elements.symbols] : [],
+          answer: data.completions.candidates,
+          acceptAnswerIndex: data.lastChecked,
+          accept: 0,
+          afterCode: '',
+          plugin: 'SI',
+          projectId: data.projectId,
+          fileSuffix: data.elements.file
+            ? extname(basename(data.elements.file))
+            : '',
+        };
         try {
-          await this._collectionApi.post('/v2', {
-            createTime: data.timelines.startGenerate.toFormat(
-              'yyyy-MM-dd HH:mm:ss',
-            ),
-            prefix: data.elements.prefix,
-            suffix: data.elements.suffix,
-            path: data.elements.file ?? '',
-            similarSnippet: data.elements.similarSnippet ?? '',
-            symbolList: data.elements.symbols ? [data.elements.symbols] : [],
-            answer: data.completions.candidates,
-            acceptAnswerIndex: data.lastChecked,
-            accept: 0,
-            afterCode: '',
-            plugin: 'SI',
-            projectId: data.projectId,
-            fileSuffix: data.elements.file
-              ? extname(basename(data.elements.file))
-              : '',
-          } satisfies CollectionData);
+          await this._collectionApi.post('/v2', requestData);
         } catch (e) {
           console.error('StatisticsReporter.completionKept.failed', e);
         }
@@ -217,27 +218,27 @@ class StatisticsReporter {
       ratio,
     });
 
+    const requestData: CollectionData = {
+      createTime: data.timelines.startGenerate.toFormat('yyyy-MM-dd HH:mm:ss'),
+      prefix: data.elements.prefix,
+      suffix: data.elements.suffix,
+      path: data.elements.file ?? '',
+      similarSnippet: data.elements.similarSnippet ?? '',
+      symbolList: data.elements.symbols ? [data.elements.symbols] : [],
+      answer: data.completions.candidates,
+      acceptAnswerIndex: data.lastChecked,
+      accept: 1,
+      afterCode: editedContent,
+      plugin: 'SI',
+      projectId: data.projectId,
+      fileSuffix: data.elements.file
+        ? extname(basename(data.elements.file))
+        : '',
+    };
+
     try {
       await Promise.all([
-        this._collectionApi.post('/v2', {
-          createTime: data.timelines.startGenerate.toFormat(
-            'yyyy-MM-dd HH:mm:ss',
-          ),
-          prefix: data.elements.prefix,
-          suffix: data.elements.suffix,
-          path: data.elements.file ?? '',
-          similarSnippet: data.elements.similarSnippet ?? '',
-          symbolList: data.elements.symbols ? [data.elements.symbols] : [],
-          answer: data.completions.candidates,
-          acceptAnswerIndex: data.lastChecked,
-          accept: 1,
-          afterCode: editedContent,
-          plugin: 'SI',
-          projectId: data.projectId,
-          fileSuffix: data.elements.file
-            ? extname(basename(data.elements.file))
-            : '',
-        } satisfies CollectionData),
+        this._collectionApi.post('/v2', requestData),
         this._statisticsApi.post(
           '/report/summary',
           constructData(
