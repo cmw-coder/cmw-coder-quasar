@@ -4,10 +4,10 @@ permissions: write-all
 
 on:
   push:
-    branches: [ main ]
-    tags: [ pre*, v* ]
+    branches: [main]
+    tags: [pre*, v*]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   get-info:
@@ -31,7 +31,7 @@ jobs:
       RELEASE_FOLDER: ./release
     strategy:
       matrix:
-        apiStyle: [ HuggingFace, Linseer ]
+        apiStyle: [HuggingFace, Linseer]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -45,6 +45,8 @@ jobs:
         with:
           node-version: 20
           cache: 'pnpm'
+      - name: Configure pnpm
+        run: pnpm config set auto-install-peers true
       - name: Install Dependencies
         run: pnpm install --no-frozen-lockfile
       - name: Publish Electron package
