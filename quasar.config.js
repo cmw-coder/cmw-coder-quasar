@@ -240,7 +240,7 @@ module.exports = configure((/* ctx */) => {
           ],
         },
       },
-      unPackagedInstallParams: []
+      unPackagedInstallParams: ['install', '--prod', '--no-frozen-lockfile'],
     },
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/developing-browser-extensions/configuring-bex
