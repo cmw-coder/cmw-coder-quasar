@@ -46,7 +46,7 @@ jobs:
           node-version: 20
           cache: 'pnpm'
       - name: Configure pnpm
-        run: pnpm config set auto-install-peers true
+        run: pnpm config set auto-install-peers false
       - name: Install Dependencies
         run: pnpm install --no-frozen-lockfile
       - name: Publish Electron package
