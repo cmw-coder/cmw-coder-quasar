@@ -217,6 +217,7 @@ module.exports = configure((/* ctx */) => {
             to: 'assets/proxy',
           },
         ],
+        npmRebuild: false,
         nsis: {
           include: 'assets/installer/script.nsh',
           multiLanguageInstaller: true,
