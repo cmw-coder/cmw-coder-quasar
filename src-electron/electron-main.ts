@@ -107,7 +107,9 @@ websocketManager.registerWsAction(
     const { actionId, explicit } = data;
     if (explicit) {
       try {
-        statisticsReporter.completionCancel(actionId, getClientVersion(pid));
+        statisticsReporter
+          .completionCancel(actionId, getClientVersion(pid))
+          .catch();
         return;
       } catch {}
     }
@@ -181,10 +183,16 @@ websocketManager.registerWsAction(
   },
 );
 websocketManager.registerWsAction(WsAction.CompletionKept, ({ data }, pid) => {
-  const { actionId, count, ratio } = data;
+  const { actionId, count, editedContent, ratio } = data;
   try {
     statisticsReporter
-      .completionKept(actionId, count, ratio, getClientVersion(pid))
+      .completionKept(
+        actionId,
+        count,
+        editedContent,
+        ratio,
+        getClientVersion(pid),
+      )
       .catch();
   } catch {
     statisticsReporter.completionAbort(actionId);

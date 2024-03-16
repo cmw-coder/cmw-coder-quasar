@@ -1,19 +1,23 @@
 import axios from 'axios';
 import { DateTime } from 'luxon';
+import { basename, extname } from 'path';
 import { v4 as uuid } from 'uuid';
 
-import { constructData } from 'main/components/StatisticsReporter/utils';
 import { configStore } from 'main/stores';
 import { CaretPosition } from 'shared/types/common';
 import { PromptElements } from 'main/components/PromptExtractor/types';
 import { Completions } from 'main/components/PromptProcessor/types';
+import {
+  CollectionData,
+  KeptRatio,
+} from 'main/components/StatisticsReporter/types';
+import { constructData } from 'main/components/StatisticsReporter/utils';
 import { timer } from 'main/utils/timer';
 import {
   skuNameAcceptMapping,
   skuNameGenerateMapping,
   skuNameKeptMapping,
 } from 'main/components/StatisticsReporter/constants';
-import { KeptRatio } from 'main/components/StatisticsReporter/types';
 
 class CompletionData {
   private _checked = new Set<number>();
@@ -50,10 +54,17 @@ class CompletionData {
     }
     return candidate;
   }
+
+  get lastChecked(): number {
+    return this._lastChecked;
+  }
 }
 
 class StatisticsReporter {
-  private _api = axios.create({
+  private _collectionApi = axios.create({
+    baseURL: configStore.endpoints.collection,
+  });
+  private _statisticsApi = axios.create({
     baseURL: configStore.endpoints.statistics,
   });
   private _lastCursorPosition: CaretPosition = { character: -1, line: -1 };
@@ -96,7 +107,7 @@ class StatisticsReporter {
 
     const lineLength = candidate.split('\r\n').length;
     try {
-      await this._api.post(
+      await this._statisticsApi.post(
         '/report/summary',
         constructData(
           lineLength,
@@ -121,7 +132,7 @@ class StatisticsReporter {
     return actionId;
   }
 
-  completionCancel(actionId: string, version: string) {
+  async completionCancel(actionId: string, version: string) {
     const data = this._recentCompletion.get(actionId);
     if (!data) {
       return;
@@ -142,7 +153,31 @@ class StatisticsReporter {
         version,
       });
 
-      // TODO: Implement the rest of this method
+      if (data.completions && data.elements && data.projectId) {
+        try {
+          await this._collectionApi.post('/v2', {
+            createTime: data.timelines.startGenerate.toFormat(
+              'yyyy-MM-dd HH:mm:ss',
+            ),
+            prefix: data.elements.prefix,
+            suffix: data.elements.suffix,
+            path: data.elements.file ?? '',
+            similarSnippet: data.elements.similarSnippet ?? '',
+            symbolList: data.elements.symbols ? [data.elements.symbols] : [],
+            answer: data.completions.candidates,
+            acceptAnswerIndex: data.lastChecked,
+            accept: 0,
+            afterCode: '',
+            plugin: 'SI',
+            projectId: data.projectId,
+            fileSuffix: data.elements.file
+              ? extname(basename(data.elements.file))
+              : '',
+          } satisfies CollectionData);
+        } catch (e) {
+          console.error('StatisticsReporter.completionKept.failed', e);
+        }
+      }
     }
     this.completionAbort(actionId);
   }
@@ -168,11 +203,12 @@ class StatisticsReporter {
   async completionKept(
     actionId: string,
     count: number,
+    editedContent: string,
     ratio: KeptRatio,
     version: string,
   ) {
     const data = this._recentCompletion.get(actionId);
-    if (!data || !data.projectId) {
+    if (!data || !data.completions || !data.elements || !data.projectId) {
       return;
     }
 
@@ -180,23 +216,46 @@ class StatisticsReporter {
       count,
       ratio,
     });
+
     try {
-      await this._api.post(
-        '/report/summary',
-        constructData(
-          count,
-          data.timelines.startAccept.toMillis(),
-          DateTime.now().toMillis(),
-          data.projectId,
-          version,
-          configStore.modelType,
-          'CODE',
-          skuNameKeptMapping[ratio],
+      await Promise.all([
+        this._collectionApi.post('/v2', {
+          createTime: data.timelines.startGenerate.toFormat(
+            'yyyy-MM-dd HH:mm:ss',
+          ),
+          prefix: data.elements.prefix,
+          suffix: data.elements.suffix,
+          path: data.elements.file ?? '',
+          similarSnippet: data.elements.similarSnippet ?? '',
+          symbolList: data.elements.symbols ? [data.elements.symbols] : [],
+          answer: data.completions.candidates,
+          acceptAnswerIndex: data.lastChecked,
+          accept: 1,
+          afterCode: editedContent,
+          plugin: 'SI',
+          projectId: data.projectId,
+          fileSuffix: data.elements.file
+            ? extname(basename(data.elements.file))
+            : '',
+        } satisfies CollectionData),
+        this._statisticsApi.post(
+          '/report/summary',
+          constructData(
+            count,
+            data.timelines.startAccept.toMillis(),
+            DateTime.now().toMillis(),
+            data.projectId,
+            version,
+            configStore.modelType,
+            'CODE',
+            skuNameKeptMapping[ratio],
+          ),
         ),
-      );
+      ]);
     } catch (e) {
       console.error('StatisticsReporter.completionKept.failed', e);
     }
+    statisticsReporter.completionAbort(actionId);
   }
 
   completionSelected(
@@ -224,7 +283,7 @@ class StatisticsReporter {
         version,
       });
       const lineLength = candidate.split('\r\n').length;
-      this._api
+      this._statisticsApi
         .post(
           '/report/summary',
           constructData(
@@ -268,7 +327,7 @@ class StatisticsReporter {
       version,
     });
     try {
-      await this._api.post(
+      await this._statisticsApi.post(
         '/report/summary',
         constructData(
           count,
@@ -301,7 +360,7 @@ class StatisticsReporter {
       version,
     });
     try {
-      await this._api.post(
+      await this._statisticsApi.post(
         '/report/summary',
         constructData(
           count,

@@ -38,6 +38,12 @@ export class HuggingFaceConfigStore {
             huggingFaceStoreDefault.config.endpoints.feedback;
           store.set('config', oldConfig);
         },
+        '1.0.4': (store) => {
+          console.log('Migrating "config" store to 1.0.4 ...');
+          const oldConfig = store.get('config');
+          oldConfig.endpoints.collection = huggingFaceStoreDefault.config.endpoints.collection;
+          store.set('config', oldConfig);
+        },
       },
       name: 'config',
       // schema: huggingFaceStoreSchema,
@@ -115,6 +121,7 @@ export class LinseerConfigStore {
         '1.0.4': (store) => {
           console.log('Migrating "config" store to 1.0.4 ...');
           const oldConfig = store.get('config');
+          oldConfig.endpoints.collection = linseerConfigDefault.config.endpoints.collection;
           oldConfig.modelConfigs = linseerConfigDefault.config.modelConfigs;
           store.set('config', oldConfig);
         },

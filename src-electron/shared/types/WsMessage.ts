@@ -79,6 +79,7 @@ export interface CompletionKeptClientMessage extends WsMessage {
   data: {
     actionId: string;
     count: number;
+    editedContent: string;
     ratio: KeptRatio;
   };
 }
