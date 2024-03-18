@@ -82,34 +82,39 @@ onBeforeUnmount(() => {
 
 <template>
   <q-page v-if="currentCompletion.length" class="row overflow-hidden">
-    <q-card
-      v-show="isMultiLine"
-      bordered
-      style="font-family: Consolas, monospace, serif; opacity: 80%"
-      :style="{
-        fontSize: `${fontSize}px`,
-        lineHeight: `${height - 1}px`,
-      }"
-    >
-      <div v-html="codeContent" style="margin-top: -1em" />
-    </q-card>
-    <div
-      v-show="!isMultiLine"
-      class="row q-pa-none q-ma-none"
-      style="font-family: Consolas, monospace, serif; white-space: pre"
-      :style="{
-        fontSize: `${fontSize}px`,
-        lineHeight: `${height - 1}px`,
-      }"
-    >
-      <div v-show="transparentFallback && cacheOffset > 0" class="text-primary">
-        {{ currentCompletion.substring(0, cacheOffset) }}
-      </div>
-      <div class="text-grey">
-        {{
-          ' '.repeat(transparentFallback ? 0 : cacheOffset) +
-          currentCompletion.substring(cacheOffset)
-        }}
+    <div class="column">
+      <q-card
+        v-show="isMultiLine"
+        bordered
+        style="font-family: Consolas, monospace, serif; opacity: 80%"
+        :style="{
+          fontSize: `${fontSize}px`,
+          lineHeight: `${height - 1}px`,
+        }"
+      >
+        <div v-html="codeContent" style="margin-top: -1em" />
+      </q-card>
+      <div
+        v-show="!isMultiLine"
+        class="row q-pa-none q-ma-none"
+        style="font-family: Consolas, monospace, serif; white-space: pre"
+        :style="{
+          fontSize: `${fontSize}px`,
+          lineHeight: `${height - 1}px`,
+        }"
+      >
+        <div
+          v-show="transparentFallback && cacheOffset > 0"
+          class="text-primary"
+        >
+          {{ currentCompletion.substring(0, cacheOffset) }}
+        </div>
+        <div class="text-grey">
+          {{
+            ' '.repeat(transparentFallback ? 0 : cacheOffset) +
+            currentCompletion.substring(cacheOffset)
+          }}
+        </div>
       </div>
     </div>
   </q-page>

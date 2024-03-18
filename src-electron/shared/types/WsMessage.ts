@@ -11,6 +11,7 @@ export enum WsAction {
   CompletionSelect = 'CompletionSelect',
   DebugSync = 'DebugSync',
   EditorFocusState = 'EditorFocusState',
+  EditorPaste = 'EditorPaste',
   EditorSwitchProject = 'EditorSwitchProject',
   HandShake = 'HandShake',
 }
@@ -134,6 +135,14 @@ export interface EditorFocusStateClientMessage extends WsMessage {
   data: boolean;
 }
 
+export interface EditorPasteClientMessage extends WsMessage {
+  action: WsAction.EditorPaste;
+  data: {
+    count: number;
+    projectId: string;
+  };
+}
+
 export interface EditorSwitchProjectClientMessage extends WsMessage {
   action: WsAction.EditorSwitchProject;
   data: string;
@@ -172,6 +181,10 @@ export interface WsMessageMapping {
   [WsAction.DebugSync]: { client: DebugSyncClientMessage; server: void };
   [WsAction.EditorFocusState]: {
     client: EditorFocusStateClientMessage;
+    server: void;
+  };
+  [WsAction.EditorPaste]: {
+    client: EditorPasteClientMessage;
     server: void;
   };
   [WsAction.EditorSwitchProject]: {

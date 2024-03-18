@@ -6,6 +6,7 @@ import { SymbolInfo } from 'main/types/SymbolInfo';
 import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
 import { timer } from 'main/utils/timer';
+import { ApiStyle } from 'shared/types/model';
 import { CompletionGenerateClientMessage } from 'shared/types/WsMessage';
 
 export class PromptElements {
@@ -22,33 +23,46 @@ export class PromptElements {
     this.suffix = suffix;
   }
 
-  constructQuestion() {
-    const result = Array<string>();
-    if (this.similarSnippet) {
-      result.push(this.similarSnippet);
-    }
-    if (this.symbols) {
-      result.push(this.symbols);
-    }
-    result.push(this.prefix);
-    return result.join('\r\n');
-  }
-
-  stringify(separateTokens: SeparateTokens) {
+  stringify(apiStyle: ApiStyle, separateTokens: SeparateTokens) {
     const { start, end, middle } = separateTokens;
     const result = Array<string>();
-    if (this.folder) {
-      result.push(`<REPO>${this.folder}`);
+    if (apiStyle === ApiStyle.HuggingFace) {
+      if (this.folder) {
+        result.push(`<REPO>${this.folder}`);
+      }
+      if (this.file) {
+        result.push(`<FILENAME>${this.file}`);
+      }
+      if (this.language) {
+        result.push(`<LANGUAGE>${this.language}`);
+      }
+      result.push(start);
+      if (this.similarSnippet) {
+        result.push(`${this.similarSnippet}\r\n`);
+      }
+      if (this.symbols) {
+        result.push(`${this.symbols}\r\n`);
+      }
+      result.push(this.prefix);
+      result.push(end);
+      result.push(this.suffix);
+      result.push(middle);
+    } else {
+      result.push(start);
+      if (this.language) {
+        result.push(`Language:${this.language}\r\n\r\n\r\n`);
+      }
+      if (this.symbols) {
+        result.push(`${this.symbols}\r\n`);
+      }
+      if (this.similarSnippet) {
+        result.push(`${this.similarSnippet}\r\n`);
+      }
+      result.push(this.prefix);
+      result.push(middle);
+      result.push(this.suffix);
+      result.push(end);
     }
-    if (this.file) {
-      result.push(`<FILENAME>${this.file}`);
-    }
-    if (this.language) {
-      result.push(`<LANGUAGE>${this.language}`);
-    }
-    result.push(start + this.constructQuestion());
-    result.push(end + this.suffix);
-    result.push(middle);
     return result.join('');
   }
 }

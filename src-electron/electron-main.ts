@@ -235,6 +235,14 @@ websocketManager.registerWsAction(
     }
   },
 );
+websocketManager.registerWsAction(WsAction.EditorPaste, ({ data }, pid) => {
+  const { count, projectId } = data;
+  try {
+    statisticsReporter
+      .copiedLines(count, projectId, getClientVersion(pid))
+      .catch();
+  } catch {}
+});
 websocketManager.registerWsAction(
   WsAction.EditorSwitchProject,
   ({ data: path }, pid) => {

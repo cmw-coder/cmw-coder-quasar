@@ -11,11 +11,10 @@ import {
   SubModelType,
 } from 'shared/types/model';
 
-export const huggingFaceStoreDefault: HuggingFaceStoreType = {
+export const huggingFaceStoreDefaultNormal: HuggingFaceStoreType = {
   apiStyle: ApiStyle.HuggingFace,
   config: {
     endpoints: {
-      collection: 'http://10.113.36.121/kong/RdTestAiService/chatgpt/collection',
       feedback: 'http://10.113.36.121/kong/RdTestAiService',
       statistics: 'http://10.113.36.121/kong/RdTestResourceStatistic',
       update: 'http://10.113.36.121/h3c-ai-assistant/cmw-coder',
@@ -67,11 +66,65 @@ export const huggingFaceStoreDefault: HuggingFaceStoreType = {
   },
 };
 
+export const huggingFaceStoreDefaultRoute: HuggingFaceStoreType = {
+  apiStyle: ApiStyle.HuggingFace,
+  config: {
+    endpoints: {
+      feedback: 'http://10.113.12.206/kong/RdTestAiService',
+      statistics: 'http://10.113.12.206/kong/RdTestResourceStatistic',
+      update: 'http://10.113.12.206/h3c-ai-assistant/cmw-coder',
+    },
+    modelConfigs: [
+      {
+        modelType: HuggingFaceModelType.ComwareV1,
+        completionConfigs: {
+          function: {
+            contextLimit: 1500,
+            endpoint: 'http://10.113.12.206:9190',
+            maxTokenCount: 1024,
+            stopTokens: ['<fim_pad>', '<｜end▁of▁sentence｜>', '\n}'],
+            suggestionCount: 1,
+            temperature: 0.2,
+          },
+          line: {
+            contextLimit: 1500,
+            endpoint: 'http://10.113.12.206:9190',
+            maxTokenCount: 64,
+            stopTokens: ['<fim_pad>', '<｜end▁of▁sentence｜>', '\r\n', '\n'],
+            suggestionCount: 1,
+            temperature: 0.2,
+          },
+          snippet: {
+            contextLimit: 1500,
+            endpoint: 'http://10.113.12.206:9190',
+            maxTokenCount: 96,
+            stopTokens: ['<fim_pad>', '<｜end▁of▁sentence｜>', '}'],
+            suggestionCount: 1,
+            temperature: 0.2,
+          },
+        },
+        separateTokens: {
+          end: '<fim_suffix>',
+          middle: '<fim_middle>',
+          start: '<fim_prefix>',
+        },
+      },
+    ],
+    server: {
+      host: 'localhost',
+      port: 3000,
+    },
+    userId: userInfo().username,
+  },
+  data: {
+    modelType: HuggingFaceModelType.ComwareV1,
+  },
+};
+
 export const linseerConfigDefault: LinseerStoreType = {
   apiStyle: ApiStyle.Linseer,
   config: {
     endpoints: {
-      collection: 'http://rdee.h3c.com/kong/RdTestAiService/chatgpt/collection',
       feedback: 'http://rdee.h3c.com/kong/RdTestAiService',
       statistics: 'http://rdee.h3c.com/kong/RdTestResourceStatistic',
       update: 'http://rdee.h3c.com/h3c-ai-assistant/plugin/sourceinsight',
@@ -85,7 +138,7 @@ export const linseerConfigDefault: LinseerStoreType = {
             contextLimit: 1500,
             maxTokenCount: 320,
             stopTokens: ['<fim_pad>', '<|endoftext|>', '</s>', '\n}'],
-            subModelType: SubModelType['linseer-code-34b'],
+            subModelType: SubModelType['linseer-code-multi-line'],
             suggestionCount: 1,
             temperature: 0.2,
           },
@@ -93,7 +146,7 @@ export const linseerConfigDefault: LinseerStoreType = {
             contextLimit: 1500,
             maxTokenCount: 15,
             stopTokens: ['<fim_pad>', '<|endoftext|>', '</s>'],
-            subModelType: SubModelType['linseer-code-13b'],
+            subModelType: SubModelType['linseer-code-single-line'],
             suggestionCount: 1,
             temperature: 0.2,
           },
@@ -101,10 +154,15 @@ export const linseerConfigDefault: LinseerStoreType = {
             contextLimit: 1500,
             maxTokenCount: 40,
             stopTokens: ['<fim_pad>', '<|endoftext|>', '</s>', '}'],
-            subModelType: SubModelType['linseer-code-34b'],
+            subModelType: SubModelType['linseer-code-multi-line'],
             suggestionCount: 1,
             temperature: 0.2,
           },
+        },
+        separateTokens: {
+          end: '<｜fim▁end｜>',
+          middle: '<｜fim▁hole｜>',
+          start: '<｜fim▁begin｜>',
         },
       },
       {
@@ -136,6 +194,11 @@ export const linseerConfigDefault: LinseerStoreType = {
             temperature: 0.2,
           },
         },
+        separateTokens: {
+          end: '<｜fim▁end｜>',
+          middle: '<｜fim▁hole｜>',
+          start: '<｜fim▁begin｜>',
+        },
       },
       {
         endpoint: 'http://rdee.h3c.com/kong/RdTestAiService/chatgpt',
@@ -165,6 +228,11 @@ export const linseerConfigDefault: LinseerStoreType = {
             suggestionCount: 1,
             temperature: 0.2,
           },
+        },
+        separateTokens: {
+          end: '<｜fim▁end｜>',
+          middle: '<｜fim▁hole｜>',
+          start: '<｜fim▁begin｜>',
         },
       },
     ],

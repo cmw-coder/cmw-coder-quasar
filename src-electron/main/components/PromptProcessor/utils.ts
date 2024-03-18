@@ -6,6 +6,7 @@ import {
 import { generate, generateRd } from 'main/utils/axios';
 import { CompletionType } from 'shared/types/common';
 import { CanceledError } from 'axios';
+import { ApiStyle } from 'shared/types/model';
 
 // Start with '//' or '#' or '{' or '/*', or is '***/'
 const detectRegex = /^\/\/|^#|^\{|^\/\*|^\*+\/$/;
@@ -70,7 +71,7 @@ export const processHuggingFaceApi = async (
     } = await generate(
       endpoint,
       {
-        inputs: promptElements.stringify(separateTokens),
+        inputs: promptElements.stringify(ApiStyle.HuggingFace, separateTokens),
         parameters: {
           best_of: suggestionCount,
           details: true,
@@ -94,7 +95,7 @@ export const processHuggingFaceApi = async (
     return _processGeneratedSuggestions(
       generatedSuggestions,
       completionType,
-      promptElements.constructQuestion(),
+      promptElements.prefix,
     );
   } catch (error) {
     if (error instanceof CanceledError) {
@@ -117,7 +118,7 @@ export const processLinseerApi = async (
   projectId: string,
   abortSignal: AbortSignal,
 ): Promise<string[]> => {
-  const { completionConfigs, endpoint } = modelConfig;
+  const { completionConfigs, endpoint, separateTokens } = modelConfig;
   const completionConfig =
     completionType === CompletionType.Function
       ? completionConfigs.function
@@ -132,7 +133,7 @@ export const processLinseerApi = async (
       await generateRd(
         endpoint,
         {
-          question: promptElements.constructQuestion(),
+          question: promptElements.stringify(ApiStyle.Linseer, separateTokens),
           model: subModelType,
           maxTokens: maxTokenCount,
           temperature: temperature,
@@ -156,7 +157,7 @@ export const processLinseerApi = async (
     return _processGeneratedSuggestions(
       generatedSuggestions,
       completionType,
-      promptElements.constructQuestion(),
+      promptElements.prefix,
     );
   } catch (error) {
     if (error instanceof CanceledError) {
@@ -174,14 +175,14 @@ export const processLinseerApi = async (
 const _processGeneratedSuggestions = (
   generatedSuggestions: string[],
   completionType: CompletionType,
-  promptQuestion: string,
+  prefix: string,
 ): string[] => {
   // TODO: Replace Date Created if needed.
   const result = generatedSuggestions
-    /// Filter out contents that are the same as the prompt.
+    /// Filter out contents that are the same as the prefix.
     .map((generatedSuggestion) =>
-      generatedSuggestion.substring(0, promptQuestion.length) === promptQuestion
-        ? generatedSuggestion.substring(promptQuestion.length)
+      generatedSuggestion.substring(0, prefix.length) === prefix
+        ? generatedSuggestion.substring(prefix.length)
         : generatedSuggestion,
     )
     /// Replace '\t' with 4 spaces.

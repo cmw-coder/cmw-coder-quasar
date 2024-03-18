@@ -1,7 +1,8 @@
 import ElectronStore from 'electron-store';
 
 import {
-  huggingFaceStoreDefault,
+  huggingFaceStoreDefaultNormal,
+  huggingFaceStoreDefaultRoute,
   linseerConfigDefault,
 } from 'main/stores/config/default';
 import {
@@ -13,6 +14,13 @@ import {
   LinseerStoreType,
 } from 'main/stores/config/types';
 import { judgment, refreshToken } from 'main/utils/axios';
+import { NetworkZone, runtimeConfig } from 'shared/config';
+
+const defaultMapping: Record<NetworkZone, HuggingFaceStoreType> = {
+  [NetworkZone.Normal]: huggingFaceStoreDefaultNormal,
+  [NetworkZone.Public]: huggingFaceStoreDefaultNormal,
+  [NetworkZone.Secure]: huggingFaceStoreDefaultRoute,
+};
 
 export class HuggingFaceConfigStore {
   private _store: ElectronStore<HuggingFaceStoreType>;
@@ -20,7 +28,7 @@ export class HuggingFaceConfigStore {
   constructor() {
     this._store = new ElectronStore({
       clearInvalidConfig: true,
-      defaults: huggingFaceStoreDefault,
+      defaults: defaultMapping[runtimeConfig.networkZone],
       migrations: {
         '1.0.1': (store) => {
           console.info('Migrating "config" store to 1.0.1 ...');
@@ -35,13 +43,7 @@ export class HuggingFaceConfigStore {
           console.info('Migrating "config" store to 1.0.3 ...');
           const oldConfig = store.get('config');
           oldConfig.endpoints.feedback =
-            huggingFaceStoreDefault.config.endpoints.feedback;
-          store.set('config', oldConfig);
-        },
-        '1.0.4': (store) => {
-          console.log('Migrating "config" store to 1.0.4 ...');
-          const oldConfig = store.get('config');
-          oldConfig.endpoints.collection = huggingFaceStoreDefault.config.endpoints.collection;
+            defaultMapping[runtimeConfig.networkZone].config.endpoints.feedback;
           store.set('config', oldConfig);
         },
       },
@@ -121,7 +123,6 @@ export class LinseerConfigStore {
         '1.0.4': (store) => {
           console.log('Migrating "config" store to 1.0.4 ...');
           const oldConfig = store.get('config');
-          oldConfig.endpoints.collection = linseerConfigDefault.config.endpoints.collection;
           oldConfig.modelConfigs = linseerConfigDefault.config.modelConfigs;
           store.set('config', oldConfig);
         },

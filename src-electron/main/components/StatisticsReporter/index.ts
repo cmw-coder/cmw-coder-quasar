@@ -62,8 +62,8 @@ class CompletionData {
 }
 
 class StatisticsReporter {
-  private _collectionApi = axios.create({
-    baseURL: configStore.endpoints.collection,
+  private _feedbackApi = axios.create({
+    baseURL: configStore.endpoints.feedback,
   });
   private _statisticsApi = axios.create({
     baseURL: configStore.endpoints.statistics,
@@ -173,7 +173,10 @@ class StatisticsReporter {
       return;
     }
 
-    const accessToken = configStore.apiStyle === ApiStyle.Linseer ? configStore.data.tokens.access : '';
+    const accessToken =
+      configStore.apiStyle === ApiStyle.Linseer
+        ? configStore.data.tokens.access
+        : '';
     const requestData: CollectionData = {
       createTime: data.timelines.startGenerate.toFormat('yyyy-MM-dd HH:mm:ss'),
       prefix: data.elements.prefix,
@@ -196,7 +199,7 @@ class StatisticsReporter {
 
     try {
       await Promise.all([
-        this._collectionApi.post('/v2', [requestData], {
+        this._feedbackApi.post('/chatgpt/collection/v2', [requestData], {
           headers: {
             'x-authorization': `bearer ${accessToken}`,
           },
@@ -318,7 +321,7 @@ class StatisticsReporter {
         ),
       );
     } catch (e) {
-      console.error('StatisticsReporter.copiedLinesFailed', e);
+      console.error('StatisticsReporter.copiedLines.failed', e);
     }
   }
 

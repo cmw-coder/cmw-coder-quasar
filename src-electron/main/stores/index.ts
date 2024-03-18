@@ -1,16 +1,12 @@
 import { HuggingFaceConfigStore, LinseerConfigStore } from 'main/stores/config';
 import { DataStore } from 'main/stores/data';
 import { registerAction } from 'preload/types/ActionApi';
+import { runtimeConfig } from 'shared/config';
 import { ActionType } from 'shared/types/ActionMessage';
 import { ApiStyle } from 'shared/types/model';
 
-let apiStyle: ApiStyle;
-
-// eslint-disable-next-line prefer-const
-apiStyle = ApiStyle.Linseer;
-
 export const configStore =
-  apiStyle === ApiStyle.HuggingFace
+  runtimeConfig.apiStyle === ApiStyle.HuggingFace
     ? new HuggingFaceConfigStore()
     : new LinseerConfigStore();
 

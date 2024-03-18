@@ -231,6 +231,22 @@ const linseerModelConfigSchema: Schema<LinseerModelConfigType> = {
     type: 'string',
     enum: Object.keys(LinseerModelType),
   },
+  separateTokens: {
+    type: 'object',
+    required: ['end', 'middle', 'start'],
+    additionalProperties: false,
+    properties: {
+      end: {
+        type: 'string',
+      },
+      middle: {
+        type: 'string',
+      },
+      start: {
+        type: 'string',
+      },
+    },
+  },
 };
 
 const linseerConfigSchema: Schema<LinseerConfigType> = {

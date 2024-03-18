@@ -13,7 +13,6 @@ export interface SeparateTokens {
 
 export interface CommonConfigType {
   endpoints: {
-    collection: string;
     feedback: string;
     statistics: string;
     update: string;
@@ -79,6 +78,7 @@ export interface LinseerModelConfigType {
   };
   endpoint: string;
   modelType: LinseerModelType;
+  separateTokens: SeparateTokens;
 }
 
 export interface LinseerConfigType extends CommonConfigType {
