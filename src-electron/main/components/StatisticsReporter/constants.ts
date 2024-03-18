@@ -31,7 +31,10 @@ export const skuNameGenerateMapping: Record<CompletionType, string> = {
   [CompletionType.Snippet]: 'GENE',
 };
 
-export const skuNameKeptMapping: Record<KeptRatio, string> = {
+export const skuNameKeptMapping: Record<
+  Exclude<KeptRatio, KeptRatio.None>,
+  string
+> = {
   [KeptRatio.All]: 'ADOPT',
   [KeptRatio.Few]: 'ADOPT_50',
   [KeptRatio.Most]: 'ADOPT_80',

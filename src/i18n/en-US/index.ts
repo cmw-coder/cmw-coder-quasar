@@ -104,7 +104,7 @@ export default {
           },
           title: 'General',
           transparentFallback: 'Transparent fallback (Windows 7)',
-          zoomFIx: 'Fix window zoom',
+          zoomFix: 'Fix window zoom',
         },
       },
       UpdateCard: {

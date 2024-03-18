@@ -6,8 +6,8 @@ export enum WsAction {
   CompletionAccept = 'CompletionAccept',
   CompletionCache = 'CompletionCache',
   CompletionCancel = 'CompletionCancel',
+  CompletionEdit = 'CompletionEdit',
   CompletionGenerate = 'CompletionGenerate',
-  CompletionKept = 'CompletionKept',
   CompletionSelect = 'CompletionSelect',
   DebugSync = 'DebugSync',
   EditorFocusState = 'EditorFocusState',
@@ -74,8 +74,8 @@ export class CompletionGenerateServerMessage implements WsMessage {
   }
 }
 
-export interface CompletionKeptClientMessage extends WsMessage {
-  action: WsAction.CompletionKept;
+export interface CompletionEditClientMessage extends WsMessage {
+  action: WsAction.CompletionEdit;
   data: {
     actionId: string;
     count: number;
@@ -157,13 +157,13 @@ export interface WsMessageMapping {
     client: CompletionCancelClientMessage;
     server: void;
   };
+  [WsAction.CompletionEdit]: {
+    client: CompletionEditClientMessage;
+    server: void;
+  };
   [WsAction.CompletionGenerate]: {
     client: CompletionGenerateClientMessage;
     server: Promise<CompletionGenerateServerMessage | void>;
-  };
-  [WsAction.CompletionKept]: {
-    client: CompletionKeptClientMessage;
-    server: void;
   };
   [WsAction.CompletionSelect]: {
     client: CompletionSelectClientMessage;

@@ -16,7 +16,7 @@ export const huggingFaceStoreDefault: HuggingFaceStoreType = {
   config: {
     endpoints: {
       collection: 'http://10.113.36.121/kong/RdTestAiService/chatgpt/collection',
-      feedback: 'http://10.113.36.121/kong/RdTestAiService-b',
+      feedback: 'http://10.113.36.121/kong/RdTestAiService',
       statistics: 'http://10.113.36.121/kong/RdTestResourceStatistic',
       update: 'http://10.113.36.121/h3c-ai-assistant/cmw-coder',
     },
@@ -72,7 +72,7 @@ export const linseerConfigDefault: LinseerStoreType = {
   config: {
     endpoints: {
       collection: 'http://rdee.h3c.com/kong/RdTestAiService/chatgpt/collection',
-      feedback: 'http://rdee.h3c.com/kong/RdTestAiService-b',
+      feedback: 'http://rdee.h3c.com/kong/RdTestAiService',
       statistics: 'http://rdee.h3c.com/kong/RdTestResourceStatistic',
       update: 'http://rdee.h3c.com/h3c-ai-assistant/plugin/sourceinsight',
     },

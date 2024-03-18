@@ -182,11 +182,11 @@ websocketManager.registerWsAction(
     }
   },
 );
-websocketManager.registerWsAction(WsAction.CompletionKept, ({ data }, pid) => {
+websocketManager.registerWsAction(WsAction.CompletionEdit, ({ data }, pid) => {
   const { actionId, count, editedContent, ratio } = data;
   try {
     statisticsReporter
-      .completionKept(
+      .completionEdit(
         actionId,
         count,
         editedContent,
@@ -229,7 +229,7 @@ websocketManager.registerWsAction(
   WsAction.EditorFocusState,
   ({ data: isFocused }) => {
     if (isFocused) {
-      // immersiveWindow.show();
+      immersiveWindow.show();
     } else {
       immersiveWindow.hide();
     }

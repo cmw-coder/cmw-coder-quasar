@@ -42,12 +42,8 @@ const updateTransparentFallback = (value: boolean) => {
       },
     }),
   );
-  setTimeout(
-    () => {
-      window.actionApi.send(new DataStoreLoadActionMessage());
-    },
-    300 + Math.random() * 700,
-  );
+  window.actionApi.send(new DataStoreLoadActionMessage());
+  window.controlApi.close(WindowType.Immersive);
 };
 
 const updateZoomFix = (value: boolean) => {
@@ -59,12 +55,7 @@ const updateZoomFix = (value: boolean) => {
       },
     }),
   );
-  setTimeout(
-    () => {
-      window.actionApi.send(new DataStoreLoadActionMessage());
-    },
-    300 + Math.random() * 700,
-  );
+  window.actionApi.send(new DataStoreLoadActionMessage());
 };
 
 const updateTheme = (value: Theme) => {
@@ -78,6 +69,8 @@ const actionApi = new ActionApi(baseName);
 onMounted(() => {
   actionApi.register(ActionType.DataStoreLoad, (data) => {
     if (data) {
+      transparentFallback.value = data.compatibility.transparentFallback;
+      transparentFallbackUpdating.value = false;
       zoomFix.value = data.compatibility.zoomFix;
       zoomFixUpdating.value = false;
     }

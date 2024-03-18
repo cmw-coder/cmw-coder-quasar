@@ -42,12 +42,7 @@ const updateModelType = (model: HuggingFaceModelType | LinseerModelType) => {
       },
     }),
   );
-  setTimeout(
-    () => {
-      window.actionApi.send(new ConfigStoreLoadActionMessage());
-    },
-    300 + Math.random() * 700,
-  );
+  window.actionApi.send(new ConfigStoreLoadActionMessage());
 };
 
 const actionApi = new ActionApi(baseName);

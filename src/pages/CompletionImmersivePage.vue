@@ -1,32 +1,15 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 
-import { ActionType } from 'shared/types/ActionMessage';
+import { fontSizeTable } from 'shared/constants';
+import {
+  ActionType,
+  DataStoreLoadActionMessage,
+} from 'shared/types/ActionMessage';
 import { useHighlighter } from 'stores/highlighter';
 import { ActionApi } from 'types/ActionApi';
 
 const baseName = 'pages.CompletionImmersivePage.';
-
-const fontSizeTable: Record<number, number> = {
-  12: 0.91,
-  14: 0.91,
-  16: 0.91,
-  17: 0.963,
-  18: 0.91,
-  20: 0.91,
-  22: 0.992,
-  26: 0.91,
-  30: 0.91,
-  34: 0.91,
-  38: 0.91,
-  40: 0.91,
-  42: 0.91,
-  48: 0.947,
-  52: 0.91,
-  64: 0.91,
-  74: 0.934,
-  104: 0.927,
-};
 
 const { codeToHtml } = useHighlighter();
 
@@ -36,20 +19,11 @@ const completionCount = reactive({
   total: 0,
 });
 const currentCompletion = ref('');
+const fontSize = ref(0);
 const height = ref(0);
-const fontSize = computed(() =>
-  fontSizeTable[height.value]
-    ? fontSizeTable[height.value] * height.value
-    : -0.000000000506374957617199 * height.value ** 6 +
-      0.000000123078838391882 * height.value ** 5 -
-      0.0000118441038684185 * height.value ** 4 +
-      0.000574698566099494 * height.value ** 3 -
-      0.0147437317361461 * height.value ** 2 +
-      1.09720488138051 * height.value,
-);
-const isMultiLine = computed(
-  () => currentCompletion.value.split('\r\n').length > 1,
-);
+const isMultiLine = ref(false);
+const transparentFallback = ref(false);
+
 const codeContent = computed(() =>
   codeToHtml(
     ' '.repeat(cacheOffset.value) +
@@ -73,7 +47,16 @@ onMounted(() => {
       currentCompletion.value = completion;
       completionCount.index = count.index;
       completionCount.total = count.total;
+      fontSize.value = fontSizeTable[fontHeight]
+        ? fontSizeTable[fontHeight] * fontHeight
+        : -0.000000000506374957617199 * fontHeight ** 6 +
+          0.000000123078838391882 * fontHeight ** 5 -
+          0.0000118441038684185 * fontHeight ** 4 +
+          0.000574698566099494 * fontHeight ** 3 -
+          0.0147437317361461 * fontHeight ** 2 +
+          1.09720488138051 * fontHeight;
       height.value = fontHeight;
+      isMultiLine.value = completion.split('\r\n').length > 1;
       console.log({ height: height.value, fontSize: fontSize.value });
     },
   );
@@ -84,6 +67,13 @@ onMounted(() => {
       cacheOffset.value += 1;
     }
   });
+  actionApi.register(ActionType.DataStoreLoad, (data) => {
+    if (data) {
+      console.log(data);
+      transparentFallback.value = data.compatibility.transparentFallback;
+    }
+  });
+  window.actionApi.send(new DataStoreLoadActionMessage());
 });
 onBeforeUnmount(() => {
   actionApi.unregister();
@@ -91,30 +81,36 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <q-page v-if="currentCompletion.length" class="overflow-hidden">
-    <div class="row">
-      <div
-        v-show="!isMultiLine"
-        class="text-grey"
-        style="font-family: Consolas, monospace, serif; white-space: pre"
-        :style="{
-          fontSize: `${fontSize}px`,
-          lineHeight: `${height - 1}px`,
-        }"
-      >
-        {{ ' '.repeat(cacheOffset) + currentCompletion.substring(cacheOffset) }}
+  <q-page v-if="currentCompletion.length" class="row overflow-hidden">
+    <q-card
+      v-show="isMultiLine"
+      bordered
+      style="font-family: Consolas, monospace, serif; opacity: 80%"
+      :style="{
+        fontSize: `${fontSize}px`,
+        lineHeight: `${height - 1}px`,
+      }"
+    >
+      <div v-html="codeContent" style="margin-top: -1em" />
+    </q-card>
+    <div
+      v-show="!isMultiLine"
+      class="row q-pa-none q-ma-none"
+      style="font-family: Consolas, monospace, serif; white-space: pre"
+      :style="{
+        fontSize: `${fontSize}px`,
+        lineHeight: `${height - 1}px`,
+      }"
+    >
+      <div v-show="transparentFallback && cacheOffset > 0" class="text-primary">
+        {{ currentCompletion.substring(0, cacheOffset) }}
       </div>
-      <q-card
-        v-show="isMultiLine"
-        bordered
-        style="font-family: Consolas, monospace, serif; opacity: 80%"
-        :style="{
-          fontSize: `${fontSize}px`,
-          lineHeight: `${height - 1}px`,
-        }"
-      >
-        <div v-html="codeContent" style="margin-top: -1em" />
-      </q-card>
+      <div class="text-grey">
+        {{
+          ' '.repeat(transparentFallback ? 0 : cacheOffset) +
+          currentCompletion.substring(cacheOffset)
+        }}
+      </div>
     </div>
   </q-page>
 </template>

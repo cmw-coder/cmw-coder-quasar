@@ -1,7 +1,7 @@
 import Conf from 'conf';
 import ElectronStore from 'electron-store';
 import { existsSync } from 'fs';
-import { release } from 'os';
+import { extend } from 'quasar';
 
 import { dataStoreDefault } from 'main/stores/data/default';
 import {
@@ -70,8 +70,9 @@ export class DataStore {
             'window',
           );
           store.set('compatibility', {
-            transparentFallback: parseInt(release().split('.')[0]) < 10,
-            zoomFix: zoom !== 1,
+            transparentFallback:
+              dataStoreDefault.compatibility.transparentFallback,
+            zoomFix: zoom ? zoom !== 1 : false,
           });
           store.set('window', {
             main,
@@ -88,7 +89,7 @@ export class DataStore {
   }
 
   set store(value: Partial<DataStoreType>) {
-    this._store.store = { ...this._store.store, ...value };
+    this._store.store = extend(true, this._store.store, value);
   }
 
   getProjectId(path: string): string | undefined {

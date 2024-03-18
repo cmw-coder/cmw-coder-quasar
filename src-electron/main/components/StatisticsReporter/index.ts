@@ -18,6 +18,7 @@ import {
   skuNameGenerateMapping,
   skuNameKeptMapping,
 } from 'main/components/StatisticsReporter/constants';
+import { ApiStyle } from 'shared/types/model';
 
 class CompletionData {
   private _checked = new Set<number>();
@@ -146,47 +147,80 @@ class StatisticsReporter {
       // TODO: Check if this works
       this._lastCursorPosition = data.position;
       console.debug('StatisticsReporter.completionCancel', {
-        completions: data.completions,
         position: data.position,
         projectId: data.projectId,
         timelines: data.timelines,
         version,
       });
-
-      if (data.completions && data.elements && data.projectId) {
-        const requestData: CollectionData = {
-          createTime: data.timelines.startGenerate.toFormat(
-            'yyyy-MM-dd HH:mm:ss',
-          ),
-          prefix: data.elements.prefix,
-          suffix: data.elements.suffix,
-          path: data.elements.file ?? '',
-          similarSnippet: data.elements.similarSnippet ?? '',
-          symbolList: data.elements.symbols ? [data.elements.symbols] : [],
-          answer: data.completions.candidates,
-          acceptAnswerIndex: data.lastChecked,
-          accept: 0,
-          afterCode: '',
-          plugin: 'SI',
-          projectId: data.projectId,
-          fileSuffix: data.elements.file
-            ? extname(basename(data.elements.file))
-            : '',
-        };
-        try {
-          await this._collectionApi.post('/v2', requestData);
-        } catch (e) {
-          console.error('StatisticsReporter.completionKept.failed', e);
-        }
-      }
     }
-    this.completionAbort(actionId);
   }
 
   completionCount(actionId: string): number {
     return (
       this._recentCompletion.get(actionId)?.completions?.candidates.length ?? 0
     );
+  }
+
+  async completionEdit(
+    actionId: string,
+    count: number,
+    editedContent: string,
+    ratio: KeptRatio,
+    version: string,
+  ) {
+    const data = this._recentCompletion.get(actionId);
+    if (!data || !data.completions || !data.elements || !data.projectId) {
+      return;
+    }
+
+    const accessToken = configStore.apiStyle === ApiStyle.Linseer ? configStore.data.tokens.access : '';
+    const requestData: CollectionData = {
+      createTime: data.timelines.startGenerate.toFormat('yyyy-MM-dd HH:mm:ss'),
+      prefix: data.elements.prefix,
+      suffix: data.elements.suffix,
+      path: data.elements.file ?? '',
+      similarSnippet: data.elements.similarSnippet ?? '',
+      symbolList: data.elements.symbols ? [data.elements.symbols] : [],
+      answer: data.completions.candidates,
+      acceptAnswerIndex: data.lastChecked,
+      accept: ratio === KeptRatio.None ? 0 : 1,
+      afterCode: editedContent,
+      plugin: 'SI',
+      projectId: data.projectId,
+      fileSuffix: data.elements.file
+        ? extname(basename(data.elements.file))
+        : '',
+    };
+
+    console.debug('StatisticsReporter.completionKept', [requestData]);
+
+    try {
+      await Promise.all([
+        this._collectionApi.post('/v2', [requestData], {
+          headers: {
+            'x-authorization': `bearer ${accessToken}`,
+          },
+        }),
+        ratio === KeptRatio.None
+          ? undefined
+          : this._statisticsApi.post(
+              '/report/summary',
+              constructData(
+                count,
+                data.timelines.startAccept.toMillis(),
+                DateTime.now().toMillis(),
+                data.projectId,
+                version,
+                configStore.modelType,
+                'CODE',
+                skuNameKeptMapping[ratio],
+              ),
+            ),
+      ]);
+    } catch (e) {
+      console.error('StatisticsReporter.completionKept.failed', e);
+    }
+    statisticsReporter.completionAbort(actionId);
   }
 
   completionGenerated(actionId: string, completions: Completions) {
@@ -199,64 +233,6 @@ class StatisticsReporter {
     if (data.timelines) {
       data.timelines.endGenerate = DateTime.now();
     }
-  }
-
-  async completionKept(
-    actionId: string,
-    count: number,
-    editedContent: string,
-    ratio: KeptRatio,
-    version: string,
-  ) {
-    const data = this._recentCompletion.get(actionId);
-    if (!data || !data.completions || !data.elements || !data.projectId) {
-      return;
-    }
-
-    console.debug('StatisticsReporter.completionKept', {
-      count,
-      ratio,
-    });
-
-    const requestData: CollectionData = {
-      createTime: data.timelines.startGenerate.toFormat('yyyy-MM-dd HH:mm:ss'),
-      prefix: data.elements.prefix,
-      suffix: data.elements.suffix,
-      path: data.elements.file ?? '',
-      similarSnippet: data.elements.similarSnippet ?? '',
-      symbolList: data.elements.symbols ? [data.elements.symbols] : [],
-      answer: data.completions.candidates,
-      acceptAnswerIndex: data.lastChecked,
-      accept: 1,
-      afterCode: editedContent,
-      plugin: 'SI',
-      projectId: data.projectId,
-      fileSuffix: data.elements.file
-        ? extname(basename(data.elements.file))
-        : '',
-    };
-
-    try {
-      await Promise.all([
-        this._collectionApi.post('/v2', requestData),
-        this._statisticsApi.post(
-          '/report/summary',
-          constructData(
-            count,
-            data.timelines.startAccept.toMillis(),
-            DateTime.now().toMillis(),
-            data.projectId,
-            version,
-            configStore.modelType,
-            'CODE',
-            skuNameKeptMapping[ratio],
-          ),
-        ),
-      ]);
-    } catch (e) {
-      console.error('StatisticsReporter.completionKept.failed', e);
-    }
-    statisticsReporter.completionAbort(actionId);
   }
 
   completionSelected(

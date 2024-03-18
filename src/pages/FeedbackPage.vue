@@ -13,6 +13,7 @@ import {
 } from 'shared/types/ActionMessage';
 import { ActionApi } from 'types/ActionApi';
 import { WindowType } from 'shared/types/WindowType';
+import { ApiStyle } from 'shared/types/model';
 
 const baseName = 'pages.FeedbackPage.';
 
@@ -27,6 +28,7 @@ const i18n = (relativePath: string) => {
 
 const { name } = matched[matched.length - 2];
 
+const accessToken = ref('');
 const description = ref('');
 const endpoint = ref('');
 const error = ref(false);
@@ -51,6 +53,7 @@ const submit = async () => {
   try {
     const { data } = await feedBack(
       endpoint.value,
+      accessToken.value,
       description.value,
       userId.value,
       'SourceInsight 0.7.0',
@@ -88,11 +91,16 @@ const submit = async () => {
 
 const actionApi = new ActionApi(baseName);
 onMounted(() => {
-  actionApi.register(ActionType.ConfigStoreLoad, (data) => {
-    if (data) {
-      endpoint.value = data.config.endpoints.feedback;
-    }
-  });
+  actionApi.register(
+    ActionType.ConfigStoreLoad,
+    ({ apiStyle, config, data }) => {
+      if (apiStyle == ApiStyle.Linseer) {
+        accessToken.value = data.tokens.access;
+      }
+      endpoint.value = config.endpoints.feedback;
+      userId.value = config.userId;
+    },
+  );
   window.actionApi.send(new ConfigStoreLoadActionMessage());
 });
 onBeforeUnmount(() => {

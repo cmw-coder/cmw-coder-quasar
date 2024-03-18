@@ -29,12 +29,12 @@ export class MainWindow extends BaseWindow {
   }
 
   protected create() {
-    const { height, show, width } = dataStore.store.window.main;
+    const store = dataStore.store;
     this._window = new BrowserWindow({
-      width,
-      height,
+      width: store.window.main.width,
+      height: store.window.main.height,
       useContentSize: true,
-      show,
+      show: store.window.main.show,
       frame: false,
       webPreferences: {
         // devTools: false,
@@ -54,17 +54,17 @@ export class MainWindow extends BaseWindow {
       this._window = undefined;
     });
     this._window.on('hide', () => {
-      const currentDataWindow = dataStore.store.window;
-      currentDataWindow.main.show = false;
-      dataStore.store.window = currentDataWindow;
+      const store = dataStore.store;
+      store.window.main.show = false;
+      dataStore.store = store;
     });
     this._window.on('resized', () => {
       if (this._window) {
+        const store = dataStore.store;
         const [width, height] = this._window.getSize();
-        const currentDataWindow = dataStore.store.window;
-        currentDataWindow.main.width = width;
-        currentDataWindow.main.height = height;
-        dataStore.store.window = currentDataWindow;
+        store.window.main.width = width;
+        store.window.main.height = height;
+        dataStore.store = store;
       }
     });
     this._window.on('ready-to-show', async () => {
@@ -73,9 +73,9 @@ export class MainWindow extends BaseWindow {
       }
     });
     this._window.on('show', () => {
-      const currentDataWindow = dataStore.store.window;
-      currentDataWindow.main.show = true;
-      dataStore.store.window = currentDataWindow;
+      const store = dataStore.store;
+      store.window.main.show = true;
+      dataStore.store = store;
     });
 
     this._actionApi.register(ActionType.ConfigStoreLoad, () => {

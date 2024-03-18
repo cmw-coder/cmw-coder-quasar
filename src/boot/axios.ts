@@ -38,6 +38,7 @@ export const authCode = async (userId: string) => {
 
 export const feedBack = async (
   endpoint: string,
+  accessToken: string,
   description: string,
   userId: string,
   version: string,
@@ -47,12 +48,20 @@ export const feedBack = async (
     .create({
       baseURL: endpoint,
     })
-    .post<string>('/chatgpt/feedback', {
-      description,
-      userId,
-      version,
-      pictures,
-    });
+    .post<string>(
+      '/chatgpt/feedback',
+      {
+        description,
+        userId,
+        version,
+        pictures,
+      },
+      {
+        headers: {
+          'x-authorization': `bearer ${accessToken}`,
+        },
+      },
+    );
 };
 
 export const loginWithCode = async (userId: string, code: string) => {

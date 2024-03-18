@@ -11,7 +11,7 @@ export interface Theme {
   name: string;
 }
 
-export const themes: Theme[] = [
+export const themes = [
   {
     color: 'teal',
     darkMode: 'auto',
@@ -30,7 +30,7 @@ export const themes: Theme[] = [
     icon: 'light_mode',
     name: 'light',
   },
-];
+] as const;
 
 export const useSettingsStore = defineStore('settings', () => {
   const theme = ref<Theme>(

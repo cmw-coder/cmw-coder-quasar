@@ -16,6 +16,7 @@ export interface CollectionData {
 
 export enum KeptRatio {
   All = 'All',
-  Most = 'Most',
   Few = 'Few',
+  Most = 'Most',
+  None = 'None',
 }
