@@ -4,16 +4,16 @@ permissions: write-all
 
 on:
   push:
-    branches: [main]
-    tags: [pre*, v*]
+    branches: [ main ]
+    tags: [ pre*, v* ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   get-info:
     runs-on: ubuntu-latest
     outputs:
-      commit-hash: ${{ steps.git-info.outputs.commit-hash }}
+      commitHash: ${{ steps.git-info.outputs.commitHash }}
     steps:
       - uses: actions/checkout@v4
       - name: Get git info
@@ -21,7 +21,7 @@ jobs:
         shell: bash
         run: |
           COMMIT_HASH=$(git rev-parse --short ${{ GITHUB.SHA }})
-          echo "commit-hash=$COMMIT_HASH" >> $GITHUB_OUTPUT
+          echo "commitHash=$COMMIT_HASH" >> $GITHUB_OUTPUT
 
   build:
     runs-on: windows-latest
@@ -31,11 +31,34 @@ jobs:
       RELEASE_FOLDER: ./release
     strategy:
       matrix:
-        apiStyle: [HuggingFace, Linseer]
+        config: [ Red, Route, Yellow ]
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: 'recursive'
+      - name: Update runtime config
+        shell: python3 {0}
+        run: |
+          with open("./src-electron/shared/config.ts", "r+", encoding="utf8") as file:
+            data = file.read()
+            data = data\
+              .replace("DEFAULT_CONFIG", "${{ matrix.config }}")
+            file.seek(0)
+            file.truncate()
+            file.write(data)
+      - name: Get Comware Coder Proxy
+        uses: robinraju/release-downloader@v1.9
+        with:
+          fileName: '*.dll'
+          latest: true
+          out-file-path: 'src-electron/assets/proxy'
+          preRelease: ${{ startsWith(github.ref, 'refs/tags/pre') }}
+          repository: cmw-coder/cmw-coder-proxy
+          tarBall: false
+          zipBall: false
+      - name: List files
+        run: |
+          ls -la src-electron/assets/proxy
       - name: Setup pnpm
         uses: pnpm/action-setup@v3.0.0
         with:
@@ -45,14 +68,14 @@ jobs:
         with:
           node-version: 20
           cache: 'pnpm'
-      - name: Install Dependencies
+      - name: Install dependencies
         run: pnpm install
       - name: Publish Electron package
         run: pnpm run publish
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: cmw-coder-quasar_${{ needs.get-info.outputs.commit-hash }}_${{ GITHUB.RUN_NUMBER }}_${{ matrix.apiStyle }}_artifacts
+          name: cmw-coder-quasar_${{ needs.get-info.outputs.commitHash }}_${{ GITHUB.RUN_NUMBER }}_${{ matrix.config }}_artifacts
           path: |
             ${{ env.OUTPUT_FOLDER }}/*.exe
             ${{ env.OUTPUT_FOLDER }}/*.exe.blockmap
@@ -60,7 +83,7 @@ jobs:
       - name: Upload other files
         uses: actions/upload-artifact@v4
         with:
-          name: cmw-coder-quasar_${{ needs.get-info.outputs.commit-hash }}_${{ GITHUB.RUN_NUMBER }}_${{ matrix.apiStyle }}_other
+          name: cmw-coder-quasar_${{ needs.get-info.outputs.commitHash }}_${{ GITHUB.RUN_NUMBER }}_${{ matrix.config }}_other
           path: |
             ${{ env.OUTPUT_FOLDER }}/generic/
             ${{ env.OUTPUT_FOLDER }}/win-unpacked/

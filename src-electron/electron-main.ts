@@ -229,7 +229,7 @@ websocketManager.registerWsAction(
   WsAction.EditorFocusState,
   ({ data: isFocused }) => {
     if (isFocused) {
-      immersiveWindow.show();
+      // immersiveWindow.show();
     } else {
       immersiveWindow.hide();
     }
