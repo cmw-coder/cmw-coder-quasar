@@ -58,7 +58,7 @@ jobs:
           zipBall: false
       - name: List files
         run: |
-          ls -la src-electron/assets/proxy
+          ls -l ./src-electron/assets/proxy
       - name: Setup pnpm
         uses: pnpm/action-setup@v3.0.0
         with:
