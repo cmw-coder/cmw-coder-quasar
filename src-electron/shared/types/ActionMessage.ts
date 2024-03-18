@@ -4,11 +4,7 @@ import {
   LinseerDataType,
   LinseerStoreType,
 } from 'main/stores/config/types';
-import {
-  DataProjectType,
-  DataStoreType,
-  DataWindowType,
-} from 'main/stores/data/types';
+import { DataStoreType } from 'main/stores/data/types';
 import { CompletionCacheClientMessage } from 'shared/types/WsMessage';
 
 export enum ActionType {
@@ -124,15 +120,9 @@ export class DataStoreLoadActionMessage implements ActionMessage {
 
 export class DataStoreSaveActionMessage implements ActionMessage {
   type = ActionType.DataStoreSave;
-  data:
-    | { type: 'project'; data: Record<string, DataProjectType> }
-    | { type: 'window'; data: Partial<DataWindowType> };
+  data: Partial<DataStoreType>;
 
-  constructor(
-    data:
-      | { type: 'project'; data: Record<string, DataProjectType> }
-      | { type: 'window'; data: Partial<DataWindowType> },
-  ) {
+  constructor(data: Partial<DataStoreType>) {
     this.data = data;
   }
 }

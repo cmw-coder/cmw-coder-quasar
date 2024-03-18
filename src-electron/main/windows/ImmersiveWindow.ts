@@ -35,7 +35,7 @@ export class ImmersiveWindow extends BaseWindow {
       this.create();
     }
     if (this._window) {
-      if (dataStore.window.dipMapping) {
+      if (dataStore.store.compatibility.zoomFix) {
         height = screen.screenToDipPoint({ x: 0, y: height }).y;
         position = screen.screenToDipPoint(position);
       }

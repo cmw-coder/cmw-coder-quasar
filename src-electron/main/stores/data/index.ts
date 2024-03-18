@@ -1,15 +1,14 @@
 import Conf from 'conf';
 import ElectronStore from 'electron-store';
 import { existsSync } from 'fs';
+import { release } from 'os';
 
 import { dataStoreDefault } from 'main/stores/data/default';
 import {
-  DataProjectType,
   DataStoreType,
   DataStoreTypeBefore_1_0_1,
   DataStoreTypeBefore_1_0_2,
   DataStoreTypeBefore_1_0_4,
-  DataWindowType,
 } from 'main/stores/data/types';
 import { getRevision, searchSvnDirectories } from 'main/utils/svn';
 
@@ -70,8 +69,11 @@ export class DataStore {
             store,
             'window',
           );
+          store.set('compatibility', {
+            transparentFallback: parseInt(release().split('.')[0]) < 10,
+            zoomFix: zoom !== 1,
+          });
           store.set('window', {
-            dipMapping: zoom !== 1,
             main,
           });
         },
@@ -81,72 +83,58 @@ export class DataStore {
     });
   }
 
-  get store() {
+  get store(): DataStoreType {
     return this._store.store;
   }
 
-  get project(): Record<string, DataProjectType> {
-    return this._store.get('project');
-  }
-
-  set project(value: Record<string, DataProjectType>) {
-    const current = this.project;
-    this._store.set('project', { ...current, ...value });
-  }
-
-  get window(): DataWindowType {
-    return this._store.get('window');
-  }
-
-  set window(value: Partial<DataWindowType>) {
-    const current = this.window;
-    this._store.set('window', { ...current, ...value });
+  set store(value: Partial<DataStoreType>) {
+    this._store.store = { ...this._store.store, ...value };
   }
 
   getProjectId(path: string): string | undefined {
-    return this.project[path]?.id;
+    return this.store.project[path]?.id;
   }
 
   async setProjectId(path: string, projectId: string) {
-    const current = this.project;
-    if (current[path]) {
-      current[path].id = projectId;
+    const store = this.store;
+    if (store.project[path]) {
+      store.project[path].id = projectId;
     } else {
-      current[path] = {
+      store.project[path] = {
         id: projectId,
         lastAddedLines: 0,
         svn: [],
       };
-      this.project = current;
-      current[path].svn = await Promise.all(
+      this.store = store;
+      store.project[path].svn = await Promise.all(
         (await searchSvnDirectories(path)).map(async (svnDirectory) => ({
           directory: svnDirectory,
           revision: await getRevision(svnDirectory),
         })),
       );
     }
-    this.project = current;
+    this.store = store;
   }
 
   async setProjectLastAddedLines(path: string, lastAddedLines: number) {
-    const current = this.project;
-    if (current[path]) {
-      current[path].lastAddedLines = lastAddedLines;
-      this.project = current;
+    const store = this.store;
+    if (store.project[path]) {
+      store.project[path].lastAddedLines = lastAddedLines;
+      this.store = store;
     }
   }
 
   async setProjectRevision(path: string) {
-    const current = this.project;
-    if (current[path]) {
+    const store = this.store;
+    if (store.project[path]) {
       const svnDirectories = await searchSvnDirectories(path);
-      current[path].svn = await Promise.all(
+      store.project[path].svn = await Promise.all(
         svnDirectories.map(async (svnDirectory) => ({
           directory: svnDirectory,
           revision: await getRevision(svnDirectory),
         })),
       );
-      this.project = current;
+      this.store = store;
     }
   }
 }

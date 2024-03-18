@@ -11,8 +11,6 @@ import {
   ActionType,
   ConfigStoreLoadActionMessage,
   ConfigStoreSaveActionMessage,
-  DataStoreLoadActionMessage,
-  DataStoreSaveActionMessage,
 } from 'shared/types/ActionMessage';
 import { HuggingFaceModelType, LinseerModelType } from 'shared/types/model';
 import { ActionApi } from 'types/ActionApi';
@@ -33,8 +31,6 @@ const availableModels = ref<HuggingFaceModelType[] | LinseerModelType[]>([]);
 const modelUpdating = ref(false);
 const modelSelectItem = ref<QExpansionItem>();
 const modelType = ref<HuggingFaceModelType | LinseerModelType>();
-const dipMapping = ref<boolean>();
-const dipMappingUpdating = ref(false);
 
 const updateModelType = (model: HuggingFaceModelType | LinseerModelType) => {
   modelUpdating.value = true;
@@ -54,24 +50,6 @@ const updateModelType = (model: HuggingFaceModelType | LinseerModelType) => {
   );
 };
 
-const updateDipMapping = (value: boolean) => {
-  dipMappingUpdating.value = true;
-  window.actionApi.send(
-    new DataStoreSaveActionMessage({
-      type: 'window',
-      data: {
-        dipMapping: value,
-      },
-    }),
-  );
-  setTimeout(
-    () => {
-      window.actionApi.send(new DataStoreLoadActionMessage());
-    },
-    300 + Math.random() * 700,
-  );
-};
-
 const actionApi = new ActionApi(baseName);
 onMounted(() => {
   actionApi.register(ActionType.ConfigStoreLoad, (data) => {
@@ -85,14 +63,7 @@ onMounted(() => {
       modelSelectItem.value?.hide();
     }
   });
-  actionApi.register(ActionType.DataStoreLoad, (data) => {
-    if (data) {
-      dipMapping.value = data.window.dipMapping;
-      dipMappingUpdating.value = false;
-    }
-  });
   window.actionApi.send(new ConfigStoreLoadActionMessage());
-  window.actionApi.send(new DataStoreLoadActionMessage());
 });
 onBeforeUnmount(() => {
   actionApi.unregister();
@@ -135,21 +106,6 @@ onBeforeUnmount(() => {
           </q-item>
         </q-list>
       </q-expansion-item>
-      <q-item :disable="dipMappingUpdating" tag="label">
-        <q-item-section>
-          {{ i18n('labels.dipMapping') }}
-        </q-item-section>
-        <q-item-section side>
-          <div class="row items-center">
-            <q-spinner v-show="dipMappingUpdating" size="sm" />
-            <q-toggle
-              :disable="dipMappingUpdating"
-              :model-value="dipMapping"
-              @update:model-value="updateDipMapping($event)"
-            />
-          </div>
-        </q-item-section>
-      </q-item>
     </q-list>
   </q-card>
 </template>

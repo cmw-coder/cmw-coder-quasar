@@ -90,7 +90,6 @@ export default {
             [LinseerModelType.Linseer_CClsw]: 'Linseer for CClsw Team',
           },
           currentModel: 'Current model',
-          dipMapping: 'Auto DPI scaling',
           title: 'Code Completion',
         },
       },
@@ -104,6 +103,8 @@ export default {
             light: 'Light',
           },
           title: 'General',
+          transparentFallback: 'Transparent fallback (Windows 7)',
+          zoomFIx: 'Fix window zoom',
         },
       },
       UpdateCard: {

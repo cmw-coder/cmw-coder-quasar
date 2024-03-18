@@ -29,7 +29,7 @@ export class MainWindow extends BaseWindow {
   }
 
   protected create() {
-    const { height, show, width } = dataStore.window.main;
+    const { height, show, width } = dataStore.store.window.main;
     this._window = new BrowserWindow({
       width,
       height,
@@ -54,17 +54,17 @@ export class MainWindow extends BaseWindow {
       this._window = undefined;
     });
     this._window.on('hide', () => {
-      const currentDataWindow = dataStore.window;
+      const currentDataWindow = dataStore.store.window;
       currentDataWindow.main.show = false;
-      dataStore.window = currentDataWindow;
+      dataStore.store.window = currentDataWindow;
     });
     this._window.on('resized', () => {
       if (this._window) {
         const [width, height] = this._window.getSize();
-        const currentDataWindow = dataStore.window;
+        const currentDataWindow = dataStore.store.window;
         currentDataWindow.main.width = width;
         currentDataWindow.main.height = height;
-        dataStore.window = currentDataWindow;
+        dataStore.store.window = currentDataWindow;
       }
     });
     this._window.on('ready-to-show', async () => {
@@ -73,9 +73,9 @@ export class MainWindow extends BaseWindow {
       }
     });
     this._window.on('show', () => {
-      const currentDataWindow = dataStore.window;
+      const currentDataWindow = dataStore.store.window;
       currentDataWindow.main.show = true;
-      dataStore.window = currentDataWindow;
+      dataStore.store.window = currentDataWindow;
     });
 
     this._actionApi.register(ActionType.ConfigStoreLoad, () => {

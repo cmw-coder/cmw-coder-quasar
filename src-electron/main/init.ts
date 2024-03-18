@@ -19,7 +19,7 @@ import { ActionMessage } from 'shared/types/ActionMessage';
 const reportProjectAdditions = async () =>
   (
     await Promise.all(
-      Object.entries(dataStore.project).map(
+      Object.entries(dataStore.store.project).map(
         async ([path, { id, lastAddedLines, svn }]) => ({
           path,
           id,

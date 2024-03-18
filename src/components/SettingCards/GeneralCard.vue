@@ -1,10 +1,19 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
-import { themes, Theme, useSettingsStore } from 'stores/settings';
 import { WindowType } from 'shared/types/WindowType';
+import {
+  ActionType,
+  DataStoreLoadActionMessage,
+  DataStoreSaveActionMessage,
+} from 'shared/types/ActionMessage';
+import { themes, Theme, useSettingsStore } from 'stores/settings';
+import { ActionApi } from 'types/ActionApi';
+
+const baseName = 'components.SettingCards.GeneralCard.';
 
 const { theme, developerMode } = storeToRefs(useSettingsStore());
 const { t } = useI18n();
@@ -13,10 +22,49 @@ const { applyDarkMode } = useSettingsStore();
 
 const i18n = (relativePath: string, data?: Record<string, unknown>) => {
   if (data) {
-    return t('components.SettingCards.GeneralCard.' + relativePath, data);
+    return t(baseName + relativePath, data);
   } else {
-    return t('components.SettingCards.GeneralCard.' + relativePath);
+    return t(baseName + relativePath);
   }
+};
+
+const transparentFallback = ref<boolean>();
+const transparentFallbackUpdating = ref(false);
+const zoomFix = ref<boolean>();
+const zoomFixUpdating = ref(false);
+
+const updateTransparentFallback = (value: boolean) => {
+  transparentFallbackUpdating.value = true;
+  window.actionApi.send(
+    new DataStoreSaveActionMessage({
+      compatibility: {
+        transparentFallback: value,
+      },
+    }),
+  );
+  setTimeout(
+    () => {
+      window.actionApi.send(new DataStoreLoadActionMessage());
+    },
+    300 + Math.random() * 700,
+  );
+};
+
+const updateZoomFix = (value: boolean) => {
+  zoomFixUpdating.value = true;
+  window.actionApi.send(
+    new DataStoreSaveActionMessage({
+      compatibility: {
+        zoomFix: value,
+      },
+    }),
+  );
+  setTimeout(
+    () => {
+      window.actionApi.send(new DataStoreLoadActionMessage());
+    },
+    300 + Math.random() * 700,
+  );
 };
 
 const updateTheme = (value: Theme) => {
@@ -25,6 +73,20 @@ const updateTheme = (value: Theme) => {
   window.controlApi.reload(WindowType.Floating);
   window.controlApi.reload(WindowType.Immersive);
 };
+
+const actionApi = new ActionApi(baseName);
+onMounted(() => {
+  actionApi.register(ActionType.DataStoreLoad, (data) => {
+    if (data) {
+      zoomFix.value = data.compatibility.zoomFix;
+      zoomFixUpdating.value = false;
+    }
+  });
+  window.actionApi.send(new DataStoreLoadActionMessage());
+});
+onBeforeUnmount(() => {
+  actionApi.unregister();
+});
 </script>
 
 <template>
@@ -63,6 +125,36 @@ const updateTheme = (value: Theme) => {
           </q-item>
         </q-list>
       </q-expansion-item>
+      <q-item :disable="transparentFallbackUpdating" tag="label">
+        <q-item-section>
+          {{ i18n('labels.transparentFallback') }}
+        </q-item-section>
+        <q-item-section side>
+          <div class="row items-center">
+            <q-spinner v-show="transparentFallbackUpdating" size="sm" />
+            <q-toggle
+              :disable="transparentFallbackUpdating"
+              :model-value="transparentFallback"
+              @update:model-value="updateTransparentFallback($event)"
+            />
+          </div>
+        </q-item-section>
+      </q-item>
+      <q-item :disable="zoomFixUpdating" tag="label">
+        <q-item-section>
+          {{ i18n('labels.zoomFix') }}
+        </q-item-section>
+        <q-item-section side>
+          <div class="row items-center">
+            <q-spinner v-show="zoomFixUpdating" size="sm" />
+            <q-toggle
+              :disable="zoomFixUpdating"
+              :model-value="zoomFix"
+              @update:model-value="updateZoomFix($event)"
+            />
+          </div>
+        </q-item-section>
+      </q-item>
       <q-item v-show="developerMode" clickable @click="push('developer')">
         <q-item-section>
           {{ i18n('labels.developerOptions') }}

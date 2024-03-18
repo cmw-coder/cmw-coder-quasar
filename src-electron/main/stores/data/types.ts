@@ -1,3 +1,8 @@
+export interface DataCompatibilityType {
+  transparentFallback: boolean;
+  zoomFix: boolean;
+}
+
 export interface DataProjectType {
   id: string;
   lastAddedLines: number;
@@ -8,7 +13,6 @@ export interface DataProjectType {
 }
 
 export interface DataWindowType {
-  dipMapping: boolean;
   main: {
     height: number;
     show: boolean;
@@ -17,6 +21,7 @@ export interface DataWindowType {
 }
 
 export interface DataStoreType {
+  compatibility: DataCompatibilityType;
   project: Record<string, DataProjectType>;
   window: DataWindowType;
 }

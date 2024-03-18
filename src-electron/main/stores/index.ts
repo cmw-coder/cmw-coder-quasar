@@ -36,16 +36,7 @@ registerAction(
 registerAction(
   ActionType.DataStoreSave,
   `main.stores.${ActionType.DataStoreSave}`,
-  ({ type, data }) => {
-    switch (type) {
-      case 'project': {
-        dataStore.project = data;
-        break;
-      }
-      case 'window': {
-        dataStore.window = data;
-        break;
-      }
-    }
+  (data) => {
+    dataStore.store = data;
   },
 );
