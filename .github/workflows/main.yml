@@ -92,13 +92,12 @@ jobs:
         run: |
           mkdir -p ${{ env.RELEASE_FOLDER }}
           cp "${{ env.OUTPUT_FOLDER }}/*.exe" "${{ env.OUTPUT_FOLDER }}/*.exe.blockmap" "${{ env.OUTPUT_FOLDER }}/release.yml" ${{ env.RELEASE_FOLDER }}
+          7z a -tzip ${{ env.RELEASE_FOLDER }}/Comware_Coder_${{ matrix.config }}.zip ${{ env.RELEASE_FOLDER }}/*
       - name: Upload release
         if: ${{ startsWith(github.ref, 'refs/tags/pre') || startsWith(github.ref, 'refs/tags/v') }}
         uses: ncipollo/release-action@v1
         with:
           allowUpdates: true
           artifacts: |
-            ${{ env.RELEASE_FOLDER }}/*.exe
-            ${{ env.RELEASE_FOLDER }}/*.exe.blockmap
-            ${{ env.RELEASE_FOLDER }}/release.yml
+            ${{ env.RELEASE_FOLDER }}/Comware_Coder_${{ matrix.config }}.zip
           prerelease: ${{ startsWith(github.ref, 'refs/tags/pre') }}
