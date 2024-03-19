@@ -33,7 +33,7 @@ export class PromptProcessor {
       );
       return completionCached;
     }
-    timer.add('CompletionGenerate', 'CheckedCache');
+    timer.add('CompletionGenerate', 'generationCheckedCache');
 
     this._abortController?.abort();
 
@@ -66,6 +66,7 @@ export class PromptProcessor {
       );
     }
     this._abortController = undefined;
+    timer.add('CompletionGenerate', 'generationProcessed');
 
     if (candidates.length) {
       console.log('PromptProcessor.process.cacheMiss', candidates);

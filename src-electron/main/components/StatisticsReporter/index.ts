@@ -227,7 +227,7 @@ class StatisticsReporter {
   }
 
   completionGenerated(actionId: string, completions: Completions) {
-    timer.add('CompletionGenerate', 'completionGenerated');
+    timer.add('CompletionGenerate', 'generationEnd');
     const data = this._recentCompletion.get(actionId);
     if (!data) {
       return;

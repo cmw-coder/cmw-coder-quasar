@@ -1,11 +1,13 @@
+import { CanceledError } from 'axios';
+
 import { PromptElements } from 'main/components/PromptExtractor/types';
 import {
   HuggingFaceModelConfigType,
   LinseerModelConfigType,
 } from 'main/stores/config/types';
 import { generate, generateRd } from 'main/utils/axios';
+import { timer } from 'main/utils/timer';
 import { CompletionType } from 'shared/types/common';
-import { CanceledError } from 'axios';
 import { ApiStyle } from 'shared/types/model';
 
 // Start with '//' or '#' or '{' or '/*', or is '***/'
@@ -84,6 +86,8 @@ export const processHuggingFaceApi = async (
       },
       abortSignal,
     );
+    timer.add('CompletionGenerate', 'generationRequested');
+
     let generatedSuggestions: string[] = [];
     if (best_of_sequences && best_of_sequences.length) {
       generatedSuggestions = best_of_sequences.map(
@@ -153,6 +157,7 @@ export const processLinseerApi = async (
     ).data
       .map((item) => item.text)
       .filter((completion) => completion.trim().length > 0);
+    timer.add('CompletionGenerate', 'generationRequested');
 
     return _processGeneratedSuggestions(
       generatedSuggestions,
