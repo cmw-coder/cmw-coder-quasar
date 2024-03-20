@@ -56,7 +56,7 @@ const submit = async () => {
       accessToken.value,
       description.value,
       userId.value,
-      'SourceInsight 0.7.0',
+      `Comware Coder ${version.value}`,
       images.value,
     );
     notify({
