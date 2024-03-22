@@ -14,19 +14,19 @@ interface RuntimeConfig {
 const availableRuntimeConfigs: Record<string, RuntimeConfig> = {
   DEFAULT_CONFIG: {
     apiStyle: ApiStyle.Linseer,
-    networkZone: NetworkZone.Normal
+    networkZone: NetworkZone.Normal,
   },
   Red: {
     apiStyle: ApiStyle.HuggingFace,
-    networkZone: NetworkZone.Normal
+    networkZone: NetworkZone.Normal,
   },
   Route: {
     apiStyle: ApiStyle.HuggingFace,
-    networkZone: NetworkZone.Secure
+    networkZone: NetworkZone.Secure,
   },
   Yellow: {
     apiStyle: ApiStyle.Linseer,
-    networkZone: NetworkZone.Normal
-  }
+    networkZone: NetworkZone.Normal,
+  },
 } as const;
 export const runtimeConfig = availableRuntimeConfigs.DEFAULT_CONFIG;

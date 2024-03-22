@@ -3,10 +3,7 @@ import { resolve } from 'path';
 
 import { dataStore } from 'main/stores';
 import { BaseWindow } from 'main/types/BaseWindow';
-import {
-  ActionApi,
-  sendToRenderer,
-} from 'preload/types/ActionApi';
+import { ActionApi, sendToRenderer } from 'preload/types/ActionApi';
 import { ControlType, registerControlCallback } from 'preload/types/ControlApi';
 import {
   ActionType,
