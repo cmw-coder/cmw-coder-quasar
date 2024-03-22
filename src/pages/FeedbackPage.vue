@@ -97,7 +97,7 @@ onMounted(() => {
       if (apiStyle == ApiStyle.Linseer) {
         accessToken.value = data.tokens.access;
       }
-      endpoint.value = config.endpoints.feedback;
+      endpoint.value = config.endpoints.aiService;
       userId.value = config.userId;
     },
   );

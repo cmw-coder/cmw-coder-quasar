@@ -62,8 +62,8 @@ class CompletionData {
 }
 
 class StatisticsReporter {
-  private _feedbackApi = axios.create({
-    baseURL: configStore.endpoints.feedback,
+  private _aiServiceApi = axios.create({
+    baseURL: configStore.endpoints.aiService,
   });
   private _statisticsApi = axios.create({
     baseURL: configStore.endpoints.statistics,
@@ -199,7 +199,7 @@ class StatisticsReporter {
 
     try {
       await Promise.all([
-        this._feedbackApi.post('/chatgpt/collection/v2', [requestData], {
+        this._aiServiceApi.post('/chatgpt/collection/v2', [requestData], {
           headers: {
             'x-authorization': `bearer ${accessToken}`,
           },

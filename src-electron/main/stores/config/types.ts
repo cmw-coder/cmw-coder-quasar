@@ -13,7 +13,7 @@ export interface SeparateTokens {
 
 export interface CommonConfigType {
   endpoints: {
-    feedback: string;
+    aiService: string;
     statistics: string;
     update: string;
   };

@@ -25,7 +25,7 @@ export class DataStore {
       defaults: dataStoreDefault,
       migrations: {
         '1.0.1': (store) => {
-          console.info('Migrating "data" store to 1.0.1 ...');
+          console.info('Upgrading "data" store to 1.0.1 ...');
           const oldProjects = getAs<DataStoreTypeBefore_1_0_1['project']>(
             store,
             'project',
@@ -47,7 +47,7 @@ export class DataStore {
           }
         },
         '1.0.2': (store) => {
-          console.info('Migrating "data" store to 1.0.2 ...');
+          console.info('Upgrading "data" store to 1.0.2 ...');
           const oldProjects = getAs<DataStoreTypeBefore_1_0_2['project']>(
             store,
             'project',
@@ -64,7 +64,7 @@ export class DataStore {
           store.set('project', newProjects);
         },
         '1.0.4': (store) => {
-          console.log('Migrating "data" store to 1.0.4 ...');
+          console.log('Upgrading "data" store to 1.0.4 ...');
           const { main, zoom } = getAs<DataStoreTypeBefore_1_0_4['window']>(
             store,
             'window',

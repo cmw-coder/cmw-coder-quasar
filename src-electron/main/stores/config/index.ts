@@ -31,7 +31,7 @@ export class HuggingFaceConfigStore {
       defaults: defaultMapping[runtimeConfig.networkZone],
       migrations: {
         '1.0.1': (store) => {
-          console.info('Migrating "config" store to 1.0.1 ...');
+          console.info('Upgrading "config" store to 1.0.1 ...');
           const oldConfig = store.get('config');
           oldConfig.modelConfigs.forEach(
             (modelConfig) =>
@@ -39,11 +39,13 @@ export class HuggingFaceConfigStore {
           );
           store.set('config', oldConfig);
         },
-        '1.0.3': (store) => {
-          console.info('Migrating "config" store to 1.0.3 ...');
+        '1.0.5': (store) => {
+          console.info('Upgrading "config" store to 1.0.5 ...');
           const oldConfig = store.get('config');
-          oldConfig.endpoints.feedback =
-            defaultMapping[runtimeConfig.networkZone].config.endpoints.feedback;
+          oldConfig.endpoints.aiService =
+            defaultMapping[
+              runtimeConfig.networkZone
+            ].config.endpoints.aiService;
           store.set('config', oldConfig);
         },
       },
@@ -105,7 +107,7 @@ export class LinseerConfigStore {
       defaults: linseerConfigDefault,
       migrations: {
         '1.0.1': (store) => {
-          console.log('Migrating "config" store to 1.0.1 ...');
+          console.log('Upgrading "config" store to 1.0.1 ...');
           const oldConfig = store.get('config');
           oldConfig.modelConfigs.forEach(
             (modelConfig) =>
@@ -113,17 +115,17 @@ export class LinseerConfigStore {
           );
           store.set('config', oldConfig);
         },
-        '1.0.3': (store) => {
-          console.log('Migrating "config" store to 1.0.3 ...');
-          const oldConfig = store.get('config');
-          oldConfig.endpoints.feedback =
-            linseerConfigDefault.config.endpoints.feedback;
-          store.set('config', oldConfig);
-        },
         '1.0.4': (store) => {
-          console.log('Migrating "config" store to 1.0.4 ...');
+          console.log('Upgrading "config" store to 1.0.4 ...');
           const oldConfig = store.get('config');
           oldConfig.modelConfigs = linseerConfigDefault.config.modelConfigs;
+          store.set('config', oldConfig);
+        },
+        '1.0.5': (store) => {
+          console.info('Upgrading "config" store to 1.0.5 ...');
+          const oldConfig = store.get('config');
+          oldConfig.endpoints.aiService =
+            linseerConfigDefault.config.endpoints.aiService;
           store.set('config', oldConfig);
         },
       },
