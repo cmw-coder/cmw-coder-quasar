@@ -218,7 +218,7 @@ module.exports = configure((/* ctx */) => {
           },
         ],
         nsis: {
-          include: 'assets/installer/script.nsh',
+          include: 'build/installer.nsh',
           multiLanguageInstaller: true,
           perMachine: true,
         },
