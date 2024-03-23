@@ -211,12 +211,6 @@ module.exports = configure((/* ctx */) => {
         electronDownload: {
           version: '22.3.27',
         },
-        extraResources: [
-          {
-            from: 'src-electron/assets/proxy/',
-            to: 'assets/proxy',
-          },
-        ],
         nsis: {
           include: 'build/installer.nsh',
           multiLanguageInstaller: true,

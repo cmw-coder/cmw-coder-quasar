@@ -39,7 +39,8 @@
 
   ${If} $SI3_LOCATION != ""
     ${killIfRunning} "Insight3.exe"
-    CopyFiles /FILESONLY "$INSTDIR\resources\assets\proxy\*" "$SI3_LOCATION"
+    SetOutPath $SI3_LOCATION
+    File "${BUILD_RESOURCES_DIR}\build\proxy\*"
     Sleep 500
     nsExec::Exec '"$SI3_LOCATION\cmw-coder-loader.exe" /uninstall'
     Sleep 500
@@ -48,7 +49,8 @@
 
   ${If} $SI4_LOCATION != ""
     ${killIfRunning} "sourceinsight4.exe"
-    CopyFiles /FILESONLY "$INSTDIR\resources\assets\proxy\*" "$SI4_LOCATION"
+    SetOutPath $SI4_LOCATION
+    File "${BUILD_RESOURCES_DIR}\build\proxy\*"
     Sleep 500
     nsExec::Exec '"$SI4_LOCATION\cmw-coder-loader.exe" /uninstall'
     Sleep 500

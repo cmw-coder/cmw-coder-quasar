@@ -9,7 +9,7 @@
     "lint": "eslint --ext .js,.ts,.vue ./",
     "format": "prettier --write \"**/*.{js,ts,vue,scss,html,md,json}\" --ignore-path .gitignore",
     "dev": "quasar dev -m electron",
-    "get-proxy": "shx cp ../../ClionProjects/cmw-coder-proxy/cmake-build-release-vs_x86/msimg32.dll src-electron/build/loaderdll.dll",
+    "get-proxy": "shx cp ../../ClionProjects/cmw-coder-proxy/cmake-build-release-vs_x86/msimg32.dll src-electron/build/proxy/loaderdll.dll",
     "publish": "quasar build -m electron --publish"
   },
   "dependencies": {

@@ -37,4 +37,5 @@ yarn-error.log*
 .env.local*
 
 # Dynamic assets
-/src-electron/build/*.dll
+/src-electron/build/proxy/*.dll
+/src-electron/build/proxy/*.exe
