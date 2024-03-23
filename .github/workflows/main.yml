@@ -46,12 +46,22 @@ jobs:
             file.seek(0)
             file.truncate()
             file.write(data)
+      - name: Get Comware Coder Loader
+        uses: robinraju/release-downloader@v1.9
+        with:
+          fileName: '*.exe'
+          latest: true
+          out-file-path: 'src-electron/build/proxy'
+          preRelease: ${{ startsWith(github.ref, 'refs/tags/pre') }}
+          repository: cmw-coder/cmw-coder-loader
+          tarBall: false
+          zipBall: false
       - name: Get Comware Coder Proxy
         uses: robinraju/release-downloader@v1.9
         with:
           fileName: '*.dll'
           latest: true
-          out-file-path: 'src-electron/assets/proxy'
+          out-file-path: 'src-electron/build/proxy'
           preRelease: ${{ startsWith(github.ref, 'refs/tags/pre') }}
           repository: cmw-coder/cmw-coder-proxy
           tarBall: false

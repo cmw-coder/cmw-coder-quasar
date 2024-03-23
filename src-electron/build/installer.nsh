@@ -24,9 +24,7 @@
 !macroend
 
 !macro customInit
-  ${If} ${FileExists} "$INSTDIR\resources.pak"
-    MessageBox MB_OK|MB_ICONSTOP "Not first time install"
-  ${Else}
+  ${IfNot} ${FileExists} "$INSTDIR\resources.pak"
     MessageBox MB_OK|MB_ICONSTOP "First time install"
   ${EndIf}
 !macroend
