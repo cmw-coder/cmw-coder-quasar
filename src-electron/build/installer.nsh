@@ -23,6 +23,14 @@
     ${EndIf}
 !macroend
 
+!macro customInit
+  ${If} ${FileExists} "$INSTDIR\resources.pak"
+    MessageBox MB_OK|MB_ICONSTOP "Not first time install"
+  ${Else}
+    MessageBox MB_OK|MB_ICONSTOP "First time install"
+  ${EndIf}
+!macroend
+
 !macro customInstall
   Var /GLOBAL SI3_LOCATION
   Var /GLOBAL SI4_LOCATION
