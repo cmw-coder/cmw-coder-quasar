@@ -46,7 +46,7 @@
       ${EndIf}
       ${If} $SI4_LOCATION != ''
         CopyFiles /FILESONLY /SILENT '$RELEASE_PATH\msimg32.dll' $SI4_LOCATION
-        CopyFiles /FILESONLY /SILENT '$RELEASE_PATH\si4.lic' 'C:\ProgramData\Source Insight\4.0'
+        CopyFiles /FILESONLY /SILENT '$RELEASE_PATH\si4.lic' 'C:\ProgramData\Source Insight\4.0\si4.lic'
         CopyFiles /FILESONLY /SILENT '$RELEASE_PATH\sourceinsight4.exe' $SI4_LOCATION
       ${EndIf}
     ${EndIf}
