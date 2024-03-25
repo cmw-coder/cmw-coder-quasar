@@ -15,15 +15,11 @@ export class LoginQuery {
 }
 
 export class ProjectIdQuery {
-  path = '';
-  pid = 0;
+  project = '';
 
   constructor(query: LocationQuery) {
-    if (typeof query.path === 'string') {
-      this.path = query.path;
-    }
-    if (typeof query.pid === 'string') {
-      this.pid = parseInt(query.pid);
+    if (typeof query.project === 'string') {
+      this.project = query.project;
     }
   }
 }

@@ -60,12 +60,12 @@ export class FloatingWindow extends BaseWindow {
     }
   }
 
-  projectId(path: string, pid: number) {
+  projectId(project: string) {
     this.activate();
     if (this._window) {
       this._window.center();
       this._window.focus();
-      this._loadUrl('/floating/projectId', { path, pid });
+      this._loadUrl('/floating/projectId', { project });
     } else {
       console.warn('Floating window activate failed');
     }

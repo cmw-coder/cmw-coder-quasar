@@ -32,12 +32,11 @@ export interface ActionMessage {
 export class ClientSetProjectIdActionMessage implements ActionMessage {
   type = ActionType.ClientSetProjectId;
   data: {
-    path: string;
-    pid: number;
+    project: string;
     projectId: string;
   };
 
-  constructor(data: { path: string; pid: number; projectId: string }) {
+  constructor(data: { project: string; projectId: string }) {
     this.data = data;
   }
 }

@@ -62,9 +62,8 @@ trayIcon.registerMenuEntry(MenuEntry.Quit, () => app.exit());
 registerAction(
   ActionType.ClientSetProjectId,
   `main.main.${ActionType.ClientSetProjectId}`,
-  ({ path, pid, projectId }) => {
-    dataStore.setProjectId(path, projectId).catch();
-    websocketManager.setClientProjectId(pid, projectId);
+  ({ project, projectId }) => {
+    dataStore.setProjectId(project, projectId).catch();
   },
 );
 registerAction(
@@ -118,7 +117,7 @@ websocketManager.registerWsAction(
 );
 websocketManager.registerWsAction(
   WsAction.CompletionGenerate,
-  async ({ data }, pid) => {
+  async ({ data }) => {
     clearInterval(immersiveWindowDestroyInterval);
     immersiveWindowDestroyInterval = initWindowDestroyInterval(immersiveWindow);
 
@@ -127,7 +126,6 @@ websocketManager.registerWsAction(
 
     try {
       const { id: projectId } = getProjectData(project);
-      websocketManager.setClientProjectId(pid, projectId);
       statisticsReporter.completionUpdateProjectId(actionId, projectId);
 
       const promptElements = await promptExtractor.getPromptComponents(
@@ -171,7 +169,7 @@ websocketManager.registerWsAction(
         }
         case CompletionErrorCause.projectData: {
           result = 'failure';
-          floatingWindow.projectId(project, pid);
+          floatingWindow.projectId(project);
           break;
         }
       }
@@ -249,7 +247,7 @@ websocketManager.registerWsAction(WsAction.EditorPaste, ({ data }, pid) => {
     const error = <Error>e;
     switch (error.cause) {
       case CompletionErrorCause.projectData: {
-        floatingWindow.projectId(project, pid);
+        floatingWindow.projectId(project);
         break;
       }
       default: {
@@ -260,12 +258,9 @@ websocketManager.registerWsAction(WsAction.EditorPaste, ({ data }, pid) => {
 });
 websocketManager.registerWsAction(
   WsAction.EditorSwitchProject,
-  ({ data: path }, pid) => {
-    const id = dataStore.getProjectId(path);
-    if (id) {
-      websocketManager.setClientProjectId(pid, id);
-    } else {
-      floatingWindow.projectId(path, pid);
+  ({ data: project }) => {
+    if (!dataStore.getProjectId(project)) {
+      floatingWindow.projectId(project);
     }
   },
 );

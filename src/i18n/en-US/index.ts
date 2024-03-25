@@ -190,7 +190,7 @@ export default {
     ProjectIdPage: {
       labels: {
         confirm: 'Confirm',
-        description: 'Current project path: {path}',
+        description: 'Current project folder: {project}',
         intro:
           'You need to provide Project ID in order to statistics your coding behavior.',
         temporary: 'This is a temporary project',

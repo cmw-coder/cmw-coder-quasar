@@ -21,7 +21,7 @@ const i18n = (relativePath: string, data?: Record<string, unknown>) => {
 };
 
 const { name } = matched[matched.length - 2];
-const { path, pid } = new ProjectIdQuery(query);
+const { project } = new ProjectIdQuery(query);
 
 const error = ref(false);
 const isLoading = ref(false);
@@ -37,8 +37,7 @@ const checkProjectId = async () => {
   isLoading.value = true;
   window.actionApi.send(
     new ClientSetProjectIdActionMessage({
-      pid,
-      path,
+      project,
       projectId: projectId.value,
     }),
   );
@@ -52,8 +51,7 @@ const temporaryProjectId = () => {
   isLoading.value = true;
   window.actionApi.send(
     new ClientSetProjectIdActionMessage({
-      pid,
-      path,
+      project,
       projectId: `Temp_${DateTime.now().toFormat('yyyyLLdd_HHmmss')}`,
     }),
   );
@@ -83,7 +81,7 @@ const temporaryProjectId = () => {
           class="text-center text-grey text-italic text-subtitle1"
           style="white-space: pre-line"
         >
-          {{ i18n('labels.description', { path }) }}
+          {{ i18n('labels.description', { project }) }}
         </div>
         <project-id-input v-model="projectId" @update:error="error = $event" />
         <q-btn

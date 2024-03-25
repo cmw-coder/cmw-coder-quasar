@@ -7,7 +7,6 @@ import {
 } from 'shared/types/WsMessage';
 
 interface ClientInfo {
-  projectId: string;
   version: string;
 }
 
@@ -36,13 +35,6 @@ class WebsocketManager {
     this._handlers.set(wsAction, callback);
   }
 
-  setClientProjectId(pid: number, projectId: string) {
-    const clientInfo = this._clientInfoMap.get(pid);
-    if (clientInfo) {
-      clientInfo.projectId = projectId;
-    }
-  }
-
   startServer() {
     this._server = new Server({
       host: '127.0.0.1',
@@ -58,7 +50,6 @@ class WebsocketManager {
           const { data } = <HandShakeClientMessage>clientMessage;
           pid = data.pid;
           this._clientInfoMap.set(pid, {
-            projectId: '',
             version: data.version,
           });
           console.log('Client verified, pid:', pid);
