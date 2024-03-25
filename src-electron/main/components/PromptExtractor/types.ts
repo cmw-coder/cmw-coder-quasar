@@ -19,8 +19,8 @@ export class PromptElements {
   symbols?: string;
 
   constructor(prefix: string, suffix: string) {
-    this.prefix = prefix;
-    this.suffix = suffix;
+    this.prefix = prefix.trimStart();
+    this.suffix = suffix.trimEnd();
   }
 
   stringify(apiStyle: ApiStyle, separateTokens: SeparateTokens) {
