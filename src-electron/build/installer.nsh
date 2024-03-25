@@ -58,18 +58,18 @@
     ${killIfRunning} 'Insight3.exe'
     SetOutPath $SI3_LOCATION
     File '${BUILD_RESOURCES_DIR}\build\proxy\*'
-    Sleep 500
+    Sleep 1000
     nsExec::Exec '"$SI3_LOCATION\cmw-coder-loader.exe" /uninstall'
-    Sleep 500
+    Sleep 1000
     nsExec::Exec '"$SI3_LOCATION\cmw-coder-loader.exe" /install'
   ${EndIf}
   ${If} $SI4_LOCATION != ''
     ${killIfRunning} 'sourceinsight4.exe'
     SetOutPath $SI4_LOCATION
     File '${BUILD_RESOURCES_DIR}\build\proxy\*'
-    Sleep 500
+    Sleep 1000
     nsExec::Exec '"$SI4_LOCATION\cmw-coder-loader.exe" /uninstall'
-    Sleep 500
+    Sleep 1000
     nsExec::Exec '"$SI4_LOCATION\cmw-coder-loader.exe" /install'
   ${EndIf}
 !macroend
