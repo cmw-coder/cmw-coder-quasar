@@ -139,7 +139,7 @@ export interface EditorPasteClientMessage extends WsMessage {
   action: WsAction.EditorPaste;
   data: {
     count: number;
-    projectId: string;
+    project: string;
   };
 }
 

@@ -160,17 +160,20 @@ websocketManager.registerWsAction(
       const error = <Error>e;
       let result: StandardResult['result'] = 'error';
       switch (error.cause) {
-        case CompletionErrorCause.accessToken:
+        case CompletionErrorCause.accessToken: {
           result = 'failure';
           floatingWindow.login(mainWindow.isVisible);
           break;
-        case CompletionErrorCause.clientInfo:
+        }
+        case CompletionErrorCause.clientInfo: {
           result = 'failure';
           break;
-        case CompletionErrorCause.projectData:
+        }
+        case CompletionErrorCause.projectData: {
           result = 'failure';
           floatingWindow.projectId(project, pid);
           break;
+        }
       }
 
       statisticsReporter.completionAbort(actionId);
@@ -236,12 +239,24 @@ websocketManager.registerWsAction(
   },
 );
 websocketManager.registerWsAction(WsAction.EditorPaste, ({ data }, pid) => {
-  const { count, projectId } = data;
+  const { count, project } = data;
   try {
+    const { id: projectId } = getProjectData(project);
     statisticsReporter
       .copiedLines(count, projectId, getClientVersion(pid))
       .catch();
-  } catch {}
+  } catch (e) {
+    const error = <Error>e;
+    switch (error.cause) {
+      case CompletionErrorCause.projectData: {
+        floatingWindow.projectId(project, pid);
+        break;
+      }
+      default: {
+        break;
+      }
+    }
+  }
 });
 websocketManager.registerWsAction(
   WsAction.EditorSwitchProject,
