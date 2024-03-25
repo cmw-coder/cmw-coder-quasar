@@ -24,24 +24,36 @@
 !macroend
 
 !macro customInit
+  Var /GLOBAL SI3_LOCATION
+  Var /GLOBAL SI4_LOCATION
+  ReadRegDWORD $SI3_LOCATION HKLM 'SOFTWARE\WOW6432Node\Source Dynamics\Source Insight\3.0\Paths' 'InitDir'
+  ReadRegDWORD $SI4_LOCATION HKLM 'SOFTWARE\WOW6432Node\Source Dynamics\Source Insight\4.0\Install' 'InstallDir'
+
   ${ifNot} ${isUpdated}
     ${IfNot} ${FileExists} '$INSTDIR\resources.pak'
+      Var /GLOBAL RELEASE_PATH
+      StrCpy $RELEASE_PATH "\\h3cbjnt23-fs\软件平台3\V7DEV\Comware Leopard 工具\SI插件"
+
       DeleteRegKey HKCU 'Software\Source Dynamics\Source Insight\Installer'
       nsExec::Exec 'schtasks /delete /tn "cmw-coder-update" /f'
       nsProcess::_KillProcess 'cmw-coder-fastify.exe'
       RMDir /r /REBOOTOK 'C:\Windows\Temp\ComwareCoder'
       RMDir /r /REBOOTOK 'C:\Windows\Temp\SourceInsight'
       RMDir /r /REBOOTOK '$APPDATA\Source Insight'
+
+      ${If} $SI3_LOCATION != ''
+        CopyFiles /FILESONLY /SILENT '$RELEASE_PATH\Insight3.exe' $SI3_LOCATION
+      ${EndIf}
+      ${If} $SI4_LOCATION != ''
+        CopyFiles /FILESONLY /SILENT '$RELEASE_PATH\msimg32.dll' $SI4_LOCATION
+        CopyFiles /FILESONLY /SILENT '$RELEASE_PATH\si4.lic' 'C:\ProgramData\Source Insight\4.0'
+        CopyFiles /FILESONLY /SILENT '$RELEASE_PATH\sourceinsight4.exe' $SI4_LOCATION
+      ${EndIf}
     ${EndIf}
   ${endIf}
 !macroend
 
 !macro customInstall
-  Var /GLOBAL SI3_LOCATION
-  Var /GLOBAL SI4_LOCATION
-  ReadRegDWORD $SI3_LOCATION HKLM 'SOFTWARE\WOW6432Node\Source Dynamics\Source Insight\3.0\Paths' 'InitDir'
-  ReadRegDWORD $SI4_LOCATION HKLM 'SOFTWARE\WOW6432Node\Source Dynamics\Source Insight\4.0\Install' 'InstallDir'
-
   ${If} $SI3_LOCATION != ''
     ${killIfRunning} 'Insight3.exe'
     SetOutPath $SI3_LOCATION
@@ -51,7 +63,6 @@
     Sleep 500
     nsExec::Exec '"$SI3_LOCATION\cmw-coder-loader.exe" /install'
   ${EndIf}
-
   ${If} $SI4_LOCATION != ''
     ${killIfRunning} 'sourceinsight4.exe'
     SetOutPath $SI4_LOCATION
