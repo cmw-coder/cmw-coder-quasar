@@ -298,7 +298,7 @@ app.whenReady().then(async () => {
     configStore.apiStyle === ApiStyle.Linseer &&
     !(await configStore.getAccessToken())
   ) {
-    floatingWindow.login(mainWindow.isVisible);
+    // floatingWindow.login(mainWindow.isVisible);
   }
 
   trayIcon.notify('正在检查更新……');

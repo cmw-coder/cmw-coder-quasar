@@ -9,21 +9,26 @@ const props = defineProps<Props>();
 </script>
 
 <template>
-  <div class="column q-gutter-y-sm">
-    <div
+  <div class="column q-gutter-y-sm q-px-lg">
+    <q-intersection
       v-for="(item, index) in props.modelValue"
       :key="index"
-      class="row"
-      :class="item.sent ? 'justify-end' : 'justify-start'"
+      once
+      :transition="item.sent ? 'slide-left' : 'slide-right'"
+      style="min-height: 48px"
     >
       <q-chat-message
+        :class="item.sent ? 'self-end' : 'self-start'"
         :bg-color="item.sent ? 'primary' : 'grey-4'"
         :sent="item.sent"
         :text-color="item.sent ? 'white' : undefined"
         text-html
-        style="max-width: 75%; word-wrap: break-word"
+        style="word-wrap: break-word"
       >
-        <div :class="item.error ? 'text-negative text-italic' : undefined">
+        <div
+          :class="item.error ? 'text-negative text-italic' : undefined"
+          style="max-width: 75vw"
+        >
           <div v-html="item.content" />
           <q-spinner-dots
             v-if="item.loading"
@@ -32,7 +37,7 @@ const props = defineProps<Props>();
           />
         </div>
       </q-chat-message>
-    </div>
+    </q-intersection>
   </div>
 </template>
 

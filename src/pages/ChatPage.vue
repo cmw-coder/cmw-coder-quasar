@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { onBeforeUnmount, onMounted } from 'vue';
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import ChatMessages from 'components/ChatMessages.vue';
@@ -8,6 +8,7 @@ import { ActionType } from 'shared/types/ActionMessage';
 import { useChatStore } from 'stores/chat';
 import { ActionApi } from 'types/ActionApi';
 import { b64GbkToUtf8 } from 'utils/iconv';
+import { QScrollArea } from 'quasar';
 
 const baseName = 'pages.ChatPage.';
 
@@ -17,6 +18,19 @@ const { t } = useI18n();
 const i18n = (relativePath: string) => {
   return t(baseName + relativePath);
 };
+
+const scrollArea = ref<QScrollArea>();
+
+watch(
+  currentChatMessages,
+  () =>
+    setTimeout(() => {
+      if (scrollArea.value) {
+        scrollArea.value?.setScrollPercentage('vertical', 1, 300);
+      }
+    }, 100),
+  { deep: true },
+);
 
 const actionApi = new ActionApi(baseName);
 onMounted(async () => {
@@ -30,17 +44,11 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <q-page class="flex row justify-center q-pa-md">
-    <div class="col-10 column q-gutter-y-md">
-      <transition
-        appear
-        enter-active-class="animated fadeIn"
-        leave-active-class="animated fadeOut"
-      >
-        <div
-          v-show="!currentChatMessages.length"
-          class="absolute-center column q-gutter-y-xl text-center"
-        >
+  <q-page class="flex row justify-center">
+    <div class="col-grow column q-gutter-y-md">
+      <q-scroll-area ref="scrollArea" class="full-height">
+        <q-space :style="{ height: `${$q.screen.height / 3}px` }" />
+        <div class="column q-gutter-y-xl q-my-xl text-center">
           <div class="text-h3">
             {{ i18n('labels.title') }}
           </div>
@@ -48,8 +56,9 @@ onBeforeUnmount(() => {
             {{ i18n('labels.intro') }}
           </div>
         </div>
-      </transition>
-      <ChatMessages v-model="currentChatMessages" />
+        <ChatMessages v-model="currentChatMessages" />
+        <q-space style="height: 48px" />
+      </q-scroll-area>
     </div>
   </q-page>
 </template>
