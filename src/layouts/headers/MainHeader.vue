@@ -62,7 +62,7 @@ const toggleMaximize = () => window.controlApi.toggleMaximize();
         flat
         icon="menu"
         round
-        @click="bus.emit('drawer', 'left', 'toggle')"
+        @click="bus.emit('drawer', 'toggle', 'left')"
       />
       <q-toolbar-title>
         <q-avatar>
@@ -74,7 +74,7 @@ const toggleMaximize = () => window.controlApi.toggleMaximize();
         flat
         icon="menu"
         round
-        @click="bus.emit('drawer', 'right', 'toggle')"
+        @click="bus.emit('drawer', 'toggle', 'right')"
       />
     </q-toolbar>
   </q-header>

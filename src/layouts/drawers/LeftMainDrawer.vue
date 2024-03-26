@@ -43,8 +43,8 @@ const navigations = [
     no-swipe-open
     overlay
     side="left"
-    @show="bus.emit('drawer', 'left', 'open')"
-    @hide="bus.emit('drawer', 'left', 'close')"
+    @show="bus.emit('drawer', 'open', 'left')"
+    @hide="bus.emit('drawer', 'close', 'left')"
   >
     <q-list>
       <template v-for="navigation in navigations" :key="navigation">

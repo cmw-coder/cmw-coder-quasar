@@ -69,7 +69,7 @@ export class MainWindow extends BaseWindow {
     });
     this._window.on('ready-to-show', async () => {
       if (this._window) {
-        // this._window.webContents.openDevTools({ mode: 'undocked' });
+        this._window.webContents.openDevTools({ mode: 'undocked' });
       }
     });
     this._window.on('show', () => {

@@ -132,7 +132,16 @@ export default {
       },
       RightMainDrawer: {},
     },
-    footers: {},
+    footers: {
+      QuestionFooter: {
+        labels: {
+          thinking: 'Thinking...',
+        },
+        tooltips: {
+          newTopic: 'Start a new topic',
+        },
+      },
+    },
     headers: {
       FloatingHeader: {
         labels: {

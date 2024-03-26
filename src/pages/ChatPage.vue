@@ -1,35 +1,57 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { storeToRefs } from 'pinia';
+import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import CodeBlock from 'components/CodeBlock.vue';
-import { ActionType } from 'shared/types/ActionMessage';
-import { b64GbkToUtf8 } from 'utils/iconv';
-import { ActionApi } from 'types/ActionApi';
+import ChatMessages from 'components/ChatMessages.vue';
+import { useChatStore } from 'stores/chat';
+import { QScrollArea } from 'quasar';
 
 const baseName = 'pages.ChatPage.';
 
+const { currentChatMessages } = storeToRefs(useChatStore());
 const { t } = useI18n();
 
 const i18n = (relativePath: string) => {
   return t(baseName + relativePath);
 };
 
-const codeContent = ref('');
+const scrollArea = ref<QScrollArea>();
 
-const actionApi = new ActionApi(baseName);
-onMounted(() => {
-  actionApi.register(ActionType.DebugSync, (data) => {
-    codeContent.value = b64GbkToUtf8(data.content);
-  });
-});
-onBeforeUnmount(() => {
-  actionApi.unregister();
-});
+watch(
+  currentChatMessages,
+  () =>
+    setTimeout(() => {
+      if (scrollArea.value) {
+        scrollArea.value?.setScrollPercentage('vertical', 1, 300);
+      }
+    }, 100),
+  { deep: true },
+);
 </script>
 
+<template>
+  <q-page class="flex row justify-center">
+    <div class="col-grow column q-gutter-y-md">
+      <q-scroll-area ref="scrollArea" class="full-height">
+        <q-space :style="{ height: `${$q.screen.height / 3}px` }" />
+        <div class="column q-gutter-y-xl q-my-xl text-center">
+          <div class="text-h3">
+            {{ i18n('labels.title') }}
+          </div>
+          <div class="text-h6 text-grey">
+            {{ i18n('labels.intro') }}
+          </div>
+        </div>
+        <ChatMessages v-model="currentChatMessages" />
+        <q-space style="height: 48px" />
+      </q-scroll-area>
+    </div>
+  </q-page>
+</template>
+
 <style lang="scss">
-.shiki-codes {
+.shiki {
   code {
     counter-reset: step;
     counter-increment: step 0;
@@ -38,31 +60,16 @@ onBeforeUnmount(() => {
   code .line::before {
     content: counter(step);
     counter-increment: step;
-    width: 1rem;
-    margin-right: 1.5rem;
+    width: 2rem;
+    margin-left: 0.5rem;
+    padding-right: 0.5rem;
     display: inline-block;
     text-align: right;
-    color: #777777;
+    background-color: #bdbdbd;
   }
 
   pre {
-    margin: unset;
+    border-radius: 3px;
   }
 }
 </style>
-
-<template>
-  <q-page class="row justify-evenly q-pa-xl">
-    <q-card class="col-grow q-pa-lg">
-      <q-card-section class="text-h4 text-center">
-        {{ i18n('labels.title') }}
-      </q-card-section>
-      <q-card-section class="text-h6 text-grey text-center">
-        {{ i18n('labels.intro') }}
-      </q-card-section>
-      <q-card-section>
-        <code-block :src="codeContent" />
-      </q-card-section>
-    </q-card>
-  </q-page>
-</template>

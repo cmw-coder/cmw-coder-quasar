@@ -80,6 +80,7 @@ export const routes: RouteRecordRaw[] = [
           leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
           default: () => import('pages/ChatPage.vue'),
           // rightDrawer: () => import('layouts/drawers/RightMainDrawer.vue'),
+          footer: () => import('layouts/footers/QuestionFooter.vue'),
         },
       },
       {

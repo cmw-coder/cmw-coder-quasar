@@ -1,6 +1,6 @@
 {
   "name": "cmw-coder-quasar",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Comware Coder based on Quasar framework",
   "productName": "Comware Coder",
   "author": "ParticleG <particle_g@outlook.com>",
@@ -34,7 +34,9 @@
   "devDependencies": {
     "@intlify/vite-plugin-vue-i18n": "^3.4.0",
     "@quasar/app-vite": "^1.8.0",
+    "@shikijs/markdown-it": "^1.2.0",
     "@types/luxon": "^3.4.2",
+    "@types/markdown-it": "^13.0.7",
     "@types/node": "^16.18.91",
     "@types/node-schedule": "^2.1.6",
     "@types/uuid": "^9.0.8",
