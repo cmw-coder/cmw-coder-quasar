@@ -7,7 +7,7 @@ const { screen } = useQuasar();
 const leftDrawerOpen = ref(false);
 const rightDrawerOpen = ref(false);
 
-bus.on('drawer', (position, action) => {
+bus.on('drawer', (action, position) => {
   const targetDrawer = position === 'left' ? leftDrawerOpen : rightDrawerOpen;
   switch (action) {
     case 'open':

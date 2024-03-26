@@ -73,6 +73,40 @@ export const loginWithCode = async (userId: string, code: string) => {
   });
 };
 
+export const question = async (
+  endpoint: string,
+  question: string,
+  historyList: { role: 'assistant' | 'user'; content: string }[],
+  accessToken?: string,
+  progressCallback?: (content: string) => void,
+) =>
+  await axios
+    .create({
+      baseURL: endpoint,
+    })
+    .post(
+      progressCallback ? '/chatgpt/question/stream' : '/chatgpt/question',
+      {
+        question,
+        model: 'chatgpt_3.5_16k',
+        temperature: 1,
+        multiChat: true,
+        historyList,
+        plugin: 'SI',
+        templateName: 'Chat',
+        profileModel: 'OPEN-AI公有云模型',
+        subType: 'Temp',
+      },
+      {
+        headers: {
+          'x-authorization': `bearer ${accessToken}`,
+        },
+        onDownloadProgress: (progressEvent) => {
+          progressCallback?.(progressEvent.event.target.responseText);
+        },
+      },
+    );
+
 // noinspection JSUnusedGlobalSymbols
 export default boot(({ app }) => {
   app.config.globalProperties.$authCode = authCode;
