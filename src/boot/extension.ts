@@ -4,7 +4,21 @@ import { getHighlighter } from 'shiki';
 
 export const highlighter = await getHighlighter({
   themes: ['dark-plus', 'light-plus'],
-  langs: ['c', 'c++'],
+  langs: [
+    'ansi',
+    'asm',
+    'c',
+    'cpp',
+    'csharp',
+    'css',
+    'html',
+    'java',
+    'javascript',
+    'python',
+    'rust',
+    'typescript',
+    'vue',
+  ],
 });
 
 const markdownIt = MarkdownIt({
@@ -19,6 +33,10 @@ markdownIt.use(
     },
     transformers: [
       {
+        span: (hast) => {
+          if (typeof hast.properties.class === 'string') {
+          }
+        },
         pre: (hast) => {
           if (typeof hast.properties.style === 'string') {
             hast.properties.style = hast.properties.style.replace(

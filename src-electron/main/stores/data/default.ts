@@ -10,9 +10,9 @@ export const dataStoreDefault: DataStoreType = {
   project: {},
   window: {
     main: {
-      height: 1120,
+      height: 1300,
       show: true,
-      width: 630,
+      width: 780,
     },
   },
 };

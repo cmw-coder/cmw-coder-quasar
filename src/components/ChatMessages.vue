@@ -27,7 +27,7 @@ const props = defineProps<Props>();
       >
         <div
           :class="item.error ? 'text-negative text-italic' : undefined"
-          style="max-width: 75vw"
+          style="max-width: 80ch"
         >
           <div v-html="item.content" />
           <q-spinner-dots

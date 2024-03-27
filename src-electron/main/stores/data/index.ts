@@ -78,6 +78,10 @@ export class DataStore {
             main,
           });
         },
+        '1.0.6': () => {
+          console.log('Upgrading "data" store to 1.0.6 ...');
+          this._store.set('window', dataStoreDefault.window);
+        },
       },
       name: 'data',
       // schema: dataStoreSchema,

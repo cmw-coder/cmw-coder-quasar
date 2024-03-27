@@ -173,10 +173,6 @@ class StatisticsReporter {
       return;
     }
 
-    const accessToken =
-      configStore.apiStyle === ApiStyle.Linseer
-        ? configStore.data.tokens.access
-        : '';
     const requestData: CollectionData = {
       createTime: data.timelines.startGenerate.toFormat('yyyy-MM-dd HH:mm:ss'),
       prefix: data.elements.prefix,
@@ -200,9 +196,14 @@ class StatisticsReporter {
     try {
       await Promise.all([
         this._aiServiceApi.post('/chatgpt/collection/v2', [requestData], {
-          headers: {
-            'x-authorization': `bearer ${accessToken}`,
-          },
+          headers:
+            configStore.apiStyle === ApiStyle.Linseer
+              ? {
+                  'x-authorization': `bearer ${configStore.data.tokens.access}`,
+                }
+              : {
+                  'X-Authenticated-Userid': configStore.config.userId,
+                },
         }),
         ratio === KeptRatio.None
           ? undefined
