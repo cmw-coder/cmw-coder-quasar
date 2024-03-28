@@ -1,20 +1,27 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
-import { question } from 'boot/axios';
+import { chatWithHuggingFace, chatWithLinseer } from 'boot/axios';
 import { markdownIt } from 'boot/extension';
-
-export interface ChatMessage {
-  content: string;
-  error: boolean;
-  loading: boolean;
-  sent: boolean;
-}
+import { ChatMessage } from 'stores/chat/types';
+import { runtimeConfig } from 'shared/config';
+import { ApiStyle } from 'shared/types/model';
 
 export const useChatStore = defineStore('chat', () => {
   const currentChatMessages = ref<ChatMessage[]>([]);
 
-  const askQuestion = async (content: string) => {
+  const askQuestion = async (
+    endPoint: string,
+    content: string,
+    accessToken: string,
+  ) => {
+    const historyList = currentChatMessages.value.map<{
+      role: 'assistant' | 'user';
+      content: string;
+    }>((item) => ({
+      role: item.sent ? 'user' : 'assistant',
+      content: item.content,
+    }));
     const newLength = currentChatMessages.value.push(
       {
         content,
@@ -31,12 +38,8 @@ export const useChatStore = defineStore('chat', () => {
     );
     const currentResponse = currentChatMessages.value[newLength - 1];
     try {
-      await question(
-        'http://rdee.h3c.com/kong/RdTestAiService',
-        content,
-        [],
-        '2H5b0MdPebH24YXv9JTO0j1FYQ5bfiPz',
-        (content) => {
+      if (runtimeConfig.apiStyle == ApiStyle.Linseer) {
+        await chatWithLinseer(endPoint, content, [], accessToken, (content) => {
           currentResponse.content = markdownIt.render(
             content
               .split('data:')
@@ -44,8 +47,15 @@ export const useChatStore = defineStore('chat', () => {
               .map((item) => JSON.parse(item.trim()).message)
               .join(''),
           );
-        },
-      );
+        });
+      } else {
+        const result = await chatWithHuggingFace(
+          endPoint,
+          content,
+          historyList,
+        );
+        console.log(result.data);
+      }
     } catch {
       currentResponse.content = 'Failed to get response';
       currentResponse.error = true;

@@ -1,8 +1,14 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { useChatStore } from 'stores/chat';
+import { ActionApi } from 'types/ActionApi';
+import {
+  ActionType,
+  ConfigStoreLoadActionMessage,
+} from 'shared/types/ActionMessage';
+import { ApiStyle } from 'shared/types/model';
 
 const baseName = 'layouts.footers.QuestionFooter.';
 
@@ -13,15 +19,28 @@ const i18n = (relativePath: string) => {
   return t(baseName + relativePath);
 };
 
+const accessToken = ref<string>();
+const currentApiStyle = ref<ApiStyle>();
+const endpoint = ref<string>();
 const questionText = ref<string>();
 const thinking = ref(false);
 
 const sendQuestion = async () => {
-  if (questionText.value && questionText.value.trim().length) {
+  if (
+    currentApiStyle.value &&
+    endpoint.value &&
+    questionText.value &&
+    questionText.value.trim().length
+  ) {
     thinking.value = true;
     const currentQuestion = questionText.value.trim();
     questionText.value = '';
-    await askQuestion(currentQuestion);
+    await askQuestion(
+      currentApiStyle.value,
+      endpoint.value,
+      currentQuestion,
+      accessToken.value,
+    );
     thinking.value = false;
   }
 };
@@ -30,6 +49,24 @@ const startNewTopic = () => {
   questionText.value = '';
   newTopic();
 };
+
+const actionApi = new ActionApi(baseName);
+onMounted(async () => {
+  actionApi.register(
+    ActionType.ConfigStoreLoad,
+    ({ apiStyle, config, data }) => {
+      currentApiStyle.value = apiStyle;
+      if (apiStyle == ApiStyle.Linseer) {
+        accessToken.value = data.tokens.access;
+      }
+      endpoint.value = config.endpoints.aiService;
+    },
+  );
+  window.actionApi.send(new ConfigStoreLoadActionMessage());
+});
+onBeforeUnmount(() => {
+  actionApi.unregister();
+});
 </script>
 
 <template>

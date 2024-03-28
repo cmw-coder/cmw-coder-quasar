@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ChatMessage } from 'stores/chat';
+import { ChatMessage } from 'stores/chat/types';
 
 interface Props {
   modelValue: ChatMessage[];

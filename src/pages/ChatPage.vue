@@ -1,13 +1,10 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import ChatMessages from 'components/ChatMessages.vue';
-import { ActionType } from 'shared/types/ActionMessage';
 import { useChatStore } from 'stores/chat';
-import { ActionApi } from 'types/ActionApi';
-import { b64GbkToUtf8 } from 'utils/iconv';
 import { QScrollArea } from 'quasar';
 
 const baseName = 'pages.ChatPage.';
@@ -31,16 +28,6 @@ watch(
     }, 100),
   { deep: true },
 );
-
-const actionApi = new ActionApi(baseName);
-onMounted(async () => {
-  actionApi.register(ActionType.DebugSync, (data) => {
-    console.log(b64GbkToUtf8(data.content));
-  });
-});
-onBeforeUnmount(() => {
-  actionApi.unregister();
-});
 </script>
 
 <template>
