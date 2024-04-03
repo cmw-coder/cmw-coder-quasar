@@ -1,5 +1,6 @@
-import { NsisUpdater, UpdateInfo } from 'electron-updater';
 import { ProgressInfo } from 'electron-builder';
+import log from 'electron-log/main';
+import { NsisUpdater, UpdateInfo } from 'electron-updater';
 
 export class AutoUpdater {
   private _updater: NsisUpdater;
@@ -8,7 +9,6 @@ export class AutoUpdater {
     this._updater = new NsisUpdater({
       channel,
       provider: 'generic',
-      // url: 'http://rdee.h3c.com/h3c-ai-assistant/plugin/sourceinsight/',
       url,
     });
     this._updater.autoDownload = false;
@@ -17,12 +17,12 @@ export class AutoUpdater {
     this._updater.disableWebInstaller = true;
 
     this._updater.on('update-not-available', (updateInfo) => {
-      console.log('update-not-available: ', { updateInfo });
+      log.info('update-not-available: ', { updateInfo });
     });
 
     this._updater.on('update-downloaded', (event) => {
       // autoUpdater.quitAndInstall();
-      console.log(event);
+      log.info(event);
     });
   }
 

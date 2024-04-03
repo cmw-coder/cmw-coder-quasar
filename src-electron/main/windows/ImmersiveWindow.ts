@@ -1,4 +1,5 @@
 import { BrowserWindow, screen } from 'electron';
+import log from 'electron-log/main';
 import { resolve } from 'path';
 
 import { dataStore } from 'main/stores';
@@ -75,7 +76,7 @@ export class ImmersiveWindow extends BaseWindow {
 
       this._window.show();
     } else {
-      console.warn('Immersive window activate failed');
+      log.warn('Immersive window activate failed');
     }
   }
 
@@ -87,7 +88,7 @@ export class ImmersiveWindow extends BaseWindow {
       sendToRenderer(this._window, new CompletionUpdateActionMessage(isDelete));
       this._window.show();
     } else {
-      console.warn('Immersive window activate failed');
+      log.warn('Immersive window activate failed');
     }
   }
 

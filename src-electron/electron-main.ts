@@ -1,4 +1,5 @@
-import { app, globalShortcut } from 'electron';
+import { app } from 'electron';
+import log from 'electron-log/main';
 import { scheduleJob } from 'node-schedule';
 
 import { AutoUpdater } from 'main/components/AutoUpdater';
@@ -13,6 +14,7 @@ import {
   initAdditionReport,
   initApplication,
   initIpcMain,
+  initShortcutHandler,
   initWindowDestroyInterval,
 } from 'main/init';
 import { configStore, dataStore } from 'main/stores';
@@ -37,6 +39,7 @@ import {
 initApplication();
 initAdditionReport();
 initIpcMain();
+initShortcutHandler();
 
 const autoUpdater = new AutoUpdater(configStore.endpoints.update);
 const floatingWindow = new FloatingWindow();
@@ -143,7 +146,7 @@ websocketManager.registerWsAction(
       if (completions) {
         statisticsReporter.completionGenerated(actionId, completions);
 
-        console.log(timer.parse('CompletionGenerate'));
+        log.log(timer.parse('CompletionGenerate'));
         timer.remove('CompletionGenerate');
         return new CompletionGenerateServerMessage({
           actionId,
@@ -265,23 +268,6 @@ websocketManager.registerWsAction(
   },
 );
 
-app.on('browser-window-blur', () => {
-  globalShortcut.unregisterAll();
-});
-app.on('browser-window-focus', () => {
-  globalShortcut.register('CommandOrControl+R', () => {
-    console.log('CommandOrControl+R is pressed: Shortcut Disabled');
-  });
-  globalShortcut.register('CommandOrControl+Shift+R', () => {
-    console.log('CommandOrControl+Shift+R is pressed: Shortcut Disabled');
-  });
-  globalShortcut.register('F5', () => {
-    console.log('F5 is pressed: Shortcut Disabled');
-  });
-  globalShortcut.register('Shift+F5', () => {
-    console.log('Shift+F5 is pressed: Shortcut Disabled');
-  });
-});
 app.on('second-instance', () => {
   app.focus();
   mainWindow.activate();

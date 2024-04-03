@@ -1,4 +1,5 @@
 import { BrowserWindow } from 'electron';
+import log from 'electron-log/main';
 import { ProgressInfo, UpdateInfo } from 'electron-updater';
 import { resolve } from 'path';
 
@@ -39,7 +40,7 @@ export class FloatingWindow extends BaseWindow {
         userId: configStore.config.userId,
       });
     } else {
-      console.warn('Floating window activate failed');
+      log.warn('Floating window activate failed');
     }
   }
 
@@ -56,7 +57,7 @@ export class FloatingWindow extends BaseWindow {
         showMain: mainIsVisible,
       });
     } else {
-      console.warn('Floating window activate failed');
+      log.warn('Floating window activate failed');
     }
   }
 
@@ -67,7 +68,7 @@ export class FloatingWindow extends BaseWindow {
       this._window.focus();
       this._loadUrl('/floating/projectId', { project });
     } else {
-      console.warn('Floating window activate failed');
+      log.warn('Floating window activate failed');
     }
   }
 
@@ -191,7 +192,7 @@ export class FloatingWindow extends BaseWindow {
       this._window
         .loadURL(url)
         .then(() => (this._currentRoute = route))
-        .catch((e) => console.log(e));
+        .catch((e) => log.debug(e));
     }
   }
 }

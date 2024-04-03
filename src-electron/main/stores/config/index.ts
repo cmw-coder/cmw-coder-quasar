@@ -1,3 +1,4 @@
+import log from 'electron-log/main';
 import ElectronStore from 'electron-store';
 
 import {
@@ -31,7 +32,7 @@ export class HuggingFaceConfigStore {
       defaults: defaultMapping[runtimeConfig.networkZone],
       migrations: {
         '1.0.1': (store) => {
-          console.info('Upgrading "config" store to 1.0.1 ...');
+          log.info('Upgrading "config" store to 1.0.1 ...');
           const oldConfig = store.get('config');
           oldConfig.modelConfigs.forEach(
             (modelConfig) =>
@@ -40,7 +41,7 @@ export class HuggingFaceConfigStore {
           store.set('config', oldConfig);
         },
         '1.0.5': (store) => {
-          console.info('Upgrading "config" store to 1.0.5 ...');
+          log.info('Upgrading "config" store to 1.0.5 ...');
           const oldConfig = store.get('config');
           oldConfig.endpoints.aiService =
             defaultMapping[
@@ -107,7 +108,7 @@ export class LinseerConfigStore {
       defaults: linseerConfigDefault,
       migrations: {
         '1.0.1': (store) => {
-          console.log('Upgrading "config" store to 1.0.1 ...');
+          log.info('Upgrading "config" store to 1.0.1 ...');
           const oldConfig = store.get('config');
           oldConfig.modelConfigs.forEach(
             (modelConfig) =>
@@ -116,13 +117,13 @@ export class LinseerConfigStore {
           store.set('config', oldConfig);
         },
         '1.0.4': (store) => {
-          console.log('Upgrading "config" store to 1.0.4 ...');
+          log.info('Upgrading "config" store to 1.0.4 ...');
           const oldConfig = store.get('config');
           oldConfig.modelConfigs = linseerConfigDefault.config.modelConfigs;
           store.set('config', oldConfig);
         },
         '1.0.5': (store) => {
-          console.info('Upgrading "config" store to 1.0.5 ...');
+          log.info('Upgrading "config" store to 1.0.5 ...');
           const oldConfig = store.get('config');
           oldConfig.endpoints.aiService =
             linseerConfigDefault.config.endpoints.aiService;

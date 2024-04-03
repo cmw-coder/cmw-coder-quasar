@@ -1,4 +1,5 @@
 import { Menu, MenuItemConstructorOptions, nativeImage, Tray } from 'electron';
+import log from 'electron-log/main';
 import { resolve } from 'path';
 
 import { MenuEntry } from 'main/components/TrayIcon/types';
@@ -16,7 +17,7 @@ export class TrayIcon {
   private _menuEntryMap = new Map<MenuEntry, () => void>();
   private readonly _title = `Comware Coder v${packageJson.version}`;
   private _tray: Tray | undefined;
-  private _trayClickCallback: () => void = () => console.log('Tray clicked');
+  private _trayClickCallback: () => void = () => log.debug('Tray clicked');
 
   activate() {
     if (!this._tray) {

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import log from 'electron-log/main';
 import { DateTime } from 'luxon';
 import { basename, extname } from 'path';
 import { v4 as uuid } from 'uuid';
@@ -95,7 +96,7 @@ class StatisticsReporter {
       return;
     }
 
-    console.debug('StatisticsReporter.acceptCompletion', {
+    log.debug('StatisticsReporter.acceptCompletion', {
       completions: data.completions,
       position: data.position,
       projectId: data.projectId,
@@ -122,7 +123,7 @@ class StatisticsReporter {
         ),
       );
     } catch (e) {
-      console.error('StatisticsReporter.completionAccept.failed', e);
+      log.error('StatisticsReporter.completionAccept.failed', e);
     }
   }
 
@@ -146,7 +147,7 @@ class StatisticsReporter {
     ) {
       // TODO: Check if this works
       this._lastCursorPosition = data.position;
-      console.debug('StatisticsReporter.completionCancel', {
+      log.debug('StatisticsReporter.completionCancel', {
         position: data.position,
         projectId: data.projectId,
         timelines: data.timelines,
@@ -191,7 +192,7 @@ class StatisticsReporter {
         : '',
     };
 
-    console.debug('StatisticsReporter.completionKept', [requestData]);
+    log.debug('StatisticsReporter.completionKept', [requestData]);
 
     try {
       await Promise.all([
@@ -222,7 +223,7 @@ class StatisticsReporter {
             ),
       ]);
     } catch (e) {
-      console.error('StatisticsReporter.completionKept.failed', e);
+      log.error('StatisticsReporter.completionKept.failed', e);
     }
     statisticsReporter.completionAbort(actionId);
   }
@@ -256,7 +257,7 @@ class StatisticsReporter {
       data.position.line >= 0 &&
       data.position.line != this._lastCursorPosition.line
     ) {
-      console.debug('StatisticsReporter.completionSelected', {
+      log.debug('StatisticsReporter.completionSelected', {
         completions: data.completions,
         position: data.position,
         projectId: data.projectId,
@@ -279,7 +280,7 @@ class StatisticsReporter {
           ),
         )
         .catch((e) =>
-          console.error('StatisticsReporter.completionSelected', e),
+          log.error('StatisticsReporter.completionSelected', e),
         );
     }
     return candidate;
@@ -302,7 +303,7 @@ class StatisticsReporter {
   }
 
   async copiedLines(count: number, projectId: string, version: string) {
-    console.log('StatisticsReporter.copiedLines', {
+    log.debug('StatisticsReporter.copiedLines', {
       count,
       projectId,
       version,
@@ -322,7 +323,7 @@ class StatisticsReporter {
         ),
       );
     } catch (e) {
-      console.error('StatisticsReporter.copiedLines.failed', e);
+      log.error('StatisticsReporter.copiedLines.failed', e);
     }
   }
 
@@ -333,7 +334,7 @@ class StatisticsReporter {
     projectId: string,
     version: string,
   ) {
-    console.log('StatisticsReporter.incrementLines', {
+    log.debug('StatisticsReporter.incrementLines', {
       count,
       startTime,
       endTime,
@@ -355,7 +356,7 @@ class StatisticsReporter {
         ),
       );
     } catch (e) {
-      console.error('StatisticsReporter.incrementLinesFailed', e);
+      log.error('StatisticsReporter.incrementLinesFailed', e);
     }
   }
 }

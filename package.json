@@ -16,6 +16,7 @@
     "@quasar/extras": "^1.16.9",
     "@taiyosen/easy-svn": "^1.0.27",
     "axios": "^1.6.8",
+    "electron-log": "^5.1.2",
     "electron-store": "^8.2.0",
     "electron-updater": "^6.1.8",
     "iconv-lite": "^0.6.3",

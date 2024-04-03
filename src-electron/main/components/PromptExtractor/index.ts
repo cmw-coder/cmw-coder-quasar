@@ -1,3 +1,4 @@
+import log from 'electron-log/main';
 import {
   IGNORE_COMMON_WORD,
   IGNORE_COMWARE_INTERNAL,
@@ -47,7 +48,7 @@ export class PromptExtractor {
     ]);
 
     const similarSnippetsSliced = similarSnippets.slice(0, similarSnippetCount);
-    console.log('PromptExtractor.getPromptComponents', {
+    log.debug('PromptExtractor.getPromptComponents', {
       minScore: this._similarSnippetConfig.minScore,
       mostSimilarSnippets: similarSnippetsSliced,
     });
@@ -94,7 +95,7 @@ export class PromptExtractor {
     suffix: string,
     recentFiles: string[],
   ): Promise<SimilarSnippet[]> {
-    console.log({
+    log.debug({
       slowRecentFiles: this._slowRecentFiles,
       currentRecentFiles: recentFiles,
     });
@@ -108,7 +109,7 @@ export class PromptExtractor {
         return [];
       }
       this._slowRecentFiles = [];
-      console.info('PromptExtractor._getSimilarSnippets.enable');
+      log.info('PromptExtractor._getSimilarSnippets.enable');
     }
 
     const startTime = Date.now();
@@ -170,7 +171,7 @@ export class PromptExtractor {
 
     const endTime = Date.now();
     if (endTime - startTime > 1000) {
-      console.info(
+      log.info(
         'PromptExtractor._getSimilarSnippets.disable',
         endTime - startTime,
       );

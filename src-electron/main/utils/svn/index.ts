@@ -1,4 +1,5 @@
 import { SVNClient } from '@taiyosen/easy-svn';
+import log from 'electron-log/main';
 import fs from 'fs';
 import { resolve } from 'path';
 
@@ -13,7 +14,7 @@ export const searchSvnDirectories = async (
       const stats = await fs.promises.stat(filePath);
       if (stats.isDirectory()) {
         if (item === '.svn') {
-          console.log('Found svn directory:', folder);
+          log.debug('Found svn directory:', folder);
           directories.push(folder);
         } else {
           directories.push(...(await searchSvnDirectories(filePath)));
@@ -31,11 +32,11 @@ export const getRevision = async (path: string): Promise<number> => {
     const info = await client.info(path);
     const revision = info.match(/Last Changed Rev: (\d+)/)?.[1];
     if (revision) {
-      console.log(`Revision for ${path}: ${revision}`);
+      log.debug(`Revision for ${path}: ${revision}`);
       return parseInt(revision);
     }
   } catch (e) {
-    console.log('Get revision failed', e);
+    log.warn('Get revision failed', e);
   }
   return -1;
 };

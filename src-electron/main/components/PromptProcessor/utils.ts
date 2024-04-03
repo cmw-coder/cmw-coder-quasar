@@ -1,4 +1,5 @@
 import { CanceledError } from 'axios';
+import log from 'electron-log/main';
 
 import { PromptElements } from 'main/components/PromptExtractor/types';
 import {
@@ -103,12 +104,12 @@ export const processHuggingFaceApi = async (
     );
   } catch (error) {
     if (error instanceof CanceledError) {
-      console.log(
+      log.debug(
         'PromptProcessor.process.processHuggingFaceApi',
         'Request aborted',
       );
     } else {
-      console.warn(error);
+      log.warn(error);
     }
   }
   return [];
@@ -166,12 +167,9 @@ export const processLinseerApi = async (
     );
   } catch (error) {
     if (error instanceof CanceledError) {
-      console.log(
-        'PromptProcessor.process.processLinseerApi',
-        'Request aborted',
-      );
+      log.debug('PromptProcessor.process.processLinseerApi', 'Request aborted');
     } else {
-      console.warn(error);
+      log.warn(error);
     }
   }
   return [];

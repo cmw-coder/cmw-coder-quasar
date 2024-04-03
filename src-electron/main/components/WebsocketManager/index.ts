@@ -1,3 +1,4 @@
+import log from 'electron-log/main';
 import { Server } from 'ws';
 
 import {
@@ -42,7 +43,6 @@ class WebsocketManager {
     });
     this._server.on('connection', (client) => {
       let pid: number;
-      console.log(`${client.url} connected`);
 
       client.on('message', async (message: string) => {
         const clientMessage = JSON.parse(message);
@@ -52,10 +52,10 @@ class WebsocketManager {
           this._clientInfoMap.set(pid, {
             version: data.version,
           });
-          console.log('Client verified, pid:', pid);
+          log.info(`Websocket client verified, pid: ${pid}`);
         } else {
           if (!pid) {
-            console.log('Client not verified');
+            log.info('Websocket client not verified');
             client.close();
             return;
           }
@@ -70,7 +70,7 @@ class WebsocketManager {
       });
 
       client.on('close', () => {
-        console.log(`Client (${pid}) disconnected`);
+        log.info(`Client (${pid}) disconnected`);
       });
     });
   }

@@ -1,4 +1,5 @@
 import { createHash } from 'crypto';
+import log from 'electron-log/main';
 
 import { PromptElements } from 'main/components/PromptExtractor/types';
 import { Completions, LRUCache } from 'main/components/PromptProcessor/types';
@@ -26,7 +27,7 @@ export class PromptProcessor {
       .digest('base64');
     const completionCached = this._cache.get(cacheKey);
     if (completionCached) {
-      console.log('PromptProcessor.process.cacheHit', completionCached);
+      log.debug('PromptProcessor.process.cacheHit', completionCached);
       completionCached.candidates = completionsPostProcess(
         completionCached.candidates,
         promptElements,
@@ -69,7 +70,7 @@ export class PromptProcessor {
     timer.add('CompletionGenerate', 'generationProcessed');
 
     if (candidates.length) {
-      console.log('PromptProcessor.process.cacheMiss', candidates);
+      log.info('PromptProcessor.process.cacheMiss', candidates);
       this._cache.put(cacheKey, { candidates, type });
       candidates = completionsPostProcess(candidates, promptElements);
       return {
