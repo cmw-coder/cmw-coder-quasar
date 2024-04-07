@@ -1,5 +1,6 @@
 import { CanceledError } from 'axios';
 import log from 'electron-log/main';
+import { extname } from 'path';
 
 import { PromptElements } from 'main/components/PromptExtractor/types';
 import {
@@ -40,7 +41,10 @@ export const getCompletionType = (
 
   const lastNonEmptyLine =
     promptElements.prefix.trimEnd().split('\r\n').at(-1) ?? '';
-  if (detectRegex.test(lastNonEmptyLine)) {
+  if (
+    detectRegex.test(lastNonEmptyLine) &&
+    extname(promptElements.file ?? '') !== 'h'
+  ) {
     return CompletionType.Function;
   }
   if (promptElements.similarSnippet) {
