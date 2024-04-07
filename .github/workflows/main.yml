@@ -42,7 +42,7 @@ jobs:
           with open("./src-electron/shared/config.ts", "r+", encoding="utf8") as file:
             data = file.read()
             data = data\
-              .replace("DEFAULT_CONFIG", "${{ matrix.config }}")
+              .replace(".DEFAULT_CONFIG", ".${{ matrix.config }}")
             file.seek(0)
             file.truncate()
             file.write(data)
