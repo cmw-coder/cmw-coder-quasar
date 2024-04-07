@@ -273,6 +273,7 @@ app.on('second-instance', () => {
   mainWindow.activate();
 });
 app.whenReady().then(async () => {
+  console.log('app ready');
   floatingWindow.activate();
   immersiveWindow.activate();
   mainWindow.activate();

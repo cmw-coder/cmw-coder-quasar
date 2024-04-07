@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { ChatMessage } from 'stores/chat/types';
+import QuestionItem from './QuestionItem.vue';
+import AnswerItem from './AnswerItem.vue';
 
 interface Props {
   modelValue: ChatMessage[];
@@ -17,28 +19,50 @@ const props = defineProps<Props>();
       :transition="item.sent ? 'slide-left' : 'slide-right'"
       style="min-height: 48px"
     >
-      <q-chat-message
-        :class="item.sent ? 'self-end' : 'self-start'"
-        :bg-color="item.sent ? 'primary' : 'grey-4'"
-        :sent="item.sent"
-        :text-color="item.sent ? 'white' : undefined"
-        text-html
-        style="word-wrap: break-word"
-      >
-        <div
-          :class="item.error ? 'text-negative text-italic' : undefined"
-          style="max-width: 80ch"
-        >
-          <div v-html="item.content" />
-          <q-spinner-dots
-            v-if="item.loading"
-            size="20px"
-            style="margin-left: 10px"
-          />
-        </div>
-      </q-chat-message>
+      <QuestionItem v-if="item.sent" :question="item" />
+      <AnswerItem v-else :answer="item" />
     </q-intersection>
   </div>
 </template>
 
 <style scoped></style>
+
+<style lang="scss">
+.custom-code-render {
+  padding: 10px 0;
+
+  .tool-wrapper {
+    display: flex;
+    align-items: center;
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--q-secondary);
+    color: white;
+    padding: 4px 0;
+
+    .left {
+      .language {
+        padding: 0 10px;
+      }
+    }
+
+    .right {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      .copy-button,
+      .insert-button {
+        margin-right: 10px;
+      }
+    }
+  }
+
+  .code-content {
+    padding: 10px 0;
+    background-color: #d3d3d3;
+    overflow-x: auto;
+  }
+}
+</style>

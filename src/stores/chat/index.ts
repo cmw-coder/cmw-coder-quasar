@@ -2,7 +2,6 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
 import { chatWithHuggingFace, chatWithLinseer } from 'boot/axios';
-import { markdownIt } from 'boot/extension';
 import { ChatMessage } from 'stores/chat/types';
 import { runtimeConfig } from 'shared/config';
 import { ApiStyle } from 'shared/types/model';
@@ -46,13 +45,18 @@ export const useChatStore = defineStore('chat', () => {
             historyList,
             accessToken,
             (content) => {
-              currentResponse.content = markdownIt.render(
-                content
-                  .split('data:')
-                  .filter((item) => item.trim() !== '')
-                  .map((item) => JSON.parse(item.trim()).message)
-                  .join(''),
-              );
+              // currentResponse.content = markdownIt.render(
+              //   content
+              //     .split('data:')
+              //     .filter((item) => item.trim() !== '')
+              //     .map((item) => JSON.parse(item.trim()).message)
+              //     .join(''),
+              // );
+              currentResponse.content = content
+                .split('data:')
+                .filter((item) => item.trim() !== '')
+                .map((item) => JSON.parse(item.trim()).message)
+                .join('');
             },
           );
         } else {
