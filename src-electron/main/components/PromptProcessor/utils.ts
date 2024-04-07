@@ -77,7 +77,7 @@ export const processHuggingFaceApi = async (
         inputs: promptElements.stringify(ApiStyle.HuggingFace, separateTokens),
         parameters: {
           best_of: suggestionCount,
-          details: false,
+          details: true,
           do_sample: true,
           max_new_tokens: maxTokenCount,
           stop: stopTokens,
