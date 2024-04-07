@@ -79,9 +79,9 @@ export class DataStore {
             main,
           });
         },
-        '1.0.6': () => {
+        '1.0.6': (store) => {
           log.info('Upgrading "data" store to 1.0.6 ...');
-          this._store.set('window', dataStoreDefault.window);
+          store.set('window', dataStoreDefault.window);
         },
       },
       name: 'data',
