@@ -43,7 +43,6 @@ const props = defineProps<Props>();
           </template>
         </div>
       </q-chat-message>
-      <!--      <QuestionItem v-if="chatMessage.sent" :model-value="chatMessage" />-->
     </q-intersection>
   </div>
 </template>

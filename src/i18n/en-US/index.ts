@@ -67,6 +67,15 @@ export default {
         },
       },
     },
+    MessageItems: {
+      AnswerItem: {
+        notifications: {
+          copyFailure: 'Failed to copy the answer',
+          copyManual: 'Please copy the answer manually',
+          copySuccess: 'The answer has been copied to the clipboard',
+        },
+      },
+    },
     ProjectIdInput: {
       errors: {
         projectId: 'Invalid Project ID',
