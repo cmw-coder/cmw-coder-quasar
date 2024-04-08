@@ -27,7 +27,7 @@ const { notify } = useQuasar();
 const { t } = useI18n();
 
 const i18n = (relativePath: string) => {
-  return t('components.CodeBlock.' + relativePath);
+  return t('components.MessageItems.AnswerItem.' + relativePath);
 };
 
 const markdownComponents = computed(() => {
@@ -72,6 +72,7 @@ const onCopy = (index: number) => {
         notify({
           type: 'negative',
           message: i18n('notifications.copyFailure'),
+          caption: i18n('notifications.copyManual'),
         }),
       );
   }

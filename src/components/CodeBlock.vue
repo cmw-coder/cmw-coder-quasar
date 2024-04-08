@@ -17,7 +17,7 @@ const emit = defineEmits(['copy', 'insert']);
 </script>
 
 <template>
-  <q-card v-if="html.length" flat bordered>
+  <q-card v-if="html.length" flat>
     <q-card-section class="q-px-none">
       <div class="shiki-codes" v-html="html" style="word-wrap: break-word" />
     </q-card-section>
