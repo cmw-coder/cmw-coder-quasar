@@ -39,9 +39,9 @@ const pseudoWorkflows: WorkflowInfo[] = [
     timestamp: Date.now(),
     status: 'running',
     steps: [
-      { name: 'Step 1', status: 'success', details: 'Success: Step 1'},
-      { name: 'Step 2', status: 'skipped', details: 'Skipped: Step 2'},
-      { name: 'Step 3', status: 'running', details: 'Running: Step 3'},
+      { name: 'Step 1', status: 'success', details: 'Success: Step 1' },
+      { name: 'Step 2', status: 'skipped', details: 'Skipped: Step 2' },
+      { name: 'Step 3', status: 'running', details: 'Running: Step 3' },
       { name: 'Step 4', status: 'pending' },
       { name: 'Step 5', status: 'pending' },
     ],
@@ -174,16 +174,29 @@ const splitPercent = ref(50);
           <q-scroll-area class="full-height full-width">
             <q-list separator>
               <q-expansion-item
+                v-for="(item, index) in pseudoWorkflows[selectedWorkflowIndex]
+                  .steps"
+                :key="index"
                 expand-separator
-                icon="perm_identity"
-                label="Account settings"
-                caption="John Doe"
+                :icon="
+                  item.status === 'aborted'
+                    ? 'mdi-alert-circle'
+                    : item.status === 'failed'
+                      ? 'mdi-close-circle'
+                      : item.status === 'pending'
+                        ? 'mdi-clock-outline'
+                        : item.status === 'running'
+                          ? 'mdi-circle-slice-8'
+                          : item.status === 'skipped'
+                            ? 'mdi-cancel'
+                            : 'mdi-check-circle'
+                "
+                :label="item.name"
+                :model-value="item.status === 'running'"
               >
                 <q-card>
                   <q-card-section>
-                    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quidem, eius reprehenderit eos corrupti
-                    commodi magni quaerat ex numquam, dolorum officiis modi facere maiores architecto suscipit iste
-                    eveniet doloribus ullam aliquid.
+                    {{ item.details }}
                   </q-card-section>
                 </q-card>
               </q-expansion-item>
