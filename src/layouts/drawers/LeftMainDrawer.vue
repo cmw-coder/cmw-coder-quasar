@@ -3,40 +3,49 @@ import { useI18n } from 'vue-i18n';
 
 import { bus } from 'boot/bus';
 
+interface Navigation {
+  label: string;
+  icon: string;
+  available: boolean;
+  route: string;
+}
+
 const { t } = useI18n();
 
 const i18n = (relativePath: string) => {
   return t('layouts.drawers.LeftMainDrawer.' + relativePath);
 };
 
-const navigations = [
+const navigations: Navigation[] = [
   {
     label: 'chat',
-    icon: 'mdi-forum-outline',
+    icon: 'mdi-source-commit',
     available: true,
     route: 'chat',
-    separator: true,
   },
   {
     label: 'commit',
     icon: 'mdi-message-bulleted',
     available: true,
     route: 'commit',
-    separator: true,
+  },
+  {
+    label: 'workflow',
+    icon: 'mdi-ray-start-arrow',
+    available: true,
+    route: 'workflow',
   },
   {
     label: 'feedback',
     icon: 'mdi-bug',
     available: true,
     route: 'feedback',
-    separator: true,
   },
   {
     label: 'settings',
     icon: 'mdi-cog',
     available: true,
     route: 'settings',
-    separator: true,
   },
 ];
 </script>
@@ -53,7 +62,7 @@ const navigations = [
     @show="bus.emit('drawer', 'open', 'left')"
     @hide="bus.emit('drawer', 'close', 'left')"
   >
-    <q-list>
+    <q-list separator>
       <template v-for="navigation in navigations" :key="navigation">
         <q-item
           :clickable="navigation.available"
@@ -70,7 +79,6 @@ const navigations = [
             {{ i18n('navigations.' + navigation.label) }}
           </q-item-section>
         </q-item>
-        <q-separator v-if="navigation.separator" />
       </template>
     </q-list>
   </q-drawer>

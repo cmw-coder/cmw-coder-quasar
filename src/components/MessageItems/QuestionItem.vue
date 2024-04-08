@@ -7,5 +7,7 @@ defineProps<Props>();
 </script>
 
 <template>
-  {{ modelValue }}
+  <div class="text-white">
+    {{ modelValue }}
+  </div>
 </template>

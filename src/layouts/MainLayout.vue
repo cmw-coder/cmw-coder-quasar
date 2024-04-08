@@ -24,7 +24,7 @@ bus.on('drawer', (action, position) => {
 </script>
 
 <template>
-  <q-layout view="hHh LpR fFf">
+  <q-layout view="hHh LpR lFf">
     <router-view :mobile="screen.lt.md" name="header" />
     <router-view
       :mobile="screen.lt.md"

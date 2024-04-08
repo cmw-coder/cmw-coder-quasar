@@ -89,8 +89,6 @@ export const routes: RouteRecordRaw[] = [
           header: () => import('layouts/headers/MainHeader.vue'),
           leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
           default: () => import('pages/CommitPage.vue'),
-          // rightDrawer: () => import('layouts/drawers/RightMainDrawer.vue'),
-          // footer: () => import('layouts/footers/QuestionFooter.vue'),
         },
       },
       {
@@ -115,6 +113,14 @@ export const routes: RouteRecordRaw[] = [
           header: () => import('layouts/headers/MainHeader.vue'),
           leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
           default: () => import('pages/SettingsPage.vue'),
+        },
+      },
+      {
+        path: 'workflow',
+        components: {
+          header: () => import('layouts/headers/MainHeader.vue'),
+          leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
+          default: () => import('pages/WorkflowPage.vue'),
         },
       },
     ],

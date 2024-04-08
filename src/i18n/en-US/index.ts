@@ -138,6 +138,7 @@ export default {
           commit: 'Commit',
           feedback: 'Feedback',
           settings: 'Settings',
+          workflow: 'Workflow',
         },
       },
       RightMainDrawer: {},
