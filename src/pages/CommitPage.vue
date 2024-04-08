@@ -19,6 +19,14 @@ const commitForm = reactive({
   `,
   message: 'xxx',
 });
+
+const generateCommitMessage = () => {
+  commitForm.message = `
+  feat: add CommitPage.vue file
+  fix: fix data store merge error
+  docs: update docs
+  `;
+};
 </script>
 
 <template>
@@ -51,7 +59,7 @@ const commitForm = reactive({
             icon="mdi-message-fast-outline"
             outline
             size="sm"
-            @click="() => {}"
+            @click="() => generateCommitMessage()"
           >
             <q-tooltip
               anchor="bottom middle"
