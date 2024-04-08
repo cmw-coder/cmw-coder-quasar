@@ -23,120 +23,81 @@ const pseudoWorkflows: WorkflowInfo[] = [
     name: 'Workflow 1',
     trigger: 'g29624',
     timestamp: Date.now(),
-    status: 'pending',
+    status: 'running',
     steps: [
-      { name: 'Step 1', status: 'pending' },
-      { name: 'Step 2', status: 'pending' },
-      { name: 'Step 3', status: 'pending' },
-      { name: 'Step 4', status: 'pending' },
-      { name: 'Step 5', status: 'pending' },
+      { name: '上传代码', status: 'success', details: '上传成功' },
+      {
+        name: '静态CA Agent',
+        status: 'success',
+        details:
+          '开始静态检查...\nCA Warning: xxxxx\n静态检查未通过...\n开始自动修复...\n自动修复成功',
+      },
+      { name: '版本编译 Agent', status: 'running', details: '开始执行编译脚本...\nLog: xxxxx' },
+      { name: '自动部署 Agent', status: 'pending' },
     ],
+    duration: 123456,
   },
   {
     id: 2,
     name: 'Workflow 2',
     trigger: 'g29624',
     timestamp: Date.now(),
-    status: 'running',
-    steps: [
-      { name: 'Step 1', status: 'success', details: 'Success: Step 1' },
-      { name: 'Step 2', status: 'skipped', details: 'Skipped: Step 2' },
-      { name: 'Step 3', status: 'running', details: 'Running: Step 3' },
-      { name: 'Step 4', status: 'pending' },
-      { name: 'Step 5', status: 'pending' },
-    ],
-  },
-  {
-    id: 3,
-    name: 'Workflow 3',
-    trigger: 'g29624',
-    timestamp: Date.now(),
-    status: 'success',
-    steps: [
-      { name: 'Step 1', status: 'success' },
-      { name: 'Step 2', status: 'success' },
-      { name: 'Step 3', status: 'success' },
-      { name: 'Step 4', status: 'success' },
-      { name: 'Step 5', status: 'success' },
-    ],
-    duration: 123456,
-  },
-  {
-    id: 4,
-    name: 'Workflow 4',
-    trigger: 'g29624',
-    timestamp: Date.now(),
-    status: 'aborted',
-    steps: [
-      { name: 'Step 1', status: 'success' },
-      { name: 'Step 2', status: 'success' },
-      { name: 'Step 3', status: 'success' },
-      { name: 'Step 4', status: 'success' },
-      { name: 'Step 5', status: 'success' },
-    ],
-    duration: 123456,
-  },
-  {
-    id: 5,
-    name: 'Workflow 5',
-    trigger: 'g29624',
-    timestamp: Date.now(),
     status: 'failed',
     steps: [
-      { name: 'Step 1', status: 'success' },
-      { name: 'Step 2', status: 'success' },
+      { name: '上传代码', status: 'success', details: '上传成功' },
       {
-        name: 'Step 3',
+        name: '静态CA Agent',
         status: 'failed',
-        details: 'Error: Something went wrong',
+        details:
+          '开始静态检查...\nCA Error: xxxxx\n静态检查未通过...\n开始自动修复...\n自动修复失败',
       },
-      { name: 'Step 4', status: 'aborted' },
-      { name: 'Step 5', status: 'pending' },
+      { name: '版本编译 Agent', status: 'skipped' },
+      { name: '自动部署 Agent', status: 'skipped' },
     ],
     duration: 123456,
   },
 ];
 
-const selectedWorkflowIndex = ref(0);
-const splitPercent = ref(50);
+const selectedIndex = ref(0);
+const splitPercentage = ref(50);
 </script>
 
 <template>
   <q-page class="flex">
     <div class="full-width" style="height: calc(100vh - 83px)">
-      <q-splitter class="full-height" horizontal v-model="splitPercent">
+      <q-splitter class="full-height" horizontal v-model="splitPercentage">
         <template v-slot:before>
           <q-scroll-area class="full-height full-width">
             <q-list separator>
               <q-item
-                v-for="(workflow, index) in pseudoWorkflows"
+                v-for="(item, index) in pseudoWorkflows"
                 :key="index"
-                :active="selectedWorkflowIndex === index"
+                :active="selectedIndex === index"
                 active-class="bg-grey-4 text-black"
                 clickable
-                @click="selectedWorkflowIndex = index"
+                @click="selectedIndex = index"
               >
                 <q-item-section avatar>
                   <q-icon
-                    v-if="workflow.status === 'aborted'"
+                    v-if="item.status === 'aborted'"
                     name="mdi-alert-circle"
                     color="grey"
                     size="2rem"
                   />
                   <q-icon
-                    v-else-if="workflow.status === 'failed'"
+                    v-else-if="item.status === 'failed'"
                     name="mdi-close-circle"
                     color="negative"
                     size="2rem"
                   />
                   <q-spinner-clock
-                    v-else-if="workflow.status === 'pending'"
+                    v-else-if="item.status === 'pending'"
                     color="primary"
                     size="1.75rem"
                     style="margin-left: 0.1rem"
                   />
                   <div
-                    v-else-if="workflow.status === 'running'"
+                    v-else-if="item.status === 'running'"
                     class="row justify-center items-center"
                     style="margin-left: 0.1rem"
                   >
@@ -149,7 +110,7 @@ const splitPercent = ref(50);
                     />
                   </div>
                   <q-icon
-                    v-else-if="workflow.status === 'success'"
+                    v-else-if="item.status === 'success'"
                     name="mdi-check-circle"
                     color="positive"
                     size="2rem"
@@ -157,10 +118,10 @@ const splitPercent = ref(50);
                 </q-item-section>
                 <q-item-section>
                   <q-item-label>
-                    {{ workflow.name }}
+                    {{ item.name }}
                   </q-item-label>
-                  <q-item-label caption
-                    >Started by {{ workflow.trigger }}
+                  <q-item-label caption>
+                    Started by {{ item.trigger }}
                   </q-item-label>
                 </q-item-section>
                 <q-item-section side>
@@ -174,7 +135,7 @@ const splitPercent = ref(50);
           <q-scroll-area class="full-height full-width">
             <q-list separator>
               <q-expansion-item
-                v-for="(item, index) in pseudoWorkflows[selectedWorkflowIndex]
+                v-for="(item, index) in pseudoWorkflows[selectedIndex]
                   .steps"
                 :key="index"
                 expand-separator
@@ -195,7 +156,7 @@ const splitPercent = ref(50);
                 :model-value="item.status === 'running'"
               >
                 <q-card>
-                  <q-card-section>
+                  <q-card-section style="white-space: pre">
                     {{ item.details }}
                   </q-card-section>
                 </q-card>

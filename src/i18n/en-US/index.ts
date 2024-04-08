@@ -181,8 +181,8 @@ export default {
     },
     CommitPage: {
       labels: {
-        title: 'Commit Message',
-        diff: 'Diff Preview',
+        title: 'Commit Codes',
+        changes: 'Changed Files',
         message: 'Commit Message',
         submit: 'Submit',
       },

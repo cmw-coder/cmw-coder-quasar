@@ -11,6 +11,7 @@ export const highlighter = await getHighlighter({
     'cpp',
     'csharp',
     'css',
+    'diff',
     'html',
     'java',
     'javascript',

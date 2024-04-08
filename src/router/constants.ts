@@ -61,6 +61,12 @@ export const routes: RouteRecordRaw[] = [
           default: () => import('pages/CompletionImmersivePage.vue'),
         },
       },
+      {
+        path: 'quake',
+        components: {
+          default: () => import('pages/QuakePage.vue'),
+        },
+      }
     ],
   },
   {
