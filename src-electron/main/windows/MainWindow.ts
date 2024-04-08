@@ -14,7 +14,7 @@ import {
   DataStoreLoadActionMessage,
   DebugSyncActionMessage,
 } from 'shared/types/ActionMessage';
-import { WsAction } from 'shared/types/WsMessage';
+import { ChatInsertServerMessage, WsAction } from 'shared/types/WsMessage';
 import { WindowType } from 'shared/types/WindowType';
 
 export class MainWindow extends BaseWindow {
@@ -78,6 +78,16 @@ export class MainWindow extends BaseWindow {
       dataStore.store = store;
     });
 
+    this._actionApi.register(ActionType.ChatInsert, (content) => {
+      websocketManager.send(
+        JSON.stringify(
+          new ChatInsertServerMessage({
+            result: 'success',
+            content,
+          }),
+        ),
+      );
+    });
     this._actionApi.register(ActionType.ConfigStoreLoad, () => {
       if (this._window) {
         sendToRenderer(

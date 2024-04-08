@@ -3,6 +3,7 @@ import { Completions } from 'main/components/PromptProcessor/types';
 import { KeptRatio } from 'main/components/StatisticsReporter/types';
 
 export enum WsAction {
+  ChatInsert = 'ChatInsert',
   CompletionAccept = 'CompletionAccept',
   CompletionCache = 'CompletionCache',
   CompletionCancel = 'CompletionCancel',
@@ -28,6 +29,16 @@ export type StandardResult<T = unknown> =
       message: string;
     }
   | ({ result: 'success' } & T);
+
+export class ChatInsertServerMessage implements WsMessage {
+  action = WsAction.ChatInsert;
+  data: StandardResult<{ content: string }>;
+  timestamp = Date.now();
+
+  constructor(data: StandardResult<{ content: string }>) {
+    this.data = data;
+  }
+}
 
 export interface CompletionAcceptClientMessage extends WsMessage {
   action: WsAction.CompletionAccept;
@@ -98,29 +109,29 @@ export interface CompletionSelectClientMessage extends WsMessage {
   };
 }
 
-export class CompletionSelectServerMessage implements WsMessage {
-  action = WsAction.CompletionSelect;
-  data: StandardResult<{
-    completion: string;
-    count: {
-      index: number;
-      total: number;
-    };
-  }>;
-  timestamp = Date.now();
-
-  constructor(
-    data: StandardResult<{
-      completion: string;
-      count: {
-        index: number;
-        total: number;
-      };
-    }>,
-  ) {
-    this.data = data;
-  }
-}
+// export class CompletionSelectServerMessage implements WsMessage {
+//   action = WsAction.CompletionSelect;
+//   data: StandardResult<{
+//     completion: string;
+//     count: {
+//       index: number;
+//       total: number;
+//     };
+//   }>;
+//   timestamp = Date.now();
+//
+//   constructor(
+//     data: StandardResult<{
+//       completion: string;
+//       count: {
+//         index: number;
+//         total: number;
+//       };
+//     }>,
+//   ) {
+//     this.data = data;
+//   }
+// }
 
 export interface DebugSyncClientMessage extends WsMessage {
   action: WsAction.DebugSync;

@@ -9,6 +9,7 @@ import { CompletionCacheClientMessage } from 'shared/types/WsMessage';
 
 export enum ActionType {
   ClientSetProjectId = 'ClientSetProjectId',
+  ChatInsert = 'ChatInsert',
   CompletionClear = 'CompletionClear',
   CompletionSet = 'CompletionSet',
   CompletionUpdate = 'CompletionUpdate',
@@ -37,6 +38,15 @@ export class ClientSetProjectIdActionMessage implements ActionMessage {
   };
 
   constructor(data: { project: string; projectId: string }) {
+    this.data = data;
+  }
+}
+
+export class ChatInsertActionMessage implements ActionMessage {
+  type = ActionType.ChatInsert;
+  data: string;
+
+  constructor(data: string) {
     this.data = data;
   }
 }
@@ -178,6 +188,7 @@ export class UpdateDownloadActionMessage implements ActionMessage {
 
 export interface ActionMessageMapping {
   [ActionType.ClientSetProjectId]: ClientSetProjectIdActionMessage;
+  [ActionType.ChatInsert]: ChatInsertActionMessage;
   [ActionType.CompletionClear]: CompletionClearActionMessage;
   [ActionType.CompletionSet]: CompletionSetActionMessage;
   [ActionType.CompletionUpdate]: CompletionUpdateActionMessage;

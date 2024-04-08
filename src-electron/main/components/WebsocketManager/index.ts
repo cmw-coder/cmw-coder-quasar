@@ -1,5 +1,5 @@
 import log from 'electron-log/main';
-import { Server } from 'ws';
+import { Server, WebSocket } from 'ws';
 
 import {
   HandShakeClientMessage,
@@ -8,11 +8,13 @@ import {
 } from 'shared/types/WsMessage';
 
 interface ClientInfo {
+  client: WebSocket;
   version: string;
 }
 
 class WebsocketManager {
   private _clientInfoMap = new Map<number, ClientInfo>();
+  private _lastActivePid = 0;
   private _handlers = new Map<
     WsAction,
     (
@@ -36,6 +38,13 @@ class WebsocketManager {
     this._handlers.set(wsAction, callback);
   }
 
+  send(message: string, pid?: number) {
+    const client = this.getClientInfo(pid ?? this._lastActivePid)?.client;
+    if (client) {
+      client.send(message);
+    }
+  }
+
   startServer() {
     this._server = new Server({
       host: '127.0.0.1',
@@ -50,8 +59,10 @@ class WebsocketManager {
           const { data } = <HandShakeClientMessage>clientMessage;
           pid = data.pid;
           this._clientInfoMap.set(pid, {
+            client: client,
             version: data.version,
           });
+          this._lastActivePid = pid;
           log.info(`Websocket client verified, pid: ${pid}`);
         } else {
           if (!pid) {
@@ -61,6 +72,7 @@ class WebsocketManager {
           }
           const handler = this._handlers.get(clientMessage.action);
           if (handler) {
+            this._lastActivePid = pid;
             const result = await handler(clientMessage, pid);
             if (result) {
               client.send(JSON.stringify(result));

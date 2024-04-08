@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 
 import { markdownIt } from 'boot/extension';
 import CodeBlock from 'components/CodeBlock.vue';
+import { ChatInsertActionMessage } from 'shared/types/ActionMessage';
 
 type MarkdownComponent =
   | {
@@ -56,10 +57,11 @@ const markdownComponents = computed(() => {
   return result;
 });
 
+const getMarkdownCodeContent = (index: number) =>
+  [...props.modelValue.matchAll(/```\S*?\n([\s\S]+?)\n```/gm)][index]?.[1];
+
 const onCopy = (index: number) => {
-  const content = [...props.modelValue.matchAll(/```\S*?\n([\s\S]+?)\n```/gm)][
-    index
-  ]?.[1];
+  const content = getMarkdownCodeContent(index);
   if (content) {
     copyToClipboard(content)
       .then(() =>
@@ -79,10 +81,9 @@ const onCopy = (index: number) => {
 };
 
 const onInsert = (index: number) => {
-  const content = [...props.modelValue.matchAll(/```\S*?\n([\s\S]+?)\n```/gm)][
-    index
-  ]?.[1];
+  const content = getMarkdownCodeContent(index);
   console.log('onInsert', content);
+  window.actionApi.send(new ChatInsertActionMessage(content));
 };
 </script>
 
