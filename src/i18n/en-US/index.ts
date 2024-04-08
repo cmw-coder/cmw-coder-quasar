@@ -178,6 +178,17 @@ export default {
         title: 'Comware Coder',
       },
     },
+    CommitPage: {
+      labels: {
+        title: 'Commit Message',
+        diff: 'Diff Preview',
+        message: 'Commit Message',
+        submit: 'Submit',
+      },
+      tooltips: {
+        generate: 'Generate Commit Message From AI',
+      },
+    },
     DeveloperPage: {
       labels: {
         currentFile: 'Current File',
