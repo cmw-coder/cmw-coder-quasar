@@ -126,6 +126,7 @@ export default {
       LeftMainDrawer: {
         navigations: {
           chat: 'Chat',
+          commit: 'Commit',
           feedback: 'Feedback',
           settings: 'Settings',
         },

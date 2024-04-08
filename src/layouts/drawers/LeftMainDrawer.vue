@@ -18,6 +18,13 @@ const navigations = [
     separator: true,
   },
   {
+    label: 'commit',
+    icon: 'mdi-forum-outline',
+    available: true,
+    route: 'commit',
+    separator: true,
+  },
+  {
     label: 'feedback',
     icon: 'mdi-bug',
     available: true,
