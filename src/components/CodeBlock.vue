@@ -1,51 +1,57 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { computed } from 'vue';
-
-import { useHighlighter } from 'stores/highlighter';
 
 export interface Props {
-  src: string;
+  html: string;
 }
 
+defineProps<Props>();
+
 const { t } = useI18n();
-const { codeToHtml } = useHighlighter();
 
 const i18n = (relativePath: string) => {
   return t('components.CodeBlock.' + relativePath);
 };
 
-const props = defineProps<Props>();
-
-const codeContent = computed(() => codeToHtml(props.src, 'c'));
+const emit = defineEmits(['copy', 'insert']);
 </script>
 
 <template>
-  <q-card v-if="codeContent.length" flat bordered>
-    <q-card-section>
-      <div
-        class="shiki-codes"
-        v-html="codeContent"
-        style="word-wrap: break-word"
-      />
+  <q-card v-if="html.length" flat bordered>
+    <q-card-section class="q-px-none">
+      <div class="shiki-codes" v-html="html" style="word-wrap: break-word" />
     </q-card-section>
-    <div class="column q-gutter-y-sm absolute-top-right q-pa-md">
-      <q-btn color="grey" dense icon="content_copy" outline size="sm">
+    <div class="row q-gutter-x-sm absolute-top-right q-pa-sm">
+      <q-btn
+        color="grey-7"
+        dense
+        icon="content_copy"
+        outline
+        size="sm"
+        @click="emit('copy')"
+      >
         <q-tooltip
-          anchor="center left"
-          self="center right"
-          transition-hide="jump-right"
-          transition-show="jump-left"
+          anchor="bottom middle"
+          self="top middle"
+          transition-hide="jump-up"
+          transition-show="jump-down"
         >
           {{ i18n('tooltips.copy') }}
         </q-tooltip>
       </q-btn>
-      <q-btn color="grey" dense icon="menu_open" outline size="sm">
+      <q-btn
+        color="grey-7"
+        dense
+        icon="menu_open"
+        outline
+        size="sm"
+        @click="emit('insert')"
+      >
         <q-tooltip
-          anchor="center left"
-          self="center right"
-          transition-hide="jump-right"
-          transition-show="jump-left"
+          anchor="bottom middle"
+          self="top middle"
+          transition-hide="jump-up"
+          transition-show="jump-down"
         >
           {{ i18n('tooltips.insert') }}
         </q-tooltip>

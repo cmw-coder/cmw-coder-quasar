@@ -45,13 +45,6 @@ export const useChatStore = defineStore('chat', () => {
             historyList,
             accessToken,
             (content) => {
-              // currentResponse.content = markdownIt.render(
-              //   content
-              //     .split('data:')
-              //     .filter((item) => item.trim() !== '')
-              //     .map((item) => JSON.parse(item.trim()).message)
-              //     .join(''),
-              // );
               currentResponse.content = content
                 .split('data:')
                 .filter((item) => item.trim() !== '')

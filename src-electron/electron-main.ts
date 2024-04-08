@@ -273,7 +273,7 @@ app.on('second-instance', () => {
   mainWindow.activate();
 });
 app.whenReady().then(async () => {
-  console.log('app ready');
+  log.info('Comware Coder is ready');
   floatingWindow.activate();
   immersiveWindow.activate();
   mainWindow.activate();

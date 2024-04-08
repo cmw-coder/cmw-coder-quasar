@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import AnswerItem from 'components/MessageItems/AnswerItem.vue';
+import QuestionItem from 'components/MessageItems/QuestionItem.vue';
 import { ChatMessage } from 'stores/chat/types';
-import QuestionItem from './QuestionItem.vue';
-import AnswerItem from './AnswerItem.vue';
 
 interface Props {
   modelValue: ChatMessage[];
@@ -13,56 +13,61 @@ const props = defineProps<Props>();
 <template>
   <div class="column q-gutter-y-sm q-px-lg">
     <q-intersection
-      v-for="(item, index) in props.modelValue"
+      v-for="(chatMessage, index) in props.modelValue"
       :key="index"
       once
-      :transition="item.sent ? 'slide-left' : 'slide-right'"
+      :transition="chatMessage.sent ? 'slide-left' : 'slide-right'"
       style="min-height: 48px"
     >
-      <QuestionItem v-if="item.sent" :question="item" />
-      <AnswerItem v-else :answer="item" />
+      <q-chat-message
+        :class="chatMessage.sent ? 'self-end' : 'self-start'"
+        :bg-color="chatMessage.sent ? 'primary' : 'grey-4'"
+        :sent="chatMessage.sent"
+        text-html
+        style="word-wrap: break-word"
+      >
+        <div
+          :class="chatMessage.error ? 'text-negative text-italic' : undefined"
+          style="max-width: 80ch"
+        >
+          <template v-if="chatMessage.sent">
+            <QuestionItem :model-value="chatMessage.content" />
+          </template>
+          <template v-else>
+            <AnswerItem :model-value="chatMessage.content" />
+            <q-spinner-dots
+              v-if="chatMessage.loading"
+              size="20px"
+              style="margin-left: 10px"
+            />
+          </template>
+        </div>
+      </q-chat-message>
+      <!--      <QuestionItem v-if="chatMessage.sent" :model-value="chatMessage" />-->
     </q-intersection>
   </div>
 </template>
 
-<style scoped></style>
-
 <style lang="scss">
-.custom-code-render {
-  padding: 10px 0;
-
-  .tool-wrapper {
-    display: flex;
-    align-items: center;
-    align-items: center;
-    justify-content: space-between;
-    background-color: var(--q-secondary);
-    color: white;
-    padding: 4px 0;
-
-    .left {
-      .language {
-        padding: 0 10px;
-      }
-    }
-
-    .right {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      flex-direction: row;
-      flex-wrap: nowrap;
-      .copy-button,
-      .insert-button {
-        margin-right: 10px;
-      }
-    }
+.shiki {
+  code {
+    counter-reset: step;
+    counter-increment: step 0;
   }
 
-  .code-content {
-    padding: 10px 0;
-    background-color: #d3d3d3;
-    overflow-x: auto;
+  code .line::before {
+    content: counter(step);
+    counter-increment: step;
+    width: 2rem;
+    margin-left: 0.5rem;
+    padding-right: 0.5rem;
+    display: inline-block;
+    text-align: right;
+    background-color: #bdbdbd;
+  }
+
+  pre {
+    border-radius: 3px;
   }
 }
 </style>

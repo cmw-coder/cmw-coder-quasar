@@ -49,27 +49,3 @@ watch(
     </div>
   </q-page>
 </template>
-
-<style lang="scss">
-.shiki {
-  code {
-    counter-reset: step;
-    counter-increment: step 0;
-  }
-
-  code .line::before {
-    content: counter(step);
-    counter-increment: step;
-    width: 2rem;
-    margin-left: 0.5rem;
-    padding-right: 0.5rem;
-    display: inline-block;
-    text-align: right;
-    background-color: #bdbdbd;
-  }
-
-  pre {
-    border-radius: 3px;
-  }
-}
-</style>
