@@ -19,7 +19,7 @@ const navigations = [
   },
   {
     label: 'commit',
-    icon: 'mdi-forum-outline',
+    icon: 'mdi-message-bulleted',
     available: true,
     route: 'commit',
     separator: true,
