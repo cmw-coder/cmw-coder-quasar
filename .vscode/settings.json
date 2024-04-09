@@ -7,21 +7,29 @@
   "eslint.validate": ["javascript", "javascriptreact", "typescript", "vue"],
   "typescript.tsdk": "node_modules/typescript/lib",
   "cSpell.words": [
+    "attrkey",
     "axios",
+    "charkey",
     "Clion",
     "Clsw",
     "Comware",
     "datetime",
+    "intellij",
     "intlify",
+    "jschardet",
     "Linseer",
     "loaderdll",
     "luxon",
     "msimg",
     "navigations",
+    "openapi",
     "persistedstate",
     "pinia",
     "shiki",
     "shikijs",
-    "taiyosen"
+    "taiyosen",
+    "undocked",
+    "unmaximize",
+    "unversioned"
   ]
 }

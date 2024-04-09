@@ -1,7 +1,13 @@
 import { SVNClient } from '@taiyosen/easy-svn';
+import * as child_process from 'child_process';
 import log from 'electron-log/main';
 import fs from 'fs';
 import { resolve } from 'path';
+import * as iconv from 'iconv-lite';
+// import { ChangedFile } from 'shared/types/ChangedFile';
+import xml2js from 'xml2js';
+import { detect } from 'jschardet';
+import { ChangedFile, SvnStatusItem } from 'shared/types/SvnType';
 
 export const searchSvnDirectories = async (
   folder: string,
@@ -65,4 +71,135 @@ export const getAddedLines = async (
   } catch {
     return [];
   }
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const formatStatusRes = (data: any) => {
+  const res = [] as SvnStatusItem[];
+  const entries = data?.status?.target?.entry;
+  if (!entries) {
+    return res;
+  }
+  if (Object.prototype.toString.call(entries) === '[object Object]') {
+    res.push({
+      path: entries?._attribute?.path,
+      type: entries['wc-status']?._attribute?.item,
+    });
+  } else if (Object.prototype.toString.call(entries) === '[object Array]') {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    entries.forEach((entry: any) => {
+      res.push({
+        path: entry?._attribute?.path,
+        type: entry['wc-status']?._attribute?.item,
+      });
+    });
+  }
+  return res;
+};
+
+export const getStatus = (path: string) => {
+  return new Promise<SvnStatusItem[]>((resolve, reject) => {
+    let stdout = '';
+    let stderr = '';
+    const childProcess = child_process.spawn('svn', ['status', '--xml'], {
+      cwd: path,
+    });
+    childProcess.stdout.on('data', (data) => {
+      const detectRes = detect(data);
+      if (detectRes.encoding !== 'UTF-8') {
+        detectRes.encoding = 'GBK';
+      }
+      stdout += iconv.decode(data, detectRes.encoding);
+    });
+    childProcess.stderr.on('data', (data) => {
+      const detectRes = detect(data);
+      if (detectRes.encoding !== 'UTF-8') {
+        detectRes.encoding = 'GBK';
+      }
+      stderr += iconv.decode(data, detectRes.encoding);
+    });
+    process.on('exit', (code: number, sig: number) => {
+      if (childProcess.connected) {
+        childProcess.kill(sig);
+      }
+    });
+    childProcess.on('error', (err) => {
+      reject(err);
+    });
+    childProcess.on('close', (code) => {
+      if (code === 0) {
+        xml2js.parseString(
+          stdout,
+          {
+            attrkey: '_attribute',
+            charkey: '_text',
+            explicitCharkey: true,
+            explicitArray: false,
+          },
+          (err, result) => {
+            resolve(formatStatusRes(result));
+          },
+        );
+      } else {
+        reject(stderr);
+      }
+    });
+  });
+};
+
+export const getFileDiffDetail = (projectPath: string, filePath: string) => {
+  return new Promise<string>((resolve) => {
+    let stdout = '';
+    let stderr = '';
+    const childProcess = child_process.spawn('svn', ['diff', filePath], {
+      cwd: projectPath,
+    });
+    childProcess.stdout.on('data', (data) => {
+      const detectRes = detect(data);
+      if (detectRes.encoding !== 'UTF-8') {
+        detectRes.encoding = 'GBK';
+      }
+      stdout += iconv.decode(data, detectRes.encoding);
+    });
+    childProcess.stderr.on('data', (data) => {
+      const detectRes = detect(data);
+      if (detectRes.encoding !== 'UTF-8') {
+        detectRes.encoding = 'GBK';
+      }
+      stderr += iconv.decode(data, detectRes.encoding);
+    });
+    childProcess.on('close', (code) => {
+      if (code === 0) {
+        resolve(stdout);
+      } else {
+        resolve(stderr);
+      }
+    });
+  });
+};
+
+export const getChangedFileList = async (path: string) => {
+  const result = [] as ChangedFile[];
+  const files = await getStatus(path);
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const diffDetail = await getFileDiffDetail(path, file.path);
+    let added = 0;
+    let deleted = 0;
+    const lines = diffDetail.split(/\r?\n/);
+    lines.forEach((line) => {
+      if (line.startsWith('+') && !line.startsWith('+++')) {
+        added++;
+      } else if (line.startsWith('-') && !line.startsWith('---')) {
+        deleted++;
+      }
+    });
+    result.push({
+      ...file,
+      additions: added,
+      deletions: deleted,
+      diff: diffDetail,
+    });
+  }
+  return result;
 };

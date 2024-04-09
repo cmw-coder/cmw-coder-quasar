@@ -13,9 +13,11 @@ import {
   ConfigStoreLoadActionMessage,
   DataStoreLoadActionMessage,
   DebugSyncActionMessage,
+  SvnCommitActionResponseMessage,
 } from 'shared/types/ActionMessage';
 import { ChatInsertServerMessage, WsAction } from 'shared/types/WsMessage';
 import { WindowType } from 'shared/types/WindowType';
+import { getChangedFileList } from 'main/utils/svn';
 
 export class MainWindow extends BaseWindow {
   private readonly _actionApi = new ActionApi('main.MainWindow.');
@@ -103,6 +105,17 @@ export class MainWindow extends BaseWindow {
         sendToRenderer(
           this._window,
           new DataStoreLoadActionMessage(dataStore.store),
+        );
+      }
+    });
+    this._actionApi.register(ActionType.SvnDiffRequest, async () => {
+      if (this._window) {
+        const clientInfo = websocketManager.getClientInfo();
+        const projectPath = clientInfo?.currentProjectPath;
+        const diffText = await getChangedFileList(projectPath ?? 'D:/svn-test');
+        sendToRenderer(
+          this._window,
+          new SvnCommitActionResponseMessage(diffText),
         );
       }
     });

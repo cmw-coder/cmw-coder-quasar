@@ -1,67 +1,83 @@
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { useHighlighter } from 'stores/highlighter';
-
-interface ChangedFile {
-  path: string;
-  status: 'added' | 'deleted' | 'modified';
-  additions: number;
-  deletions: number;
-  diff: string;
-}
+import {
+  ActionType,
+  ConfigStoreLoadActionMessage,
+} from 'app/src-electron/shared/types/ActionMessage';
+import { ActionApi } from '../types/ActionApi';
+import { ChangedFile } from 'app/src-electron/shared/types/SvnType';
+import { generateCommitPrompt } from '../utils/commitPrompt';
+import { ApiStyle } from 'app/src-electron/shared/types/model';
+import { chatWithLinseer } from '../boot/axios';
 
 const { codeToHtml } = useHighlighter();
 const { t } = useI18n();
 
 const baseName = 'pages.CommitPage.';
 
+const actionApi = new ActionApi(baseName);
+
 const i18n = (relativePath: string) => {
   return t(baseName + relativePath);
 };
 
-const changedFileList = ref<ChangedFile[]>([
-  {
-    path: 'src/router/constants.ts',
-    status: 'modified',
-    additions: 6,
-    deletions: 0,
-    diff: `Index: src/router/constants.ts
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
-diff --git a/src/router/constants.ts b/src/router/constants.ts
---- a/src/router/constants.ts\t(revision 4f8101738bf41956ea9bfe3f963d2de73dc98a6e)
-+++ b/src/router/constants.ts\t(date 1712562421075)
-@@ -61,6 +61,12 @@
-           default: () => import('pages/CompletionImmersivePage.vue'),
-         },
-       },
-+      {
-+        path: 'quake',
-+        components: {
-+          default: () => import('pages/QuakePage.vue'),
-+        },
-+      }
-     ],
-   },
-   {
-`,
-  },
-]);
+const changedFileList = ref<ChangedFile[]>([]);
 
 const commitMessage = ref('');
 const selectedIndex = ref(0);
 const shadowText = ref('');
-const splitPercentage = ref(50);
+const splitPercentage = ref(40);
 
-const generateCommitMessage = () => {
-  shadowText.value = `: add CommitPage.vue file
-  fix: fix data store merge error
-  docs: update docs`;
+const accessToken = ref<string>();
+const endpoint = ref<string>();
+
+const generateLoading = ref(false);
+
+const generateCommitMessage = async () => {
+  const commitPrompt = generateCommitPrompt(changedFileList.value);
+  console.log('commitPrompt', commitPrompt);
+  try {
+    generateLoading.value = true;
+    const { data } = await chatWithLinseer(
+      endpoint.value || '',
+      commitPrompt,
+      [],
+      accessToken.value || '',
+    );
+    const result = data[0]?.code;
+    commitMessage.value = result;
+  } finally {
+    generateLoading.value = false;
+  }
 };
+
+const getDiffData = () => {
+  window.actionApi.send({
+    type: ActionType.SvnDiffRequest,
+    data: undefined,
+  });
+};
+
+onMounted(() => {
+  getDiffData();
+  actionApi.register(ActionType.SvnDiffResponse, (data) => {
+    console.log('ActionType.SvnDiffResponse', data);
+    changedFileList.value = data;
+  });
+  actionApi.register(
+    ActionType.ConfigStoreLoad,
+    ({ apiStyle, config, data }) => {
+      if (apiStyle == ApiStyle.Linseer) {
+        accessToken.value = data.tokens.access;
+      }
+      endpoint.value = config.endpoints.aiService;
+    },
+  );
+  window.actionApi.send(new ConfigStoreLoadActionMessage());
+});
 </script>
 
 <template>
@@ -88,19 +104,19 @@ const generateCommitMessage = () => {
                 >
                   <q-item-section avatar>
                     <q-icon
-                      v-if="item.status === 'added'"
+                      v-if="item.type === 'added'"
                       name="mdi-file-document-plus"
                       color="positive"
                       size="2rem"
                     />
                     <q-icon
-                      v-if="item.status === 'deleted'"
+                      v-if="item.type === 'missing'"
                       name="mdi-file-document-minus"
                       color="negative"
                       size="2rem"
                     />
                     <q-icon
-                      v-if="item.status === 'modified'"
+                      v-if="item.type === 'modified'"
                       name="mdi-file-document-edit"
                       color="warn"
                       size="2rem"
@@ -142,6 +158,7 @@ const generateCommitMessage = () => {
           <template v-slot:after>
             <q-scroll-area class="full-height full-width">
               <div
+                v-if="changedFileList[selectedIndex]"
                 class="q-pa-sm"
                 v-html="codeToHtml(changedFileList[selectedIndex].diff, 'diff')"
               />
@@ -162,6 +179,8 @@ const generateCommitMessage = () => {
           icon="mdi-message-fast-outline"
           outline
           size="sm"
+          :loading="generateLoading"
+          :disabled="changedFileList.length === 0"
           @click="() => generateCommitMessage()"
         >
           <q-tooltip
@@ -170,7 +189,11 @@ const generateCommitMessage = () => {
             transition-hide="jump-up"
             transition-show="jump-down"
           >
-            {{ i18n('tooltips.generate') }}
+            {{
+              generateLoading
+                ? i18n('tooltips.generating')
+                : i18n('tooltips.generate')
+            }}
           </q-tooltip>
         </q-btn>
         <q-input
@@ -181,6 +204,7 @@ const generateCommitMessage = () => {
           :shadow-text="shadowText"
           type="textarea"
           v-model="commitMessage"
+          :disabled="changedFileList.length === 0"
         />
       </div>
     </q-card-section>
@@ -189,6 +213,7 @@ const generateCommitMessage = () => {
         class="col-grow"
         color="primary"
         :label="i18n('labels.submit')"
+        :disabled="!commitMessage"
         @click="() => {}"
       />
     </q-card-section>
@@ -201,8 +226,8 @@ const generateCommitMessage = () => {
 
   .generate-btn {
     position: absolute;
-    right: 10px;
-    top: 10px;
+    right: 0px;
+    top: -30px;
     z-index: 100;
   }
 }

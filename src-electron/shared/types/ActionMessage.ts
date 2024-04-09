@@ -6,6 +6,7 @@ import {
 } from 'main/stores/config/types';
 import { DataStoreType } from 'main/stores/data/types';
 import { CompletionCacheClientMessage } from 'shared/types/WsMessage';
+import { ChangedFile } from './SvnType';
 
 export enum ActionType {
   ClientSetProjectId = 'ClientSetProjectId',
@@ -23,6 +24,8 @@ export enum ActionType {
   UpdateDownload = 'UpdateDownload',
   UpdateFinish = 'UpdateFinish',
   UpdateProgress = 'UpdateProgress',
+  SvnDiffRequest = 'SvnDiffRequest',
+  SvnDiffResponse = 'SvnDiffResponse',
 }
 
 export interface ActionMessage {
@@ -186,6 +189,20 @@ export class UpdateDownloadActionMessage implements ActionMessage {
   data: undefined;
 }
 
+export class SvnDiffActionRequestMessage implements ActionMessage {
+  type = ActionType.SvnDiffRequest;
+  data: undefined;
+}
+
+export class SvnCommitActionResponseMessage implements ActionMessage {
+  type = ActionType.SvnDiffResponse;
+  data: ChangedFile[];
+
+  constructor(data: ChangedFile[]) {
+    this.data = data;
+  }
+}
+
 export interface ActionMessageMapping {
   [ActionType.ClientSetProjectId]: ClientSetProjectIdActionMessage;
   [ActionType.ChatInsert]: ChatInsertActionMessage;
@@ -202,4 +219,6 @@ export interface ActionMessageMapping {
   [ActionType.UpdateDownload]: UpdateDownloadActionMessage;
   [ActionType.UpdateFinish]: UpdateFinishActionMessage;
   [ActionType.UpdateProgress]: UpdateProgressActionMessage;
+  [ActionType.SvnDiffRequest]: SvnDiffActionRequestMessage;
+  [ActionType.SvnDiffResponse]: SvnCommitActionResponseMessage;
 }

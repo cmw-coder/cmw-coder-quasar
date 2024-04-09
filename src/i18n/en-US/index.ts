@@ -188,6 +188,7 @@ export default {
       },
       tooltips: {
         generate: 'Generate Commit Message From AI',
+        generating: 'Generating...',
       },
     },
     DeveloperPage: {

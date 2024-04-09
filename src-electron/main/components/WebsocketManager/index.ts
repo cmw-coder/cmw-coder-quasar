@@ -10,6 +10,7 @@ import {
 interface ClientInfo {
   client: WebSocket;
   version: string;
+  currentProjectPath: string;
 }
 
 class WebsocketManager {
@@ -24,8 +25,8 @@ class WebsocketManager {
   >();
   private _server: Server | undefined;
 
-  getClientInfo(pid: number) {
-    return this._clientInfoMap.get(pid);
+  getClientInfo(pid?: number) {
+    return this._clientInfoMap.get(pid ?? this._lastActivePid);
   }
 
   registerWsAction<T extends keyof WsMessageMapping>(
@@ -61,6 +62,7 @@ class WebsocketManager {
           this._clientInfoMap.set(pid, {
             client: client,
             version: data.version,
+            currentProjectPath: '',
           });
           this._lastActivePid = pid;
           log.info(`Websocket client verified, pid: ${pid}`);
