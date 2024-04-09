@@ -203,3 +203,38 @@ export const getChangedFileList = async (path: string) => {
   }
   return result;
 };
+
+export const svnCommit = async (projectPath: string, commitMessage: string) => {
+  return new Promise<string>((resolve) => {
+    let stdout = '';
+    let stderr = '';
+    const childProcess = child_process.spawn(
+      'svn',
+      ['commit', '-m', commitMessage],
+      {
+        cwd: projectPath,
+      },
+    );
+    childProcess.stdout.on('data', (data) => {
+      const detectRes = detect(data);
+      if (detectRes.encoding !== 'UTF-8') {
+        detectRes.encoding = 'GBK';
+      }
+      stdout += iconv.decode(data, detectRes.encoding);
+    });
+    childProcess.stderr.on('data', (data) => {
+      const detectRes = detect(data);
+      if (detectRes.encoding !== 'UTF-8') {
+        detectRes.encoding = 'GBK';
+      }
+      stderr += iconv.decode(data, detectRes.encoding);
+    });
+    childProcess.on('close', (code) => {
+      if (code === 0) {
+        resolve(stdout);
+      } else {
+        resolve(stderr);
+      }
+    });
+  });
+};

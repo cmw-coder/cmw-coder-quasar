@@ -12,9 +12,11 @@ import { ChangedFile } from 'app/src-electron/shared/types/SvnType';
 import { generateCommitPrompt } from '../utils/commitPrompt';
 import { ApiStyle } from 'app/src-electron/shared/types/model';
 import { chatWithLinseer } from '../boot/axios';
+import { useQuasar } from 'quasar';
 
 const { codeToHtml } = useHighlighter();
 const { t } = useI18n();
+const { notify } = useQuasar();
 
 const baseName = 'pages.CommitPage.';
 
@@ -61,10 +63,17 @@ const getDiffData = () => {
   });
 };
 
+const submitCommitMessage = () => {
+  window.actionApi.send({
+    type: ActionType.SvnCommitRequest,
+    data: commitMessage.value,
+  });
+};
+
 onMounted(() => {
   getDiffData();
   actionApi.register(ActionType.SvnDiffResponse, (data) => {
-    console.log('ActionType.SvnDiffResponse', data);
+    console.log('SvnDiffResponse', data);
     changedFileList.value = data;
   });
   actionApi.register(
@@ -76,6 +85,14 @@ onMounted(() => {
       endpoint.value = config.endpoints.aiService;
     },
   );
+  actionApi.register(ActionType.SvnCommitSuccess, () => {
+    notify({
+      type: 'positive',
+      message: i18n('notifications.commitSuccess'),
+    });
+    commitMessage.value = '';
+    getDiffData();
+  });
   window.actionApi.send(new ConfigStoreLoadActionMessage());
 });
 </script>
@@ -214,7 +231,7 @@ onMounted(() => {
         color="primary"
         :label="i18n('labels.submit')"
         :disabled="!commitMessage"
-        @click="() => {}"
+        @click="() => submitCommitMessage()"
       />
     </q-card-section>
   </q-page>

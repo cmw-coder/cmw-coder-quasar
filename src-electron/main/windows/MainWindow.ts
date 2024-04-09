@@ -13,11 +13,12 @@ import {
   ConfigStoreLoadActionMessage,
   DataStoreLoadActionMessage,
   DebugSyncActionMessage,
-  SvnCommitActionResponseMessage,
+  SvnCommitSuccessActionMessage,
+  SvnDiffActionResponseMessage,
 } from 'shared/types/ActionMessage';
 import { ChatInsertServerMessage, WsAction } from 'shared/types/WsMessage';
 import { WindowType } from 'shared/types/WindowType';
-import { getChangedFileList } from 'main/utils/svn';
+import { getChangedFileList, svnCommit } from 'main/utils/svn';
 
 export class MainWindow extends BaseWindow {
   private readonly _actionApi = new ActionApi('main.MainWindow.');
@@ -112,11 +113,21 @@ export class MainWindow extends BaseWindow {
       if (this._window) {
         const clientInfo = websocketManager.getClientInfo();
         const projectPath = clientInfo?.currentProjectPath;
-        const diffText = await getChangedFileList(projectPath ?? 'D:/svn-test');
+        const changedFileList = await getChangedFileList(
+          projectPath ?? 'D:/svn-test',
+        );
         sendToRenderer(
           this._window,
-          new SvnCommitActionResponseMessage(diffText),
+          new SvnDiffActionResponseMessage(changedFileList),
         );
+      }
+    });
+    this._actionApi.register(ActionType.SvnCommitRequest, async (data) => {
+      if (this._window) {
+        const clientInfo = websocketManager.getClientInfo();
+        const projectPath = clientInfo?.currentProjectPath ?? 'D:/svn-test';
+        await svnCommit(projectPath, data);
+        sendToRenderer(this._window, new SvnCommitSuccessActionMessage());
       }
     });
 

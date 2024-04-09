@@ -190,6 +190,9 @@ export default {
         generate: 'Generate Commit Message From AI',
         generating: 'Generating...',
       },
+      notifications: {
+        commitSuccess: 'Commit successfully',
+      },
     },
     DeveloperPage: {
       labels: {

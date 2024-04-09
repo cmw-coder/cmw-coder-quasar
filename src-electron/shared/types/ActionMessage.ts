@@ -26,6 +26,8 @@ export enum ActionType {
   UpdateProgress = 'UpdateProgress',
   SvnDiffRequest = 'SvnDiffRequest',
   SvnDiffResponse = 'SvnDiffResponse',
+  SvnCommitRequest = 'SvnCommitRequest',
+  SvnCommitSuccess = 'SvnCommitSuccess',
 }
 
 export interface ActionMessage {
@@ -194,13 +196,27 @@ export class SvnDiffActionRequestMessage implements ActionMessage {
   data: undefined;
 }
 
-export class SvnCommitActionResponseMessage implements ActionMessage {
+export class SvnDiffActionResponseMessage implements ActionMessage {
   type = ActionType.SvnDiffResponse;
   data: ChangedFile[];
 
   constructor(data: ChangedFile[]) {
     this.data = data;
   }
+}
+
+export class SvnCommitActionRequestMessage implements ActionMessage {
+  type = ActionType.SvnCommitRequest;
+  data: string;
+
+  constructor(data: string) {
+    this.data = data;
+  }
+}
+
+export class SvnCommitSuccessActionMessage implements ActionMessage {
+  type = ActionType.SvnCommitSuccess;
+  data: undefined;
 }
 
 export interface ActionMessageMapping {
@@ -220,5 +236,7 @@ export interface ActionMessageMapping {
   [ActionType.UpdateFinish]: UpdateFinishActionMessage;
   [ActionType.UpdateProgress]: UpdateProgressActionMessage;
   [ActionType.SvnDiffRequest]: SvnDiffActionRequestMessage;
-  [ActionType.SvnDiffResponse]: SvnCommitActionResponseMessage;
+  [ActionType.SvnDiffResponse]: SvnDiffActionResponseMessage;
+  [ActionType.SvnCommitRequest]: SvnCommitActionRequestMessage;
+  [ActionType.SvnCommitSuccess]: SvnCommitSuccessActionMessage;
 }
