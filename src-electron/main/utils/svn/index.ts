@@ -47,30 +47,44 @@ export const getRevision = async (path: string): Promise<number> => {
   return -1;
 };
 
-export const getAddedLines = async (
-  path: string,
-  revision: number,
-): Promise<string[]> => {
-  try {
-    const client = new SVNClient();
-    client.setConfig({ silent: true });
-    const diff = await client.cmd(
-      'diff',
-      ['-r', revision.toString(), path],
-      undefined,
-      true,
+export const getAddedLines = (path: string, revision: number) => {
+  return new Promise<string[]>((resolve) => {
+    let stdout = '';
+    let stderr = '';
+    const childProcess = child_process.spawn(
+      'svn',
+      ['diff', '-r', revision.toString()],
+      {
+        cwd: path,
+      },
     );
-    return diff
-      .split(/\r?\n/)
-      .filter((line) => line.startsWith('+') && !line.startsWith('++'))
-      .map((line) => line.substring(1))
-      .filter((line) => line.trim().length > 0)
-      .join('\r\n')
-      .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')
-      .split('\r\n');
-  } catch {
-    return [];
-  }
+    childProcess.stdout.on('data', (data) => {
+      const detectRes = detect(data);
+      if (detectRes.encoding !== 'UTF-8') {
+        detectRes.encoding = 'GBK';
+      }
+      stdout += iconv.decode(data, detectRes.encoding);
+    });
+    childProcess.stderr.on('data', (data) => {
+      const detectRes = detect(data);
+      if (detectRes.encoding !== 'UTF-8') {
+        detectRes.encoding = 'GBK';
+      }
+      stderr += iconv.decode(data, detectRes.encoding);
+    });
+    childProcess.on('close', () => {
+      resolve(
+        (stdout + stderr)
+          .split(/\r?\n/)
+          .filter((line) => line.startsWith('+') && !line.startsWith('++'))
+          .map((line) => line.substring(1))
+          .filter((line) => line.trim().length > 0)
+          .join('\r\n')
+          .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')
+          .split('\r\n'),
+      );
+    });
+  });
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

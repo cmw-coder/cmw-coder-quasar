@@ -7,12 +7,12 @@ import {
   ActionType,
   ConfigStoreLoadActionMessage,
 } from 'app/src-electron/shared/types/ActionMessage';
-import { ActionApi } from '../types/ActionApi';
+import { ActionApi } from 'types/ActionApi';
 import { ChangedFile } from 'app/src-electron/shared/types/SvnType';
-import { generateCommitPrompt } from '../utils/commitPrompt';
 import { ApiStyle } from 'app/src-electron/shared/types/model';
-import { chatWithLinseer } from '../boot/axios';
+import { chatWithLinseer } from 'boot/axios';
 import { useQuasar } from 'quasar';
+import { generateCommitPrompt } from 'src/utils/commitPrompt';
 
 const { codeToHtml } = useHighlighter();
 const { t } = useI18n();
