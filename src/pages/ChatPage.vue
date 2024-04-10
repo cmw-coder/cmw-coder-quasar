@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { ref, watch } from 'vue';
+import { nextTick, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import ChatMessages from 'components/ChatMessages.vue';
 import { useChatStore } from 'stores/chat';
 import { QScrollArea } from 'quasar';
+import { timeout } from 'utils/index';
 
 const baseName = 'pages.ChatPage.';
 
@@ -20,12 +21,13 @@ const scrollArea = ref<QScrollArea>();
 
 watch(
   currentChatMessages,
-  () =>
-    setTimeout(() => {
-      if (scrollArea.value) {
-        scrollArea.value?.setScrollPercentage('vertical', 1, 300);
-      }
-    }, 100),
+  async () => {
+    await nextTick();
+    await timeout(100);
+    if (scrollArea.value) {
+      scrollArea.value?.setScrollPercentage('vertical', 1, 300);
+    }
+  },
   { deep: true },
 );
 </script>
