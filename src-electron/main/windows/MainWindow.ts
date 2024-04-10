@@ -6,6 +6,7 @@ import { configStore, dataStore } from 'main/stores';
 import { dataStoreDefault } from 'main/stores/data/default';
 import { BaseWindow } from 'main/types/BaseWindow';
 import { bypassCors } from 'main/utils/common';
+import { getChangedFileList, svnCommit } from 'main/utils/svn';
 import { ActionApi, sendToRenderer } from 'preload/types/ActionApi';
 import { ControlType, registerControlCallback } from 'preload/types/ControlApi';
 import {
@@ -16,9 +17,8 @@ import {
   SvnCommitSuccessActionMessage,
   SvnDiffActionResponseMessage,
 } from 'shared/types/ActionMessage';
-import { ChatInsertServerMessage, WsAction } from 'shared/types/WsMessage';
 import { WindowType } from 'shared/types/WindowType';
-import { getChangedFileList, svnCommit } from 'main/utils/svn';
+import { ChatInsertServerMessage, WsAction } from 'shared/types/WsMessage';
 
 export class MainWindow extends BaseWindow {
   private readonly _actionApi = new ActionApi('main.MainWindow.');

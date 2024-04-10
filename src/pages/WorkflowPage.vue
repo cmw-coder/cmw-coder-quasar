@@ -32,7 +32,11 @@ const pseudoWorkflows: WorkflowInfo[] = [
         details:
           '开始静态检查...\nCA Warning: xxxxx\n静态检查未通过...\n开始自动修复...\n自动修复成功',
       },
-      { name: '版本编译 Agent', status: 'running', details: '开始执行编译脚本...\nLog: xxxxx' },
+      {
+        name: '版本编译 Agent',
+        status: 'running',
+        details: '开始执行编译脚本...\nLog: xxxxx',
+      },
       { name: '自动部署 Agent', status: 'pending' },
     ],
     duration: 123456,
@@ -135,8 +139,7 @@ const splitPercentage = ref(50);
           <q-scroll-area class="full-height full-width">
             <q-list separator>
               <q-expansion-item
-                v-for="(item, index) in pseudoWorkflows[selectedIndex]
-                  .steps"
+                v-for="(item, index) in pseudoWorkflows[selectedIndex].steps"
                 :key="index"
                 expand-separator
                 :icon="

@@ -1,18 +1,18 @@
 <script lang="ts" setup>
+import { useQuasar } from 'quasar';
 import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { useHighlighter } from 'stores/highlighter';
 import {
   ActionType,
   ConfigStoreLoadActionMessage,
 } from 'app/src-electron/shared/types/ActionMessage';
-import { ActionApi } from 'types/ActionApi';
-import { ChangedFile } from 'app/src-electron/shared/types/SvnType';
 import { ApiStyle } from 'app/src-electron/shared/types/model';
+import { ChangedFile } from 'app/src-electron/shared/types/SvnType';
 import { chatWithLinseer } from 'boot/axios';
-import { useQuasar } from 'quasar';
-import { generateCommitPrompt } from 'src/utils/commitPrompt';
+import { useHighlighter } from 'stores/highlighter';
+import { ActionApi } from 'types/ActionApi';
+import { generateCommitPrompt } from 'utils/commitPrompt';
 
 const { codeToHtml } = useHighlighter();
 const { t } = useI18n();

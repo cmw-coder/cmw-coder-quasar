@@ -9,8 +9,8 @@ import {
 
 interface ClientInfo {
   client: WebSocket;
-  version: string;
   currentProjectPath: string;
+  version: string;
 }
 
 class WebsocketManager {
@@ -61,8 +61,8 @@ class WebsocketManager {
           pid = data.pid;
           this._clientInfoMap.set(pid, {
             client: client,
-            version: data.version,
             currentProjectPath: '',
+            version: data.version,
           });
           this._lastActivePid = pid;
           log.info(`Websocket client verified, pid: ${pid}`);

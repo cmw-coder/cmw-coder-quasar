@@ -279,9 +279,7 @@ class StatisticsReporter {
             skuNameGenerateMapping[data.completions.type],
           ),
         )
-        .catch((e) =>
-          log.error('StatisticsReporter.completionSelected', e),
-        );
+        .catch((e) => log.error('StatisticsReporter.completionSelected', e));
     }
     return candidate;
   }

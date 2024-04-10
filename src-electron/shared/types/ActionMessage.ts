@@ -5,8 +5,8 @@ import {
   LinseerStoreType,
 } from 'main/stores/config/types';
 import { DataStoreType } from 'main/stores/data/types';
+import { ChangedFile } from 'shared/types/svn';
 import { CompletionCacheClientMessage } from 'shared/types/WsMessage';
-import { ChangedFile } from './SvnType';
 
 export enum ActionType {
   ClientSetProjectId = 'ClientSetProjectId',
@@ -24,10 +24,10 @@ export enum ActionType {
   UpdateDownload = 'UpdateDownload',
   UpdateFinish = 'UpdateFinish',
   UpdateProgress = 'UpdateProgress',
-  SvnDiffRequest = 'SvnDiffRequest',
-  SvnDiffResponse = 'SvnDiffResponse',
   SvnCommitRequest = 'SvnCommitRequest',
   SvnCommitSuccess = 'SvnCommitSuccess',
+  SvnDiffRequest = 'SvnDiffRequest',
+  SvnDiffResponse = 'SvnDiffResponse',
 }
 
 export interface ActionMessage {
@@ -191,20 +191,6 @@ export class UpdateDownloadActionMessage implements ActionMessage {
   data: undefined;
 }
 
-export class SvnDiffActionRequestMessage implements ActionMessage {
-  type = ActionType.SvnDiffRequest;
-  data: undefined;
-}
-
-export class SvnDiffActionResponseMessage implements ActionMessage {
-  type = ActionType.SvnDiffResponse;
-  data: ChangedFile[];
-
-  constructor(data: ChangedFile[]) {
-    this.data = data;
-  }
-}
-
 export class SvnCommitActionRequestMessage implements ActionMessage {
   type = ActionType.SvnCommitRequest;
   data: string;
@@ -217,6 +203,20 @@ export class SvnCommitActionRequestMessage implements ActionMessage {
 export class SvnCommitSuccessActionMessage implements ActionMessage {
   type = ActionType.SvnCommitSuccess;
   data: undefined;
+}
+
+export class SvnDiffActionRequestMessage implements ActionMessage {
+  type = ActionType.SvnDiffRequest;
+  data: undefined;
+}
+
+export class SvnDiffActionResponseMessage implements ActionMessage {
+  type = ActionType.SvnDiffResponse;
+  data: ChangedFile[];
+
+  constructor(data: ChangedFile[]) {
+    this.data = data;
+  }
 }
 
 export interface ActionMessageMapping {
@@ -235,8 +235,8 @@ export interface ActionMessageMapping {
   [ActionType.UpdateDownload]: UpdateDownloadActionMessage;
   [ActionType.UpdateFinish]: UpdateFinishActionMessage;
   [ActionType.UpdateProgress]: UpdateProgressActionMessage;
-  [ActionType.SvnDiffRequest]: SvnDiffActionRequestMessage;
-  [ActionType.SvnDiffResponse]: SvnDiffActionResponseMessage;
   [ActionType.SvnCommitRequest]: SvnCommitActionRequestMessage;
   [ActionType.SvnCommitSuccess]: SvnCommitSuccessActionMessage;
+  [ActionType.SvnDiffRequest]: SvnDiffActionRequestMessage;
+  [ActionType.SvnDiffResponse]: SvnDiffActionResponseMessage;
 }

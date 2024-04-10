@@ -20,10 +20,7 @@ import {
   ToggleMaximizeControlMessage,
 } from 'preload/types/ControlApi';
 import { ActionMessage } from 'shared/types/ActionMessage';
-import {
-  actionApiKey,
-  controlApiKey,
-} from 'shared/types/constants';
+import { actionApiKey, controlApiKey } from 'shared/types/constants';
 import { WindowType } from 'shared/types/WindowType';
 
 contextBridge.exposeInMainWorld(actionApiKey, {

@@ -66,7 +66,7 @@ export const routes: RouteRecordRaw[] = [
         components: {
           default: () => import('pages/QuakePage.vue'),
         },
-      }
+      },
     ],
   },
   {

@@ -2,11 +2,11 @@ import { SVNClient } from '@taiyosen/easy-svn';
 import * as child_process from 'child_process';
 import log from 'electron-log/main';
 import fs from 'fs';
-import { resolve } from 'path';
 import * as iconv from 'iconv-lite';
-// import { ChangedFile } from 'shared/types/ChangedFile';
-import xml2js from 'xml2js';
 import { detect } from 'jschardet';
+import { resolve } from 'path';
+import xml2js from 'xml2js';
+
 import { ChangedFile, SvnStatusItem } from 'shared/types/SvnType';
 
 export const searchSvnDirectories = async (
