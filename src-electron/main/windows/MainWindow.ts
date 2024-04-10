@@ -18,7 +18,7 @@ import {
 } from 'shared/types/ActionMessage';
 import { ChatInsertServerMessage, WsAction } from 'shared/types/WsMessage';
 import { WindowType } from 'shared/types/WindowType';
-import { getAddedLines, getChangedFileList, svnCommit } from 'main/utils/svn';
+import { getChangedFileList, svnCommit } from 'main/utils/svn';
 
 export class MainWindow extends BaseWindow {
   private readonly _actionApi = new ActionApi('main.MainWindow.');
@@ -113,11 +113,6 @@ export class MainWindow extends BaseWindow {
       if (this._window) {
         const clientInfo = websocketManager.getClientInfo();
         const projectPath = clientInfo?.currentProjectPath;
-        const addedLines = await getAddedLines(
-          projectPath ?? 'D:/svn-test',
-          4409,
-        );
-        console.log('addedLines', addedLines);
         const changedFileList = await getChangedFileList(
           projectPath ?? 'D:/svn-test',
         );
