@@ -38,10 +38,14 @@ export class ActionApi {
   }
 }
 
-export const invokeToMain = async <T extends keyof ActionMessageMapping>(
+export const invokeToMain2 = async <T extends keyof ActionMessageMapping>(
   message: ActionMessageMapping[T],
 ): Promise<ActionMessageMapping[T]> => {
   return await ipcRenderer.invoke(actionApiKey, message);
+};
+
+export const invokeToMain = (channel: string, ...args: unknown[]) => {
+  return ipcRenderer.invoke(channel, ...args);
 };
 
 export const registerAction = <T extends keyof ActionMessageMapping>(

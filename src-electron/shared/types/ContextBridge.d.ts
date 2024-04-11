@@ -23,9 +23,7 @@ declare global {
       toggleMaximize: () => void;
     };
     [actionApiKey]: {
-      invoke: <T extends keyof ActionMessageMapping>(
-        message: ActionMessageMapping[T],
-      ) => Promise<ActionMessageMapping[T]>;
+      invoke: (channel: string, ...args: unknown[]) => Promise<unknown>;
       register: <T extends keyof ActionMessageMapping>(
         actionType: T,
         name: string,

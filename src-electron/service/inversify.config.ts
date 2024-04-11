@@ -1,8 +1,8 @@
 import { Container } from 'inversify';
 import { ConfigService } from 'service/entities/ConfigService';
-import { TYPES } from 'service/types';
 import { WindowService } from 'service/entities/WindowService';
 import { InvokeService } from './entities/InvokeService';
+import { TYPES } from 'service/types';
 
 const container = new Container();
 

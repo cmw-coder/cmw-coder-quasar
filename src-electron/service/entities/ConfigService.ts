@@ -1,8 +1,8 @@
 import { injectable, inject } from 'inversify';
 import 'reflect-metadata';
-import { TYPES } from 'service/types';
-import { I_ConfigService } from 'service/types/I_ConfigService';
+import { I_ConfigService } from 'shared/types/service/I_ConfigService';
 import { WindowService } from './WindowService';
+import { TYPES } from 'service/types';
 
 @injectable()
 export class ConfigService implements I_ConfigService {
