@@ -34,7 +34,6 @@ const loadingCommit = ref(false);
 const loadingDiff = ref(false);
 const loadingGenerate = ref(false);
 const selectedIndex = ref(0);
-const shadowText = ref('');
 const splitPercentage = ref(40);
 
 const generateCommitMessage = async () => {
@@ -134,16 +133,29 @@ onMounted(() => {
     <q-card-section class="text-h3 text-center">
       {{ i18n('labels.title') }}
     </q-card-section>
-    <q-card-section class="column q-gutter-y-md">
-      <div class="text-bold text-grey text-h6">
-        {{ i18n('labels.changes') }}
+    <q-card-section class="column q-gutter-y-sm">
+      <div class="row justify-between">
+        <div class="text-bold text-grey text-h6">
+          {{ i18n('labels.changes') }}
+        </div>
+        <q-btn
+          color="primary"
+          dense
+          icon="mdi-refresh"
+          :label="i18n('labels.refresh')"
+          :loading="loadingDiff"
+          no-caps
+          outline
+          @click="sendSvnDiffAction"
+        />
       </div>
-      <q-card>
+      <q-card class="diff-card row items-center justify-center" bordered flat>
         <q-splitter
           v-if="changedFileList"
+          class="full-height"
+          :disable="loadingDiff"
           horizontal
           v-model="splitPercentage"
-          style="height: 500px"
         >
           <template v-slot:before>
             <q-scroll-area class="full-height full-width">
@@ -232,20 +244,22 @@ onMounted(() => {
         </div>
       </q-card>
     </q-card-section>
-    <q-card-section class="column q-gutter-x-md">
-      <div class="text-bold text-grey text-h6">
-        {{ i18n('labels.message') }}
-      </div>
-      <div class="commit-message-input">
+    <q-card-section class="column q-gutter-y-md">
+      <div class="row justify-between">
+        <div class="text-bold text-grey text-h6">
+          {{ i18n('labels.message') }}
+        </div>
         <q-btn
-          class="generate-btn"
-          color="grey-7"
+          color="accent"
           dense
-          :disabled="!changedFileList || changedFileList.length === 0 || loadingCommit"
-          icon="mdi-message-fast-outline"
+          :disabled="
+            !changedFileList || changedFileList.length === 0 || loadingCommit
+          "
+          icon="mdi-creation"
+          :label="i18n('labels.generate')"
           :loading="loadingGenerate"
+          no-caps
           outline
-          size="sm"
           @click="generateCommitMessage"
         >
           <q-tooltip
@@ -261,19 +275,18 @@ onMounted(() => {
             }}
           </q-tooltip>
         </q-btn>
-        <q-input
-          clearable
-          dense
-          :disabled="
-            !changedFileList || changedFileList.length === 0 || loadingCommit
-          "
-          :maxlength="400"
-          outlined
-          :shadow-text="shadowText"
-          type="textarea"
-          v-model="commitMessage"
-        />
       </div>
+      <q-input
+        autogrow
+        clearable
+        dense
+        :disable="
+          !changedFileList || changedFileList.length === 0 || loadingCommit
+        "
+        :maxlength="400"
+        outlined
+        v-model="commitMessage"
+      />
     </q-card-section>
     <q-card-section class="row q-gutter-x-md">
       <q-btn
@@ -282,6 +295,8 @@ onMounted(() => {
         :disabled="!commitMessage"
         :label="i18n('labels.commit')"
         :loading="loadingCommit"
+        no-caps
+        size="lg"
         @click="sendSvnCommitAction"
       />
     </q-card-section>
@@ -289,14 +304,8 @@ onMounted(() => {
 </template>
 
 <style lang="scss" scoped>
-.commit-message-input {
-  position: relative;
-
-  .generate-btn {
-    position: absolute;
-    right: 0;
-    top: -30px;
-    z-index: 100;
-  }
+.diff-card {
+  height: calc(100vh - 550px);
+  min-height: 250px;
 }
 </style>

@@ -183,10 +183,12 @@ export default {
       labels: {
         changes: 'Changed Files',
         commit: 'Commit',
+        generate: 'Generate',
         invalidProject: 'Invalid project',
         message: 'Commit Message',
         noChanges: 'No changes',
         noSelect: 'No file selected',
+        refresh: 'Refresh',
         title: 'Commit Codes',
       },
       tooltips: {
