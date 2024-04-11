@@ -125,6 +125,22 @@ websocketManager.registerWsAction(
     statisticsReporter.completionAbort(actionId);
   },
 );
+websocketManager.registerWsAction(WsAction.CompletionEdit, ({ data }, pid) => {
+  const { actionId, count, editedContent, ratio } = data;
+  try {
+    statisticsReporter
+      .completionEdit(
+        actionId,
+        count,
+        editedContent,
+        ratio,
+        getClientVersion(pid),
+      )
+      .catch();
+  } catch {
+    statisticsReporter.completionAbort(actionId);
+  }
+});
 websocketManager.registerWsAction(
   WsAction.CompletionGenerate,
   async ({ data }, pid) => {
@@ -146,7 +162,7 @@ websocketManager.registerWsAction(
       statisticsReporter.completionUpdateProjectId(actionId, projectId);
 
       const promptElements = await promptExtractor.getPromptComponents(
-        new RawInputs(data),
+        new RawInputs(data, project),
       );
       statisticsReporter.completionUpdatePromptElements(
         actionId,
@@ -200,22 +216,6 @@ websocketManager.registerWsAction(
     }
   },
 );
-websocketManager.registerWsAction(WsAction.CompletionEdit, ({ data }, pid) => {
-  const { actionId, count, editedContent, ratio } = data;
-  try {
-    statisticsReporter
-      .completionEdit(
-        actionId,
-        count,
-        editedContent,
-        ratio,
-        getClientVersion(pid),
-      )
-      .catch();
-  } catch {
-    statisticsReporter.completionAbort(actionId);
-  }
-});
 websocketManager.registerWsAction(
   WsAction.CompletionSelect,
   ({ data }, pid) => {

@@ -86,9 +86,11 @@ export class RawInputs {
   recentFiles: string[];
   symbols: SymbolInfo[];
 
-  constructor(rawData: CompletionGenerateClientMessage['data']) {
-    const { caret, path, prefix, project, recentFiles, suffix, symbols } =
-      rawData;
+  constructor(
+    rawData: CompletionGenerateClientMessage['data'],
+    project: string,
+  ) {
+    const { caret, path, prefix, recentFiles, suffix, symbols } = rawData;
     this.document = new TextDocument(path);
     this.elements = new PromptElements(prefix, suffix);
     this.position = new Position(caret.line, caret.character);
