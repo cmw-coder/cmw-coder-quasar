@@ -35,7 +35,11 @@ export const generateCommitMessage = async (
       throw new Error('Invalid access token');
     }
   } else {
-    const { data } = await chatWithDeepSeek(endPoint, prompt, []);
+    const { data } = await chatWithDeepSeek(
+      'http://10.113.36.127:9204',
+      prompt,
+      [],
+    );
     return data[0]?.choices[0]?.message?.content as string;
   }
 };
