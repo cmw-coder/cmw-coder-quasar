@@ -50,8 +50,10 @@ onMounted(async () => {
     ({ apiStyle, config, data }) => {
       if (apiStyle == ApiStyle.Linseer) {
         accessToken.value = data.tokens.access;
+        endpoint.value = config.endpoints.aiService;
+      } else {
+        endpoint.value = config.modelConfigs[0].completionConfigs.function.endpoint;
       }
-      endpoint.value = config.endpoints.aiService;
     },
   );
   window.actionApi.send(new ConfigStoreLoadActionMessage());

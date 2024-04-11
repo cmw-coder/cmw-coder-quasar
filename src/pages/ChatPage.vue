@@ -1,12 +1,12 @@
 <script setup lang="ts">
+import { QScrollArea } from 'quasar';
 import { storeToRefs } from 'pinia';
 import { nextTick, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import ChatMessages from 'components/ChatMessages.vue';
 import { useChatStore } from 'stores/chat';
-import { QScrollArea } from 'quasar';
-import { timeout } from 'utils/index';
+import { timeout } from 'src/utils';
 
 const baseName = 'pages.ChatPage.';
 
