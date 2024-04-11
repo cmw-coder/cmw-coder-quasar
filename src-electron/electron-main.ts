@@ -35,6 +35,13 @@ import {
   StandardResult,
   WsAction,
 } from 'shared/types/WsMessage';
+import { container } from 'service/inversify.config';
+import { TYPES } from 'service/types';
+import { ConfigService } from 'service/entities/ConfigService';
+
+const configService = container.get<ConfigService>(TYPES.ConfigService);
+
+configService.sayHello();
 
 initApplication();
 initAdditionReport();

@@ -3,7 +3,15 @@
   "compilerOptions": {
     "baseUrl": ".",
     "sourceMap": true,
+    "target": "es5",
+    "lib": ["ES2022"],
+    "types": ["reflect-metadata"],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "paths": {
+      "service/*": ["./service/*"],
       "main/*": ["./main/*"],
       "preload/*": ["./preload/*"],
       "root/*": ["../*"],
@@ -12,5 +20,11 @@
     },
     "outDir": "dist"
   },
-  "include": ["*.ts", "main/**/*.ts", "preload/**/*.ts", "shared/**/*.ts"]
+  "include": [
+    "*.ts",
+    "main/**/*.ts",
+    "preload/**/*.ts",
+    "shared/**/*.ts",
+    "service/**/*.ts"
+  ]
 }
