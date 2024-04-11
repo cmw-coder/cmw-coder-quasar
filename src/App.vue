@@ -5,7 +5,6 @@ import { ActionType } from 'shared/types/ActionMessage';
 import { useHighlighter } from 'stores/highlighter';
 import { useSettingsStore } from 'stores/settings';
 import { ActionApi } from 'types/ActionApi';
-import { useInvokeService } from 'boot/useInvokeService';
 
 const baseName = 'web.app.';
 
@@ -22,11 +21,6 @@ onMounted(async () => {
   actionApi.register(ActionType.RouterReload, () => {
     reloadKey.value = !reloadKey.value;
   });
-  console.log('app mounted');
-
-  const invokeService = useInvokeService();
-  const invokeRes = await invokeService.sayHello('hi');
-  console.log('invokeRes', invokeRes);
 });
 onBeforeUnmount(() => {
   actionApi.unregister();

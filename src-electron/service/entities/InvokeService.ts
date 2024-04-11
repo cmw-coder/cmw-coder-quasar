@@ -11,7 +11,7 @@ import { ConfigService } from 'service/entities/ConfigService';
 @injectable()
 export class InvokeService implements I_InvokeService {
   @inject(TYPES.ConfigService)
-  private _ConfigService!: ConfigService;
+  private _configService!: ConfigService;
   constructor() {
     ipcMain.handle(
       InvokeServiceKey,
@@ -33,7 +33,7 @@ export class InvokeService implements I_InvokeService {
 
   async sayHello(data: string) {
     console.log('Hello from InvokeService', data);
-    // this._ConfigService.sayHello();
+    this._configService.sayHello();
     return Math.random();
   }
 }
