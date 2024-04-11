@@ -17,7 +17,6 @@ import {
   generateCommitMessage,
   generateCommitPrompt,
 } from 'utils/commitPrompt';
-import { useInvokeService } from 'boot/useInvokeService';
 
 const { codeToHtml } = useHighlighter();
 const { t } = useI18n();
@@ -73,11 +72,6 @@ const sendSvnCommitAction = () => {
 };
 
 const sendSvnDiffAction = async () => {
-  const invokeService = useInvokeService();
-  const res = await invokeService.sayHello('CommitPage');
-  console.log('sayHello', res);
-
-  return;
   loadingDiff.value = true;
   window.actionApi.send({
     type: ActionType.SvnDiff,
