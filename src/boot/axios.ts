@@ -122,7 +122,14 @@ export const chatWithDeepSeek = async (
     .create({
       baseURL: endpoint,
     })
-    .post('/v1/chat/completions', {
+    .post<{
+      choices: {
+        message: {
+          role: 'assistant' | 'user';
+          content: string;
+        };
+      }[];
+    }>('/v1/chat/completions', {
       max_tokens: 1024,
       messages: [
         ...historyList,

@@ -40,6 +40,6 @@ export const generateCommitMessage = async (
       prompt,
       [],
     );
-    return data[0]?.choices[0]?.message?.content as string;
+    return data.choices[0]?.message?.content || '';
   }
 };
