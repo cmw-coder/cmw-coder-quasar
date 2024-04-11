@@ -181,17 +181,25 @@ export default {
     },
     CommitPage: {
       labels: {
-        title: 'Commit Codes',
         changes: 'Changed Files',
+        commit: 'Commit',
+        generate: 'Generate',
+        invalidProject: 'Invalid project',
         message: 'Commit Message',
-        submit: 'Submit',
+        noChanges: 'No changes',
+        noSelect: 'No file selected',
+        refresh: 'Refresh',
+        title: 'Commit Check',
       },
       tooltips: {
         generate: 'Generate Commit Message From AI',
         generating: 'Generating...',
       },
       notifications: {
+        commitFailed: 'Commit failed',
         commitSuccess: 'Commit successfully',
+        generateFailed: 'Failed to generate commit message',
+        invalidProject: 'Invalid project',
       },
     },
     DeveloperPage: {

@@ -14,9 +14,10 @@ import {
   ConfigStoreLoadActionMessage,
   DataStoreLoadActionMessage,
   DebugSyncActionMessage,
-  SvnCommitSuccessActionMessage,
-  SvnDiffActionResponseMessage,
+  SvnCommitActionMessage,
+  SvnDiffActionMessage,
 } from 'shared/types/ActionMessage';
+import { ChangedFile } from 'shared/types/svn';
 import { WindowType } from 'shared/types/WindowType';
 import { ChatInsertServerMessage, WsAction } from 'shared/types/WsMessage';
 
@@ -109,25 +110,32 @@ export class MainWindow extends BaseWindow {
         );
       }
     });
-    this._actionApi.register(ActionType.SvnDiffRequest, async () => {
+    this._actionApi.register(ActionType.SvnDiff, async () => {
       if (this._window) {
-        const clientInfo = websocketManager.getClientInfo();
-        const projectPath = clientInfo?.currentProjectPath;
-        const changedFileList = await getChangedFileList(
-          projectPath ?? 'D:/svn-test',
-        );
-        sendToRenderer(
-          this._window,
-          new SvnDiffActionResponseMessage(changedFileList),
-        );
+        let changedFileList: ChangedFile[] | undefined;
+        const projectPath = websocketManager.getClientInfo()?.currentProject;
+        if (projectPath) {
+          changedFileList = await getChangedFileList(projectPath);
+        }
+        sendToRenderer(this._window, new SvnDiffActionMessage(changedFileList));
       }
     });
-    this._actionApi.register(ActionType.SvnCommitRequest, async (data) => {
+    this._actionApi.register(ActionType.SvnCommit, async (data) => {
       if (this._window) {
-        const clientInfo = websocketManager.getClientInfo();
-        const projectPath = clientInfo?.currentProjectPath ?? 'D:/svn-test';
-        await svnCommit(projectPath, data);
-        sendToRenderer(this._window, new SvnCommitSuccessActionMessage());
+        const projectPath = websocketManager.getClientInfo()?.currentProject;
+        if (projectPath) {
+          try {
+            await svnCommit(projectPath, data);
+            sendToRenderer(this._window, new SvnCommitActionMessage('success'));
+          } catch (e) {
+            sendToRenderer(this._window, new SvnCommitActionMessage(<string>e));
+          }
+        } else {
+          sendToRenderer(
+            this._window,
+            new SvnCommitActionMessage('invalidProject'),
+          );
+        }
       }
     });
 
