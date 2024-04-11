@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
-import { chatWithHuggingFace, chatWithLinseer } from 'boot/axios';
+import { chatWithDeepSeek, chatWithLinseer } from 'boot/axios';
 import { ChatMessage } from 'stores/chat/types';
 import { runtimeConfig } from 'shared/config';
 import { ApiStyle } from 'shared/types/model';
@@ -57,12 +57,17 @@ export const useChatStore = defineStore('chat', () => {
           currentResponse.error = true;
         }
       } else {
-        const result = await chatWithHuggingFace(
-          endPoint,
+        const { data } = await chatWithDeepSeek(
+          'http://10.113.36.127:9204',
           content,
           historyList,
         );
-        console.log(result.data);
+        if (data.choices[0]?.message?.content) {
+          currentResponse.content = data.choices[0]?.message?.content;
+        } else {
+          currentResponse.content = 'Failed to get response';
+          currentResponse.error = true;
+        }
       }
     } catch {
       currentResponse.content = 'Failed to get response';
