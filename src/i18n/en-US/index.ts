@@ -191,6 +191,7 @@ export default {
         noSelect: 'No file selected',
         refresh: 'Refresh',
         title: 'Commit Check',
+        noProject: 'No Project, Please Confirm Source Insight is Opened',
       },
       tooltips: {
         generate: 'Generate Commit Message From AI',

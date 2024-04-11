@@ -3,7 +3,7 @@ import { ipcMain } from 'electron';
 import { TYPES } from 'service/types';
 import { ConfigService } from 'service/entities/ConfigService';
 import { SvnService } from 'service/entities/SvnService';
-// import { dataStore } from 'main/stores';
+import { dataStore } from 'main/stores';
 import {
   I_InvokeService,
   InvokeServiceKey,
@@ -46,8 +46,9 @@ export class InvokeService implements I_InvokeService {
       path: string;
       changedFileList: ChangedFile[];
     }[];
-    const projectPathList = ['D:\\svn-test'];
-    // const projectPathList = Object.keys(dataStore.store.project);
+    let projectPathList = Object.keys(dataStore.store.project);
+    projectPathList = ['D:\\svn-test', 'D:\\project\\cmw-coder-quasar'];
+
     for (let i = 0; i < projectPathList.length; i++) {
       const projectPath = projectPathList[i];
       const changedFileList = await this._svnService.dirDiff(projectPath);
@@ -57,5 +58,9 @@ export class InvokeService implements I_InvokeService {
       });
     }
     return result;
+  }
+
+  async commit(projectPath: string, message: string) {
+    return this._svnService.commit(projectPath, message);
   }
 }

@@ -8,6 +8,7 @@ export interface I_InvokeService {
       changedFileList: ChangedFile[];
     }[]
   >;
+  commit(projectPath: string, message: string): Promise<string>;
 }
 
 export const InvokeServiceKey = 'InvokeService:Call';

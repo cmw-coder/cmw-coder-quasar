@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { useQuasar } from 'quasar';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 
@@ -47,18 +47,19 @@ const refreshProjectList = async () => {
     ...item,
     commitMessage: '',
   }));
+  activeProjectIndex.value = projectList.value.findIndex((item) =>
+    commitQuery.currentFile.includes(item.path),
+  );
+  if (activeProjectIndex.value === -1) {
+    activeProjectIndex.value = 0;
+  }
 };
 
-// TODO: 获取当前激活的文件夹
 const activeProjectIndex = ref<number>(0);
-
-console.log('activeProject', activeProjectIndex.value);
 
 const commitQuery = new CommitQuery(query);
 
 const accessToken = ref<string>();
-const changedFileList = ref<ChangedFile[]>();
-const commitMessage = ref('');
 const endpoint = ref<string>();
 const loadingCommit = ref(false);
 const loadingDiff = ref(false);
@@ -66,18 +67,24 @@ const loadingGenerate = ref(false);
 const selectedIndex = ref(0);
 const splitPercentage = ref(40);
 
+const activeProject = computed(() => {
+  return projectList.value[activeProjectIndex.value];
+});
+
 const closeWindow = () => window.controlApi.hide(WindowType.Floating);
 
 const generateCommitMessageHandle = async () => {
-  if (changedFileList.value && changedFileList.value?.length) {
+  const changedFileList = activeProject.value.changedFileList;
+  if (changedFileList && changedFileList.length) {
     loadingGenerate.value = true;
-    const commitPrompt = generateCommitPrompt(changedFileList.value);
+    const commitPrompt = generateCommitPrompt(changedFileList);
     try {
-      commitMessage.value = await generateCommitMessage(
-        endpoint.value || '',
-        commitPrompt,
-        accessToken.value,
-      );
+      projectList.value[activeProjectIndex.value].commitMessage =
+        await generateCommitMessage(
+          endpoint.value || '',
+          commitPrompt,
+          accessToken.value,
+        );
     } catch (e) {
       notify({
         type: 'negative',
@@ -89,20 +96,13 @@ const generateCommitMessageHandle = async () => {
   }
 };
 
-const sendSvnCommitAction = () => {
+const sendSvnCommitAction = async () => {
   loadingCommit.value = true;
-  window.actionApi.send({
-    type: ActionType.SvnCommit,
-    data: commitMessage.value,
-  });
-};
-
-const sendSvnDiffAction = async () => {
-  loadingDiff.value = true;
-  window.actionApi.send({
-    type: ActionType.SvnDiff,
-    data: undefined,
-  });
+  await invokeService.commit(
+    activeProject.value.path,
+    activeProject.value.commitMessage,
+  );
+  loadingCommit.value = false;
 };
 
 const actionApi = new ActionApi(baseName);
@@ -117,266 +117,255 @@ onMounted(() => {
       endpoint.value = config.endpoints.aiService;
     },
   );
-  actionApi.register(ActionType.SvnCommit, (result) => {
-    switch (result) {
-      case 'success': {
-        notify({
-          type: 'positive',
-          message: i18n('notifications.commitSuccess'),
-        });
-        commitMessage.value = '';
-        if (name === WindowType.Floating) {
-          setTimeout(closeWindow, 2000);
-        } else {
-          sendSvnDiffAction();
-        }
-        break;
-      }
-      case 'invalidProject': {
-        notify({
-          type: 'warning',
-          message: i18n('notifications.invalidProject'),
-        });
-        break;
-      }
-      default: {
-        notify({
-          type: 'negative',
-          message: i18n('notifications.commitFailed'),
-          caption: result,
-        });
-        sendSvnDiffAction();
-        break;
-      }
-    }
-    loadingCommit.value = false;
-  });
-  actionApi.register(ActionType.SvnDiff, (data) => {
-    console.log('SvnDiff.response', data);
-    if (data) {
-      changedFileList.value = data;
-    }
-    loadingDiff.value = false;
-  });
-
-  console.log(commitQuery.currentFile);
   window.actionApi.send(new ConfigStoreLoadActionMessage());
-  sendSvnDiffAction();
 });
+
+const getLastDirName = (path: string) => {
+  const pathArr = path.split('\\');
+  return pathArr[pathArr.length - 1];
+};
 </script>
 
 <template>
-  <q-page class="commit-page-wrapper">
-    <!-- <div class="side-bar"></div> -->
-    <div class="content">
-      <div class="column col-grow q-gutter-y-md">
-        <div class="text-center text-h4">
-          {{ i18n('labels.title') }}
-        </div>
-        <div class="column q-gutter-y-md">
-          <div class="row items-baseline justify-between">
-            <div class="text-bold text-grey text-h6">
-              {{ i18n('labels.changes') }}
-            </div>
-            <q-btn
-              color="primary"
-              dense
-              icon="mdi-refresh"
-              :label="i18n('labels.refresh')"
-              :loading="loadingDiff"
-              no-caps
-              outline
-              @click="sendSvnDiffAction"
-            />
-          </div>
-          <q-card
-            class="diff-card row items-center justify-center"
-            bordered
-            flat
-          >
-            <q-splitter
-              v-if="changedFileList"
-              class="full-height full-width"
-              :disable="loadingDiff"
-              horizontal
-              v-model="splitPercentage"
-            >
-              <template v-slot:before>
-                <q-scroll-area class="full-height full-width">
-                  <q-list v-if="changedFileList.length" separator>
-                    <q-item
-                      v-for="(item, index) in changedFileList"
-                      :key="index"
-                      :active="selectedIndex === index"
-                      active-class="bg-grey-4 text-black"
-                      clickable
-                      @click="selectedIndex = index"
-                    >
-                      <q-item-section avatar>
-                        <q-icon
-                          v-if="item.type === 'added'"
-                          name="mdi-file-document-plus"
-                          color="positive"
-                          size="2rem"
-                        />
-                        <q-icon
-                          v-if="item.type === 'missing'"
-                          name="mdi-file-document-minus"
-                          color="negative"
-                          size="2rem"
-                        />
-                        <q-icon
-                          v-if="item.type === 'modified'"
-                          name="mdi-file-document-edit"
-                          color="warn"
-                          size="2rem"
-                        />
-                      </q-item-section>
-                      <q-item-section>
-                        <q-item-label>
-                          {{ item.path }}
-                        </q-item-label>
-                      </q-item-section>
-                      <q-item-section side top>
-                        <q-item-label caption>
-                          {{ item.additions }}+ / {{ item.deletions }}-
-                        </q-item-label>
-                        <div class="row">
-                          <q-icon
-                            v-for="sequence in 5"
-                            :key="sequence"
-                            name="mdi-square"
-                            :color="
-                              sequence <=
-                              (item.additions /
-                                (item.additions + item.deletions)) *
-                                5
-                                ? 'positive'
-                                : sequence <=
-                                    (item.deletions /
-                                      (item.additions + item.deletions)) *
-                                      5
-                                  ? 'negative'
-                                  : 'grey'
-                            "
-                          />
-                        </div>
-                      </q-item-section>
-                    </q-item>
-                  </q-list>
-                  <div v-else class="text-center text-grey text-h4 text-italic">
-                    {{ i18n('labels.noChanges') }}
-                  </div>
-                </q-scroll-area>
-              </template>
-              <template v-slot:after>
-                <q-scroll-area
-                  v-if="changedFileList[selectedIndex]"
-                  class="full-height full-width"
-                >
-                  <div
-                    class="q-pa-sm"
-                    v-html="
-                      codeToHtml(changedFileList[selectedIndex].diff, 'diff')
-                    "
-                  />
-                </q-scroll-area>
-                <div v-else class="text-center text-grey text-h4 text-italic">
-                  {{ i18n('labels.noSelect') }}
-                </div>
-              </template>
-            </q-splitter>
-            <div v-else class="text-center text-grey text-h3 text-italic">
-              {{ i18n('labels.invalidProject') }}
-            </div>
-          </q-card>
-        </div>
-        <div class="column q-gutter-y-md">
-          <div class="row items-baseline justify-between">
-            <div class="text-bold text-grey text-h6">
-              {{ i18n('labels.message') }}
-            </div>
-            <q-btn
-              color="accent"
-              dense
-              :disabled="
-                !changedFileList || !changedFileList.length || loadingCommit
-              "
-              icon="mdi-creation"
-              :label="i18n('labels.generate')"
-              :loading="loadingGenerate"
-              no-caps
-              outline
-              @click="generateCommitMessageHandle"
-            >
-              <q-tooltip
-                anchor="bottom middle"
-                self="top middle"
-                transition-hide="jump-up"
-                transition-show="jump-down"
-              >
-                {{
-                  loadingGenerate
-                    ? i18n('tooltips.generating')
-                    : i18n('tooltips.generate')
-                }}
-              </q-tooltip>
-            </q-btn>
-          </div>
-          <q-input
-            :autofocus="!!(changedFileList && changedFileList.length)"
-            autogrow
-            clearable
-            dense
-            :disable="
-              !changedFileList || !changedFileList.length || loadingCommit
-            "
-            :maxlength="400"
-            outlined
-            v-model="commitMessage"
-          />
-        </div>
-        <div class="row q-gutter-x-md">
-          <q-btn
-            v-if="name === WindowType.Floating"
-            class="col-grow"
-            flat
-            :label="i18n('labels.cancel')"
-            :loading="loadingCommit"
-            @click="closeWindow"
-          />
-          <q-btn
-            class="col-grow"
-            color="primary"
-            :disabled="!commitMessage"
-            :label="i18n('labels.commit')"
-            :loading="loadingCommit"
-            no-caps
-            @click="sendSvnCommitAction"
-          />
-        </div>
+  <q-page class="row items-center justify-evenly q-pa-xl">
+    <div v-if="activeProject" class="side-bar">
+      <q-list bordered separator>
+        <q-item
+          v-for="(item, index) in projectList"
+          :key="item.path"
+          clickable
+          v-ripple
+          :active="index === activeProjectIndex"
+          @click="
+            () => {
+              activeProjectIndex = index;
+              selectedIndex = 0;
+            }
+          "
+        >
+          <q-item-section>
+            <q-tooltip>
+              {{ item.path }}
+            </q-tooltip>
+            {{ getLastDirName(item.path) }}
+          </q-item-section>
+        </q-item>
+      </q-list>
+    </div>
+    <div
+      v-if="activeProject"
+      class="column col-grow q-gutter-y-md"
+      style="padding-left: 140px"
+    >
+      <div class="text-center text-h4">
+        {{ i18n('labels.title') }}
       </div>
+      <div class="column q-gutter-y-md">
+        <div class="row items-baseline justify-between">
+          <div class="text-bold text-grey text-h6">
+            {{ i18n('labels.changes') }}
+          </div>
+          <q-btn
+            color="primary"
+            dense
+            icon="mdi-refresh"
+            :label="i18n('labels.refresh')"
+            :loading="loadingDiff"
+            no-caps
+            outline
+            @click="refreshProjectList"
+          />
+        </div>
+        <q-card class="diff-card row items-center justify-center" bordered flat>
+          <q-splitter
+            v-if="activeProject.changedFileList"
+            class="full-height full-width"
+            :disable="loadingDiff"
+            horizontal
+            v-model="splitPercentage"
+          >
+            <template v-slot:before>
+              <q-scroll-area class="full-height full-width">
+                <q-list v-if="activeProject.changedFileList.length" separator>
+                  <q-item
+                    v-for="(item, index) in activeProject.changedFileList"
+                    :key="index"
+                    :active="selectedIndex === index"
+                    active-class="bg-grey-4 text-black"
+                    clickable
+                    @click="selectedIndex = index"
+                  >
+                    <q-item-section avatar>
+                      <q-icon
+                        v-if="item.type === 'added'"
+                        name="mdi-file-document-plus"
+                        color="positive"
+                        size="2rem"
+                      />
+                      <q-icon
+                        v-if="item.type === 'missing'"
+                        name="mdi-file-document-minus"
+                        color="negative"
+                        size="2rem"
+                      />
+                      <q-icon
+                        v-if="item.type === 'modified'"
+                        name="mdi-file-document-edit"
+                        color="warn"
+                        size="2rem"
+                      />
+                    </q-item-section>
+                    <q-item-section>
+                      <q-item-label>
+                        {{ item.path }}
+                      </q-item-label>
+                    </q-item-section>
+                    <q-item-section side top>
+                      <q-item-label caption>
+                        {{ item.additions }}+ / {{ item.deletions }}-
+                      </q-item-label>
+                      <div class="row">
+                        <q-icon
+                          v-for="sequence in 5"
+                          :key="sequence"
+                          name="mdi-square"
+                          :color="
+                            sequence <=
+                            (item.additions /
+                              (item.additions + item.deletions)) *
+                              5
+                              ? 'positive'
+                              : sequence <=
+                                  (item.deletions /
+                                    (item.additions + item.deletions)) *
+                                    5
+                                ? 'negative'
+                                : 'grey'
+                          "
+                        />
+                      </div>
+                    </q-item-section>
+                  </q-item>
+                </q-list>
+                <div v-else class="text-center text-grey text-h4 text-italic">
+                  {{ i18n('labels.noChanges') }}
+                </div>
+              </q-scroll-area>
+            </template>
+            <template v-slot:after>
+              <q-scroll-area
+                v-if="activeProject.changedFileList[selectedIndex]"
+                class="full-height full-width"
+              >
+                <div
+                  class="q-pa-sm"
+                  v-html="
+                    codeToHtml(
+                      activeProject.changedFileList[selectedIndex].diff,
+                      'diff',
+                    )
+                  "
+                />
+              </q-scroll-area>
+              <div v-else class="text-center text-grey text-h4 text-italic">
+                {{ i18n('labels.noSelect') }}
+              </div>
+            </template>
+          </q-splitter>
+          <div v-else class="text-center text-grey text-h3 text-italic">
+            {{ i18n('labels.invalidProject') }}
+          </div>
+        </q-card>
+      </div>
+      <div class="column q-gutter-y-md">
+        <div class="row items-baseline justify-between">
+          <div class="text-bold text-grey text-h6">
+            {{ i18n('labels.message') }}
+          </div>
+          <q-btn
+            color="accent"
+            dense
+            :disabled="
+              !activeProject.changedFileList ||
+              !activeProject.changedFileList.length ||
+              loadingCommit
+            "
+            icon="mdi-creation"
+            :label="i18n('labels.generate')"
+            :loading="loadingGenerate"
+            no-caps
+            outline
+            @click="generateCommitMessageHandle"
+          >
+            <q-tooltip
+              anchor="bottom middle"
+              self="top middle"
+              transition-hide="jump-up"
+              transition-show="jump-down"
+            >
+              {{
+                loadingGenerate
+                  ? i18n('tooltips.generating')
+                  : i18n('tooltips.generate')
+              }}
+            </q-tooltip>
+          </q-btn>
+        </div>
+        <q-input
+          :autofocus="
+            !!(
+              activeProject.changedFileList &&
+              activeProject.changedFileList.length
+            )
+          "
+          autogrow
+          clearable
+          dense
+          :disable="
+            !activeProject.changedFileList ||
+            !activeProject.changedFileList.length ||
+            loadingCommit
+          "
+          :maxlength="400"
+          outlined
+          v-model="projectList[activeProjectIndex].commitMessage"
+        />
+      </div>
+      <div class="row q-gutter-x-md">
+        <q-btn
+          v-if="name === WindowType.Floating"
+          class="col-grow"
+          flat
+          :label="i18n('labels.cancel')"
+          :loading="loadingCommit"
+          @click="closeWindow"
+        />
+        <q-btn
+          class="col-grow"
+          color="primary"
+          :disabled="!activeProject.commitMessage"
+          :label="i18n('labels.commit')"
+          :loading="loadingCommit"
+          no-caps
+          @click="sendSvnCommitAction"
+        />
+      </div>
+    </div>
+    <div v-if="!activeProject" class="text-center text-h4">
+      {{ i18n('labels.noProject') }}
     </div>
   </q-page>
 </template>
 
 <style lang="scss" scoped>
-.commit-page-wrapper {
+.side-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 140px;
   height: 100%;
-  width: 100%;
-  padding-left: 60px;
-  position: relative;
-  .side-bar {
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 60px;
-    background-color: #f5f5f5;
-  }
-  .content {
-    height: 100%;
-  }
+  background-color: #f5f5f5;
 }
 
 .diff-card {
