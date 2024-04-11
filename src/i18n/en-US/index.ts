@@ -261,8 +261,14 @@ export default {
       labels: {
         agentAudit: 'Waiting for agent audit...',
         compileCode: 'Compiling Code...',
+        copyWorkflowId: 'Copy workflow ID',
+        deleteWorkflow: 'Delete workflow',
         deployArtifact: 'Deploying Artifact...',
         staticCheck: 'Performing static check...',
+      },
+      notifications: {
+        copyFailure: 'Failed to copy the workflow ID',
+        copySuccess: 'This workflow ID has been copied to the clipboard',
       }
     }
   },

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
+import { copyToClipboard, useQuasar } from 'quasar';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -7,7 +8,9 @@ import { useWorkflowStore } from 'stores/workflow';
 import WorkflowStatus from 'components/WorkflowItems/WorkflowStatus.vue';
 import StepStatus from 'components/WorkflowItems/StepStatus.vue';
 
+const { notify } = useQuasar();
 const { t } = useI18n();
+const { deleteWorkflow } = useWorkflowStore();
 const { workflows } = storeToRefs(useWorkflowStore());
 
 const baseName = 'pages.WorkflowPage.';
@@ -18,6 +21,21 @@ const i18n = (relativePath: string) => {
 
 const selectedIndex = ref(workflows.value.length - 1);
 const splitPercentage = ref(50);
+
+const copyWorkflowId = (id: string) =>
+  copyToClipboard(id)
+    .then(() =>
+      notify({
+        type: 'positive',
+        message: i18n('notifications.copySuccess'),
+      }),
+    )
+    .catch(() =>
+      notify({
+        type: 'negative',
+        message: i18n('notifications.copyFailure'),
+      }),
+    );
 
 const selectWorkflow = (index: number) => {
   selectedIndex.value = index;
@@ -52,7 +70,30 @@ const selectWorkflow = (index: number) => {
                   </q-item-label>
                 </q-item-section>
                 <q-item-section side>
-                  <q-btn dense flat icon="mdi-dots-horizontal" />
+                  <q-btn dense flat icon="mdi-dots-horizontal">
+                    <q-menu>
+                      <q-list style="min-width: 100px">
+                        <q-item
+                          clickable
+                          v-close-popup
+                          @click="copyWorkflowId(item.id)"
+                        >
+                          <q-item-section>
+                            {{ i18n('labels.copyWorkflowId') }}
+                          </q-item-section>
+                        </q-item>
+                        <q-item
+                          clickable
+                          v-close-popup
+                          @click="deleteWorkflow(item.id)"
+                        >
+                          <q-item-section class="text-red text-weight-bold">
+                            {{ i18n('labels.deleteWorkflow') }}
+                          </q-item-section>
+                        </q-item>
+                      </q-list>
+                    </q-menu>
+                  </q-btn>
                 </q-item-section>
               </q-item>
             </q-list>
@@ -64,6 +105,9 @@ const selectWorkflow = (index: number) => {
               <q-expansion-item
                 v-for="(item, index) in workflows[selectedIndex].steps"
                 :key="index"
+                :disable="
+                  item.status === 'pending' || item.status === 'skipped'
+                "
                 expand-separator
                 :model-value="
                   workflows[selectedIndex].status === 'running'
