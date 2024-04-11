@@ -2,8 +2,9 @@
 import { useQuasar } from 'quasar';
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
+import { useInvokeService } from 'boot/useInvokeService';
 import {
   ActionType,
   ConfigStoreLoadActionMessage,
@@ -12,18 +13,20 @@ import { ApiStyle } from 'shared/types/model';
 import { ChangedFile } from 'shared/types/svn';
 import { WindowType } from 'shared/types/WindowType';
 import { useHighlighter } from 'stores/highlighter';
+import { useWorkflowStore } from 'stores/workflow';
 import { ActionApi } from 'types/ActionApi';
 import { CommitQuery } from 'types/queries';
 import {
   generateCommitMessage,
   generateCommitPrompt,
 } from 'utils/commitPrompt';
-import { useInvokeService } from 'boot/useInvokeService';
 
 const { codeToHtml } = useHighlighter();
+const { createWorkflow } = useWorkflowStore();
 const { t } = useI18n();
 const { notify } = useQuasar();
 const { matched, query } = useRoute();
+const { push } = useRouter();
 
 const baseName = 'pages.CommitPage.';
 const { name } = matched[matched.length - 2];
@@ -98,10 +101,30 @@ const generateCommitMessageHandle = async () => {
 
 const sendSvnCommitAction = async () => {
   loadingCommit.value = true;
-  await invokeService.commit(
-    activeProject.value.path,
-    activeProject.value.commitMessage,
-  );
+  try {
+    await invokeService.commit(
+      activeProject.value.path,
+      activeProject.value.commitMessage,
+    );
+    notify({
+      type: 'positive',
+      message: i18n('notifications.commitSuccess'),
+    });
+    createWorkflow(
+      activeProject.value.path,
+      activeProject.value.commitMessage,
+      'administrator',
+    ).catch();
+    setTimeout(() => {
+      push('/main/workflow');
+    }, 1500);
+  } catch (e) {
+    notify({
+      type: 'negative',
+      message: i18n('notifications.commitFailed'),
+      caption: (<Error>e).message,
+    });
+  }
   loadingCommit.value = false;
 };
 

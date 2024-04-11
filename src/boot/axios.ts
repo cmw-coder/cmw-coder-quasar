@@ -1,5 +1,7 @@
-import { boot } from 'quasar/wrappers';
 import axios, { AxiosResponse } from 'axios';
+import { boot } from 'quasar/wrappers';
+
+import { StepInfo } from 'stores/workflow/types';
 
 declare module '@vue/runtime-core' {
   // noinspection JSUnusedGlobalSymbols
@@ -23,10 +25,73 @@ type LoginData =
       error: null;
     };
 
+interface LangChainDataResponse {
+  event: 'data';
+  data: {
+    messages: {
+      content: StepInfo[];
+    }[];
+  };
+}
+
+interface LangChainMetadataResponse {
+  event: 'metadata';
+  data: string;
+}
+
+type LangChainResponse = LangChainDataResponse | LangChainMetadataResponse;
+
 const rdTestServiceProxy = axios.create({
   baseURL: 'http://rdee.h3c.com/kong/RdTestServiceProxy-e',
 });
 
+export const agentStream = async (
+  input: string,
+  progressCallback?: (response: { id: string; data: StepInfo[] }) => void,
+) =>
+  axios.create({ baseURL: 'http://10.113.36.127:9299' }).post(
+    '/agent/stream',
+    {
+      config: {
+        metadata: {},
+        recursionLimit: 25,
+        tags: [],
+      },
+      input: {
+        input: input,
+      },
+      kwargs: {},
+    },
+    {
+      onDownloadProgress: ({ event }) => {
+        if (progressCallback) {
+          const result: { id: string; data: StepInfo[] } = { id: '', data: [] };
+          const processed = (<XMLHttpRequest>event.target).responseText
+            .split(/\r?\n\r?\n/)
+            .filter((item) => item.length)
+            .map((item) => item.split(/\r?\n/))
+            .filter((list) => list.length === 2)
+            .map(
+              ([event, data]) =>
+                <LangChainResponse>{
+                  event: event.split('event: ')[1],
+                  data: Object.values(JSON.parse(data.split('data: ')[1]))[0],
+                },
+            )
+            .filter(({ event, data }) => event?.length && data)
+            .filter(({ data }) => typeof data === 'string' || data);
+          for (const { event, data } of processed) {
+            if (event === 'metadata') {
+              result.id = data;
+            } else if (data.messages.length === 1) {
+              result.data.push(data.messages[0].content[0]);
+            }
+          }
+          progressCallback(result);
+        }
+      },
+    },
+  );
 export const authCode = async (userId: string) => {
   return await rdTestServiceProxy.get('/EpWeChatLogin/authCode', {
     params: {
@@ -117,8 +182,8 @@ export const chatWithDeepSeek = async (
   endpoint: string,
   question: string,
   historyList: { role: 'assistant' | 'user'; content: string }[],
-) => {
-  return await axios
+) =>
+  await axios
     .create({
       baseURL: endpoint,
     })
@@ -144,7 +209,6 @@ export const chatWithDeepSeek = async (
       temperature: 0.001,
       details: false,
     });
-};
 
 export const chatWithLinseer = async (
   endpoint: string,

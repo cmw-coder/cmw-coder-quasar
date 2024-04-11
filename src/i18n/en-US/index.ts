@@ -257,5 +257,13 @@ export default {
         releaseDate: 'Release date: {releaseDate}',
       },
     },
+    WorkflowPage: {
+      labels: {
+        agentAudit: 'Waiting for agent audit...',
+        compileCode: 'Compiling Code...',
+        deployArtifact: 'Deploying Artifact...',
+        staticCheck: 'Performing static check...',
+      }
+    }
   },
 };
