@@ -1,7 +1,7 @@
 import {
   I_InvokeService,
   InvokeServiceKey,
-} from 'shared/types/service/I_InvokeService';
+} from 'shared/types/I_InvokeService';
 
 const target = {} as unknown as I_InvokeService;
 

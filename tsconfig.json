@@ -18,5 +18,9 @@
       "utils/*": ["src/utils/*"]
     }
   },
-  "include": ["src/**/*", "src-electron/shared/**/*"]
+  "include": [
+    "src/**/*",
+    "src-electron/shared/**/*",
+    "src-electron/service/**/*"
+  ]
 }

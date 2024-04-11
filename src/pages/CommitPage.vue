@@ -18,6 +18,7 @@ import {
   generateCommitMessage,
   generateCommitPrompt,
 } from 'utils/commitPrompt';
+import { useInvokeService } from 'boot/useInvokeService';
 
 const { codeToHtml } = useHighlighter();
 const { t } = useI18n();
@@ -30,6 +31,23 @@ const { name } = matched[matched.length - 2];
 const i18n = (relativePath: string) => {
   return t(baseName + relativePath);
 };
+
+const invokeService = useInvokeService();
+const projectList = ref<
+  {
+    path: string;
+    changedFileList: ChangedFile[];
+  }[]
+>([]);
+
+const refreshProjectList = async () => {
+  projectList.value = await invokeService.getAllProjectList();
+};
+
+// TODO: 获取当前激活的文件夹
+const activeProject = ref<string>('D:\\svn-test');
+
+console.log('activeProject', activeProject.value);
 
 const commitQuery = new CommitQuery(query);
 
@@ -84,6 +102,7 @@ const sendSvnDiffAction = async () => {
 
 const actionApi = new ActionApi(baseName);
 onMounted(() => {
+  refreshProjectList();
   actionApi.register(
     ActionType.ConfigStoreLoad,
     ({ apiStyle, config, data }) => {
