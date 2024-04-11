@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { IterableReadableStream } from '@langchain/core/dist/utils/stream';
 import { RemoteRunnable } from '@langchain/core/runnables/remote';
 import { QScrollArea } from 'quasar';
 import { storeToRefs } from 'pinia';
@@ -37,10 +38,31 @@ onMounted(async () => {
     url: 'http://10.113.36.127:9299/agent',
   });
 
-  const stream = await remoteChain.stream({ input: 'placeholder' });
+  const stream = <
+    IterableReadableStream<
+      Record<
+        string,
+        {
+          kwargs: {
+            messages: {
+              kwargs: {
+                content: { content: string; status: 'failure' | 'success' }[];
+              };
+            }[];
+          };
+        }
+      >
+    >
+  >await remoteChain.stream({
+    input: 'placeholder',
+  });
 
   for await (const chunk of stream) {
-    console.log(chunk);
+    const [event, data] = Object.entries(chunk)[0];
+    console.log(
+      event,
+      data.kwargs.messages.map((message) => message.kwargs.content),
+    );
   }
 });
 </script>

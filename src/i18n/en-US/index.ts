@@ -181,6 +181,7 @@ export default {
     },
     CommitPage: {
       labels: {
+        cancel: 'Cancel',
         changes: 'Changed Files',
         commit: 'Commit',
         generate: 'Generate',

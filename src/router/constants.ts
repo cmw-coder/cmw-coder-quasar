@@ -14,6 +14,13 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('layouts/MainLayout.vue'),
     children: [
       {
+        path: 'commit',
+        components: {
+          header: () => import('layouts/headers/FloatingHeader.vue'),
+          default: () => import('pages/CommitPage.vue'),
+        },
+      },
+      {
         path: 'completions',
         components: {
           header: () => import('layouts/headers/FloatingHeader.vue'),
