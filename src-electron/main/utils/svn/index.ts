@@ -112,7 +112,7 @@ const formatStatusRes = (data: any) => {
 };
 
 export const getStatus = (path: string) => {
-  return new Promise<SvnStatusItem[]>((resolve, reject) => {
+  return new Promise<SvnStatusItem[]>((resolve) => {
     let stdout = '';
     let stderr = '';
     const childProcess = child_process.spawn('svn', ['status', '--xml'], {
@@ -138,7 +138,8 @@ export const getStatus = (path: string) => {
       }
     });
     childProcess.on('error', (err) => {
-      reject(err);
+      log.error('SVN Get status error:', err);
+      log.error('SVN Get status error:', stderr);
     });
     childProcess.on('close', (code) => {
       if (code === 0) {
@@ -155,7 +156,7 @@ export const getStatus = (path: string) => {
           },
         );
       } else {
-        reject(stderr);
+        resolve([]);
       }
     });
   });
