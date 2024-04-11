@@ -271,7 +271,7 @@ onMounted(() => {
             color="accent"
             dense
             :disabled="
-              !changedFileList || changedFileList.length === 0 || loadingCommit
+              !changedFileList || !changedFileList.length || loadingCommit
             "
             icon="mdi-creation"
             :label="i18n('labels.generate')"
@@ -295,11 +295,12 @@ onMounted(() => {
           </q-btn>
         </div>
         <q-input
+          :autofocus="!!(changedFileList && changedFileList.length)"
           autogrow
           clearable
           dense
           :disable="
-            !changedFileList || changedFileList.length === 0 || loadingCommit
+            !changedFileList || !changedFileList.length || loadingCommit
           "
           :maxlength="400"
           outlined
