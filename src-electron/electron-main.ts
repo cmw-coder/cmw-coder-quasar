@@ -238,8 +238,8 @@ websocketManager.registerWsAction(
 );
 websocketManager.registerWsAction(
   WsAction.EditorCommit,
-  () => {
-    floatingWindow.commit();
+  ({ data: currentFile }) => {
+    floatingWindow.commit(currentFile);
   },
 );
 websocketManager.registerWsAction(

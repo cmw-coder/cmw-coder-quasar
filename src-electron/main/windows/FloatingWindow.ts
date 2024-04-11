@@ -35,13 +35,13 @@ export class FloatingWindow extends BaseWindow {
     super(WindowType.Floating);
   }
 
-  commit() {
+  commit(currentFile: string) {
     this.activate();
     if (this._window) {
       this._window.setSize(600, 1000);
       this._window.center();
       this._window.focus();
-      this._loadUrl('/floating/commit');
+      this._loadUrl('/floating/commit', { currentFile });
     } else {
       log.warn('Floating window activate failed');
     }
@@ -53,9 +53,7 @@ export class FloatingWindow extends BaseWindow {
       this._window.setSize(600, 850);
       this._window.center();
       this._window.focus();
-      this._loadUrl('/floating/feedback', {
-        userId: configStore.config.userId,
-      });
+      this._loadUrl('/floating/feedback');
     } else {
       log.warn('Floating window activate failed');
     }
@@ -180,7 +178,10 @@ export class FloatingWindow extends BaseWindow {
         const projectPath = websocketManager.getClientInfo()?.currentProject;
         if (projectPath && dataStore.store.project[projectPath]?.svn[0]) {
           try {
-            await svnCommit(dataStore.store.project[projectPath].svn[0].directory, data);
+            await svnCommit(
+              dataStore.store.project[projectPath].svn[0].directory,
+              data,
+            );
             sendToRenderer(this._window, new SvnCommitActionMessage('success'));
           } catch (e) {
             sendToRenderer(this._window, new SvnCommitActionMessage(<string>e));

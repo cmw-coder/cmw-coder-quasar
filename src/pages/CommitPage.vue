@@ -13,6 +13,7 @@ import { ChangedFile } from 'shared/types/svn';
 import { WindowType } from 'shared/types/WindowType';
 import { useHighlighter } from 'stores/highlighter';
 import { ActionApi } from 'types/ActionApi';
+import { CommitQuery } from 'types/queries';
 import {
   generateCommitMessage,
   generateCommitPrompt,
@@ -21,7 +22,7 @@ import {
 const { codeToHtml } = useHighlighter();
 const { t } = useI18n();
 const { notify } = useQuasar();
-const { matched } = useRoute();
+const { matched, query } = useRoute();
 
 const baseName = 'pages.CommitPage.';
 const { name } = matched[matched.length - 2];
@@ -29,6 +30,8 @@ const { name } = matched[matched.length - 2];
 const i18n = (relativePath: string) => {
   return t(baseName + relativePath);
 };
+
+const commitQuery = new CommitQuery(query);
 
 const accessToken = ref<string>();
 const changedFileList = ref<ChangedFile[]>();
@@ -131,6 +134,8 @@ onMounted(() => {
     }
     loadingDiff.value = false;
   });
+
+  console.log(commitQuery.currentFile);
   window.actionApi.send(new ConfigStoreLoadActionMessage());
   sendSvnDiffAction();
 });
