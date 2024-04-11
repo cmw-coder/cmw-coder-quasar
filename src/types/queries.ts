@@ -1,5 +1,15 @@
 import { LocationQuery } from 'vue-router';
 
+export class CommitQuery {
+  currentFile = '';
+
+  constructor(query: LocationQuery) {
+    if (typeof query.currentFile === 'string') {
+      this.currentFile = query.currentFile;
+    }
+  }
+}
+
 export class LoginQuery {
   userId = '';
   showMain = false;

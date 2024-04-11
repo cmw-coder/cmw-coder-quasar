@@ -143,7 +143,7 @@ export interface DebugSyncClientMessage extends WsMessage {
 
 export interface EditorCommitClientMessage extends WsMessage {
   action: WsAction.EditorCommit;
-  data: undefined;
+  data: string;
 }
 
 export interface EditorFocusStateClientMessage extends WsMessage {
