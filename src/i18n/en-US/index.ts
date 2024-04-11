@@ -189,7 +189,7 @@ export default {
         noChanges: 'No changes',
         noSelect: 'No file selected',
         refresh: 'Refresh',
-        title: 'Commit Codes',
+        title: 'Commit Check',
       },
       tooltips: {
         generate: 'Generate Commit Message From AI',

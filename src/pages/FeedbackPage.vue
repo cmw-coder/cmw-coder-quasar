@@ -109,12 +109,12 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <q-page class="row justify-evenly q-pa-xl">
-    <q-card class="col-grow q-pa-lg">
-      <q-card-section class="text-h4 text-center">
+  <q-page class="row items-center justify-evenly q-pa-xl">
+    <div class="column col-grow q-gutter-y-md">
+      <div class="text-h4 text-center">
         {{ i18n('labels.title') }}
-      </q-card-section>
-      <q-card-section class="column q-gutter-y-md">
+      </div>
+      <div class="column q-gutter-y-md">
         <account-input v-model="userId" @update:error="error = $event" />
         <div class="column q-gutter-y-sm">
           <div class="text-bold text-grey text-h6">
@@ -144,8 +144,8 @@ onBeforeUnmount(() => {
             @uploaded="onUploaded"
           />
         </div>
-      </q-card-section>
-      <q-card-section class="row q-gutter-x-md">
+      </div>
+      <div class="row q-gutter-x-md">
         <q-btn
           v-if="name === WindowType.Floating"
           class="col-grow"
@@ -170,8 +170,8 @@ onBeforeUnmount(() => {
           :loading="loading"
           @click="submit"
         />
-      </q-card-section>
-    </q-card>
+      </div>
+    </div>
   </q-page>
 </template>
 
