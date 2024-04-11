@@ -3,9 +3,11 @@ import log from 'electron-log/main';
 import { ProgressInfo, UpdateInfo } from 'electron-updater';
 import { resolve } from 'path';
 
-import { configStore } from 'main/stores';
+import { websocketManager } from 'main/components/WebsocketManager';
+import { configStore, dataStore } from 'main/stores';
 import { BaseWindow } from 'main/types/BaseWindow';
 import { bypassCors } from 'main/utils/common';
+import { getChangedFileList, svnCommit } from 'main/utils/svn';
 import { ActionApi, sendToRenderer } from 'preload/types/ActionApi';
 import {
   ControlType,
@@ -17,9 +19,12 @@ import {
   ActionType,
   ConfigStoreLoadActionMessage,
   RouterReloadActionMessage,
+  SvnCommitActionMessage,
+  SvnDiffActionMessage,
   UpdateFinishActionMessage,
   UpdateProgressActionMessage,
 } from 'shared/types/ActionMessage';
+import { ChangedFile } from 'shared/types/svn';
 import { WindowType } from 'shared/types/WindowType';
 
 export class FloatingWindow extends BaseWindow {
@@ -145,7 +150,7 @@ export class FloatingWindow extends BaseWindow {
 
     this._window.once('ready-to-show', () => {
       if (this._window) {
-        // this._window.webContents.openDevTools({ mode: 'undocked' });
+        this._window.webContents.openDevTools({ mode: 'undocked' });
         this._window.show();
       }
     });
@@ -156,6 +161,36 @@ export class FloatingWindow extends BaseWindow {
           this._window,
           new ConfigStoreLoadActionMessage(configStore.store),
         );
+      }
+    });
+    this._actionApi.register(ActionType.SvnDiff, async () => {
+      if (this._window) {
+        let changedFileList: ChangedFile[] | undefined;
+        const projectPath = websocketManager.getClientInfo()?.currentProject;
+        if (projectPath && dataStore.store.project[projectPath]?.svn[0]) {
+          changedFileList = await getChangedFileList(
+            dataStore.store.project[projectPath].svn[0].directory,
+          );
+        }
+        sendToRenderer(this._window, new SvnDiffActionMessage(changedFileList));
+      }
+    });
+    this._actionApi.register(ActionType.SvnCommit, async (data) => {
+      if (this._window) {
+        const projectPath = websocketManager.getClientInfo()?.currentProject;
+        if (projectPath && dataStore.store.project[projectPath]?.svn[0]) {
+          try {
+            await svnCommit(dataStore.store.project[projectPath].svn[0].directory, data);
+            sendToRenderer(this._window, new SvnCommitActionMessage('success'));
+          } catch (e) {
+            sendToRenderer(this._window, new SvnCommitActionMessage(<string>e));
+          }
+        } else {
+          sendToRenderer(
+            this._window,
+            new SvnCommitActionMessage('invalidProject'),
+          );
+        }
       }
     });
 
