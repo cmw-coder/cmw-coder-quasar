@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { Container } from 'inversify';
 import { ConfigService } from 'service/entities/ConfigService';
 import { WindowService } from 'service/entities/WindowService';

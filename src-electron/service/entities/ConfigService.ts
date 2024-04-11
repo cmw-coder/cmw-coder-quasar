@@ -1,5 +1,4 @@
 import { injectable, inject } from 'inversify';
-import 'reflect-metadata';
 import { WindowService } from './WindowService';
 import { TYPES } from 'service/types';
 

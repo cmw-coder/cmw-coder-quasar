@@ -3,7 +3,6 @@ import {
   I_InvokeService,
   InvokeServiceKey,
 } from 'shared/types/service/I_InvokeService';
-import 'reflect-metadata';
 import { ipcMain } from 'electron';
 import { TYPES } from 'service/types';
 import { ConfigService } from 'service/entities/ConfigService';
@@ -22,7 +21,7 @@ export class InvokeService implements I_InvokeService {
         }
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        return func(...payloads);
+        return func.bind(this)(...payloads);
       },
     );
   }
