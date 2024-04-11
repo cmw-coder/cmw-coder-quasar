@@ -67,7 +67,6 @@ export interface CompletionGenerateClientMessage extends WsMessage {
     caret: CaretPosition;
     path: string;
     prefix: string;
-    project: string;
     recentFiles: string[];
     suffix: string;
     symbols: SymbolInfo[];
@@ -150,7 +149,6 @@ export interface EditorPasteClientMessage extends WsMessage {
   action: WsAction.EditorPaste;
   data: {
     count: number;
-    project: string;
   };
 }
 
@@ -161,7 +159,7 @@ export interface EditorSwitchProjectClientMessage extends WsMessage {
 
 export interface HandShakeClientMessage extends WsMessage {
   action: WsAction.HandShake;
-  data: { pid: number; version: string };
+  data: { pid: number; currentProject: string; version: string };
 }
 
 export interface WsMessageMapping {

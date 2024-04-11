@@ -7,7 +7,7 @@ import { detect } from 'jschardet';
 import { resolve } from 'path';
 import xml2js from 'xml2js';
 
-import { ChangedFile, SvnStatusItem } from 'shared/types/SvnType';
+import { ChangedFile, SvnStatusItem } from 'shared/types/svn';
 
 export const searchSvnDirectories = async (
   folder: string,
@@ -219,7 +219,7 @@ export const getChangedFileList = async (path: string) => {
 };
 
 export const svnCommit = async (projectPath: string, commitMessage: string) => {
-  return new Promise<string>((resolve) => {
+  return new Promise<string>((resolve, reject) => {
     let stdout = '';
     let stderr = '';
     const childProcess = child_process.spawn(
@@ -247,7 +247,7 @@ export const svnCommit = async (projectPath: string, commitMessage: string) => {
       if (code === 0) {
         resolve(stdout);
       } else {
-        resolve(stderr);
+        reject(stderr);
       }
     });
   });

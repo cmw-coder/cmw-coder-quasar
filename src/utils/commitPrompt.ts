@@ -1,4 +1,4 @@
-import { ChangedFile } from 'app/src-electron/shared/types/SvnType';
+import { ChangedFile } from 'shared/types/svn';
 
 export const generateCommitPrompt = (changedFile: ChangedFile[]) => {
   const requirement = `请为如下的代码变动生成简略的提交信息:

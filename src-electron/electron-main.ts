@@ -120,12 +120,19 @@ websocketManager.registerWsAction(
 );
 websocketManager.registerWsAction(
   WsAction.CompletionGenerate,
-  async ({ data }) => {
+  async ({ data }, pid) => {
     clearInterval(immersiveWindowDestroyInterval);
     immersiveWindowDestroyInterval = initWindowDestroyInterval(immersiveWindow);
 
-    const { caret, project } = data;
+    const { caret } = data;
     const actionId = statisticsReporter.completionBegin(caret);
+    const project = websocketManager.getClientInfo(pid)?.currentProject;
+    if (!project || !project.length) {
+      return new CompletionGenerateServerMessage({
+        result: 'failure',
+        message: 'Invalid project path',
+      });
+    }
 
     try {
       const { id: projectId } = getProjectData(project);
@@ -240,33 +247,28 @@ websocketManager.registerWsAction(
   },
 );
 websocketManager.registerWsAction(WsAction.EditorPaste, ({ data }, pid) => {
-  const { count, project } = data;
-  try {
-    const { id: projectId } = getProjectData(project);
-    statisticsReporter
-      .copiedLines(count, projectId, getClientVersion(pid))
-      .catch();
-  } catch (e) {
-    const error = <Error>e;
-    switch (error.cause) {
-      case CompletionErrorCause.projectData: {
-        floatingWindow.projectId(project);
-        break;
-      }
-      default: {
-        break;
+  const { count } = data;
+  const project = websocketManager.getClientInfo(pid)?.currentProject;
+  if (project && project.length) {
+    try {
+      const { id: projectId } = getProjectData(project);
+      statisticsReporter
+        .copiedLines(count, projectId, getClientVersion(pid))
+        .catch();
+    } catch (e) {
+      const error = <Error>e;
+      switch (error.cause) {
+        case CompletionErrorCause.projectData: {
+          floatingWindow.projectId(project);
+          break;
+        }
+        default: {
+          break;
+        }
       }
     }
   }
 });
-websocketManager.registerWsAction(
-  WsAction.EditorSwitchProject,
-  ({ data: project }) => {
-    if (!dataStore.getProjectId(project)) {
-      floatingWindow.projectId(project);
-    }
-  },
-);
 
 app.on('second-instance', () => {
   app.focus();

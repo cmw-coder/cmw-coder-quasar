@@ -24,10 +24,8 @@ export enum ActionType {
   UpdateDownload = 'UpdateDownload',
   UpdateFinish = 'UpdateFinish',
   UpdateProgress = 'UpdateProgress',
-  SvnCommitRequest = 'SvnCommitRequest',
-  SvnCommitSuccess = 'SvnCommitSuccess',
-  SvnDiffRequest = 'SvnDiffRequest',
-  SvnDiffResponse = 'SvnDiffResponse',
+  SvnCommit = 'SvnCommit',
+  SvnDiff = 'SvnDiff',
 }
 
 export interface ActionMessage {
@@ -191,30 +189,20 @@ export class UpdateDownloadActionMessage implements ActionMessage {
   data: undefined;
 }
 
-export class SvnCommitActionRequestMessage implements ActionMessage {
-  type = ActionType.SvnCommitRequest;
-  data: string;
+export class SvnCommitActionMessage implements ActionMessage {
+  type = ActionType.SvnCommit;
+  data: 'invalidProject' | 'success' | string;
 
   constructor(data: string) {
     this.data = data;
   }
 }
 
-export class SvnCommitSuccessActionMessage implements ActionMessage {
-  type = ActionType.SvnCommitSuccess;
-  data: undefined;
-}
+export class SvnDiffActionMessage implements ActionMessage {
+  type = ActionType.SvnDiff;
+  data: ChangedFile[] | undefined;
 
-export class SvnDiffActionRequestMessage implements ActionMessage {
-  type = ActionType.SvnDiffRequest;
-  data: undefined;
-}
-
-export class SvnDiffActionResponseMessage implements ActionMessage {
-  type = ActionType.SvnDiffResponse;
-  data: ChangedFile[];
-
-  constructor(data: ChangedFile[]) {
+  constructor(data?: ChangedFile[]) {
     this.data = data;
   }
 }
@@ -235,8 +223,6 @@ export interface ActionMessageMapping {
   [ActionType.UpdateDownload]: UpdateDownloadActionMessage;
   [ActionType.UpdateFinish]: UpdateFinishActionMessage;
   [ActionType.UpdateProgress]: UpdateProgressActionMessage;
-  [ActionType.SvnCommitRequest]: SvnCommitActionRequestMessage;
-  [ActionType.SvnCommitSuccess]: SvnCommitSuccessActionMessage;
-  [ActionType.SvnDiffRequest]: SvnDiffActionRequestMessage;
-  [ActionType.SvnDiffResponse]: SvnDiffActionResponseMessage;
+  [ActionType.SvnCommit]: SvnCommitActionMessage;
+  [ActionType.SvnDiff]: SvnDiffActionMessage;
 }

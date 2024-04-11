@@ -8,7 +8,7 @@ import {
   ConfigStoreLoadActionMessage,
 } from 'app/src-electron/shared/types/ActionMessage';
 import { ApiStyle } from 'app/src-electron/shared/types/model';
-import { ChangedFile } from 'app/src-electron/shared/types/SvnType';
+import { ChangedFile } from 'shared/types/svn';
 import { chatWithLinseer } from 'boot/axios';
 import { useHighlighter } from 'stores/highlighter';
 import { ActionApi } from 'types/ActionApi';
@@ -26,56 +26,58 @@ const i18n = (relativePath: string) => {
   return t(baseName + relativePath);
 };
 
-const changedFileList = ref<ChangedFile[]>([]);
-
+const accessToken = ref<string>();
+const changedFileList = ref<ChangedFile[]>();
 const commitMessage = ref('');
+const endpoint = ref<string>();
+const loadingCommit = ref(false);
+const loadingDiff = ref(false);
+const loadingGenerate = ref(false);
 const selectedIndex = ref(0);
 const shadowText = ref('');
 const splitPercentage = ref(40);
 
-const accessToken = ref<string>();
-const endpoint = ref<string>();
-
-const generateLoading = ref(false);
-
 const generateCommitMessage = async () => {
-  const commitPrompt = generateCommitPrompt(changedFileList.value);
-  console.log('commitPrompt', commitPrompt);
-  try {
-    generateLoading.value = true;
-    const { data } = await chatWithLinseer(
-      endpoint.value || '',
-      commitPrompt,
-      [],
-      accessToken.value || '',
-    );
-    const result = data[0]?.code;
-    commitMessage.value = result;
-  } finally {
-    generateLoading.value = false;
+  if (changedFileList.value && changedFileList.value?.length) {
+    loadingGenerate.value = true;
+    const commitPrompt = generateCommitPrompt(changedFileList.value);
+    console.log('commitPrompt', commitPrompt);
+    try {
+      const { data } = await chatWithLinseer(
+        endpoint.value || '',
+        commitPrompt,
+        [],
+        accessToken.value || '',
+      );
+      commitMessage.value = data[0]?.code;
+    } catch (e) {
+      notify({
+        type: 'negative',
+        message: i18n('notifications.generateFailed'),
+        caption: (<Error>e).message,
+      });
+    }
+    loadingGenerate.value = false;
   }
 };
 
-const getDiffData = () => {
+const sendSvnCommitAction = () => {
+  loadingCommit.value = true;
   window.actionApi.send({
-    type: ActionType.SvnDiffRequest,
-    data: undefined,
-  });
-};
-
-const submitCommitMessage = () => {
-  window.actionApi.send({
-    type: ActionType.SvnCommitRequest,
+    type: ActionType.SvnCommit,
     data: commitMessage.value,
   });
 };
 
-onMounted(() => {
-  getDiffData();
-  actionApi.register(ActionType.SvnDiffResponse, (data) => {
-    console.log('SvnDiffResponse', data);
-    changedFileList.value = data;
+const sendSvnDiffAction = () => {
+  loadingDiff.value = true;
+  window.actionApi.send({
+    type: ActionType.SvnDiff,
+    data: undefined,
   });
+};
+
+onMounted(() => {
   actionApi.register(
     ActionType.ConfigStoreLoad,
     ({ apiStyle, config, data }) => {
@@ -85,15 +87,45 @@ onMounted(() => {
       endpoint.value = config.endpoints.aiService;
     },
   );
-  actionApi.register(ActionType.SvnCommitSuccess, () => {
-    notify({
-      type: 'positive',
-      message: i18n('notifications.commitSuccess'),
-    });
-    commitMessage.value = '';
-    getDiffData();
+  actionApi.register(ActionType.SvnCommit, (result) => {
+    switch (result) {
+      case 'success': {
+        notify({
+          type: 'positive',
+          message: i18n('notifications.commitSuccess'),
+        });
+        commitMessage.value = '';
+        sendSvnDiffAction();
+        break;
+      }
+      case 'invalidProject': {
+        notify({
+          type: 'warning',
+          message: i18n('notifications.invalidProject'),
+        });
+        break;
+      }
+      default: {
+        notify({
+          type: 'negative',
+          message: i18n('notifications.commitFailed'),
+          caption: result,
+        });
+        sendSvnDiffAction();
+        break;
+      }
+    }
+    loadingCommit.value = false;
+  });
+  actionApi.register(ActionType.SvnDiff, (data) => {
+    console.log('SvnDiff.response', data);
+    if (data) {
+      changedFileList.value = data;
+    }
+    loadingDiff.value = false;
   });
   window.actionApi.send(new ConfigStoreLoadActionMessage());
+  sendSvnDiffAction();
 });
 </script>
 
@@ -107,10 +139,15 @@ onMounted(() => {
         {{ i18n('labels.changes') }}
       </div>
       <q-card>
-        <q-splitter horizontal v-model="splitPercentage" style="height: 500px">
+        <q-splitter
+          v-if="changedFileList"
+          horizontal
+          v-model="splitPercentage"
+          style="height: 500px"
+        >
           <template v-slot:before>
             <q-scroll-area class="full-height full-width">
-              <q-list separator>
+              <q-list v-if="changedFileList.length" separator>
                 <q-item
                   v-for="(item, index) in changedFileList"
                   :key="index"
@@ -170,18 +207,29 @@ onMounted(() => {
                   </q-item-section>
                 </q-item>
               </q-list>
+              <div v-else class="text-center text-grey text-h4 text-italic">
+                {{ i18n('labels.noChanges') }}
+              </div>
             </q-scroll-area>
           </template>
           <template v-slot:after>
-            <q-scroll-area class="full-height full-width">
+            <q-scroll-area
+              v-if="changedFileList[selectedIndex]"
+              class="full-height full-width"
+            >
               <div
-                v-if="changedFileList[selectedIndex]"
                 class="q-pa-sm"
                 v-html="codeToHtml(changedFileList[selectedIndex].diff, 'diff')"
               />
             </q-scroll-area>
+            <div v-else class="text-center text-grey text-h4 text-italic">
+              {{ i18n('labels.noSelect') }}
+            </div>
           </template>
         </q-splitter>
+        <div v-else class="text-center text-grey text-h3 text-italic">
+          {{ i18n('labels.invalidProject') }}
+        </div>
       </q-card>
     </q-card-section>
     <q-card-section class="column q-gutter-x-md">
@@ -193,12 +241,12 @@ onMounted(() => {
           class="generate-btn"
           color="grey-7"
           dense
+          :disabled="!changedFileList || changedFileList.length === 0 || loadingCommit"
           icon="mdi-message-fast-outline"
+          :loading="loadingGenerate"
           outline
           size="sm"
-          :loading="generateLoading"
-          :disabled="changedFileList.length === 0"
-          @click="() => generateCommitMessage()"
+          @click="generateCommitMessage"
         >
           <q-tooltip
             anchor="bottom middle"
@@ -207,7 +255,7 @@ onMounted(() => {
             transition-show="jump-down"
           >
             {{
-              generateLoading
+              loadingGenerate
                 ? i18n('tooltips.generating')
                 : i18n('tooltips.generate')
             }}
@@ -216,12 +264,14 @@ onMounted(() => {
         <q-input
           clearable
           dense
+          :disabled="
+            !changedFileList || changedFileList.length === 0 || loadingCommit
+          "
           :maxlength="400"
           outlined
           :shadow-text="shadowText"
           type="textarea"
           v-model="commitMessage"
-          :disabled="changedFileList.length === 0"
         />
       </div>
     </q-card-section>
@@ -229,9 +279,10 @@ onMounted(() => {
       <q-btn
         class="col-grow"
         color="primary"
-        :label="i18n('labels.submit')"
         :disabled="!commitMessage"
-        @click="() => submitCommitMessage()"
+        :label="i18n('labels.commit')"
+        :loading="loadingCommit"
+        @click="sendSvnCommitAction"
       />
     </q-card-section>
   </q-page>
@@ -243,7 +294,7 @@ onMounted(() => {
 
   .generate-btn {
     position: absolute;
-    right: 0px;
+    right: 0;
     top: -30px;
     z-index: 100;
   }
