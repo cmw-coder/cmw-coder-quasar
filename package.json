@@ -13,6 +13,7 @@
     "publish": "quasar build -m electron --publish"
   },
   "dependencies": {
+    "@langchain/core": "^0.1.55",
     "@quasar/extras": "^1.16.9",
     "@taiyosen/easy-svn": "^1.0.27",
     "axios": "^1.6.8",
