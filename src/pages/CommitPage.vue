@@ -9,10 +9,12 @@ import {
 } from 'app/src-electron/shared/types/ActionMessage';
 import { ApiStyle } from 'app/src-electron/shared/types/model';
 import { ChangedFile } from 'shared/types/svn';
-import { chatWithLinseer } from 'boot/axios';
 import { useHighlighter } from 'stores/highlighter';
 import { ActionApi } from 'types/ActionApi';
-import { generateCommitPrompt } from 'utils/commitPrompt';
+import {
+  generateCommitMessage,
+  generateCommitPrompt,
+} from 'utils/commitPrompt';
 
 const { codeToHtml } = useHighlighter();
 const { t } = useI18n();
@@ -36,19 +38,16 @@ const loadingGenerate = ref(false);
 const selectedIndex = ref(0);
 const splitPercentage = ref(40);
 
-const generateCommitMessage = async () => {
+const generateCommitMessageHandle = async () => {
   if (changedFileList.value && changedFileList.value?.length) {
     loadingGenerate.value = true;
     const commitPrompt = generateCommitPrompt(changedFileList.value);
-    console.log('commitPrompt', commitPrompt);
     try {
-      const { data } = await chatWithLinseer(
+      commitMessage.value = await generateCommitMessage(
         endpoint.value || '',
         commitPrompt,
-        [],
-        accessToken.value || '',
+        accessToken.value,
       );
-      commitMessage.value = data[0]?.code;
     } catch (e) {
       notify({
         type: 'negative',
@@ -153,7 +152,7 @@ onMounted(() => {
         <q-card class="diff-card row items-center justify-center" bordered flat>
           <q-splitter
             v-if="changedFileList"
-            class="full-height"
+            class="full-height full-width"
             :disable="loadingDiff"
             horizontal
             v-model="splitPercentage"
@@ -264,7 +263,7 @@ onMounted(() => {
             :loading="loadingGenerate"
             no-caps
             outline
-            @click="generateCommitMessage"
+            @click="generateCommitMessageHandle"
           >
             <q-tooltip
               anchor="bottom middle"

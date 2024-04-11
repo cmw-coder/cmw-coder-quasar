@@ -1,4 +1,7 @@
 import { ChangedFile } from 'shared/types/svn';
+import { ApiStyle } from 'shared/types/model';
+import { runtimeConfig } from 'shared/config';
+import { chatWithDeepSeek, chatWithLinseer } from 'boot/axios';
 
 export const generateCommitPrompt = (changedFile: ChangedFile[]) => {
   const requirement = `请为如下的代码变动生成简略的提交信息:
@@ -17,4 +20,22 @@ ${file.diff}
     })
     .join('\r\n');
   return requirement + changedText;
+};
+
+export const generateCommitMessage = async (
+  endPoint: string,
+  prompt: string,
+  accessToken?: string,
+) => {
+  if (runtimeConfig.apiStyle === ApiStyle.Linseer) {
+    if (accessToken) {
+      const { data } = await chatWithLinseer(endPoint, prompt, [], accessToken);
+      return data[0]?.code as string;
+    } else {
+      throw new Error('Invalid access token');
+    }
+  } else {
+    const { data } = await chatWithDeepSeek(endPoint, prompt, []);
+    return data[0]?.choices[0]?.message?.content as string;
+  }
 };

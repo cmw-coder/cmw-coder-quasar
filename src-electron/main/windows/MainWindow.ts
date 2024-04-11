@@ -113,7 +113,8 @@ export class MainWindow extends BaseWindow {
     this._actionApi.register(ActionType.SvnDiff, async () => {
       if (this._window) {
         let changedFileList: ChangedFile[] | undefined;
-        const projectPath = websocketManager.getClientInfo()?.currentProject;
+        const projectPath =
+          websocketManager.getClientInfo()?.currentProject || 'D:\\project\\IP';
         if (projectPath) {
           changedFileList = await getChangedFileList(projectPath);
         }
@@ -122,7 +123,8 @@ export class MainWindow extends BaseWindow {
     });
     this._actionApi.register(ActionType.SvnCommit, async (data) => {
       if (this._window) {
-        const projectPath = websocketManager.getClientInfo()?.currentProject;
+        const projectPath =
+          websocketManager.getClientInfo()?.currentProject || 'D:\\project\\IP';
         if (projectPath) {
           try {
             await svnCommit(projectPath, data);
