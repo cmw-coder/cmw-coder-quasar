@@ -102,7 +102,7 @@ const websocketManager = new WebsocketManager();
 websocketManager.registerWsAction(
   WsAction.EditorSwitchProject,
   ({ data: project }, pid) => {
-    websocketManager.setCurrentProject(pid, project)
+    websocketManager.setCurrentProject(pid, project);
   },
 );
 
