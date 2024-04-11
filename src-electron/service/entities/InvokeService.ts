@@ -1,13 +1,17 @@
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
 import {
   I_InvokeService,
   InvokeServiceKey,
 } from 'shared/types/service/I_InvokeService';
 import 'reflect-metadata';
 import { ipcMain } from 'electron';
+import { TYPES } from 'service/types';
+import { ConfigService } from 'service/entities/ConfigService';
 
 @injectable()
 export class InvokeService implements I_InvokeService {
+  @inject(TYPES.ConfigService)
+  private _ConfigService!: ConfigService;
   constructor() {
     ipcMain.handle(
       InvokeServiceKey,
@@ -29,6 +33,7 @@ export class InvokeService implements I_InvokeService {
 
   async sayHello(data: string) {
     console.log('Hello from InvokeService', data);
+    // this._ConfigService.sayHello();
     return Math.random();
   }
 }

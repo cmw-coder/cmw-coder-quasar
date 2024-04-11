@@ -22,6 +22,7 @@ onMounted(async () => {
   actionApi.register(ActionType.RouterReload, () => {
     reloadKey.value = !reloadKey.value;
   });
+  console.log('app mounted');
 
   const invokeService = useInvokeService();
   const invokeRes = await invokeService.sayHello('hi');

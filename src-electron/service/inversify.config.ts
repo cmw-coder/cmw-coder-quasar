@@ -4,7 +4,9 @@ import { WindowService } from 'service/entities/WindowService';
 import { InvokeService } from './entities/InvokeService';
 import { TYPES } from 'service/types';
 
-const container = new Container();
+const container = new Container({
+  defaultScope: 'Transient',
+});
 
 container.bind<ConfigService>(TYPES.ConfigService).to(ConfigService);
 container.bind<WindowService>(TYPES.WindowService).to(WindowService);
