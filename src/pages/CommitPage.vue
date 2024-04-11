@@ -82,7 +82,7 @@ const generateCommitMessageHandle = async () => {
     loadingGenerate.value = true;
     const commitPrompt = generateCommitPrompt(changedFileList);
     try {
-      projectList.value[activeProjectIndex.value].commitMessage =
+      activeProject.value.commitMessage =
         await generateCommitMessage(
           endpoint.value || '',
           commitPrompt,
@@ -351,7 +351,7 @@ const getLastDirName = (path: string) => {
           "
           :maxlength="400"
           outlined
-          v-model="projectList[activeProjectIndex].commitMessage"
+          v-model="activeProject.commitMessage"
         />
       </div>
       <div class="row q-gutter-x-md">

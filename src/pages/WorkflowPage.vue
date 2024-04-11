@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { copyToClipboard, useQuasar } from 'quasar';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { useWorkflowStore } from 'stores/workflow';
@@ -21,6 +21,8 @@ const i18n = (relativePath: string) => {
 
 const selectedIndex = ref(workflows.value.length - 1);
 const splitPercentage = ref(50);
+
+const currentWorkflow = computed(() => workflows.value[selectedIndex.value]);
 
 const copyWorkflowId = (id: string) =>
   copyToClipboard(id)
@@ -101,9 +103,9 @@ const selectWorkflow = (index: number) => {
         </template>
         <template v-slot:after>
           <q-scroll-area class="full-height full-width">
-            <q-list v-if="workflows[selectedIndex]?.steps?.length" separator>
+            <q-list v-if="currentWorkflow?.steps?.length" separator>
               <q-expansion-item
-                v-for="(item, index) in workflows[selectedIndex].steps"
+                v-for="(item, index) in currentWorkflow.steps"
                 :key="index"
                 :disable="
                   item.status === 'pending' || item.status === 'skipped'
