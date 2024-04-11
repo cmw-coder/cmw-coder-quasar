@@ -113,6 +113,39 @@ export const chatWithHuggingFace = async (
     });
 };
 
+export const chatWithDeepSeek = async (
+  endpoint: string,
+  question: string,
+  historyList: { role: 'assistant' | 'user'; content: string }[],
+) => {
+  return await axios
+    .create({
+      baseURL: endpoint,
+    })
+    .post<{
+      choices: {
+        message: {
+          role: 'assistant' | 'user';
+          content: string;
+        };
+      }[];
+    }>('/v1/chat/completions', {
+      max_tokens: 1024,
+      messages: [
+        ...historyList,
+        {
+          role: 'user',
+          content: question,
+        },
+      ],
+      model: 'tgi',
+      seed: 42,
+      stream: false,
+      temperature: 0.001,
+      details: false,
+    });
+};
+
 export const chatWithLinseer = async (
   endpoint: string,
   question: string,

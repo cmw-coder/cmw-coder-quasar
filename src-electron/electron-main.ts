@@ -244,6 +244,12 @@ websocketManager.registerWsAction(
   },
 );
 websocketManager.registerWsAction(
+  WsAction.EditorCommit,
+  () => {
+    floatingWindow.commit();
+  },
+);
+websocketManager.registerWsAction(
   WsAction.EditorFocusState,
   ({ data: isFocused }) => {
     if (isFocused) {

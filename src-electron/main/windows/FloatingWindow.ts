@@ -30,6 +30,18 @@ export class FloatingWindow extends BaseWindow {
     super(WindowType.Floating);
   }
 
+  commit() {
+    this.activate();
+    if (this._window) {
+      this._window.setSize(600, 1000);
+      this._window.center();
+      this._window.focus();
+      this._loadUrl('/floating/commit');
+    } else {
+      log.warn('Floating window activate failed');
+    }
+  }
+
   feedback() {
     this.activate();
     if (this._window) {

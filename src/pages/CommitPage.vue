@@ -2,25 +2,29 @@
 import { useQuasar } from 'quasar';
 import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRoute } from 'vue-router';
 
 import {
   ActionType,
   ConfigStoreLoadActionMessage,
-} from 'app/src-electron/shared/types/ActionMessage';
-import { ApiStyle } from 'app/src-electron/shared/types/model';
+} from 'shared/types/ActionMessage';
+import { ApiStyle } from 'shared/types/model';
 import { ChangedFile } from 'shared/types/svn';
-import { chatWithLinseer } from 'boot/axios';
+import { WindowType } from 'shared/types/WindowType';
 import { useHighlighter } from 'stores/highlighter';
 import { ActionApi } from 'types/ActionApi';
-import { generateCommitPrompt } from 'utils/commitPrompt';
+import {
+  generateCommitMessage,
+  generateCommitPrompt,
+} from 'utils/commitPrompt';
 
 const { codeToHtml } = useHighlighter();
 const { t } = useI18n();
 const { notify } = useQuasar();
+const { matched } = useRoute();
 
 const baseName = 'pages.CommitPage.';
-
-const actionApi = new ActionApi(baseName);
+const { name } = matched[matched.length - 2];
 
 const i18n = (relativePath: string) => {
   return t(baseName + relativePath);
@@ -36,19 +40,18 @@ const loadingGenerate = ref(false);
 const selectedIndex = ref(0);
 const splitPercentage = ref(40);
 
-const generateCommitMessage = async () => {
+const closeWindow = () => window.controlApi.hide(WindowType.Floating);
+
+const generateCommitMessageHandle = async () => {
   if (changedFileList.value && changedFileList.value?.length) {
     loadingGenerate.value = true;
     const commitPrompt = generateCommitPrompt(changedFileList.value);
-    console.log('commitPrompt', commitPrompt);
     try {
-      const { data } = await chatWithLinseer(
+      commitMessage.value = await generateCommitMessage(
         endpoint.value || '',
         commitPrompt,
-        [],
-        accessToken.value || '',
+        accessToken.value,
       );
-      commitMessage.value = data[0]?.code;
     } catch (e) {
       notify({
         type: 'negative',
@@ -76,6 +79,7 @@ const sendSvnDiffAction = () => {
   });
 };
 
+const actionApi = new ActionApi(baseName);
 onMounted(() => {
   actionApi.register(
     ActionType.ConfigStoreLoad,
@@ -94,7 +98,11 @@ onMounted(() => {
           message: i18n('notifications.commitSuccess'),
         });
         commitMessage.value = '';
-        sendSvnDiffAction();
+        if (name === WindowType.Floating) {
+          setTimeout(closeWindow, 2000);
+        } else {
+          sendSvnDiffAction();
+        }
         break;
       }
       case 'invalidProject': {
@@ -153,7 +161,7 @@ onMounted(() => {
         <q-card class="diff-card row items-center justify-center" bordered flat>
           <q-splitter
             v-if="changedFileList"
-            class="full-height"
+            class="full-height full-width"
             :disable="loadingDiff"
             horizontal
             v-model="splitPercentage"
@@ -264,7 +272,7 @@ onMounted(() => {
             :loading="loadingGenerate"
             no-caps
             outline
-            @click="generateCommitMessage"
+            @click="generateCommitMessageHandle"
           >
             <q-tooltip
               anchor="bottom middle"
@@ -292,15 +300,25 @@ onMounted(() => {
           v-model="commitMessage"
         />
       </div>
-      <q-btn
-        color="primary"
-        :disabled="!commitMessage"
-        :label="i18n('labels.commit')"
-        :loading="loadingCommit"
-        no-caps
-        size="lg"
-        @click="sendSvnCommitAction"
-      />
+      <div class="row q-gutter-x-md">
+        <q-btn
+          v-if="name === WindowType.Floating"
+          class="col-grow"
+          flat
+          :label="i18n('labels.cancel')"
+          :loading="loadingCommit"
+          @click="closeWindow"
+        />
+        <q-btn
+          class="col-grow"
+          color="primary"
+          :disabled="!commitMessage"
+          :label="i18n('labels.commit')"
+          :loading="loadingCommit"
+          no-caps
+          @click="sendSvnCommitAction"
+        />
+      </div>
     </div>
   </q-page>
 </template>

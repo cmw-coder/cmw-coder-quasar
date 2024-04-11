@@ -11,6 +11,7 @@ export enum WsAction {
   CompletionGenerate = 'CompletionGenerate',
   CompletionSelect = 'CompletionSelect',
   DebugSync = 'DebugSync',
+  EditorCommit = 'EditorCommit',
   EditorFocusState = 'EditorFocusState',
   EditorPaste = 'EditorPaste',
   EditorSwitchProject = 'EditorSwitchProject',
@@ -140,6 +141,11 @@ export interface DebugSyncClientMessage extends WsMessage {
   };
 }
 
+export interface EditorCommitClientMessage extends WsMessage {
+  action: WsAction.EditorCommit;
+  data: undefined;
+}
+
 export interface EditorFocusStateClientMessage extends WsMessage {
   action: WsAction.EditorFocusState;
   data: boolean;
@@ -188,6 +194,10 @@ export interface WsMessageMapping {
     server: void;
   };
   [WsAction.DebugSync]: { client: DebugSyncClientMessage; server: void };
+  [WsAction.EditorCommit]: {
+    client: EditorCommitClientMessage;
+    server: void;
+  };
   [WsAction.EditorFocusState]: {
     client: EditorFocusStateClientMessage;
     server: void;

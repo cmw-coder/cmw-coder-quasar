@@ -1,12 +1,14 @@
 <script setup lang="ts">
+import { IterableReadableStream } from '@langchain/core/dist/utils/stream';
+import { RemoteRunnable } from '@langchain/core/runnables/remote';
+import { QScrollArea } from 'quasar';
 import { storeToRefs } from 'pinia';
-import { nextTick, ref, watch } from 'vue';
+import { nextTick, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import ChatMessages from 'components/ChatMessages.vue';
 import { useChatStore } from 'stores/chat';
-import { QScrollArea } from 'quasar';
-import { timeout } from 'utils/index';
+import { timeout } from 'src/utils';
 
 const baseName = 'pages.ChatPage.';
 
@@ -30,6 +32,39 @@ watch(
   },
   { deep: true },
 );
+
+onMounted(async () => {
+  const remoteChain = new RemoteRunnable({
+    url: 'http://10.113.36.127:9299/agent',
+  });
+
+  const stream = <
+    IterableReadableStream<
+      Record<
+        string,
+        {
+          kwargs: {
+            messages: {
+              kwargs: {
+                content: { content: string; status: 'failure' | 'success' }[];
+              };
+            }[];
+          };
+        }
+      >
+    >
+  >await remoteChain.stream({
+    input: 'placeholder',
+  });
+
+  for await (const chunk of stream) {
+    const [event, data] = Object.entries(chunk)[0];
+    console.log(
+      event,
+      data.kwargs.messages.map((message) => message.kwargs.content),
+    );
+  }
+});
 </script>
 
 <template>
