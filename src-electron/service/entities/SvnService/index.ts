@@ -124,8 +124,7 @@ export class SvnService implements I_SvnService {
       path: string;
       changedFileList: ChangedFile[];
     }[];
-    let projectPathList = Object.keys(dataStore.store.project);
-    projectPathList = ['D:\\svn-test', 'D:\\svn-test'];
+    const projectPathList = Object.keys(dataStore.store.project);
     for (let i = 0; i < projectPathList.length; i++) {
       const projectPath = projectPathList[i];
       const changedFileList = await this.dirDiff(projectPath);
