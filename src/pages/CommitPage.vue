@@ -115,13 +115,13 @@ const sendSvnCommitAction = async () => {
       activeProject.value.commitMessage,
       'administrator',
     ).catch();
-    if (name === WindowType.Floating) {
-      closeWindow();
-    } else {
-      setTimeout(() => {
+    setTimeout(() => {
+      if (name === WindowType.Floating) {
+        closeWindow();
+      } else {
         push('/main/workflow');
-      }, 1500);
-    }
+      }
+    }, 2000);
   } catch (e) {
     notify({
       type: 'negative',
