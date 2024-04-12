@@ -105,19 +105,23 @@ const sendSvnCommitAction = async () => {
       activeProject.value.path,
       activeProject.value.commitMessage,
     );
-    refreshProjectList();
     notify({
       type: 'positive',
       message: i18n('notifications.commitSuccess'),
     });
+    refreshProjectList().catch();
     createWorkflow(
       activeProject.value.path,
       activeProject.value.commitMessage,
       'administrator',
     ).catch();
-    setTimeout(() => {
-      push('/main/workflow');
-    }, 1500);
+    if (name === WindowType.Floating) {
+      closeWindow();
+    } else {
+      setTimeout(() => {
+        push('/main/workflow');
+      }, 1500);
+    }
   } catch (e) {
     notify({
       type: 'negative',
