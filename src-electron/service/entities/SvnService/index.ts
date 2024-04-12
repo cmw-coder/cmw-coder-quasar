@@ -6,9 +6,11 @@ import { formatStatusRes } from 'service/entities/SvnService/util';
 import { spawn } from 'child_process';
 import { decode } from 'iconv-lite';
 import xml2js from 'xml2js';
+import { I_SvnService } from 'shared/service-interface/I_SvnService';
+import { dataStore } from 'main/stores';
 
 @injectable()
-export class SvnService {
+export class SvnService implements I_SvnService {
   status(dirPath: string) {
     return new Promise<SvnStatusItem[]>((resolve) => {
       let stdout = '';
@@ -112,6 +114,24 @@ export class SvnService {
         additions: added,
         deletions: deleted,
         diff: diffDetail,
+      });
+    }
+    return result;
+  }
+
+  async getAllProjectList() {
+    const result = [] as {
+      path: string;
+      changedFileList: ChangedFile[];
+    }[];
+    let projectPathList = Object.keys(dataStore.store.project);
+    projectPathList = ['D:\\svn-test', 'D:\\svn-test'];
+    for (let i = 0; i < projectPathList.length; i++) {
+      const projectPath = projectPathList[i];
+      const changedFileList = await this.dirDiff(projectPath);
+      result.push({
+        path: projectPath,
+        changedFileList,
       });
     }
     return result;

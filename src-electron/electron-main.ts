@@ -36,12 +36,12 @@ import {
   WsAction,
 } from 'shared/types/WsMessage';
 import { container } from 'service/inversify.config';
-import { InvokeService } from 'service/entities/InvokeService';
-import { TYPES } from 'service/types';
+import { AppService } from 'service/entities/AppService';
+import { TYPES } from 'shared/service-interface/types';
 
-const invokeService = container.get<InvokeService>(TYPES.InvokeService);
+const appService = container.get<AppService>(TYPES.AppService);
 
-invokeService.init();
+appService.init();
 
 initApplication();
 initAdditionReport();

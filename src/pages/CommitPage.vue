@@ -3,8 +3,6 @@ import { useQuasar } from 'quasar';
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
-
-import { useInvokeService } from 'boot/useInvokeService';
 import {
   ActionType,
   ConfigStoreLoadActionMessage,
@@ -20,6 +18,8 @@ import {
   generateCommitMessage,
   generateCommitPrompt,
 } from 'utils/commitPrompt';
+import useService from 'boot/useService';
+import { TYPES } from 'app/src-electron/shared/service-interface/types';
 
 const { codeToHtml } = useHighlighter();
 const { createWorkflow } = useWorkflowStore();
@@ -35,7 +35,7 @@ const i18n = (relativePath: string) => {
   return t(baseName + relativePath);
 };
 
-const invokeService = useInvokeService();
+const svnService = useService(TYPES.SvnService);
 const projectList = ref<
   {
     path: string;
@@ -45,7 +45,7 @@ const projectList = ref<
 >([]);
 
 const refreshProjectList = async () => {
-  const res = await invokeService.getAllProjectList();
+  const res = await svnService.getAllProjectList();
   projectList.value = res.map((item) => ({
     ...item,
     commitMessage: '',
@@ -82,12 +82,11 @@ const generateCommitMessageHandle = async () => {
     loadingGenerate.value = true;
     const commitPrompt = generateCommitPrompt(changedFileList);
     try {
-      activeProject.value.commitMessage =
-        await generateCommitMessage(
-          endpoint.value || '',
-          commitPrompt,
-          accessToken.value,
-        );
+      activeProject.value.commitMessage = await generateCommitMessage(
+        endpoint.value || '',
+        commitPrompt,
+        accessToken.value,
+      );
     } catch (e) {
       notify({
         type: 'negative',
@@ -102,10 +101,11 @@ const generateCommitMessageHandle = async () => {
 const sendSvnCommitAction = async () => {
   loadingCommit.value = true;
   try {
-    await invokeService.commit(
+    await svnService.commit(
       activeProject.value.path,
       activeProject.value.commitMessage,
     );
+    refreshProjectList();
     notify({
       type: 'positive',
       message: i18n('notifications.commitSuccess'),

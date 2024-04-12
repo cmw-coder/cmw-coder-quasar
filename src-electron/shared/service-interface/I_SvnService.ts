@@ -1,7 +1,6 @@
 import { ChangedFile } from 'shared/types/svn';
 
-export interface I_InvokeService {
-  sayHello(data: string): Promise<number>;
+export interface I_SvnService {
   getAllProjectList(): Promise<
     {
       path: string;
@@ -10,5 +9,3 @@ export interface I_InvokeService {
   >;
   commit(projectPath: string, message: string): Promise<string>;
 }
-
-export const InvokeServiceKey = 'InvokeService:Call';
