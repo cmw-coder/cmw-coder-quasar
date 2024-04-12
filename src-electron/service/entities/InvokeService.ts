@@ -46,8 +46,7 @@ export class InvokeService implements I_InvokeService {
       path: string;
       changedFileList: ChangedFile[];
     }[];
-    let projectPathList = Object.keys(dataStore.store.project);
-    projectPathList = ['D:\\svn-test', 'D:\\project\\cmw-coder-quasar'];
+    const projectPathList = Object.keys(dataStore.store.project);
 
     for (let i = 0; i < projectPathList.length; i++) {
       const projectPath = projectPathList[i];
