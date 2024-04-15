@@ -1,6 +1,6 @@
 import { ipcRenderer } from 'electron';
 
-import { controlApiKey } from 'shared/types/constants';
+import { CONTROL_API_KEY } from 'shared/constants/common';
 import { WindowType } from 'shared/types/WindowType';
 
 export enum ControlType {
@@ -166,4 +166,4 @@ export const triggerControlCallback = (
 };
 
 export const sendControlAction = (message: ControlMessageUnion) =>
-  ipcRenderer.send(controlApiKey, message);
+  ipcRenderer.send(CONTROL_API_KEY, message);

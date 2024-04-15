@@ -7,6 +7,10 @@ import { detect } from 'jschardet';
 import { resolve } from 'path';
 import xml2js from 'xml2js';
 
+import { statisticsReporter } from 'main/components/StatisticsReporter';
+import { dataStore } from 'main/stores';
+import { folderLatestModificationTime } from 'main/utils/common';
+import packageJson from 'root/package.json';
 import { ChangedFile, SvnStatusItem } from 'shared/types/svn';
 
 export const searchSvnDirectories = async (
@@ -218,6 +222,48 @@ export const getChangedFileList = async (path: string) => {
   }
   return result;
 };
+
+export const reportProjectAdditions = async () =>
+  (
+    await Promise.all(
+      Object.entries(dataStore.store.project).map(
+        async ([path, { id, lastAddedLines, svn }]) => ({
+          path,
+          id,
+          addedLines:
+            Date.now() - (await folderLatestModificationTime(path)).getTime() >
+            1000 * 3600 * 24
+              ? (
+                  await Promise.all(
+                    svn.map(
+                      async ({ directory, revision }) =>
+                        await getAddedLines(directory, revision),
+                    ),
+                  )
+                ).reduce((acc, val) => acc.concat(val), []).length
+              : 0,
+          lastAddedLines,
+        }),
+      ),
+    )
+  )
+    .filter(({ addedLines }) => addedLines > 0)
+    .forEach(({ path, id, addedLines, lastAddedLines }) => {
+      log.debug('reportProjectAdditions', {
+        path,
+        id,
+        addedLines,
+        lastAddedLines,
+      });
+      dataStore.setProjectLastAddedLines(path, addedLines);
+      statisticsReporter.incrementLines(
+        addedLines - lastAddedLines,
+        Date.now(),
+        Date.now(),
+        id,
+        packageJson.version,
+      );
+    });
 
 export const svnCommit = async (projectPath: string, commitMessage: string) => {
   return new Promise<string>((resolve, reject) => {

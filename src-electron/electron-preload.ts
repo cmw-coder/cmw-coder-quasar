@@ -19,17 +19,17 @@ import {
   ShowControlMessage,
   ToggleMaximizeControlMessage,
 } from 'preload/types/ControlApi';
+import { ACTION_API_KEY, CONTROL_API_KEY } from 'shared/constants/common';
 import { ActionMessage } from 'shared/types/ActionMessage';
-import { actionApiKey, controlApiKey } from 'shared/types/constants';
 import { WindowType } from 'shared/types/WindowType';
 
-contextBridge.exposeInMainWorld(actionApiKey, {
+contextBridge.exposeInMainWorld(ACTION_API_KEY, {
   invoke: invokeToMain,
   register: registerAction,
   send: sendToMain,
   unregister: unregisterAction,
 });
-contextBridge.exposeInMainWorld(controlApiKey, {
+contextBridge.exposeInMainWorld(CONTROL_API_KEY, {
   close: (windowType: WindowType) =>
     sendControlAction(new CloseControlMessage(windowType)),
   devTools: (windowType: WindowType) =>
@@ -49,7 +49,7 @@ contextBridge.exposeInMainWorld(controlApiKey, {
   toggleMaximize: () => sendControlAction(new ToggleMaximizeControlMessage()),
 });
 
-ipcRenderer.on(actionApiKey, (_, message: ActionMessage) =>
+ipcRenderer.on(ACTION_API_KEY, (_, message: ActionMessage) =>
   triggerAction(message.type, message.data),
 );
 

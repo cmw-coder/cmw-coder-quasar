@@ -1,11 +1,11 @@
+import { ACTION_API_KEY, CONTROL_API_KEY } from 'shared/constants/common';
 import { ActionMessageMapping } from 'shared/types/ActionMessage';
-import { actionApiKey, controlApiKey } from 'shared/types/constants';
 import { WindowType } from 'shared/types/WindowType';
 
 declare global {
   // noinspection JSUnusedGlobalSymbols
   interface Window {
-    [controlApiKey]: {
+    [CONTROL_API_KEY]: {
       close: (windowType: WindowType) => void;
       devTools: (windowType: WindowType) => void;
       hide: (windowType: WindowType) => void;
@@ -22,7 +22,7 @@ declare global {
       show: (windowType: WindowType) => void;
       toggleMaximize: () => void;
     };
-    [actionApiKey]: {
+    [ACTION_API_KEY]: {
       invoke: (channel: string, ...args: unknown[]) => Promise<unknown>;
       register: <T extends keyof ActionMessageMapping>(
         actionType: T,
