@@ -7,7 +7,9 @@ import { spawn } from 'child_process';
 import { decode } from 'iconv-lite';
 import xml2js from 'xml2js';
 import type { SvnServiceBase } from 'shared/service-interface/SvnServiceBase';
-import { dataStore } from 'main/stores';
+import { container } from 'service/inversify.config';
+import { TYPES } from 'shared/service-interface/types';
+import { DataStoreService } from '../DataStoreService';
 
 @injectable()
 export class SvnService implements SvnServiceBase {
@@ -124,6 +126,9 @@ export class SvnService implements SvnServiceBase {
       path: string;
       changedFileList: ChangedFile[];
     }[];
+    const dataStore = container.get<DataStoreService>(
+      TYPES.DataStoreService,
+    ).dataStore;
     const projectPathList = Object.keys(dataStore.store.project);
     for (let i = 0; i < projectPathList.length; i++) {
       const projectPath = projectPathList[i];

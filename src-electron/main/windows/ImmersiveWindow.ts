@@ -2,7 +2,6 @@ import { BrowserWindow, screen } from 'electron';
 import log from 'electron-log/main';
 import { resolve } from 'path';
 
-import { dataStore } from 'main/stores';
 import { BaseWindow } from 'main/types/BaseWindow';
 import { ActionApi, sendToRenderer } from 'preload/types/ActionApi';
 import { ControlType, registerControlCallback } from 'preload/types/ControlApi';
@@ -15,6 +14,9 @@ import {
   RouterReloadActionMessage,
 } from 'shared/types/ActionMessage';
 import { WindowType } from 'shared/types/WindowType';
+import { DataStoreService } from 'service/entities/DataStoreService';
+import { container } from 'service/inversify.config';
+import { TYPES } from 'shared/service-interface/types';
 
 export class ImmersiveWindow extends BaseWindow {
   private readonly _actionApi = new ActionApi('main.ImmersiveWindow.');
@@ -40,6 +42,9 @@ export class ImmersiveWindow extends BaseWindow {
       this.create();
     }
     if (this._window) {
+      const dataStore = container.get<DataStoreService>(
+        TYPES.DataStoreService,
+      ).dataStore;
       if (dataStore.store.compatibility.transparentFallback) {
         const lines = completion.split('\r\n');
         this._window.setBounds(
@@ -101,6 +106,9 @@ export class ImmersiveWindow extends BaseWindow {
   }
 
   protected create() {
+    const dataStore = container.get<DataStoreService>(
+      TYPES.DataStoreService,
+    ).dataStore;
     this._window = new BrowserWindow({
       width: dataStore.store.compatibility.transparentFallback ? 0 : 3840,
       height: dataStore.store.compatibility.transparentFallback ? 0 : 2160,

@@ -23,10 +23,6 @@ import { container } from 'service/inversify.config';
 import type { ConfigService } from 'service/entities/ConfigService';
 import { TYPES } from 'shared/service-interface/types';
 
-const configStore = container.get<ConfigService>(
-  TYPES.ConfigService,
-).configStore;
-
 class CompletionData {
   private _checked = new Set<number>();
   private _lastChecked: number = -1;
@@ -69,17 +65,30 @@ class CompletionData {
 }
 
 class StatisticsReporter {
-  private _aiServiceApi = axios.create({
-    baseURL: configStore.endpoints?.aiService || '',
-  });
-  private _statisticsApi = axios.create({
-    baseURL: configStore?.endpoints?.statistics || '',
-  });
   private _lastCursorPosition: CaretPosition = { character: -1, line: -1 };
   private _recentCompletion = new Map<string, CompletionData>();
 
+  private get _aiServiceApi() {
+    const configStore = container.get<ConfigService>(
+      TYPES.ConfigService,
+    ).configStore;
+    return axios.create({
+      baseURL: configStore.endpoints?.aiService || '',
+    });
+  }
+
+  private get _statisticsApi() {
+    const configStore = container.get<ConfigService>(
+      TYPES.ConfigService,
+    ).configStore;
+    return axios.create({
+      baseURL: configStore?.endpoints?.statistics || '',
+    });
+  }
+
   constructor() {
     console.log('StatisticsReporter constructor');
+
     setInterval(() => {
       for (const [actionId, data] of this._recentCompletion) {
         if (data.timelines.startGenerate.isValid) {
@@ -116,6 +125,9 @@ class StatisticsReporter {
 
     const lineLength = candidate.split('\r\n').length;
     try {
+      const configStore = container.get<ConfigService>(
+        TYPES.ConfigService,
+      ).configStore;
       await this._statisticsApi.post(
         '/report/summary',
         constructData(
@@ -202,6 +214,9 @@ class StatisticsReporter {
     log.debug('StatisticsReporter.completionKept', [requestData]);
 
     try {
+      const configStore = container.get<ConfigService>(
+        TYPES.ConfigService,
+      ).configStore;
       await Promise.all([
         this._aiServiceApi.post('/chatgpt/collection/v2', [requestData], {
           headers:
@@ -264,6 +279,9 @@ class StatisticsReporter {
       data.position.line >= 0 &&
       data.position.line != this._lastCursorPosition.line
     ) {
+      const configStore = container.get<ConfigService>(
+        TYPES.ConfigService,
+      ).configStore;
       log.debug('StatisticsReporter.completionSelected', {
         completions: data.completions,
         position: data.position,
@@ -314,6 +332,9 @@ class StatisticsReporter {
       version,
     });
     try {
+      const configStore = container.get<ConfigService>(
+        TYPES.ConfigService,
+      ).configStore;
       await this._statisticsApi.post(
         '/report/summary',
         constructData(
@@ -347,6 +368,9 @@ class StatisticsReporter {
       version,
     });
     try {
+      const configStore = container.get<ConfigService>(
+        TYPES.ConfigService,
+      ).configStore;
       await this._statisticsApi.post(
         '/report/summary',
         constructData(

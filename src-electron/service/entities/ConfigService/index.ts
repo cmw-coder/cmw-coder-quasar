@@ -6,6 +6,8 @@ import { runtimeConfig } from 'shared/config';
 import { ApiStyle } from 'shared/types/model';
 import { HuggingFaceConfigStore, LinseerConfigStore } from 'main/stores/config';
 import { LinseerConfigType, LinseerDataType } from 'main/stores/config/types';
+import { registerAction } from 'preload/types/ActionApi';
+import { ActionType } from 'shared/types/ActionMessage';
 
 @injectable()
 export class ConfigService implements ConfigServiceBase {
@@ -18,6 +20,22 @@ export class ConfigService implements ConfigServiceBase {
 
   constructor() {
     console.log('ConfigService constructor');
+    registerAction(
+      ActionType.ConfigStoreSave,
+      `main.stores.${ActionType.ConfigStoreSave}`,
+      ({ type, data }) => {
+        switch (type) {
+          case 'config': {
+            this.configStore.config = data;
+            break;
+          }
+          case 'data': {
+            this.configStore.data = data;
+            break;
+          }
+        }
+      },
+    );
   }
 
   public sayHello(): void {

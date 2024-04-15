@@ -12,11 +12,13 @@
     "attrkey",
     "autogrow",
     "axios",
+    "cclsw",
     "charkey",
     "Clion",
     "Clsw",
     "Comware",
     "datetime",
+    "endoftext",
     "fullscreenable",
     "intellij",
     "intlify",
@@ -41,6 +43,7 @@
     "taiyosen",
     "undocked",
     "unmaximize",
-    "unversioned"
+    "unversioned",
+    "Userid"
   ]
 }

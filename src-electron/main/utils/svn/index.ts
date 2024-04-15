@@ -8,10 +8,12 @@ import { resolve } from 'path';
 import xml2js from 'xml2js';
 
 import { statisticsReporter } from 'main/components/StatisticsReporter';
-import { dataStore } from 'main/stores';
 import { folderLatestModificationTime } from 'main/utils/common';
 import packageJson from 'root/package.json';
 import { ChangedFile, SvnStatusItem } from 'shared/types/svn';
+import { container } from 'service/inversify.config';
+import { DataStoreService } from 'service/entities/DataStoreService';
+import { TYPES } from 'shared/service-interface/types';
 
 export const searchSvnDirectories = async (
   folder: string,
@@ -223,8 +225,11 @@ export const getChangedFileList = async (path: string) => {
   return result;
 };
 
-export const reportProjectAdditions = async () =>
-  (
+export const reportProjectAdditions = async () => {
+  const dataStore = container.get<DataStoreService>(
+    TYPES.DataStoreService,
+  ).dataStore;
+  return (
     await Promise.all(
       Object.entries(dataStore.store.project).map(
         async ([path, { id, lastAddedLines, svn }]) => ({
@@ -264,6 +269,7 @@ export const reportProjectAdditions = async () =>
         packageJson.version,
       );
     });
+};
 
 export const svnCommit = async (projectPath: string, commitMessage: string) => {
   return new Promise<string>((resolve, reject) => {

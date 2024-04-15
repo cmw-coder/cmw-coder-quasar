@@ -1,7 +1,9 @@
 import { websocketManager } from 'main/components/WebsocketManager';
-import { dataStore } from 'main/stores';
 import { DataProjectType } from 'main/stores/data/types';
 import packageJson from 'root/package.json';
+import { DataStoreService } from 'service/entities/DataStoreService';
+import { container } from 'service/inversify.config';
+import { TYPES } from 'shared/service-interface/types';
 
 export enum CompletionErrorCause {
   accessToken = 'accessToken',
@@ -20,6 +22,9 @@ export const getClientVersion = (pid: number) => {
 };
 
 export const getProjectData = (project: string): DataProjectType => {
+  const dataStore = container.get<DataStoreService>(
+    TYPES.DataStoreService,
+  ).dataStore;
   const projectData: DataProjectType | undefined =
     dataStore.store.project[project];
   if (!projectData) {
