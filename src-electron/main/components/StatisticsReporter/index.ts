@@ -63,14 +63,20 @@ class CompletionData {
 }
 
 class StatisticsReporter {
-  private _aiServiceApi = axios.create({
-    baseURL: configStore.endpoints.aiService,
-  });
-  private _statisticsApi = axios.create({
-    baseURL: configStore.endpoints.statistics,
-  });
   private _lastCursorPosition: CaretPosition = { character: -1, line: -1 };
   private _recentCompletion = new Map<string, CompletionData>();
+
+  private get _aiServiceApi() {
+    return axios.create({
+      baseURL: configStore.endpoints.aiService,
+    });
+  }
+
+  private get _statisticsApi() {
+    return axios.create({
+      baseURL: configStore.endpoints.statistics,
+    });
+  }
 
   constructor() {
     setInterval(() => {
