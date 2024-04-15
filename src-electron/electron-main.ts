@@ -2,7 +2,6 @@ import { app } from 'electron';
 import log from 'electron-log/main';
 import { scheduleJob } from 'node-schedule';
 
-import { AutoUpdater } from 'main/components/AutoUpdater';
 import { PromptExtractor } from 'main/components/PromptExtractor';
 import { RawInputs } from 'main/components/PromptExtractor/types';
 import { PromptProcessor } from 'main/components/PromptProcessor';
@@ -17,7 +16,6 @@ import {
   initShortcutHandler,
   initWindowDestroyInterval,
 } from 'main/init';
-import { configStore, dataStore } from 'main/stores';
 import {
   CompletionErrorCause,
   getClientVersion,
@@ -36,19 +34,27 @@ import {
   WsAction,
 } from 'shared/types/WsMessage';
 import { container } from 'service/inversify.config';
-import { AppService } from 'service/entities/AppService';
 import { TYPES } from 'shared/service-interface/types';
+import type { AppService } from 'service/entities/AppService';
+import type { UpdaterService } from 'service/entities/UpdaterService';
+import type { ConfigService } from 'service/entities/ConfigService';
+import type { DataStoreService } from 'service/entities/DataStoreService';
 
 const appService = container.get<AppService>(TYPES.AppService);
+const updaterService = container.get<UpdaterService>(TYPES.UpdaterService);
+const configService = container.get<ConfigService>(TYPES.ConfigService);
+const dataStoreService = container.get<DataStoreService>(
+  TYPES.DataStoreService,
+);
 
 appService.init();
+updaterService.init();
 
 initApplication();
 initAdditionReport();
 initIpcMain();
 initShortcutHandler();
 
-const autoUpdater = new AutoUpdater(configStore.endpoints.update);
 const floatingWindow = new FloatingWindow();
 const immersiveWindow = new ImmersiveWindow();
 const mainWindow = new MainWindow();
@@ -58,12 +64,14 @@ const trayIcon = new TrayIcon();
 
 let immersiveWindowDestroyInterval = initWindowDestroyInterval(immersiveWindow);
 
-autoUpdater.onAvailable((updateInfo) => floatingWindow.updateShow(updateInfo));
-autoUpdater.onDownloading((progressInfo) =>
+updaterService.onAvailable((updateInfo) =>
+  floatingWindow.updateShow(updateInfo),
+);
+updaterService.onDownloading((progressInfo) =>
   floatingWindow.updateProgress(progressInfo),
 );
 
-autoUpdater.onFinish(() => floatingWindow.updateFinish());
+updaterService.onFinish(() => floatingWindow.updateFinish());
 
 trayIcon.onClick(() => mainWindow.activate());
 trayIcon.registerMenuEntry(MenuEntry.Feedback, () => floatingWindow.feedback());
@@ -73,20 +81,20 @@ registerAction(
   ActionType.ClientSetProjectId,
   `main.main.${ActionType.ClientSetProjectId}`,
   ({ project, projectId }) => {
-    dataStore.setProjectId(project, projectId).catch();
+    dataStoreService.dataStore.setProjectId(project, projectId).catch();
   },
 );
 registerAction(
   ActionType.UpdateDownload,
   `main.main.${ActionType.UpdateDownload}`,
   async () => {
-    await autoUpdater.downloadUpdate();
+    await updaterService.downloadUpdate();
   },
 );
 registerAction(
   ActionType.UpdateFinish,
   `main.main.${ActionType.UpdateFinish}`,
-  () => autoUpdater.installUpdate(),
+  () => updaterService.installUpdate(),
 );
 
 websocketManager.registerWsAction(
@@ -297,14 +305,14 @@ app.whenReady().then(async () => {
   websocketManager.startServer();
 
   if (
-    configStore.apiStyle === ApiStyle.Linseer &&
-    !(await configStore.getAccessToken())
+    configService.configStore.apiStyle === ApiStyle.Linseer &&
+    !(await configService.configStore.getAccessToken())
   ) {
     floatingWindow.login(mainWindow.isVisible);
   }
 
   trayIcon.notify('正在检查更新……');
-  autoUpdater.checkUpdate().catch();
+  updaterService.checkUpdate().catch();
 
   scheduleJob(
     {
@@ -313,7 +321,7 @@ app.whenReady().then(async () => {
     },
     () => {
       trayIcon.notify('正在检查更新……');
-      autoUpdater.checkUpdate().catch();
+      updaterService.checkUpdate().catch();
     },
   );
 });

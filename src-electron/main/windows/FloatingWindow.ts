@@ -4,7 +4,6 @@ import { ProgressInfo, UpdateInfo } from 'electron-updater';
 import { resolve } from 'path';
 
 import { websocketManager } from 'main/components/WebsocketManager';
-import { configStore, dataStore } from 'main/stores';
 import { BaseWindow } from 'main/types/BaseWindow';
 import { bypassCors } from 'main/utils/common';
 import { getChangedFileList, svnCommit } from 'main/utils/svn';
@@ -26,6 +25,10 @@ import {
 } from 'shared/types/ActionMessage';
 import { ChangedFile } from 'shared/types/svn';
 import { WindowType } from 'shared/types/WindowType';
+import { container } from 'service/inversify.config';
+import type { ConfigService } from 'service/entities/ConfigService';
+import { TYPES } from 'shared/service-interface/types';
+import { DataStoreService } from 'service/entities/DataStoreService';
 
 export class FloatingWindow extends BaseWindow {
   private readonly _actionApi = new ActionApi('main.FloatingWindow.');
@@ -60,6 +63,9 @@ export class FloatingWindow extends BaseWindow {
   }
 
   login(mainIsVisible: boolean) {
+    const configStore = container.get<ConfigService>(
+      TYPES.ConfigService,
+    ).configStore;
     if (mainIsVisible) {
       triggerControlCallback(WindowType.Main, ControlType.Hide, undefined);
     }
@@ -120,6 +126,13 @@ export class FloatingWindow extends BaseWindow {
   }
 
   protected create() {
+    const dataStore = container.get<DataStoreService>(
+      TYPES.DataStoreService,
+    ).dataStore;
+    const configStore = container.get<ConfigService>(
+      TYPES.ConfigService,
+    ).configStore;
+
     this._window = new BrowserWindow({
       width: 800,
       height: 600,

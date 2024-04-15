@@ -4,7 +4,6 @@ import { DateTime } from 'luxon';
 import { basename, extname } from 'path';
 import { v4 as uuid } from 'uuid';
 
-import { configStore } from 'main/stores';
 import { CaretPosition } from 'shared/types/common';
 import { PromptElements } from 'main/components/PromptExtractor/types';
 import { Completions } from 'main/components/PromptProcessor/types';
@@ -20,6 +19,13 @@ import {
   skuNameKeptMapping,
 } from 'main/components/StatisticsReporter/constants';
 import { ApiStyle } from 'shared/types/model';
+import { container } from 'service/inversify.config';
+import type { ConfigService } from 'service/entities/ConfigService';
+import { TYPES } from 'shared/service-interface/types';
+
+const configStore = container.get<ConfigService>(
+  TYPES.ConfigService,
+).configStore;
 
 class CompletionData {
   private _checked = new Set<number>();
@@ -64,7 +70,7 @@ class CompletionData {
 
 class StatisticsReporter {
   private _aiServiceApi = axios.create({
-    baseURL: configStore?.endpoints?.aiService || '',
+    baseURL: configStore.endpoints?.aiService || '',
   });
   private _statisticsApi = axios.create({
     baseURL: configStore?.endpoints?.statistics || '',
@@ -73,7 +79,7 @@ class StatisticsReporter {
   private _recentCompletion = new Map<string, CompletionData>();
 
   constructor() {
-    console.log('StatisticsReporter constructor', configStore);
+    console.log('StatisticsReporter constructor');
     setInterval(() => {
       for (const [actionId, data] of this._recentCompletion) {
         if (data.timelines.startGenerate.isValid) {
