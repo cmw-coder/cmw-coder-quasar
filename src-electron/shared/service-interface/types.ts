@@ -4,6 +4,7 @@ import { ConfigServiceBase } from 'shared/service-interface/ConfigServiceBase';
 import { SvnServiceBase } from 'shared/service-interface/SvnServiceBase';
 import { WindowServiceBase } from 'shared/service-interface/WindowServiceInterBase';
 import { UpdaterServiceBase } from 'shared/service-interface/UpdaterServiceBase';
+import { StatisticsReporterServiceBase } from './StatisticsReporterServiceBase';
 
 enum TYPES {
   ConfigService = 'ConfigService',
@@ -12,6 +13,7 @@ enum TYPES {
   AppService = 'AppService',
   DataStoreService = 'DataStoreService',
   UpdaterService = 'UpdaterService',
+  StatisticsReporterService = 'StatisticsReporterService',
 }
 
 const ServiceCallKey = 'Service:Call';
@@ -23,6 +25,7 @@ interface ServiceTypeMapping {
   [TYPES.AppService]: AppServiceBase;
   [TYPES.DataStoreService]: DataStoreServiceBase;
   [TYPES.UpdaterService]: UpdaterServiceBase;
+  [TYPES.StatisticsReporterService]: StatisticsReporterServiceBase;
 }
 
 type Service<T extends TYPES> = ServiceTypeMapping[T];

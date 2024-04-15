@@ -1,86 +1,49 @@
-import axios from 'axios';
-import log from 'electron-log/main';
-import { DateTime } from 'luxon';
-import { basename, extname } from 'path';
-import { v4 as uuid } from 'uuid';
-
+import { inject, injectable } from 'inversify';
+import { StatisticsReporterServiceBase } from 'shared/service-interface/StatisticsReporterServiceBase';
+import { TYPES } from 'shared/service-interface/types';
+import { ConfigService } from 'service/entities/ConfigService';
+import { CompletionData } from 'service/entities/StatisticsReporterService/CompletionData';
 import { CaretPosition } from 'shared/types/common';
-import { PromptElements } from 'main/components/PromptExtractor/types';
-import { Completions } from 'main/components/PromptProcessor/types';
-import {
-  CollectionData,
-  KeptRatio,
-} from 'main/components/StatisticsReporter/types';
+import axios from 'axios';
+import { DateTime } from 'luxon';
+import log from 'electron-log/main';
 import { constructData } from 'main/components/StatisticsReporter/utils';
-import { timer } from 'main/utils/timer';
 import {
   skuNameAcceptMapping,
   skuNameGenerateMapping,
   skuNameKeptMapping,
 } from 'main/components/StatisticsReporter/constants';
-import { ApiStyle } from 'shared/types/model';
+import { timer } from 'main/utils/timer';
+import { v4 as uuid } from 'uuid';
+import { PromptElements } from 'main/components/PromptExtractor/types';
+import { Completions } from 'main/components/PromptProcessor/types';
+import {
+  KeptRatio,
+  CollectionData,
+} from 'main/components/StatisticsReporter/types';
+import { extname, basename } from 'path';
 import { container } from 'service/inversify.config';
-import type { ConfigService } from 'service/entities/ConfigService';
-import { TYPES } from 'shared/service-interface/types';
+import { ApiStyle } from 'shared/types/model';
 
-class CompletionData {
-  private _checked = new Set<number>();
-  private _lastChecked: number = -1;
+@injectable()
+export class StatisticsReporterService
+  implements StatisticsReporterServiceBase
+{
+  @inject(TYPES.ConfigService)
+  private _configService!: ConfigService;
 
-  completions?: Completions;
-  elements?: PromptElements;
-  position: CaretPosition;
-  projectId?: string;
-  timelines: {
-    startGenerate: DateTime;
-    endGenerate: DateTime;
-    startAccept: DateTime;
-  };
-
-  constructor(caretPosition: CaretPosition) {
-    this.position = caretPosition;
-    this.timelines = {
-      startGenerate: DateTime.now(),
-      endGenerate: DateTime.invalid('Uninitialized'),
-      startAccept: DateTime.invalid('Uninitialized'),
-    };
-  }
-
-  select(index: number): string | undefined {
-    if (!this.timelines.startAccept.isValid) {
-      this.timelines.startAccept = DateTime.now();
-    }
-
-    const candidate = this.completions?.candidates[index];
-    if (candidate) {
-      this._checked.add(index);
-      this._lastChecked = index;
-    }
-    return candidate;
-  }
-
-  get lastChecked(): number {
-    return this._lastChecked;
-  }
-}
-
-class StatisticsReporter {
   private _lastCursorPosition: CaretPosition = { character: -1, line: -1 };
   private _recentCompletion = new Map<string, CompletionData>();
 
   private get _aiServiceApi() {
-    const configStore = container.get<ConfigService>(
-      TYPES.ConfigService,
-    ).configStore;
+    const configStore = this._configService.configStore;
     return axios.create({
       baseURL: configStore.endpoints?.aiService || '',
     });
   }
 
   private get _statisticsApi() {
-    const configStore = container.get<ConfigService>(
-      TYPES.ConfigService,
-    ).configStore;
+    const configStore = this._configService.configStore;
     return axios.create({
       baseURL: configStore?.endpoints?.statistics || '',
     });
@@ -88,7 +51,6 @@ class StatisticsReporter {
 
   constructor() {
     console.log('StatisticsReporter constructor');
-
     setInterval(() => {
       for (const [actionId, data] of this._recentCompletion) {
         if (data.timelines.startGenerate.isValid) {
@@ -125,9 +87,7 @@ class StatisticsReporter {
 
     const lineLength = candidate.split('\r\n').length;
     try {
-      const configStore = container.get<ConfigService>(
-        TYPES.ConfigService,
-      ).configStore;
+      const configStore = this._configService.configStore;
       await this._statisticsApi.post(
         '/report/summary',
         constructData(
@@ -247,7 +207,7 @@ class StatisticsReporter {
     } catch (e) {
       log.error('StatisticsReporter.completionKept.failed', e);
     }
-    statisticsReporter.completionAbort(actionId);
+    this.completionAbort(actionId);
   }
 
   completionGenerated(actionId: string, completions: Completions) {
@@ -368,9 +328,7 @@ class StatisticsReporter {
       version,
     });
     try {
-      const configStore = container.get<ConfigService>(
-        TYPES.ConfigService,
-      ).configStore;
+      const configStore = this._configService.configStore;
       await this._statisticsApi.post(
         '/report/summary',
         constructData(
@@ -389,5 +347,3 @@ class StatisticsReporter {
     }
   }
 }
-
-export const statisticsReporter = new StatisticsReporter();

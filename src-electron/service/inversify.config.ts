@@ -7,6 +7,7 @@ import { TYPES } from 'shared/service-interface/types';
 import { AppService } from 'service/entities/AppService';
 import { DataStoreService } from 'service/entities/DataStoreService';
 import { UpdaterService } from 'service/entities/UpdaterService';
+import { StatisticsReporterService } from 'service/entities/StatisticsReporterService';
 
 const container = new Container({
   defaultScope: 'Transient',
@@ -29,6 +30,10 @@ container
 container
   .bind<UpdaterService>(TYPES.UpdaterService)
   .to(UpdaterService)
+  .inSingletonScope();
+container
+  .bind<StatisticsReporterService>(TYPES.StatisticsReporterService)
+  .to(StatisticsReporterService)
   .inSingletonScope();
 
 export { container };

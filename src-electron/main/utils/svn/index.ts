@@ -7,13 +7,13 @@ import { detect } from 'jschardet';
 import { resolve } from 'path';
 import xml2js from 'xml2js';
 
-import { statisticsReporter } from 'main/components/StatisticsReporter';
 import { folderLatestModificationTime } from 'main/utils/common';
 import packageJson from 'root/package.json';
 import { ChangedFile, SvnStatusItem } from 'shared/types/svn';
 import { container } from 'service/inversify.config';
 import { DataStoreService } from 'service/entities/DataStoreService';
 import { TYPES } from 'shared/service-interface/types';
+import { StatisticsReporterService } from 'service/entities/StatisticsReporterService';
 
 export const searchSvnDirectories = async (
   folder: string,
@@ -229,6 +229,9 @@ export const reportProjectAdditions = async () => {
   const dataStore = container.get<DataStoreService>(
     TYPES.DataStoreService,
   ).dataStore;
+  const statisticsReporterService = container.get<StatisticsReporterService>(
+    TYPES.StatisticsReporterService,
+  );
   return (
     await Promise.all(
       Object.entries(dataStore.store.project).map(
@@ -261,7 +264,7 @@ export const reportProjectAdditions = async () => {
         lastAddedLines,
       });
       dataStore.setProjectLastAddedLines(path, addedLines);
-      statisticsReporter.incrementLines(
+      statisticsReporterService.incrementLines(
         addedLines - lastAddedLines,
         Date.now(),
         Date.now(),
