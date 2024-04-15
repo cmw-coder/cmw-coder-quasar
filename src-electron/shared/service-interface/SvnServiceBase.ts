@@ -1,6 +1,6 @@
-import { ChangedFile } from 'shared/types/svn';
+import type { ChangedFile } from 'shared/types/svn';
 
-export interface I_SvnService {
+export interface SvnServiceBase {
   getAllProjectList(): Promise<
     {
       path: string;

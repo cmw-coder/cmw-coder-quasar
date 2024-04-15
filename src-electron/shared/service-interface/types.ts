@@ -1,7 +1,7 @@
-import { I_AppService } from './I_AppService';
-import { I_ConfigService } from './I_ConfigService';
-import { I_SvnService } from './I_SvnService';
-import { I_WindowService } from './I_WindowService';
+import { AppServiceBase } from './AppServiceBase';
+import { ConfigServiceBase } from './ConfigServiceBase';
+import { SvnServiceBase } from './SvnServiceBase';
+import { WindowServiceBase } from './WindowServiceInterface';
 
 enum TYPES {
   ConfigService = 'ConfigService',
@@ -13,13 +13,13 @@ enum TYPES {
 const ServiceCallKey = 'Service:Call';
 
 type Service<T extends TYPES> = T extends TYPES.ConfigService
-  ? I_ConfigService
+  ? ConfigServiceBase
   : T extends TYPES.WindowService
-    ? I_WindowService
+    ? WindowServiceBase
     : T extends TYPES.SvnService
-      ? I_SvnService
+      ? SvnServiceBase
       : T extends TYPES.AppService
-        ? I_AppService
+        ? AppServiceBase
         : never;
 
 export { TYPES, ServiceCallKey, type Service };

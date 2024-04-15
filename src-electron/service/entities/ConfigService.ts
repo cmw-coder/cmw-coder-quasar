@@ -1,10 +1,10 @@
 import { injectable, inject } from 'inversify';
 import { WindowService } from './WindowService';
 import { TYPES } from 'shared/service-interface/types';
-import { I_ConfigService } from 'shared/service-interface/I_ConfigService';
+import { ConfigServiceBase } from 'shared/service-interface/ConfigServiceBase';
 
 @injectable()
-export class ConfigService implements I_ConfigService {
+export class ConfigService implements ConfigServiceBase {
   @inject(TYPES.WindowService)
   private _windowService!: WindowService;
   public sayHello(): void {

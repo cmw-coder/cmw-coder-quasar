@@ -1,8 +1,8 @@
 import { injectable } from 'inversify';
-import { I_WindowService } from 'shared/service-interface/I_WindowService';
+import { WindowServiceBase } from 'shared/service-interface/WindowServiceInterface';
 
 @injectable()
-export class WindowService implements I_WindowService {
+export class WindowService implements WindowServiceBase {
   public sayHello(): void {
     console.log('Hello from WindowService');
   }

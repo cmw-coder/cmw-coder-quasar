@@ -64,15 +64,16 @@ class CompletionData {
 
 class StatisticsReporter {
   private _aiServiceApi = axios.create({
-    baseURL: configStore.endpoints.aiService,
+    baseURL: configStore?.endpoints?.aiService || '',
   });
   private _statisticsApi = axios.create({
-    baseURL: configStore.endpoints.statistics,
+    baseURL: configStore?.endpoints?.statistics || '',
   });
   private _lastCursorPosition: CaretPosition = { character: -1, line: -1 };
   private _recentCompletion = new Map<string, CompletionData>();
 
   constructor() {
+    console.log('StatisticsReporter constructor', configStore);
     setInterval(() => {
       for (const [actionId, data] of this._recentCompletion) {
         if (data.timelines.startGenerate.isValid) {

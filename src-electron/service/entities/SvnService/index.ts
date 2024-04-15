@@ -6,11 +6,11 @@ import { formatStatusRes } from 'service/entities/SvnService/util';
 import { spawn } from 'child_process';
 import { decode } from 'iconv-lite';
 import xml2js from 'xml2js';
-import { I_SvnService } from 'shared/service-interface/I_SvnService';
+import type { SvnServiceBase } from 'shared/service-interface/SvnServiceBase';
 import { dataStore } from 'main/stores';
 
 @injectable()
-export class SvnService implements I_SvnService {
+export class SvnService implements SvnServiceBase {
   status(dirPath: string) {
     return new Promise<SvnStatusItem[]>((resolve) => {
       let stdout = '';
