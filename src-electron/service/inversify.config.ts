@@ -8,6 +8,7 @@ import { AppService } from 'service/entities/AppService';
 import { DataStoreService } from 'service/entities/DataStoreService';
 import { UpdaterService } from 'service/entities/UpdaterService';
 import { StatisticsReporterService } from 'service/entities/StatisticsReporterService';
+import { WebsocketService } from 'service/entities/WebsocketService';
 
 const container = new Container({
   defaultScope: 'Transient',
@@ -34,6 +35,11 @@ container
 container
   .bind<StatisticsReporterService>(TYPES.StatisticsReporterService)
   .to(StatisticsReporterService)
+  .inSingletonScope();
+
+container
+  .bind<WebsocketService>(TYPES.WebsocketService)
+  .to(WebsocketService)
   .inSingletonScope();
 
 export { container };

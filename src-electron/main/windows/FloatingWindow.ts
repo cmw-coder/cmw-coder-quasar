@@ -2,8 +2,6 @@ import { BrowserWindow } from 'electron';
 import log from 'electron-log/main';
 import { ProgressInfo, UpdateInfo } from 'electron-updater';
 import { resolve } from 'path';
-
-import { websocketManager } from 'main/components/WebsocketManager';
 import { BaseWindow } from 'main/types/BaseWindow';
 import { bypassCors } from 'main/utils/common';
 import { getChangedFileList, svnCommit } from 'main/utils/svn';
@@ -26,9 +24,10 @@ import {
 import { ChangedFile } from 'shared/types/svn';
 import { WindowType } from 'shared/types/WindowType';
 import { container } from 'service/inversify.config';
-import type { ConfigService } from 'service/entities/ConfigService';
 import { TYPES } from 'shared/service-interface/types';
-import { DataStoreService } from 'service/entities/DataStoreService';
+import type { ConfigService } from 'service/entities/ConfigService';
+import type { DataStoreService } from 'service/entities/DataStoreService';
+import type { WebsocketService } from 'service/entities/WebsocketService';
 
 export class FloatingWindow extends BaseWindow {
   private readonly _actionApi = new ActionApi('main.FloatingWindow.');
@@ -176,8 +175,11 @@ export class FloatingWindow extends BaseWindow {
     });
     this._actionApi.register(ActionType.SvnDiff, async () => {
       if (this._window) {
+        const websocketService = container.get<WebsocketService>(
+          TYPES.WebsocketService,
+        );
         let changedFileList: ChangedFile[] | undefined;
-        const projectPath = websocketManager.getClientInfo()?.currentProject;
+        const projectPath = websocketService.getClientInfo()?.currentProject;
         if (projectPath && dataStore.store.project[projectPath]?.svn[0]) {
           changedFileList = await getChangedFileList(
             dataStore.store.project[projectPath].svn[0].directory,
@@ -188,7 +190,10 @@ export class FloatingWindow extends BaseWindow {
     });
     this._actionApi.register(ActionType.SvnCommit, async (data) => {
       if (this._window) {
-        const projectPath = websocketManager.getClientInfo()?.currentProject;
+        const websocketService = container.get<WebsocketService>(
+          TYPES.WebsocketService,
+        );
+        const projectPath = websocketService.getClientInfo()?.currentProject;
         if (projectPath && dataStore.store.project[projectPath]?.svn[0]) {
           try {
             await svnCommit(

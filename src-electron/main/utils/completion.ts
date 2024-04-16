@@ -1,7 +1,7 @@
-import { websocketManager } from 'main/components/WebsocketManager';
 import { DataProjectType } from 'main/stores/data/types';
 import packageJson from 'root/package.json';
-import { DataStoreService } from 'service/entities/DataStoreService';
+import type { DataStoreService } from 'service/entities/DataStoreService';
+import type { WebsocketService } from 'service/entities/WebsocketService';
 import { container } from 'service/inversify.config';
 import { TYPES } from 'shared/service-interface/types';
 
@@ -12,7 +12,10 @@ export enum CompletionErrorCause {
 }
 
 export const getClientVersion = (pid: number) => {
-  const clientInfo = websocketManager.getClientInfo(pid);
+  const websocketService = container.get<WebsocketService>(
+    TYPES.WebsocketService,
+  );
+  const clientInfo = websocketService.getClientInfo(pid);
   if (!clientInfo) {
     throw new Error('Completion Generate Failed, invalid client info.', {
       cause: CompletionErrorCause.clientInfo,

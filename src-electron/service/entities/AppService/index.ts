@@ -1,0 +1,187 @@
+import { app, globalShortcut, ipcMain } from 'electron';
+import log from 'electron-log/main';
+import { inject, injectable } from 'inversify';
+import { DateTime } from 'luxon';
+import { release, version } from 'os';
+import { container } from 'service/inversify.config';
+import { AppServiceBase } from 'shared/service-interface/AppServiceBase';
+import { ServiceCallKey, TYPES } from 'shared/service-interface/types';
+import type { WindowService } from 'service/entities/WindowService';
+import type { WebsocketService } from 'service/entities/WebsocketService';
+import type { UpdaterService } from 'service/entities/UpdaterService';
+import type { ConfigService } from 'service/entities/ConfigService';
+import type { DataStoreService } from 'service/entities/DataStoreService';
+import { ApiStyle } from 'shared/types/model';
+import { scheduleJob } from 'node-schedule';
+import { reportProjectAdditions } from 'main/utils/svn';
+import { registerAction, triggerAction } from 'preload/types/ActionApi';
+import {
+  ControlMessage,
+  triggerControlCallback,
+} from 'preload/types/ControlApi';
+import { ACTION_API_KEY, CONTROL_API_KEY } from 'shared/constants/common';
+import { ActionMessage, ActionType } from 'shared/types/ActionMessage';
+
+@injectable()
+export class AppService implements AppServiceBase {
+  @inject(TYPES.WindowService)
+  private _windowService!: WindowService;
+  @inject(TYPES.WebsocketService)
+  private _websocketService!: WebsocketService;
+  @inject(TYPES.UpdaterService)
+  private _updaterService!: UpdaterService;
+  @inject(TYPES.ConfigService)
+  private _configService!: ConfigService;
+  @inject(TYPES.DataStoreService)
+  private _dataStoreService!: DataStoreService;
+  constructor() {
+    console.log('AppService constructor');
+  }
+
+  init() {
+    console.log('AppService initialized');
+    this.initApplication();
+    this.initAdditionReport();
+    this.initIpcMain();
+    this.initShortcutHandler();
+  }
+
+  initApplication() {
+    log.initialize();
+    log.transports.file.format = '{text}';
+    log.transports.file.transforms.push(({ data, message }) => {
+      const { date, level, variables } = message;
+      return [
+        `[${DateTime.fromJSDate(date).toISO()}] ${variables?.processType}.${level.toUpperCase()}: ${data}`,
+      ];
+    });
+
+    log.info(`OS version: ${version()} (${release()})`);
+    if (!app.requestSingleInstanceLock()) {
+      app.quit();
+      process.exit(-1);
+    }
+    app.setLoginItemSettings({
+      openAtLogin: true,
+    });
+
+    app.on('second-instance', () => {
+      app.focus();
+      this._windowService.mainWindow.activate();
+    });
+    app.whenReady().then(async () => {
+      log.info('Comware Coder is ready');
+      this._windowService.floatingWindow.activate();
+      this._windowService.immersiveWindow.activate();
+      this._windowService.mainWindow.activate();
+      this._windowService.trayIcon.activate();
+
+      this._websocketService.startServer();
+      this._websocketService.registerWsActions();
+
+      if (
+        this._configService.configStore.apiStyle === ApiStyle.Linseer &&
+        !(await this._configService.configStore.getAccessToken())
+      ) {
+        this._windowService.floatingWindow.login(
+          this._windowService.mainWindow.isVisible,
+        );
+      }
+
+      this._windowService.trayIcon.notify('正在检查更新……');
+      this._updaterService.checkUpdate().catch();
+
+      scheduleJob(
+        {
+          hour: 4,
+          minute: 0,
+        },
+        () => {
+          this._windowService.trayIcon.notify('正在检查更新……');
+          this._updaterService.checkUpdate().catch();
+        },
+      );
+    });
+  }
+
+  initAdditionReport() {
+    reportProjectAdditions().catch();
+    return scheduleJob(
+      {
+        hour: 3,
+        minute: 0,
+      },
+      reportProjectAdditions,
+    );
+  }
+
+  initIpcMain() {
+    ipcMain.handle(
+      ServiceCallKey,
+      (
+        event,
+        serviceName: string,
+        functionName: keyof AppService,
+        ...payloads: unknown[]
+      ) => {
+        const service = container.get<AppService>(serviceName);
+        const func = service[functionName];
+        if (typeof func !== 'function') {
+          throw new Error('Function not found');
+        }
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        return func.bind(service)(...payloads);
+      },
+    );
+
+    ipcMain.on(ACTION_API_KEY, (_, message: ActionMessage) =>
+      triggerAction(message.type, message.data),
+    );
+    ipcMain.on(CONTROL_API_KEY, (_, message: ControlMessage) =>
+      triggerControlCallback(message.windowType, message.type, message.data),
+    );
+
+    registerAction(
+      ActionType.ClientSetProjectId,
+      `main.main.${ActionType.ClientSetProjectId}`,
+      ({ project, projectId }) => {
+        this._dataStoreService.dataStore
+          .setProjectId(project, projectId)
+          .catch();
+      },
+    );
+    registerAction(
+      ActionType.UpdateDownload,
+      `main.main.${ActionType.UpdateDownload}`,
+      async () => {
+        await this._updaterService.downloadUpdate();
+      },
+    );
+    registerAction(
+      ActionType.UpdateFinish,
+      `main.main.${ActionType.UpdateFinish}`,
+      () => this._updaterService.installUpdate(),
+    );
+  }
+
+  initShortcutHandler() {
+    app.on('browser-window-blur', () => {
+      globalShortcut.unregisterAll();
+    });
+    app.on('browser-window-focus', () => {
+      globalShortcut.register('CommandOrControl+R', () => {
+        log.debug('CommandOrControl+R is pressed: Shortcut Disabled');
+      });
+      globalShortcut.register('CommandOrControl+Shift+R', () => {
+        log.debug('CommandOrControl+Shift+R is pressed: Shortcut Disabled');
+      });
+      globalShortcut.register('F5', () => {
+        log.debug('F5 is pressed: Shortcut Disabled');
+      });
+      globalShortcut.register('Shift+F5', () => {
+        log.debug('Shift+F5 is pressed: Shortcut Disabled');
+      });
+    });
+  }
+}

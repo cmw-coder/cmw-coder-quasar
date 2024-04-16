@@ -1,7 +1,5 @@
 import { BrowserWindow } from 'electron';
 import { resolve } from 'path';
-
-import { websocketManager } from 'main/components/WebsocketManager';
 import { dataStoreDefault } from 'main/stores/data/default';
 import { BaseWindow } from 'main/types/BaseWindow';
 import { bypassCors } from 'main/utils/common';
@@ -23,6 +21,7 @@ import type { DataStoreService } from 'service/entities/DataStoreService';
 import type { ConfigService } from 'service/entities/ConfigService';
 import { TYPES } from 'shared/service-interface/types';
 import { container } from 'service/inversify.config';
+import type { WebsocketService } from 'service/entities/WebsocketService';
 
 export class MainWindow extends BaseWindow {
   private readonly _actionApi = new ActionApi('main.MainWindow.');
@@ -92,7 +91,10 @@ export class MainWindow extends BaseWindow {
     });
 
     this._actionApi.register(ActionType.ChatInsert, (content) => {
-      websocketManager.send(
+      const websocketService = container.get<WebsocketService>(
+        TYPES.WebsocketService,
+      );
+      websocketService.send(
         JSON.stringify(
           new ChatInsertServerMessage({
             result: 'success',
@@ -121,8 +123,11 @@ export class MainWindow extends BaseWindow {
     });
     this._actionApi.register(ActionType.SvnDiff, async () => {
       if (this._window) {
+        const websocketService = container.get<WebsocketService>(
+          TYPES.WebsocketService,
+        );
         let changedFileList: ChangedFile[] | undefined;
-        const projectPath = websocketManager.getClientInfo()?.currentProject;
+        const projectPath = websocketService.getClientInfo()?.currentProject;
         if (projectPath && dataStore.store.project[projectPath]?.svn[0]) {
           changedFileList = await getChangedFileList(
             dataStore.store.project[projectPath].svn[0].directory,
@@ -133,7 +138,10 @@ export class MainWindow extends BaseWindow {
     });
     this._actionApi.register(ActionType.SvnCommit, async (data) => {
       if (this._window) {
-        const projectPath = websocketManager.getClientInfo()?.currentProject;
+        const websocketService = container.get<WebsocketService>(
+          TYPES.WebsocketService,
+        );
+        const projectPath = websocketService.getClientInfo()?.currentProject;
         if (projectPath && dataStore.store.project[projectPath]?.svn[0]) {
           try {
             await svnCommit(
@@ -185,8 +193,10 @@ export class MainWindow extends BaseWindow {
         this._window?.maximize();
       }
     });
-
-    websocketManager.registerWsAction(WsAction.DebugSync, (message) => {
+    const websocketService = container.get<WebsocketService>(
+      TYPES.WebsocketService,
+    );
+    websocketService.registerWsAction(WsAction.DebugSync, (message) => {
       if (this._window) {
         sendToRenderer(this._window, new DebugSyncActionMessage(message.data));
       }
