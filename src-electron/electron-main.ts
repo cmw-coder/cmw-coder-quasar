@@ -2,11 +2,9 @@ import { app } from 'electron';
 import log from 'electron-log/main';
 import { scheduleJob } from 'node-schedule';
 
-import { AutoUpdater } from 'main/components/AutoUpdater';
 import { PromptExtractor } from 'main/components/PromptExtractor';
 import { RawInputs } from 'main/components/PromptExtractor/types';
 import { PromptProcessor } from 'main/components/PromptProcessor';
-import { statisticsReporter } from 'main/components/StatisticsReporter';
 import { TrayIcon } from 'main/components/TrayIcon';
 import { MenuEntry } from 'main/components/TrayIcon/types';
 import { websocketManager } from 'main/components/WebsocketManager';
@@ -17,7 +15,6 @@ import {
   initShortcutHandler,
   initWindowDestroyInterval,
 } from 'main/init';
-import { configStore, dataStore } from 'main/stores';
 import {
   CompletionErrorCause,
   getClientVersion,
@@ -36,19 +33,31 @@ import {
   WsAction,
 } from 'shared/types/WsMessage';
 import { container } from 'service/inversify.config';
-import { AppService } from 'service/entities/AppService';
 import { TYPES } from 'shared/service-interface/types';
+import type { AppService } from 'service/entities/AppService';
+import type { UpdaterService } from 'service/entities/UpdaterService';
+import type { ConfigService } from 'service/entities/ConfigService';
+import type { DataStoreService } from 'service/entities/DataStoreService';
+import { StatisticsReporterService } from 'service/entities/StatisticsReporterService';
 
 const appService = container.get<AppService>(TYPES.AppService);
+const updaterService = container.get<UpdaterService>(TYPES.UpdaterService);
+const configService = container.get<ConfigService>(TYPES.ConfigService);
+const dataStoreService = container.get<DataStoreService>(
+  TYPES.DataStoreService,
+);
+const statisticsReporterService = container.get<StatisticsReporterService>(
+  TYPES.StatisticsReporterService,
+);
 
 appService.init();
+updaterService.init();
 
 initApplication();
 initAdditionReport();
 initIpcMain();
 initShortcutHandler();
 
-const autoUpdater = new AutoUpdater(configStore.endpoints.update);
 const floatingWindow = new FloatingWindow();
 const immersiveWindow = new ImmersiveWindow();
 const mainWindow = new MainWindow();
@@ -58,12 +67,14 @@ const trayIcon = new TrayIcon();
 
 let immersiveWindowDestroyInterval = initWindowDestroyInterval(immersiveWindow);
 
-autoUpdater.onAvailable((updateInfo) => floatingWindow.updateShow(updateInfo));
-autoUpdater.onDownloading((progressInfo) =>
+updaterService.onAvailable((updateInfo) =>
+  floatingWindow.updateShow(updateInfo),
+);
+updaterService.onDownloading((progressInfo) =>
   floatingWindow.updateProgress(progressInfo),
 );
 
-autoUpdater.onFinish(() => floatingWindow.updateFinish());
+updaterService.onFinish(() => floatingWindow.updateFinish());
 
 trayIcon.onClick(() => mainWindow.activate());
 trayIcon.registerMenuEntry(MenuEntry.Feedback, () => floatingWindow.feedback());
@@ -73,20 +84,20 @@ registerAction(
   ActionType.ClientSetProjectId,
   `main.main.${ActionType.ClientSetProjectId}`,
   ({ project, projectId }) => {
-    dataStore.setProjectId(project, projectId).catch();
+    dataStoreService.dataStore.setProjectId(project, projectId).catch();
   },
 );
 registerAction(
   ActionType.UpdateDownload,
   `main.main.${ActionType.UpdateDownload}`,
   async () => {
-    await autoUpdater.downloadUpdate();
+    await updaterService.downloadUpdate();
   },
 );
 registerAction(
   ActionType.UpdateFinish,
   `main.main.${ActionType.UpdateFinish}`,
-  () => autoUpdater.installUpdate(),
+  () => updaterService.installUpdate(),
 );
 
 websocketManager.registerWsAction(
@@ -95,11 +106,11 @@ websocketManager.registerWsAction(
     const { actionId, index } = data;
     immersiveWindow.completionClear();
     try {
-      statisticsReporter
+      statisticsReporterService
         .completionAccept(actionId, index, getClientVersion(pid))
         .catch();
     } catch {
-      statisticsReporter.completionAbort(actionId);
+      statisticsReporterService.completionAbort(actionId);
     }
   },
 );
@@ -116,19 +127,19 @@ websocketManager.registerWsAction(
     const { actionId, explicit } = data;
     if (explicit) {
       try {
-        statisticsReporter
+        statisticsReporterService
           .completionCancel(actionId, getClientVersion(pid))
           .catch();
         return;
       } catch {}
     }
-    statisticsReporter.completionAbort(actionId);
+    statisticsReporterService.completionAbort(actionId);
   },
 );
 websocketManager.registerWsAction(WsAction.CompletionEdit, ({ data }, pid) => {
   const { actionId, count, editedContent, ratio } = data;
   try {
-    statisticsReporter
+    statisticsReporterService
       .completionEdit(
         actionId,
         count,
@@ -138,7 +149,7 @@ websocketManager.registerWsAction(WsAction.CompletionEdit, ({ data }, pid) => {
       )
       .catch();
   } catch {
-    statisticsReporter.completionAbort(actionId);
+    statisticsReporterService.completionAbort(actionId);
   }
 });
 websocketManager.registerWsAction(
@@ -148,7 +159,7 @@ websocketManager.registerWsAction(
     immersiveWindowDestroyInterval = initWindowDestroyInterval(immersiveWindow);
 
     const { caret } = data;
-    const actionId = statisticsReporter.completionBegin(caret);
+    const actionId = statisticsReporterService.completionBegin(caret);
     const project = websocketManager.getClientInfo(pid)?.currentProject;
     if (!project || !project.length) {
       return new CompletionGenerateServerMessage({
@@ -159,12 +170,12 @@ websocketManager.registerWsAction(
 
     try {
       const { id: projectId } = getProjectData(project);
-      statisticsReporter.completionUpdateProjectId(actionId, projectId);
+      statisticsReporterService.completionUpdateProjectId(actionId, projectId);
 
       const promptElements = await promptExtractor.getPromptComponents(
         new RawInputs(data, project),
       );
-      statisticsReporter.completionUpdatePromptElements(
+      statisticsReporterService.completionUpdatePromptElements(
         actionId,
         promptElements,
       );
@@ -174,7 +185,7 @@ websocketManager.registerWsAction(
         projectId,
       );
       if (completions) {
-        statisticsReporter.completionGenerated(actionId, completions);
+        statisticsReporterService.completionGenerated(actionId, completions);
 
         log.log(timer.parse('CompletionGenerate'));
         timer.remove('CompletionGenerate');
@@ -185,7 +196,7 @@ websocketManager.registerWsAction(
         });
       }
 
-      statisticsReporter.completionAbort(actionId);
+      statisticsReporterService.completionAbort(actionId);
       timer.remove('CompletionGenerate');
     } catch (e) {
       const error = <Error>e;
@@ -207,7 +218,7 @@ websocketManager.registerWsAction(
         }
       }
 
-      statisticsReporter.completionAbort(actionId);
+      statisticsReporterService.completionAbort(actionId);
       timer.remove('CompletionGenerate');
       return new CompletionGenerateServerMessage({
         result,
@@ -225,7 +236,7 @@ websocketManager.registerWsAction(
       dimensions: { height, x, y },
     } = data;
     try {
-      const candidate = statisticsReporter.completionSelected(
+      const candidate = statisticsReporterService.completionSelected(
         actionId,
         index,
         getClientVersion(pid),
@@ -233,13 +244,13 @@ websocketManager.registerWsAction(
       if (candidate) {
         immersiveWindow.completionSelect(
           candidate,
-          { index, total: statisticsReporter.completionCount(actionId) },
+          { index, total: statisticsReporterService.completionCount(actionId) },
           height,
           { x, y },
         );
       }
     } catch {
-      statisticsReporter.completionAbort(actionId);
+      statisticsReporterService.completionAbort(actionId);
     }
   },
 );
@@ -265,7 +276,7 @@ websocketManager.registerWsAction(WsAction.EditorPaste, ({ data }, pid) => {
   if (project && project.length) {
     try {
       const { id: projectId } = getProjectData(project);
-      statisticsReporter
+      statisticsReporterService
         .copiedLines(count, projectId, getClientVersion(pid))
         .catch();
     } catch (e) {
@@ -297,14 +308,14 @@ app.whenReady().then(async () => {
   websocketManager.startServer();
 
   if (
-    configStore.apiStyle === ApiStyle.Linseer &&
-    !(await configStore.getAccessToken())
+    configService.configStore.apiStyle === ApiStyle.Linseer &&
+    !(await configService.configStore.getAccessToken())
   ) {
     floatingWindow.login(mainWindow.isVisible);
   }
 
   trayIcon.notify('正在检查更新……');
-  autoUpdater.checkUpdate().catch();
+  updaterService.checkUpdate().catch();
 
   scheduleJob(
     {
@@ -313,7 +324,7 @@ app.whenReady().then(async () => {
     },
     () => {
       trayIcon.notify('正在检查更新……');
-      autoUpdater.checkUpdate().catch();
+      updaterService.checkUpdate().catch();
     },
   );
 });

@@ -1,16 +1,25 @@
-import { ProgressInfo } from 'electron-builder';
+import { NsisUpdater, ProgressInfo, UpdateInfo } from 'electron-updater';
+import { injectable, inject } from 'inversify';
+import { UpdaterServiceBase } from 'shared/service-interface/UpdaterServiceBase';
+import { TYPES } from 'shared/service-interface/types';
+import { ConfigService } from 'service/entities/ConfigService';
 import log from 'electron-log/main';
-import { NsisUpdater, UpdateInfo } from 'electron-updater';
 
-export class AutoUpdater {
-  private _updater: NsisUpdater;
+@injectable()
+export class UpdaterService implements UpdaterServiceBase {
+  private _updater!: NsisUpdater;
+  @inject(TYPES.ConfigService)
+  private _configService!: ConfigService;
 
-  constructor(url: string, channel: 'beta' | 'release' = 'release') {
+  constructor() {}
+
+  init() {
     this._updater = new NsisUpdater({
-      channel,
+      channel: 'release',
       provider: 'generic',
-      url,
+      url: this._configService.configStore.config.endpoints.update,
     });
+
     this._updater.autoDownload = false;
     this._updater.autoInstallOnAppQuit = true;
     this._updater.autoRunAppAfterInstall = true;

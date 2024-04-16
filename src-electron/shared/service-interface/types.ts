@@ -1,25 +1,33 @@
-import { I_AppService } from './I_AppService';
-import { I_ConfigService } from './I_ConfigService';
-import { I_SvnService } from './I_SvnService';
-import { I_WindowService } from './I_WindowService';
+import { DataStoreServiceBase } from 'shared/service-interface/DataStoreServiceBase';
+import { AppServiceBase } from 'shared/service-interface/AppServiceBase';
+import { ConfigServiceBase } from 'shared/service-interface/ConfigServiceBase';
+import { SvnServiceBase } from 'shared/service-interface/SvnServiceBase';
+import { WindowServiceBase } from 'shared/service-interface/WindowServiceInterBase';
+import { UpdaterServiceBase } from 'shared/service-interface/UpdaterServiceBase';
+import { StatisticsReporterServiceBase } from './StatisticsReporterServiceBase';
 
 enum TYPES {
   ConfigService = 'ConfigService',
   WindowService = 'WindowService',
   SvnService = 'SvnService',
   AppService = 'AppService',
+  DataStoreService = 'DataStoreService',
+  UpdaterService = 'UpdaterService',
+  StatisticsReporterService = 'StatisticsReporterService',
 }
 
 const ServiceCallKey = 'Service:Call';
 
-type Service<T extends TYPES> = T extends TYPES.ConfigService
-  ? I_ConfigService
-  : T extends TYPES.WindowService
-    ? I_WindowService
-    : T extends TYPES.SvnService
-      ? I_SvnService
-      : T extends TYPES.AppService
-        ? I_AppService
-        : never;
+interface ServiceTypeMapping {
+  [TYPES.ConfigService]: ConfigServiceBase;
+  [TYPES.WindowService]: WindowServiceBase;
+  [TYPES.SvnService]: SvnServiceBase;
+  [TYPES.AppService]: AppServiceBase;
+  [TYPES.DataStoreService]: DataStoreServiceBase;
+  [TYPES.UpdaterService]: UpdaterServiceBase;
+  [TYPES.StatisticsReporterService]: StatisticsReporterServiceBase;
+}
+
+type Service<T extends TYPES> = ServiceTypeMapping[T];
 
 export { TYPES, ServiceCallKey, type Service };

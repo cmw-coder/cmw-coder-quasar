@@ -9,9 +9,11 @@ import {
   processHuggingFaceApi,
   processLinseerApi,
 } from 'main/components/PromptProcessor/utils';
-import { configStore } from 'main/stores';
 import { CompletionErrorCause } from 'main/utils/completion';
 import { timer } from 'main/utils/timer';
+import type { ConfigService } from 'service/entities/ConfigService';
+import { container } from 'service/inversify.config';
+import { TYPES } from 'shared/service-interface/types';
 import { ApiStyle } from 'shared/types/model';
 
 export class PromptProcessor {
@@ -22,6 +24,9 @@ export class PromptProcessor {
     promptElements: PromptElements,
     projectId: string,
   ): Promise<Completions | undefined> {
+    const configStore = container.get<ConfigService>(
+      TYPES.ConfigService,
+    ).configStore;
     const cacheKey = createHash('sha1')
       .update(promptElements.prefix.trimEnd())
       .digest('base64');

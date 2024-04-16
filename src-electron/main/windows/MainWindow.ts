@@ -2,7 +2,6 @@ import { BrowserWindow } from 'electron';
 import { resolve } from 'path';
 
 import { websocketManager } from 'main/components/WebsocketManager';
-import { configStore, dataStore } from 'main/stores';
 import { dataStoreDefault } from 'main/stores/data/default';
 import { BaseWindow } from 'main/types/BaseWindow';
 import { bypassCors } from 'main/utils/common';
@@ -20,6 +19,10 @@ import {
 import { ChangedFile } from 'shared/types/svn';
 import { WindowType } from 'shared/types/WindowType';
 import { ChatInsertServerMessage, WsAction } from 'shared/types/WsMessage';
+import type { DataStoreService } from 'service/entities/DataStoreService';
+import type { ConfigService } from 'service/entities/ConfigService';
+import { TYPES } from 'shared/service-interface/types';
+import { container } from 'service/inversify.config';
 
 export class MainWindow extends BaseWindow {
   private readonly _actionApi = new ActionApi('main.MainWindow.');
@@ -33,6 +36,12 @@ export class MainWindow extends BaseWindow {
   }
 
   protected create() {
+    const dataStore = container.get<DataStoreService>(
+      TYPES.DataStoreService,
+    ).dataStore;
+    const configStore = container.get<ConfigService>(
+      TYPES.ConfigService,
+    ).configStore;
     const store = dataStore.store;
     this._window = new BrowserWindow({
       width: store.window.main.width,
@@ -127,7 +136,10 @@ export class MainWindow extends BaseWindow {
         const projectPath = websocketManager.getClientInfo()?.currentProject;
         if (projectPath && dataStore.store.project[projectPath]?.svn[0]) {
           try {
-            await svnCommit(dataStore.store.project[projectPath].svn[0].directory, data);
+            await svnCommit(
+              dataStore.store.project[projectPath].svn[0].directory,
+              data,
+            );
             sendToRenderer(this._window, new SvnCommitActionMessage('success'));
           } catch (e) {
             sendToRenderer(this._window, new SvnCommitActionMessage(<string>e));

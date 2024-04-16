@@ -1,11 +1,11 @@
 import { ipcMain } from 'electron';
 import { injectable } from 'inversify';
 import { container } from 'service/inversify.config';
-import { I_AppService } from 'shared/service-interface/I_AppService';
+import { AppServiceBase } from 'shared/service-interface/AppServiceBase';
 import { ServiceCallKey } from 'shared/service-interface/types';
 
 @injectable()
-export class AppService implements I_AppService {
+export class AppService implements AppServiceBase {
   constructor() {
     console.log('AppService constructor');
     ipcMain.handle(

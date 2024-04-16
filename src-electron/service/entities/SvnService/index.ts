@@ -6,11 +6,13 @@ import { formatStatusRes } from 'service/entities/SvnService/util';
 import { spawn } from 'child_process';
 import { decode } from 'iconv-lite';
 import xml2js from 'xml2js';
-import { I_SvnService } from 'shared/service-interface/I_SvnService';
-import { dataStore } from 'main/stores';
+import type { SvnServiceBase } from 'shared/service-interface/SvnServiceBase';
+import { container } from 'service/inversify.config';
+import { TYPES } from 'shared/service-interface/types';
+import { DataStoreService } from '../DataStoreService';
 
 @injectable()
-export class SvnService implements I_SvnService {
+export class SvnService implements SvnServiceBase {
   status(dirPath: string) {
     return new Promise<SvnStatusItem[]>((resolve) => {
       let stdout = '';
@@ -124,6 +126,9 @@ export class SvnService implements I_SvnService {
       path: string;
       changedFileList: ChangedFile[];
     }[];
+    const dataStore = container.get<DataStoreService>(
+      TYPES.DataStoreService,
+    ).dataStore;
     const projectPathList = Object.keys(dataStore.store.project);
     for (let i = 0; i < projectPathList.length; i++) {
       const projectPath = projectPathList[i];

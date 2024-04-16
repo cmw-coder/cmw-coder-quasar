@@ -2,7 +2,9 @@ import {
   productLineMapping,
   secondClassMap,
 } from 'main/components/StatisticsReporter/constants';
-import { configStore } from 'main/stores';
+import type { ConfigService } from 'service/entities/ConfigService';
+import { container } from 'service/inversify.config';
+import { TYPES } from 'shared/service-interface/types';
 import { HuggingFaceModelType, LinseerModelType } from 'shared/types/model';
 
 export const constructData = (
@@ -15,6 +17,7 @@ export const constructData = (
   firstClass: string,
   skuName: string,
 ) => {
+  const configService = container.get<ConfigService>(TYPES.ConfigService);
   const basicData = {
     begin: Math.floor(startTime / 1000),
     end: Math.floor(endTime / 1000),
@@ -23,7 +26,7 @@ export const constructData = (
     secondClass: secondClassMap[modelType],
     subType: projectId,
     type: 'AIGC',
-    user: configStore.config.userId,
+    user: configService.configStore.config.userId,
     userType: 'USER',
     productLine:
       modelType in LinseerModelType

@@ -5,14 +5,35 @@ import { WindowService } from 'service/entities/WindowService';
 import { SvnService } from 'service/entities/SvnService';
 import { TYPES } from 'shared/service-interface/types';
 import { AppService } from 'service/entities/AppService';
+import { DataStoreService } from 'service/entities/DataStoreService';
+import { UpdaterService } from 'service/entities/UpdaterService';
+import { StatisticsReporterService } from 'service/entities/StatisticsReporterService';
 
 const container = new Container({
   defaultScope: 'Transient',
 });
 
-container.bind<ConfigService>(TYPES.ConfigService).to(ConfigService);
-container.bind<WindowService>(TYPES.WindowService).to(WindowService);
-container.bind<SvnService>(TYPES.SvnService).to(SvnService);
-container.bind<AppService>(TYPES.AppService).to(AppService);
+container
+  .bind<ConfigService>(TYPES.ConfigService)
+  .to(ConfigService)
+  .inSingletonScope();
+container
+  .bind<WindowService>(TYPES.WindowService)
+  .to(WindowService)
+  .inSingletonScope();
+container.bind<SvnService>(TYPES.SvnService).to(SvnService).inSingletonScope();
+container.bind<AppService>(TYPES.AppService).to(AppService).inSingletonScope();
+container
+  .bind<DataStoreService>(TYPES.DataStoreService)
+  .to(DataStoreService)
+  .inSingletonScope();
+container
+  .bind<UpdaterService>(TYPES.UpdaterService)
+  .to(UpdaterService)
+  .inSingletonScope();
+container
+  .bind<StatisticsReporterService>(TYPES.StatisticsReporterService)
+  .to(StatisticsReporterService)
+  .inSingletonScope();
 
 export { container };
