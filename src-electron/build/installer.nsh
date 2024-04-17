@@ -46,14 +46,14 @@
 
 !define installProxy '!insertmacro installProxyImpl'
 !macro installProxyImpl targetPath
-  SetOutPath $targetPath
+  SetOutPath ${targetPath}
   File '${BUILD_RESOURCES_DIR}\build\assets\cmw-coder-loader.exe'
   File '${BUILD_RESOURCES_DIR}\build\assets\loaderdll.dll'
   File '${BUILD_RESOURCES_DIR}\build\assets\zlib1.dll'
   Sleep 3000
-  nsExec::Exec '"$targetPath\cmw-coder-loader.exe" /uninstall'
+  nsExec::Exec '"${targetPath}\cmw-coder-loader.exe" /uninstall'
   Sleep 3000
-  nsExec::Exec '"$targetPath\cmw-coder-loader.exe" /install'
+  nsExec::Exec '"${targetPath}\cmw-coder-loader.exe" /install'
   SetOutPath $INSTDIR
 !macroend
 
