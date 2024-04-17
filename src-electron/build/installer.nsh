@@ -101,11 +101,11 @@
   ${If} $SI3_INSTALL_DIR != ''
   ${AndIf} ${FileExists} '$SI3_INSTALL_DIR\$SI3_EXECUTABLE'
     ${killIfRunning} '$SI3_EXECUTABLE'
-    ${installProxy} $SI3_INSTALL_DIR
+    ${installProxy} '$SI3_INSTALL_DIR'
   ${EndIf}
   ${If} $SI4_INSTALL_DIR != ''
   ${AndIf} ${FileExists} '$SI4_INSTALL_DIR\$SI4_EXECUTABLE'
     ${killIfRunning} '$SI4_EXECUTABLE'
-    ${installProxy} $SI4_INSTALL_DIR
+    ${installProxy} '$SI4_INSTALL_DIR'
   ${EndIf}
 !macroend
