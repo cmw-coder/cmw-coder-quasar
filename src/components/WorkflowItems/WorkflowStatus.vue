@@ -27,19 +27,9 @@ defineProps<Props>();
     style="margin-left: 0.1rem"
   >
     <q-spinner-oval color="amber" size="1.75rem" />
-    <q-icon
-      class="absolute"
-      color="amber"
-      name="circle"
-      size="xs"
-    />
+    <q-icon class="absolute" color="amber" name="circle" size="xs" />
   </div>
-  <q-icon
-    v-else
-    name="mdi-check-circle"
-    color="positive"
-    size="2rem"
-  />
+  <q-icon v-else name="mdi-check-circle" color="positive" size="2rem" />
 </template>
 
 <style scoped></style>

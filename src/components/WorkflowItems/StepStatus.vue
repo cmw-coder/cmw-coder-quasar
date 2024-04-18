@@ -33,12 +33,7 @@ defineProps<Props>();
     color="grey"
     size="sm"
   />
-  <q-icon
-    v-else
-    name="mdi-check-circle"
-    color="positive"
-    size="sm"
-  />
+  <q-icon v-else name="mdi-check-circle" color="positive" size="sm" />
 </template>
 
 <style scoped></style>

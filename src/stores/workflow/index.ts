@@ -93,15 +93,17 @@ export const useWorkflowStore = defineStore('workflow', () => {
     });
 
   const deleteWorkflow = (workflowId: string) => {
-    const index = workflows.value.findIndex((workflow) => workflow.id === workflowId);
+    const index = workflows.value.findIndex(
+      (workflow) => workflow.id === workflowId,
+    );
     if (index !== -1) {
       workflows.value.splice(index, 1);
     }
-  }
+  };
 
   return {
     workflows,
     createWorkflow,
-    deleteWorkflow
+    deleteWorkflow,
   };
 });

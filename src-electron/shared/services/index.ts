@@ -31,5 +31,4 @@ export interface ServiceTypeMapping {
   [ServiceType.WINDOW]: WindowServiceBase;
 }
 
-
 export type Service<T extends ServiceType> = ServiceTypeMapping[T];

@@ -1,7 +1,7 @@
 import { exec } from 'child_process';
 import { BrowserWindow } from 'electron';
 import { readdir, stat } from 'fs/promises';
-import {decode} from 'iconv-lite';
+import { decode } from 'iconv-lite';
 import path from 'path';
 import { promisify } from 'util';
 

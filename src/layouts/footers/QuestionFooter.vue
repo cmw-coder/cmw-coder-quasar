@@ -52,7 +52,8 @@ onMounted(async () => {
         accessToken.value = data.tokens.access;
         endpoint.value = config.endpoints.aiService;
       } else {
-        endpoint.value = config.modelConfigs[0].completionConfigs.function.endpoint;
+        endpoint.value =
+          config.modelConfigs[0].completionConfigs.function.endpoint;
       }
     },
   );

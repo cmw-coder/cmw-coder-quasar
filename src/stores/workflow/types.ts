@@ -9,6 +9,6 @@ export interface Workflow {
   id: string;
   name: string;
   creator: string;
-  status: 'failure' | 'pending' | 'running' | 'success'
+  status: 'failure' | 'pending' | 'running' | 'success';
   steps: StepInfo[];
 }

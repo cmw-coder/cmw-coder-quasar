@@ -269,7 +269,7 @@ export default {
       notifications: {
         copyFailure: 'Failed to copy the workflow ID',
         copySuccess: 'This workflow ID has been copied to the clipboard',
-      }
-    }
+      },
+    },
   },
 };
