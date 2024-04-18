@@ -1,17 +1,18 @@
 import { injectable, inject } from 'inversify';
-import { WindowService } from 'service/entities/WindowService';
-import { TYPES } from 'shared/service-interface/types';
-import { ConfigServiceBase } from 'shared/service-interface/ConfigServiceBase';
-import { runtimeConfig } from 'shared/config';
-import { ApiStyle } from 'shared/types/model';
+
 import { HuggingFaceConfigStore, LinseerConfigStore } from 'main/stores/config';
 import { LinseerConfigType, LinseerDataType } from 'main/stores/config/types';
 import { registerAction } from 'preload/types/ActionApi';
+import { WindowService } from 'service/entities/WindowService';
+import { runtimeConfig } from 'shared/config';
+import { ServiceType } from 'shared/services';
+import { ConfigServiceBase } from 'shared/services/types/ConfigServiceBase';
 import { ActionType } from 'shared/types/ActionMessage';
+import { ApiStyle } from 'shared/types/model';
 
 @injectable()
 export class ConfigService implements ConfigServiceBase {
-  @inject(TYPES.WindowService)
+  @inject(ServiceType.WINDOW)
   private _windowService!: WindowService;
   configStore =
     runtimeConfig.apiStyle === ApiStyle.HuggingFace
@@ -36,11 +37,6 @@ export class ConfigService implements ConfigServiceBase {
         }
       },
     );
-  }
-
-  public sayHello(): void {
-    console.log('Hello from ConfigService');
-    this._windowService.sayHello();
   }
 
   async saveConfig(data: Partial<LinseerConfigType>) {

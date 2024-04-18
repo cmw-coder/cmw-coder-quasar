@@ -1,8 +1,9 @@
 import { injectable } from 'inversify';
-import { DataStoreServiceBase } from 'shared/service-interface/DataStoreServiceBase';
+
 import { DataStore } from 'main/stores/data';
 import { DataStoreType } from 'main/stores/data/types';
 import { registerAction } from 'preload/types/ActionApi';
+import { DataStoreServiceBase } from 'shared/services/types/DataStoreServiceBase';
 import { ActionType } from 'shared/types/ActionMessage';
 
 @injectable()

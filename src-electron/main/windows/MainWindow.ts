@@ -3,9 +3,14 @@ import { resolve } from 'path';
 import { dataStoreDefault } from 'main/stores/data/default';
 import { BaseWindow } from 'main/types/BaseWindow';
 import { bypassCors } from 'main/utils/common';
-import { getChangedFileList, svnCommit } from 'main/utils/svn';
+import { svnCommit } from 'main/utils/svn';
 import { ActionApi, sendToRenderer } from 'preload/types/ActionApi';
 import { ControlType, registerControlCallback } from 'preload/types/ControlApi';
+import { container } from 'service';
+import type { DataStoreService } from 'service/entities/DataStoreService';
+import type { ConfigService } from 'service/entities/ConfigService';
+import type { WebsocketService } from 'service/entities/WebsocketService';
+import { ServiceType } from 'shared/services';
 import {
   ActionType,
   ConfigStoreLoadActionMessage,
@@ -17,11 +22,7 @@ import {
 import { ChangedFile } from 'shared/types/svn';
 import { WindowType } from 'shared/types/WindowType';
 import { ChatInsertServerMessage, WsAction } from 'shared/types/WsMessage';
-import type { DataStoreService } from 'service/entities/DataStoreService';
-import type { ConfigService } from 'service/entities/ConfigService';
-import { TYPES } from 'shared/service-interface/types';
-import { container } from 'service/inversify.config';
-import type { WebsocketService } from 'service/entities/WebsocketService';
+import { SvnService } from 'service/entities/SvnService';
 
 export class MainWindow extends BaseWindow {
   private readonly _actionApi = new ActionApi('main.MainWindow.');
@@ -36,10 +37,10 @@ export class MainWindow extends BaseWindow {
 
   protected create() {
     const dataStore = container.get<DataStoreService>(
-      TYPES.DataStoreService,
+      ServiceType.DATA_STORE,
     ).dataStore;
     const configStore = container.get<ConfigService>(
-      TYPES.ConfigService,
+      ServiceType.CONFIG,
     ).configStore;
     const store = dataStore.store;
     this._window = new BrowserWindow({
@@ -81,7 +82,7 @@ export class MainWindow extends BaseWindow {
     });
     this._window.on('ready-to-show', async () => {
       if (this._window) {
-        this._window.webContents.openDevTools();
+        // this._window.webContents.openDevTools();
       }
     });
     this._window.on('show', () => {
@@ -92,7 +93,7 @@ export class MainWindow extends BaseWindow {
 
     this._actionApi.register(ActionType.ChatInsert, (content) => {
       const websocketService = container.get<WebsocketService>(
-        TYPES.WebsocketService,
+        ServiceType.WEBSOCKET,
       );
       websocketService.send(
         JSON.stringify(
@@ -124,14 +125,14 @@ export class MainWindow extends BaseWindow {
     this._actionApi.register(ActionType.SvnDiff, async () => {
       if (this._window) {
         const websocketService = container.get<WebsocketService>(
-          TYPES.WebsocketService,
+          ServiceType.WEBSOCKET,
         );
         let changedFileList: ChangedFile[] | undefined;
         const projectPath = websocketService.getClientInfo()?.currentProject;
         if (projectPath && dataStore.store.project[projectPath]?.svn[0]) {
-          changedFileList = await getChangedFileList(
-            dataStore.store.project[projectPath].svn[0].directory,
-          );
+          changedFileList = await container
+            .get<SvnService>(ServiceType.SVN)
+            .repoDiff(dataStore.store.project[projectPath].svn[0].directory);
         }
         sendToRenderer(this._window, new SvnDiffActionMessage(changedFileList));
       }
@@ -139,7 +140,7 @@ export class MainWindow extends BaseWindow {
     this._actionApi.register(ActionType.SvnCommit, async (data) => {
       if (this._window) {
         const websocketService = container.get<WebsocketService>(
-          TYPES.WebsocketService,
+          ServiceType.WEBSOCKET,
         );
         const projectPath = websocketService.getClientInfo()?.currentProject;
         if (projectPath && dataStore.store.project[projectPath]?.svn[0]) {
@@ -194,7 +195,7 @@ export class MainWindow extends BaseWindow {
       }
     });
     const websocketService = container.get<WebsocketService>(
-      TYPES.WebsocketService,
+      ServiceType.WEBSOCKET,
     );
     websocketService.registerWsAction(WsAction.DebugSync, (message) => {
       if (this._window) {

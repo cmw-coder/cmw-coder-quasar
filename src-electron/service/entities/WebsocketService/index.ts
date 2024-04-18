@@ -1,7 +1,21 @@
 import log from 'electron-log/main';
 import { inject, injectable } from 'inversify';
-import { WebsocketServiceBase } from 'shared/service-interface/WebsocketServiceBase';
-import { TYPES } from 'shared/service-interface/types';
+import { Server, type WebSocket } from 'ws';
+
+import { PromptExtractor } from 'main/components/PromptExtractor';
+import { RawInputs } from 'main/components/PromptExtractor/types';
+import { PromptProcessor } from 'main/components/PromptProcessor';
+import { initWindowDestroyInterval } from 'main/init';
+import {
+  CompletionErrorCause,
+  getClientVersion,
+  getProjectData,
+} from 'main/utils/completion';
+import { timer } from 'main/utils/timer';
+import type { WindowService } from 'service/entities/WindowService';
+import type { StatisticsReporterService } from 'service/entities/StatisticsReporterService';
+import { ServiceType } from 'shared/services';
+import { WebsocketServiceBase } from 'shared/services/types/WebsocketServiceBase';
 import {
   CompletionGenerateServerMessage,
   HandShakeClientMessage,
@@ -9,19 +23,6 @@ import {
   WsAction,
   WsMessageMapping,
 } from 'shared/types/WsMessage';
-import { Server, type WebSocket } from 'ws';
-import type { WindowService } from 'service/entities/WindowService';
-import type { StatisticsReporterService } from 'service/entities/StatisticsReporterService';
-import {
-  CompletionErrorCause,
-  getClientVersion,
-  getProjectData,
-} from 'main/utils/completion';
-import { initWindowDestroyInterval } from 'main/init';
-import { RawInputs } from 'main/components/PromptExtractor/types';
-import { timer } from 'main/utils/timer';
-import { PromptProcessor } from 'main/components/PromptProcessor';
-import { PromptExtractor } from 'main/components/PromptExtractor';
 
 interface ClientInfo {
   client: WebSocket;
@@ -31,9 +32,9 @@ interface ClientInfo {
 
 @injectable()
 export class WebsocketService implements WebsocketServiceBase {
-  @inject(TYPES.WindowService)
+  @inject(ServiceType.WINDOW)
   private _windowService!: WindowService;
-  @inject(TYPES.StatisticsReporterService)
+  @inject(ServiceType.STATISTICS_REPORTER)
   private _statisticsReporterService!: StatisticsReporterService;
   private _clientInfoMap = new Map<number, ClientInfo>();
   private _lastActivePid = 0;

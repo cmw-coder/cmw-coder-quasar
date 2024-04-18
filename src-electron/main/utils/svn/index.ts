@@ -1,29 +1,27 @@
 import { SVNClient } from '@taiyosen/easy-svn';
-import * as child_process from 'child_process';
 import log from 'electron-log/main';
-import fs from 'fs';
-import * as iconv from 'iconv-lite';
-import { detect } from 'jschardet';
+import { readdir, stat } from 'fs/promises';
 import { resolve } from 'path';
-import xml2js from 'xml2js';
 
-import { folderLatestModificationTime } from 'main/utils/common';
+import {
+  executeCommand,
+  folderLatestModificationTime,
+} from 'main/utils/common';
 import packageJson from 'root/package.json';
-import { ChangedFile, SvnStatusItem } from 'shared/types/svn';
-import { container } from 'service/inversify.config';
+import { container } from 'service';
 import { DataStoreService } from 'service/entities/DataStoreService';
-import { TYPES } from 'shared/service-interface/types';
 import { StatisticsReporterService } from 'service/entities/StatisticsReporterService';
+import { ServiceType } from 'shared/services';
 
 export const searchSvnDirectories = async (
   folder: string,
 ): Promise<string[]> => {
   const directories: string[] = [];
   try {
-    const items = await fs.promises.readdir(folder);
+    const items = await readdir(folder);
     for (const item of items) {
       const filePath = resolve(folder, item);
-      const stats = await fs.promises.stat(filePath);
+      const stats = await stat(filePath);
       if (stats.isDirectory()) {
         if (item === '.svn') {
           log.debug('Found svn directory:', folder);
@@ -53,184 +51,27 @@ export const getRevision = async (path: string): Promise<number> => {
   return -1;
 };
 
-export const getAddedLines = (path: string, revision: number) => {
-  return new Promise<string[]>((resolve) => {
-    let stdout = '';
-    let stderr = '';
-    const childProcess = child_process.spawn(
-      'svn',
-      ['diff', '-r', revision.toString()],
-      {
-        cwd: path,
-      },
-    );
-    childProcess.stdout.on('data', (data) => {
-      const detectRes = detect(data);
-      if (detectRes.encoding !== 'UTF-8') {
-        detectRes.encoding = 'GBK';
-      }
-      stdout += iconv.decode(data, detectRes.encoding);
-    });
-    childProcess.stderr.on('data', (data) => {
-      const detectRes = detect(data);
-      if (detectRes.encoding !== 'UTF-8') {
-        detectRes.encoding = 'GBK';
-      }
-      stderr += iconv.decode(data, detectRes.encoding);
-    });
-    childProcess.on('close', () => {
-      resolve(
-        (stdout + stderr)
-          .split(/\r?\n/)
-          .filter((line) => line.startsWith('+') && !line.startsWith('++'))
-          .map((line) => line.substring(1))
-          .filter((line) => line.trim().length > 0)
-          .join('\r\n')
-          .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')
-          .split('\r\n'),
-      );
-    });
-  });
-};
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const formatStatusRes = (data: any) => {
-  const res = [] as SvnStatusItem[];
-  const entries = data?.status?.target?.entry;
-  if (!entries) {
-    return res;
-  }
-  if (Object.prototype.toString.call(entries) === '[object Object]') {
-    res.push({
-      path: entries?._attribute?.path,
-      type: entries['wc-status']?._attribute?.item,
-    });
-  } else if (Object.prototype.toString.call(entries) === '[object Array]') {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    entries.forEach((entry: any) => {
-      res.push({
-        path: entry?._attribute?.path,
-        type: entry['wc-status']?._attribute?.item,
-      });
-    });
-  }
-  return res;
-};
-
-export const getStatus = (path: string) => {
-  return new Promise<SvnStatusItem[]>((resolve) => {
-    let stdout = '';
-    let stderr = '';
-    const childProcess = child_process.spawn('svn', ['status', '--xml'], {
-      cwd: path,
-    });
-    childProcess.stdout.on('data', (data) => {
-      const detectRes = detect(data);
-      if (detectRes.encoding !== 'UTF-8') {
-        detectRes.encoding = 'GBK';
-      }
-      stdout += iconv.decode(data, detectRes.encoding);
-    });
-    childProcess.stderr.on('data', (data) => {
-      const detectRes = detect(data);
-      if (detectRes.encoding !== 'UTF-8') {
-        detectRes.encoding = 'GBK';
-      }
-      stderr += iconv.decode(data, detectRes.encoding);
-    });
-    process.on('exit', (code: number, sig: number) => {
-      if (childProcess.connected) {
-        childProcess.kill(sig);
-      }
-    });
-    childProcess.on('error', (err) => {
-      log.error('SVN Get status error:', err);
-      log.error('SVN Get status error:', stderr);
-    });
-    childProcess.on('close', (code) => {
-      if (code === 0) {
-        xml2js.parseString(
-          stdout,
-          {
-            attrkey: '_attribute',
-            charkey: '_text',
-            explicitCharkey: true,
-            explicitArray: false,
-          },
-          (err, result) => {
-            resolve(formatStatusRes(result));
-          },
-        );
-      } else {
-        resolve([]);
-      }
-    });
-  });
-};
-
-export const getFileDiffDetail = (projectPath: string, filePath: string) => {
-  return new Promise<string>((resolve) => {
-    let stdout = '';
-    let stderr = '';
-    const childProcess = child_process.spawn('svn', ['diff', filePath], {
-      cwd: projectPath,
-    });
-    childProcess.stdout.on('data', (data) => {
-      const detectRes = detect(data);
-      if (detectRes.encoding !== 'UTF-8') {
-        detectRes.encoding = 'GBK';
-      }
-      stdout += iconv.decode(data, detectRes.encoding);
-    });
-    childProcess.stderr.on('data', (data) => {
-      const detectRes = detect(data);
-      if (detectRes.encoding !== 'UTF-8') {
-        detectRes.encoding = 'GBK';
-      }
-      stderr += iconv.decode(data, detectRes.encoding);
-    });
-    childProcess.on('close', (code) => {
-      if (code === 0) {
-        resolve(stdout);
-      } else {
-        resolve(stderr);
-      }
-    });
-  });
-};
-
-export const getChangedFileList = async (path: string) => {
-  const result = [] as ChangedFile[];
-  const files = await getStatus(path);
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i];
-    const diffDetail = await getFileDiffDetail(path, file.path);
-    let added = 0;
-    let deleted = 0;
-    const lines = diffDetail.split(/\r?\n/);
-    lines.forEach((line) => {
-      if (line.startsWith('+') && !line.startsWith('+++')) {
-        added++;
-      } else if (line.startsWith('-') && !line.startsWith('---')) {
-        deleted++;
-      }
-    });
-    result.push({
-      ...file,
-      additions: added,
-      deletions: deleted,
-      diff: diffDetail,
-    });
-  }
-  return result;
+export const getAddedLines = async (path: string, revision: number) => {
+  const { stdout, stderr } = await executeCommand(
+    `svn diff -r ${revision}`,
+    path,
+  );
+  return `${stdout}\r\n${stderr}`
+    .split(/\r?\n/)
+    .filter((line) => line.startsWith('+') && !line.startsWith('++'))
+    .map((line) => line.substring(1))
+    .filter((line) => line.trim().length > 0)
+    .join('\r\n')
+    .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')
+    .split('\r\n').length;
 };
 
 export const reportProjectAdditions = async () => {
   const dataStore = container.get<DataStoreService>(
-    TYPES.DataStoreService,
+    ServiceType.DATA_STORE,
   ).dataStore;
   const statisticsReporterService = container.get<StatisticsReporterService>(
-    TYPES.StatisticsReporterService,
+    ServiceType.STATISTICS_REPORTER,
   );
   return (
     await Promise.all(
@@ -248,7 +89,7 @@ export const reportProjectAdditions = async () => {
                         await getAddedLines(directory, revision),
                     ),
                   )
-                ).reduce((acc, val) => acc.concat(val), []).length
+                ).reduce((accumulate, current) => accumulate + current, 0)
               : 0,
           lastAddedLines,
         }),
@@ -275,36 +116,12 @@ export const reportProjectAdditions = async () => {
 };
 
 export const svnCommit = async (projectPath: string, commitMessage: string) => {
-  return new Promise<string>((resolve, reject) => {
-    let stdout = '';
-    let stderr = '';
-    const childProcess = child_process.spawn(
-      'svn',
-      ['commit', '-m', commitMessage],
-      {
-        cwd: projectPath,
-      },
-    );
-    childProcess.stdout.on('data', (data) => {
-      const detectRes = detect(data);
-      if (detectRes.encoding !== 'UTF-8') {
-        detectRes.encoding = 'GBK';
-      }
-      stdout += iconv.decode(data, detectRes.encoding);
-    });
-    childProcess.stderr.on('data', (data) => {
-      const detectRes = detect(data);
-      if (detectRes.encoding !== 'UTF-8') {
-        detectRes.encoding = 'GBK';
-      }
-      stderr += iconv.decode(data, detectRes.encoding);
-    });
-    childProcess.on('close', (code) => {
-      if (code === 0) {
-        resolve(stdout);
-      } else {
-        reject(stderr);
-      }
-    });
-  });
+  const { stdout, stderr } = await executeCommand(
+    `svn commit -m ${commitMessage}`,
+    projectPath,
+  );
+  if (stderr && stderr.length) {
+    throw new Error(stderr);
+  }
+  return stdout;
 };

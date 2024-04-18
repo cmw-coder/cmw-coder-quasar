@@ -3,6 +3,8 @@ import { useQuasar } from 'quasar';
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
+
+import { ServiceType } from 'shared/services';
 import {
   ActionType,
   ConfigStoreLoadActionMessage,
@@ -18,8 +20,7 @@ import {
   generateCommitMessage,
   generateCommitPrompt,
 } from 'utils/commitPrompt';
-import useService from 'boot/useService';
-import { TYPES } from 'app/src-electron/shared/service-interface/types';
+import { useService } from 'utils/common';
 
 const { codeToHtml } = useHighlighter();
 const { createWorkflow } = useWorkflowStore();
@@ -35,7 +36,7 @@ const i18n = (relativePath: string) => {
   return t(baseName + relativePath);
 };
 
-const svnService = useService(TYPES.SvnService);
+const svnService = useService(ServiceType.SVN);
 const projectList = ref<
   {
     path: string;

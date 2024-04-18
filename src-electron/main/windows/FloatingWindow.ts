@@ -2,9 +2,10 @@ import { BrowserWindow } from 'electron';
 import log from 'electron-log/main';
 import { ProgressInfo, UpdateInfo } from 'electron-updater';
 import { resolve } from 'path';
+
 import { BaseWindow } from 'main/types/BaseWindow';
 import { bypassCors } from 'main/utils/common';
-import { getChangedFileList, svnCommit } from 'main/utils/svn';
+import { svnCommit } from 'main/utils/svn';
 import { ActionApi, sendToRenderer } from 'preload/types/ActionApi';
 import {
   ControlType,
@@ -12,6 +13,11 @@ import {
   triggerControlCallback,
 } from 'preload/types/ControlApi';
 import packageJson from 'root/package.json';
+import { container } from 'service';
+import type { ConfigService } from 'service/entities/ConfigService';
+import type { DataStoreService } from 'service/entities/DataStoreService';
+import type { WebsocketService } from 'service/entities/WebsocketService';
+import { ServiceType } from 'shared/services';
 import {
   ActionType,
   ConfigStoreLoadActionMessage,
@@ -22,12 +28,8 @@ import {
   UpdateProgressActionMessage,
 } from 'shared/types/ActionMessage';
 import { ChangedFile } from 'shared/types/svn';
+import { SvnService } from 'service/entities/SvnService';
 import { WindowType } from 'shared/types/WindowType';
-import { container } from 'service/inversify.config';
-import { TYPES } from 'shared/service-interface/types';
-import type { ConfigService } from 'service/entities/ConfigService';
-import type { DataStoreService } from 'service/entities/DataStoreService';
-import type { WebsocketService } from 'service/entities/WebsocketService';
 
 export class FloatingWindow extends BaseWindow {
   private readonly _actionApi = new ActionApi('main.FloatingWindow.');
@@ -63,7 +65,7 @@ export class FloatingWindow extends BaseWindow {
 
   login(mainIsVisible: boolean) {
     const configStore = container.get<ConfigService>(
-      TYPES.ConfigService,
+      ServiceType.CONFIG,
     ).configStore;
     if (mainIsVisible) {
       triggerControlCallback(WindowType.Main, ControlType.Hide, undefined);
@@ -126,10 +128,10 @@ export class FloatingWindow extends BaseWindow {
 
   protected create() {
     const dataStore = container.get<DataStoreService>(
-      TYPES.DataStoreService,
+      ServiceType.DATA_STORE,
     ).dataStore;
     const configStore = container.get<ConfigService>(
-      TYPES.ConfigService,
+      ServiceType.CONFIG,
     ).configStore;
 
     this._window = new BrowserWindow({
@@ -160,7 +162,7 @@ export class FloatingWindow extends BaseWindow {
 
     this._window.once('ready-to-show', () => {
       if (this._window) {
-        this._window.webContents.openDevTools({ mode: 'undocked' });
+        // this._window.webContents.openDevTools({ mode: 'undocked' });
         this._window.show();
       }
     });
@@ -176,14 +178,14 @@ export class FloatingWindow extends BaseWindow {
     this._actionApi.register(ActionType.SvnDiff, async () => {
       if (this._window) {
         const websocketService = container.get<WebsocketService>(
-          TYPES.WebsocketService,
+          ServiceType.WEBSOCKET,
         );
         let changedFileList: ChangedFile[] | undefined;
         const projectPath = websocketService.getClientInfo()?.currentProject;
         if (projectPath && dataStore.store.project[projectPath]?.svn[0]) {
-          changedFileList = await getChangedFileList(
-            dataStore.store.project[projectPath].svn[0].directory,
-          );
+          changedFileList = await container
+            .get<SvnService>(ServiceType.SVN)
+            .repoDiff(dataStore.store.project[projectPath].svn[0].directory);
         }
         sendToRenderer(this._window, new SvnDiffActionMessage(changedFileList));
       }
@@ -191,7 +193,7 @@ export class FloatingWindow extends BaseWindow {
     this._actionApi.register(ActionType.SvnCommit, async (data) => {
       if (this._window) {
         const websocketService = container.get<WebsocketService>(
-          TYPES.WebsocketService,
+          ServiceType.WEBSOCKET,
         );
         const projectPath = websocketService.getClientInfo()?.currentProject;
         if (projectPath && dataStore.store.project[projectPath]?.svn[0]) {

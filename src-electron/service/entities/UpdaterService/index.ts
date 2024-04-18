@@ -1,17 +1,18 @@
+import log from 'electron-log/main';
 import { NsisUpdater, ProgressInfo, UpdateInfo } from 'electron-updater';
 import { injectable, inject } from 'inversify';
-import { UpdaterServiceBase } from 'shared/service-interface/UpdaterServiceBase';
-import { TYPES } from 'shared/service-interface/types';
+
+import { ServiceType } from 'shared/services';
+import { UpdaterServiceBase } from 'shared/services/types/UpdaterServiceBase';
 import type { ConfigService } from 'service/entities/ConfigService';
-import type { WindowService } from '../WindowService';
-import log from 'electron-log/main';
+import type { WindowService } from 'service/entities/WindowService';
 
 @injectable()
 export class UpdaterService implements UpdaterServiceBase {
   private _updater!: NsisUpdater;
-  @inject(TYPES.ConfigService)
+  @inject(ServiceType.CONFIG)
   private _configService!: ConfigService;
-  @inject(TYPES.WindowService)
+  @inject(ServiceType.WINDOW)
   private _windowService!: WindowService;
 
   constructor() {}

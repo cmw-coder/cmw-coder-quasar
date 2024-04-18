@@ -1,9 +1,9 @@
 import { DataProjectType } from 'main/stores/data/types';
 import packageJson from 'root/package.json';
+import { container } from 'service';
 import type { DataStoreService } from 'service/entities/DataStoreService';
 import type { WebsocketService } from 'service/entities/WebsocketService';
-import { container } from 'service/inversify.config';
-import { TYPES } from 'shared/service-interface/types';
+import { ServiceType } from 'shared/services';
 
 export enum CompletionErrorCause {
   accessToken = 'accessToken',
@@ -13,7 +13,7 @@ export enum CompletionErrorCause {
 
 export const getClientVersion = (pid: number) => {
   const websocketService = container.get<WebsocketService>(
-    TYPES.WebsocketService,
+    ServiceType.WEBSOCKET,
   );
   const clientInfo = websocketService.getClientInfo(pid);
   if (!clientInfo) {
@@ -26,7 +26,7 @@ export const getClientVersion = (pid: number) => {
 
 export const getProjectData = (project: string): DataProjectType => {
   const dataStore = container.get<DataStoreService>(
-    TYPES.DataStoreService,
+    ServiceType.DATA_STORE,
   ).dataStore;
   const projectData: DataProjectType | undefined =
     dataStore.store.project[project];

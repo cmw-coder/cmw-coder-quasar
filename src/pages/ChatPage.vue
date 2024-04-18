@@ -6,7 +6,7 @@ import { useI18n } from 'vue-i18n';
 
 import ChatMessages from 'components/ChatMessages.vue';
 import { useChatStore } from 'stores/chat';
-import { timeout } from 'src/utils';
+import { timeout } from 'utils/common';
 
 const baseName = 'pages.ChatPage.';
 

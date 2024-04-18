@@ -2,17 +2,15 @@ import { app, globalShortcut, ipcMain } from 'electron';
 import log from 'electron-log/main';
 import { inject, injectable } from 'inversify';
 import { DateTime } from 'luxon';
+import { scheduleJob } from 'node-schedule';
 import { release, version } from 'os';
-import { container } from 'service/inversify.config';
-import { AppServiceBase } from 'shared/service-interface/AppServiceBase';
-import { ServiceCallKey, TYPES } from 'shared/service-interface/types';
-import type { WindowService } from 'service/entities/WindowService';
-import type { WebsocketService } from 'service/entities/WebsocketService';
-import type { UpdaterService } from 'service/entities/UpdaterService';
+
+import { container } from 'service';
 import type { ConfigService } from 'service/entities/ConfigService';
 import type { DataStoreService } from 'service/entities/DataStoreService';
-import { ApiStyle } from 'shared/types/model';
-import { scheduleJob } from 'node-schedule';
+import type { UpdaterService } from 'service/entities/UpdaterService';
+import type { WebsocketService } from 'service/entities/WebsocketService';
+import type { WindowService } from 'service/entities/WindowService';
 import { reportProjectAdditions } from 'main/utils/svn';
 import { registerAction, triggerAction } from 'preload/types/ActionApi';
 import {
@@ -20,20 +18,24 @@ import {
   triggerControlCallback,
 } from 'preload/types/ControlApi';
 import { ACTION_API_KEY, CONTROL_API_KEY } from 'shared/constants/common';
+import { SERVICE_CALL_KEY, ServiceType } from 'shared/services';
+import { AppServiceBase } from 'shared/services/types/AppServiceBase';
 import { ActionMessage, ActionType } from 'shared/types/ActionMessage';
+import { ApiStyle } from 'shared/types/model';
 
 @injectable()
 export class AppService implements AppServiceBase {
-  @inject(TYPES.WindowService)
+  @inject(ServiceType.WINDOW)
   private _windowService!: WindowService;
-  @inject(TYPES.WebsocketService)
+  @inject(ServiceType.WEBSOCKET)
   private _websocketService!: WebsocketService;
-  @inject(TYPES.UpdaterService)
+  @inject(ServiceType.UPDATER)
   private _updaterService!: UpdaterService;
-  @inject(TYPES.ConfigService)
+  @inject(ServiceType.CONFIG)
   private _configService!: ConfigService;
-  @inject(TYPES.DataStoreService)
+  @inject(ServiceType.DATA_STORE)
   private _dataStoreService!: DataStoreService;
+
   constructor() {
     console.log('AppService constructor');
   }
@@ -117,7 +119,7 @@ export class AppService implements AppServiceBase {
 
   initIpcMain() {
     ipcMain.handle(
-      ServiceCallKey,
+      SERVICE_CALL_KEY,
       (
         event,
         serviceName: string,

@@ -14,9 +14,9 @@ import {
   RouterReloadActionMessage,
 } from 'shared/types/ActionMessage';
 import { WindowType } from 'shared/types/WindowType';
+import { container } from 'service';
 import { DataStoreService } from 'service/entities/DataStoreService';
-import { container } from 'service/inversify.config';
-import { TYPES } from 'shared/service-interface/types';
+import { ServiceType } from 'shared/services';
 
 export class ImmersiveWindow extends BaseWindow {
   private readonly _actionApi = new ActionApi('main.ImmersiveWindow.');
@@ -43,7 +43,7 @@ export class ImmersiveWindow extends BaseWindow {
     }
     if (this._window) {
       const dataStore = container.get<DataStoreService>(
-        TYPES.DataStoreService,
+        ServiceType.DATA_STORE,
       ).dataStore;
       if (dataStore.store.compatibility.transparentFallback) {
         const lines = completion.split('\r\n');
@@ -107,7 +107,7 @@ export class ImmersiveWindow extends BaseWindow {
 
   protected create() {
     const dataStore = container.get<DataStoreService>(
-      TYPES.DataStoreService,
+      ServiceType.DATA_STORE,
     ).dataStore;
     this._window = new BrowserWindow({
       width: dataStore.store.compatibility.transparentFallback ? 0 : 3840,

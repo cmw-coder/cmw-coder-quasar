@@ -1,6 +1,11 @@
+import { exec } from 'child_process';
 import { BrowserWindow } from 'electron';
 import { readdir, stat } from 'fs/promises';
+import {decode} from 'iconv-lite';
 import path from 'path';
+import { promisify } from 'util';
+
+const execAsync = promisify(exec);
 
 export const bypassCors = (window: BrowserWindow) =>
   window.webContents.session.webRequest.onHeadersReceived(
@@ -14,6 +19,22 @@ export const bypassCors = (window: BrowserWindow) =>
       });
     },
   );
+
+export const executeCommand = async (
+  command: string,
+  workingDirectory?: string,
+): Promise<{
+  stdout: string;
+  stderr: string;
+}> => {
+  const { stdout, stderr } = await execAsync(command, {
+    cwd: workingDirectory,
+  });
+  return {
+    stdout: decode(Buffer.from(stdout), 'GBK'),
+    stderr: decode(Buffer.from(stderr), 'GBK'),
+  };
+};
 
 export const folderLatestModificationTime = async (
   dir: string,

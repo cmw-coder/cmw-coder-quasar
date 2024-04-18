@@ -1,35 +1,36 @@
-import { inject, injectable } from 'inversify';
-import { StatisticsReporterServiceBase } from 'shared/service-interface/StatisticsReporterServiceBase';
-import { TYPES } from 'shared/service-interface/types';
-import { ConfigService } from 'service/entities/ConfigService';
-import { CompletionData } from 'service/entities/StatisticsReporterService/CompletionData';
-import { CaretPosition } from 'shared/types/common';
 import axios from 'axios';
-import { DateTime } from 'luxon';
 import log from 'electron-log/main';
+import { inject, injectable } from 'inversify';
+import { DateTime } from 'luxon';
+import { extname, basename } from 'path';
+import { v4 as uuid } from 'uuid';
+
+import { PromptElements } from 'main/components/PromptExtractor/types';
+import { Completions } from 'main/components/PromptProcessor/types';
 import { constructData } from 'main/components/StatisticsReporter/utils';
 import {
   skuNameAcceptMapping,
   skuNameGenerateMapping,
   skuNameKeptMapping,
 } from 'main/components/StatisticsReporter/constants';
-import { timer } from 'main/utils/timer';
-import { v4 as uuid } from 'uuid';
-import { PromptElements } from 'main/components/PromptExtractor/types';
-import { Completions } from 'main/components/PromptProcessor/types';
 import {
   KeptRatio,
   CollectionData,
 } from 'main/components/StatisticsReporter/types';
-import { extname, basename } from 'path';
-import { container } from 'service/inversify.config';
+import { timer } from 'main/utils/timer';
+import { container } from 'service';
+import { ConfigService } from 'service/entities/ConfigService';
+import { CompletionData } from 'service/entities/StatisticsReporterService/types';
+import { ServiceType } from 'shared/services';
+import { StatisticsReporterServiceBase } from 'shared/services/types/StatisticsReporterServiceBase';
+import { CaretPosition } from 'shared/types/common';
 import { ApiStyle } from 'shared/types/model';
 
 @injectable()
 export class StatisticsReporterService
   implements StatisticsReporterServiceBase
 {
-  @inject(TYPES.ConfigService)
+  @inject(ServiceType.CONFIG)
   private _configService!: ConfigService;
 
   private _lastCursorPosition: CaretPosition = { character: -1, line: -1 };
@@ -175,7 +176,7 @@ export class StatisticsReporterService
 
     try {
       const configStore = container.get<ConfigService>(
-        TYPES.ConfigService,
+        ServiceType.CONFIG,
       ).configStore;
       await Promise.all([
         this._aiServiceApi.post('/chatgpt/collection/v2', [requestData], {
@@ -240,7 +241,7 @@ export class StatisticsReporterService
       data.position.line != this._lastCursorPosition.line
     ) {
       const configStore = container.get<ConfigService>(
-        TYPES.ConfigService,
+        ServiceType.CONFIG,
       ).configStore;
       log.debug('StatisticsReporter.completionSelected', {
         completions: data.completions,
@@ -293,7 +294,7 @@ export class StatisticsReporterService
     });
     try {
       const configStore = container.get<ConfigService>(
-        TYPES.ConfigService,
+        ServiceType.CONFIG,
       ).configStore;
       await this._statisticsApi.post(
         '/report/summary',

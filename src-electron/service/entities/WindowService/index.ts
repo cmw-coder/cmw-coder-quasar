@@ -1,12 +1,13 @@
+import { app } from 'electron';
 import { injectable } from 'inversify';
+
+import { TrayIcon } from 'main/components/TrayIcon';
+import { MenuEntry } from 'main/components/TrayIcon/types';
+import { initWindowDestroyInterval } from 'main/init';
 import { FloatingWindow } from 'main/windows/FloatingWindow';
 import { ImmersiveWindow } from 'main/windows/ImmersiveWindow';
 import { MainWindow } from 'main/windows/MainWindow';
-import { WindowServiceBase } from 'shared/service-interface/WindowServiceInterBase';
-import { TrayIcon } from 'main/components/TrayIcon';
-import { initWindowDestroyInterval } from 'main/init';
-import { app } from 'electron';
-import { MenuEntry } from 'main/components/TrayIcon/types';
+import { WindowServiceBase } from 'shared/services/types/WindowServiceInterBase';
 
 @injectable()
 export class WindowService implements WindowServiceBase {
@@ -32,9 +33,5 @@ export class WindowService implements WindowServiceBase {
       this.floatingWindow.feedback(),
     );
     this.trayIcon.registerMenuEntry(MenuEntry.Quit, () => app.exit());
-  }
-
-  public sayHello(): void {
-    console.log('Hello from WindowService');
   }
 }
