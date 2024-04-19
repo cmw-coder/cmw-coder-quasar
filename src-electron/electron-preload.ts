@@ -22,11 +22,16 @@ import {
 import { ACTION_API_KEY, CONTROL_API_KEY } from 'shared/constants/common';
 import { ActionMessage } from 'shared/types/ActionMessage';
 import { WindowType } from 'shared/types/WindowType';
+import { SERVICE_CALL_KEY, ServiceType } from 'shared/services';
 
 contextBridge.exposeInMainWorld(ACTION_API_KEY, {
-  invoke: invokeToMain,
   register: registerAction,
   send: sendToMain,
+  service: <T extends ServiceType>(
+    serviceName: T,
+    functionName: string | symbol,
+    ...args: never[]
+  ) => invokeToMain(SERVICE_CALL_KEY, serviceName, functionName, ...args),
   unregister: unregisterAction,
 });
 contextBridge.exposeInMainWorld(CONTROL_API_KEY, {

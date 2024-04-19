@@ -6,11 +6,11 @@ import { scheduleJob } from 'node-schedule';
 import { release, version } from 'os';
 
 import { container } from 'service';
-import type { ConfigService } from 'service/entities/ConfigService';
-import type { DataStoreService } from 'service/entities/DataStoreService';
-import type { UpdaterService } from 'service/entities/UpdaterService';
-import type { WebsocketService } from 'service/entities/WebsocketService';
-import type { WindowService } from 'service/entities/WindowService';
+import { ConfigService } from 'service/entities/ConfigService';
+import { DataStoreService } from 'service/entities/DataStoreService';
+import { UpdaterService } from 'service/entities/UpdaterService';
+import { WebsocketService } from 'service/entities/WebsocketService';
+import { WindowService } from 'service/entities/WindowService';
 import { reportProjectAdditions } from 'main/utils/svn';
 import { registerAction, triggerAction } from 'preload/types/ActionApi';
 import {
@@ -22,6 +22,10 @@ import { SERVICE_CALL_KEY, ServiceType } from 'shared/services';
 import { AppServiceBase } from 'shared/services/types/AppServiceBase';
 import { ActionMessage, ActionType } from 'shared/types/ActionMessage';
 import { ApiStyle } from 'shared/types/model';
+
+interface AbstractServicePort {
+  [key: string]: ((...args: unknown[]) => Promise<unknown>) | undefined;
+}
 
 @injectable()
 export class AppService implements AppServiceBase {
@@ -120,20 +124,18 @@ export class AppService implements AppServiceBase {
   initIpcMain() {
     ipcMain.handle(
       SERVICE_CALL_KEY,
-      (
-        event,
-        serviceName: string,
-        functionName: keyof AppService,
+      <T extends ServiceType>(
+        _: Electron.IpcMainInvokeEvent,
+        serviceName: T,
+        functionName: string,
         ...payloads: unknown[]
       ) => {
-        const service = container.get<AppService>(serviceName);
+        const service = container.get<AbstractServicePort>(serviceName);
         const func = service[functionName];
-        if (typeof func !== 'function') {
-          throw new Error('Function not found');
+        if (typeof func === 'function') {
+          return func.bind(service)(...payloads);
         }
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        return func.bind(service)(...payloads);
+        throw new Error('Function not found');
       },
     );
 

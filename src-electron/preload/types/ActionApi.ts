@@ -2,6 +2,7 @@ import { BrowserWindow, ipcRenderer } from 'electron';
 
 import { ACTION_API_KEY } from 'shared/constants/common';
 import { ActionMessageMapping, ActionType } from 'shared/types/ActionMessage';
+import { ServiceType } from 'shared/services';
 
 // -------------------------------------------------------------------------------------------------------
 // ↓↓↓↓↓↓↓↓↓↓                                   Local stuff                                     ↓↓↓↓↓↓↓↓↓↓
@@ -38,14 +39,13 @@ export class ActionApi {
   }
 }
 
-export const invokeToMain2 = async <T extends keyof ActionMessageMapping>(
-  message: ActionMessageMapping[T],
-): Promise<ActionMessageMapping[T]> => {
-  return await ipcRenderer.invoke(ACTION_API_KEY, message);
-};
-
-export const invokeToMain = (channel: string, ...args: unknown[]) => {
-  return ipcRenderer.invoke(channel, ...args);
+export const invokeToMain = <T extends ServiceType>(
+  channel: string,
+  serviceName: T,
+  functionName: string | symbol,
+  ...args: never[]
+) => {
+  return ipcRenderer.invoke(channel, serviceName, functionName, ...args);
 };
 
 export const registerAction = <T extends keyof ActionMessageMapping>(

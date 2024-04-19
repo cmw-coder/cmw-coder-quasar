@@ -7,7 +7,7 @@ import { UpdaterServiceBase } from 'shared/services/types/UpdaterServiceBase';
 import { WebsocketServiceBase } from 'shared/services/types/WebsocketServiceBase';
 import { WindowServiceBase } from 'shared/services/types/WindowServiceInterBase';
 
-export const SERVICE_CALL_KEY = 'Service:Call';
+export const SERVICE_CALL_KEY = 'Service:Call' as const;
 
 export enum ServiceType {
   App = 'App',

@@ -8,16 +8,15 @@ export const generateCommitPrompt = (changedFile: ChangedFile[]) => {
 
   `;
   const changedText = changedFile
-    .map((file) => {
-      return `
-************************************************************
-文件路径: ${file.path}
-变动类型: ${file.type}
-变动详情:
-${file.diff}
-************************************************************
-    `;
-    })
+    .map(
+      (file) =>
+        '************************************************************\r\n' +
+        `文件路径: ${file.path}\r\n` +
+        `变动类型: ${file.type}\r\n` +
+        '变动详情: \r\n' +
+        `${file.diff}\r\n` +
+        '************************************************************\r\n',
+    )
     .join('\r\n');
   return requirement + changedText;
 };
