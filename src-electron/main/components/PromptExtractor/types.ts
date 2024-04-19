@@ -74,7 +74,6 @@ export interface SimilarSnippet {
 }
 
 export interface SimilarSnippetConfig {
-  contextLines: number;
   minScore: number;
 }
 

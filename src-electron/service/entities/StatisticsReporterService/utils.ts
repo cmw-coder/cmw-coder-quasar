@@ -1,8 +1,8 @@
 import {
   productLineMapping,
   secondClassMap,
-} from 'main/components/StatisticsReporter/constants';
-import { container } from 'service';
+} from 'service/entities/StatisticsReporterService/constants';
+import { container } from 'service/index';
 import type { ConfigService } from 'service/entities/ConfigService';
 import { ServiceType } from 'shared/services';
 import { HuggingFaceModelType, LinseerModelType } from 'shared/types/model';

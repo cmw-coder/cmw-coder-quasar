@@ -24,8 +24,7 @@ import { timer } from 'main/utils/timer';
 
 export class PromptExtractor {
   private _similarSnippetConfig: SimilarSnippetConfig = {
-    contextLines: 30,
-    minScore: 0.45,
+    minScore: 0.5,
   };
   private _slowRecentFiles: string[] = [];
 
@@ -33,6 +32,7 @@ export class PromptExtractor {
     inputs: RawInputs,
     similarSnippetCount: number = 1,
   ): Promise<PromptElements> {
+    log.debug('PromptExtractor.getPromptComponents', inputs);
     const { elements, document, position, recentFiles } = inputs;
     timer.add('CompletionGenerate', 'CalculatedFileFolder');
 

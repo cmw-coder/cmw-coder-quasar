@@ -7,20 +7,20 @@ import { v4 as uuid } from 'uuid';
 
 import { PromptElements } from 'main/components/PromptExtractor/types';
 import { Completions } from 'main/components/PromptProcessor/types';
-import { constructData } from 'main/components/StatisticsReporter/utils';
+import { timer } from 'main/utils/timer';
+import { container } from 'service';
+import { ConfigService } from 'service/entities/ConfigService';
 import {
   skuNameAcceptMapping,
   skuNameGenerateMapping,
   skuNameKeptMapping,
-} from 'main/components/StatisticsReporter/constants';
+} from 'service/entities/StatisticsReporterService/constants';
 import {
-  KeptRatio,
   CollectionData,
-} from 'main/components/StatisticsReporter/types';
-import { timer } from 'main/utils/timer';
-import { container } from 'service';
-import { ConfigService } from 'service/entities/ConfigService';
-import { CompletionData } from 'service/entities/StatisticsReporterService/types';
+  CompletionData,
+  KeptRatio,
+} from 'service/entities/StatisticsReporterService/types';
+import { constructData } from 'service/entities/StatisticsReporterService/utils';
 import { ServiceType } from 'shared/services';
 import { StatisticsReporterServiceBase } from 'shared/services/types/StatisticsReporterServiceBase';
 import { CaretPosition } from 'shared/types/common';

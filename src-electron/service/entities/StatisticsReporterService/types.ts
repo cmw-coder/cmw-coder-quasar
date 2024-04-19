@@ -3,6 +3,22 @@ import { PromptElements } from 'main/components/PromptExtractor/types';
 import { Completions } from 'main/components/PromptProcessor/types';
 import { CaretPosition } from 'shared/types/common';
 
+export interface CollectionData {
+  createTime: string;
+  prefix: string;
+  suffix: string;
+  path: string;
+  similarSnippet: string;
+  symbolList: string[];
+  answer: string[];
+  acceptAnswerIndex: number;
+  accept: 0 | 1;
+  afterCode: string;
+  plugin: 'SI';
+  projectId: string;
+  fileSuffix: string;
+}
+
 export class CompletionData {
   private _checked = new Set<number>();
   private _lastChecked: number = -1;
@@ -42,4 +58,11 @@ export class CompletionData {
   get lastChecked(): number {
     return this._lastChecked;
   }
+}
+
+export enum KeptRatio {
+  All = 'All',
+  Few = 'Few',
+  Most = 'Most',
+  None = 'None',
 }
