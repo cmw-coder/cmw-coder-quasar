@@ -1,4 +1,3 @@
-import { SVNClient } from '@taiyosen/easy-svn';
 import log from 'electron-log/main';
 import { readdir, stat } from 'fs/promises';
 import { resolve } from 'path';
@@ -36,17 +35,15 @@ export const searchSvnDirectories = async (
 };
 
 export const getRevision = async (path: string): Promise<number> => {
-  try {
-    const client = new SVNClient();
-    client.setConfig({ silent: true });
-    const info = await client.info(path);
-    const revision = info.match(/Last Changed Rev: (\d+)/)?.[1];
-    if (revision) {
-      log.debug(`Revision for ${path}: ${revision}`);
-      return parseInt(revision);
-    }
-  } catch (e) {
-    log.warn('Get revision failed', e);
+  const { stdout, stderr } = await executeCommand('svn info', path);
+  log.debug('getRevision', { stdout, stderr });
+  if (stderr && stderr.length) {
+    log.error('Get revision failed:', stderr);
+    return -1;
+  }
+  const revision = stdout.match(/Last Changed Rev: (\d+)/)?.[1];
+  if (revision) {
+    return parseInt(revision);
   }
   return -1;
 };
@@ -113,15 +110,4 @@ export const reportProjectAdditions = async () => {
         packageJson.version,
       );
     });
-};
-
-export const svnCommit = async (projectPath: string, commitMessage: string) => {
-  const { stdout, stderr } = await executeCommand(
-    `svn commit -m ${commitMessage}`,
-    projectPath,
-  );
-  if (stderr && stderr.length) {
-    throw new Error(stderr);
-  }
-  return stdout;
 };

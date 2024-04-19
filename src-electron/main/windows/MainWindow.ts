@@ -3,7 +3,6 @@ import { resolve } from 'path';
 import { dataStoreDefault } from 'main/stores/data/default';
 import { BaseWindow } from 'main/types/BaseWindow';
 import { bypassCors } from 'main/utils/common';
-import { svnCommit } from 'main/utils/svn';
 import { ActionApi, sendToRenderer } from 'preload/types/ActionApi';
 import { ControlType, registerControlCallback } from 'preload/types/ControlApi';
 import { container } from 'service';
@@ -145,10 +144,12 @@ export class MainWindow extends BaseWindow {
         const projectPath = websocketService.getClientInfo()?.currentProject;
         if (projectPath && dataStore.store.project[projectPath]?.svn[0]) {
           try {
-            await svnCommit(
-              dataStore.store.project[projectPath].svn[0].directory,
-              data,
-            );
+            await container
+              .get<SvnService>(ServiceType.SVN)
+              .commit(
+                dataStore.store.project[projectPath].svn[0].directory,
+                data,
+              );
             sendToRenderer(this._window, new SvnCommitActionMessage('success'));
           } catch (e) {
             sendToRenderer(this._window, new SvnCommitActionMessage(<string>e));

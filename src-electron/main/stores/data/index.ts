@@ -97,10 +97,6 @@ export class DataStore {
     this._store.store = extend(true, this._store.store, value);
   }
 
-  getProjectId(path: string): string | undefined {
-    return this.store.project[path]?.id;
-  }
-
   async setProjectId(path: string, projectId: string) {
     const store = this.store;
     if (store.project[path]) {
