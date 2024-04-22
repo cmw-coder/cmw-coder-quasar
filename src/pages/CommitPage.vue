@@ -2,7 +2,7 @@
 import { useQuasar } from 'quasar';
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 
 import { ServiceType } from 'shared/services';
 import {
@@ -13,7 +13,6 @@ import { ApiStyle } from 'shared/types/model';
 import { ChangedFile } from 'shared/types/svn';
 import { WindowType } from 'shared/types/WindowType';
 import { useHighlighter } from 'stores/highlighter';
-import { useWorkflowStore } from 'stores/workflow';
 import { ActionApi } from 'types/ActionApi';
 import { CommitQuery } from 'types/queries';
 import {
@@ -23,11 +22,9 @@ import {
 import { useService } from 'utils/common';
 
 const { codeToHtml } = useHighlighter();
-const { createWorkflow } = useWorkflowStore();
 const { t } = useI18n();
 const { notify } = useQuasar();
 const { matched, query } = useRoute();
-const { push } = useRouter();
 
 const baseName = 'pages.CommitPage.';
 const { name } = matched[matched.length - 2];
@@ -111,18 +108,14 @@ const sendSvnCommitAction = async () => {
       message: i18n('notifications.commitSuccess'),
     });
     refreshProjectList().catch();
-    createWorkflow(
-      activeProject.value.path,
-      activeProject.value.commitMessage,
-      'administrator',
-    ).catch();
-    setTimeout(() => {
-      if (name === WindowType.Floating) {
-        closeWindow();
-      } else {
-        push('/main/workflow');
-      }
-    }, 2000);
+    // createWorkflow(
+    //   activeProject.value.path,
+    //   activeProject.value.commitMessage,
+    //   'administrator',
+    // ).catch();
+    if (name === WindowType.Floating) {
+      setTimeout(() => closeWindow(), 2000);
+    }
   } catch (e) {
     notify({
       type: 'negative',

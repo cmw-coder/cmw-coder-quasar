@@ -3,18 +3,14 @@
   "compilerOptions": {
     "baseUrl": ".",
     "sourceMap": true,
-    "target": "ES2015",
-    "lib": ["ES2022"],
     "types": ["reflect-metadata"],
-    "module": "commonjs",
-    "moduleResolution": "node",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "paths": {
-      "service/*": ["./service/*"],
       "main/*": ["./main/*"],
       "preload/*": ["./preload/*"],
       "root/*": ["../*"],
+      "service/*": ["./service/*"],
       "shared/*": ["./shared/*"],
       "web/*": ["../src/*"]
     },

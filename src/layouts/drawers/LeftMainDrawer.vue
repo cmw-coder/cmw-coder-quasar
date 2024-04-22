@@ -32,7 +32,7 @@ const navigations: Navigation[] = [
   {
     label: 'workflow',
     icon: 'mdi-ray-start-arrow',
-    available: true,
+    available: false,
     route: 'workflow',
   },
   {
