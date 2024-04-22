@@ -29,6 +29,7 @@ const formatRepoStatusData = (data: RepoStatusData) => {
 
 export const repoStatus = async (path: string) => {
   const { stdout, stderr } = await executeCommand('svn status --xml', path);
+  log.debug('fileDiff', { path, stdout, stderr });
   if (stderr && stderr.length) {
     log.error('SVN Get status error:', stderr);
     return [];
@@ -43,8 +44,9 @@ export const repoStatus = async (path: string) => {
   );
 };
 
-export const fileDiff = async (filePath: string, cwd?: string) => {
-  const { stdout, stderr } = await executeCommand(`svn diff ${filePath}`, cwd);
+export const fileDiff = async (path: string, cwd?: string) => {
+  const { stdout, stderr } = await executeCommand(`svn diff ${path}`, cwd);
+  log.debug('fileDiff', { filePath: path, cwd, stdout, stderr });
   if (stderr && stderr.length) {
     throw new Error(stderr);
   }

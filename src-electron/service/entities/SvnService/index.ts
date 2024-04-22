@@ -7,6 +7,7 @@ import { container } from 'service/index';
 import { ServiceType } from 'shared/services';
 import type { SvnServiceBase } from 'shared/services/types/SvnServiceBase';
 import { ChangedFile } from 'shared/types/svn';
+import log from 'electron-log/main';
 
 @injectable()
 export class SvnService implements SvnServiceBase {
@@ -63,6 +64,7 @@ export class SvnService implements SvnServiceBase {
       `svn commit -m ${commitMessage}`,
       path,
     );
+    log.debug('commit', { path, commitMessage, stdout, stderr });
     if (stderr && stderr.length) {
       throw new Error(stderr);
     }

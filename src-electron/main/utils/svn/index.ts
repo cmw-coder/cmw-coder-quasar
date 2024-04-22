@@ -36,7 +36,7 @@ export const searchSvnDirectories = async (
 
 export const getRevision = async (path: string): Promise<number> => {
   const { stdout, stderr } = await executeCommand('svn info', path);
-  log.debug('getRevision', { stdout, stderr });
+  log.debug('getRevision', { path, stdout, stderr });
   if (stderr && stderr.length) {
     log.error('Get revision failed:', stderr);
     return -1;
@@ -53,6 +53,7 @@ export const getAddedLines = async (path: string, revision: number) => {
     `svn diff -r ${revision}`,
     path,
   );
+  log.debug('getAddedLines', { path, revision, stdout, stderr });
   return `${stdout}\r\n${stderr}`
     .split(/\r?\n/)
     .filter((line) => line.startsWith('+') && !line.startsWith('++'))
