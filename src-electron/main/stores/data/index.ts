@@ -13,6 +13,13 @@ import {
 } from 'main/stores/data/types';
 import { getRevision, searchSvnDirectories } from 'main/utils/svn';
 
+const collectSvnData = async (path: string) =>
+  await Promise.all(
+    (await searchSvnDirectories(path)).map(async (directory) => ({
+      directory,
+      revision: await getRevision(directory),
+    })),
+  );
 const getAs = <T>(store: unknown, key: string): T => {
   return <T>(<Conf>store).get(key);
 };
@@ -108,13 +115,8 @@ export class DataStore {
         svn: [],
       };
       this.store = store;
-      log.debug('Project added:', { path, projectId });
-      store.project[path].svn = await Promise.all(
-        (await searchSvnDirectories(path)).map(async (svnDirectory) => ({
-          directory: svnDirectory,
-          revision: await getRevision(svnDirectory),
-        })),
-      );
+      log.debug('setProjectId', { path, projectId });
+      store.project[path].svn = await collectSvnData(path);
     }
     this.store = store;
   }
@@ -129,14 +131,9 @@ export class DataStore {
 
   async setProjectRevision(path: string) {
     const store = this.store;
+    log.debug('setProjectRevision', { path });
     if (store.project[path]) {
-      const svnDirectories = await searchSvnDirectories(path);
-      store.project[path].svn = await Promise.all(
-        svnDirectories.map(async (svnDirectory) => ({
-          directory: svnDirectory,
-          revision: await getRevision(svnDirectory),
-        })),
-      );
+      store.project[path].svn = await collectSvnData(path);
       this.store = store;
     }
   }
