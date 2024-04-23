@@ -24,6 +24,7 @@ export interface GenerateRequestData {
     details: boolean;
     do_sample: boolean;
     max_new_tokens: number;
+    repetition_penalty: number;
     stop: string[];
     temperature: number;
     top_p: number;

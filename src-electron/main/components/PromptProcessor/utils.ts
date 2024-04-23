@@ -97,6 +97,7 @@ export const processHuggingFaceApi = async (
           details: true,
           do_sample: true,
           max_new_tokens: maxTokenCount,
+          repetition_penalty: 1.1,
           stop: stopTokens,
           temperature: temperature,
           top_p: 0.95,
