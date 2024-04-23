@@ -3,7 +3,7 @@ import log from 'electron-log/main';
 import { inject, injectable } from 'inversify';
 import { DateTime } from 'luxon';
 import { scheduleJob } from 'node-schedule';
-import { release, version } from 'os';
+import { release, userInfo, version } from 'os';
 
 import { container } from 'service';
 import { ConfigService } from 'service/entities/ConfigService';
@@ -22,6 +22,7 @@ import { SERVICE_CALL_KEY, ServiceType } from 'shared/services';
 import { AppServiceBase } from 'shared/services/types/AppServiceBase';
 import { ActionMessage, ActionType } from 'shared/types/ActionMessage';
 import { ApiStyle } from 'shared/types/model';
+import { runtimeConfig } from 'shared/config';
 
 interface AbstractServicePort {
   [key: string]: ((...args: unknown[]) => Promise<unknown>) | undefined;
@@ -40,12 +41,10 @@ export class AppService implements AppServiceBase {
   @inject(ServiceType.DATA_STORE)
   private _dataStoreService!: DataStoreService;
 
-  constructor() {
-    console.log('AppService constructor');
-  }
+  constructor() {}
 
   init() {
-    console.log('AppService initialized');
+    log.info('AppService init', userInfo().username);
     this.initApplication();
     this.initAdditionReport();
     this.initIpcMain();
@@ -86,6 +85,7 @@ export class AppService implements AppServiceBase {
       this._websocketService.registerWsActions();
 
       if (
+        runtimeConfig.apiStyle === ApiStyle.Linseer &&
         this._configService.configStore.apiStyle === ApiStyle.Linseer &&
         !(await this._configService.configStore.getAccessToken())
       ) {

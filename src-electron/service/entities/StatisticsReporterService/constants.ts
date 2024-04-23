@@ -11,10 +11,12 @@ export const secondClassMap: Record<
   [LinseerModelType.Linseer]: 'LS13B',
   [LinseerModelType.Linseer_SR88Driver]: 'LS13B',
   [LinseerModelType.Linseer_CClsw]: 'LS13B',
+  [LinseerModelType.Linseer_Beta]: 'CMW_BETA_V1',
 };
 
 export const productLineMapping: Record<LinseerModelType, string> = {
   [LinseerModelType.Linseer]: 'H3C 通用',
+  [LinseerModelType.Linseer_Beta]: 'ComWare产品线',
   [LinseerModelType.Linseer_CClsw]: '交换机产品线',
   [LinseerModelType.Linseer_SR88Driver]: '路由器产品线',
 };

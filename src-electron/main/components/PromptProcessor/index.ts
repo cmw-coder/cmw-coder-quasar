@@ -1,6 +1,6 @@
 import { createHash } from 'crypto';
 import log from 'electron-log/main';
-
+import { userInfo } from 'os';
 import { PromptElements } from 'main/components/PromptExtractor/types';
 import { Completions, LRUCache } from 'main/components/PromptProcessor/types';
 import {
@@ -8,6 +8,7 @@ import {
   getCompletionType,
   processHuggingFaceApi,
   processLinseerApi,
+  processLinseerBetaApi,
 } from 'main/components/PromptProcessor/utils';
 import { CompletionErrorCause } from 'main/utils/completion';
 import { timer } from 'main/utils/timer';
@@ -15,6 +16,8 @@ import { container } from 'service';
 import type { ConfigService } from 'service/entities/ConfigService';
 import { ServiceType } from 'shared/services';
 import { ApiStyle } from 'shared/types/model';
+import { betaApiUserList } from 'shared/constants';
+import { LinseerModelConfigType } from 'main/stores/config/types';
 
 export class PromptProcessor {
   private _abortController?: AbortController;
@@ -46,30 +49,43 @@ export class PromptProcessor {
     const type = getCompletionType(promptElements);
     let candidates: string[];
 
-    if (configStore.apiStyle === ApiStyle.HuggingFace) {
+    // 临时指定用户访问LinseerBeta版本
+    const username = userInfo().username;
+    if (betaApiUserList.includes(username)) {
       this._abortController = new AbortController();
-      candidates = await processHuggingFaceApi(
-        configStore.modelConfig,
-        promptElements,
-        type,
-        this._abortController.signal,
-      );
-    } else {
-      const accessToken = await configStore.getAccessToken();
-      if (!accessToken) {
-        throw new Error('Access token is not available.', {
-          cause: CompletionErrorCause.accessToken,
-        });
-      }
-      this._abortController = new AbortController();
-      candidates = await processLinseerApi(
-        configStore.modelConfig,
-        accessToken,
+      candidates = await processLinseerBetaApi(
+        configStore.modelConfig as LinseerModelConfigType,
         promptElements,
         type,
         projectId,
         this._abortController.signal,
       );
+    } else {
+      if (configStore.apiStyle === ApiStyle.HuggingFace) {
+        this._abortController = new AbortController();
+        candidates = await processHuggingFaceApi(
+          configStore.modelConfig,
+          promptElements,
+          type,
+          this._abortController.signal,
+        );
+      } else {
+        const accessToken = await configStore.getAccessToken();
+        if (!accessToken) {
+          throw new Error('Access token is not available.', {
+            cause: CompletionErrorCause.accessToken,
+          });
+        }
+        this._abortController = new AbortController();
+        candidates = await processLinseerApi(
+          configStore.modelConfig,
+          accessToken,
+          promptElements,
+          type,
+          projectId,
+          this._abortController.signal,
+        );
+      }
     }
     this._abortController = undefined;
     timer.add('CompletionGenerate', 'generationProcessed');

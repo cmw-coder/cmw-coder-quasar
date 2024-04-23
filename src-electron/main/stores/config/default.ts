@@ -250,3 +250,63 @@ export const linseerConfigDefault: LinseerStoreType = {
     },
   },
 };
+
+export const linseerConfigDefaultBeta: LinseerStoreType = {
+  apiStyle: ApiStyle.Linseer,
+  config: {
+    endpoints: {
+      aiService: 'http://10.113.36.121/kong/RdTestAiService',
+      statistics: 'http://10.113.36.121/kong/RdTestResourceStatistic',
+      update: 'http://10.113.36.121/h3c-ai-assistant/plugin/sourceinsight',
+    },
+    modelConfigs: [
+      {
+        endpoint: 'http://10.113.36.121/kong/RdTestAiService/chatgpt',
+        modelType: LinseerModelType.Linseer_Beta,
+        completionConfigs: {
+          function: {
+            contextLimit: 1500,
+            maxTokenCount: 320,
+            stopTokens: ['<fim_pad>', '<｜end▁of▁sentence｜>', '\n}'],
+            subModelType: SubModelType['CmwCoderV1'],
+            suggestionCount: 1,
+            temperature: 0.2,
+          },
+          line: {
+            contextLimit: 1500,
+            maxTokenCount: 15,
+            stopTokens: ['<fim_pad>', '<｜end▁of▁sentence｜>', '\r\n', '\n'],
+            subModelType: SubModelType['CmwCoderV1'],
+            suggestionCount: 1,
+            temperature: 0.2,
+          },
+          snippet: {
+            contextLimit: 1500,
+            maxTokenCount: 40,
+            stopTokens: ['<fim_pad>', '<｜end▁of▁sentence｜>', '}'],
+            subModelType: SubModelType['CmwCoderV1'],
+            suggestionCount: 1,
+            temperature: 0.2,
+          },
+        },
+        separateTokens: {
+          end: '<fim_middle>',
+          middle: '<fim_suffix>',
+          start: '<fim_prefix>',
+        },
+      },
+    ],
+    server: {
+      host: 'localhost',
+      port: 3000,
+    },
+    userId: userInfo().username,
+  },
+  data: {
+    modelType: LinseerModelType.Linseer,
+    tokens: {
+      access: '',
+      refresh: '',
+    },
+  },
+};

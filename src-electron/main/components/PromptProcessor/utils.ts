@@ -193,6 +193,65 @@ export const processLinseerApi = async (
   return [];
 };
 
+export const processLinseerBetaApi = async (
+  modelConfig: LinseerModelConfigType,
+  promptElements: PromptElements,
+  completionType: CompletionType,
+  projectId: string,
+  abortSignal: AbortSignal,
+): Promise<string[]> => {
+  const { completionConfigs, endpoint, separateTokens } = modelConfig;
+  const completionConfig =
+    completionType === CompletionType.Function
+      ? completionConfigs.function
+      : completionType === CompletionType.Line
+        ? completionConfigs.line
+        : completionConfigs.snippet;
+  const { maxTokenCount, stopTokens, subModelType, temperature } =
+    completionConfig;
+
+  try {
+    const generatedSuggestions = (
+      await generateRd(
+        endpoint,
+        {
+          question: promptElements.stringify(ApiStyle.Linseer, separateTokens),
+          model: subModelType,
+          maxTokens: maxTokenCount,
+          temperature: temperature,
+          stop: stopTokens,
+          suffix: promptElements.suffix,
+          plugin: 'SI',
+          profileModel: '百业灵犀-13B',
+          templateName:
+            completionType === CompletionType.Line
+              ? 'ShortLineCode'
+              : 'LineCode',
+          subType: projectId,
+        },
+        undefined,
+        abortSignal,
+      )
+    ).data
+      .map((item) => item.text)
+      .filter((completion) => completion.trim().length > 0);
+    timer.add('CompletionGenerate', 'generationRequested');
+
+    return _processGeneratedSuggestions(
+      generatedSuggestions,
+      completionType,
+      promptElements.prefix,
+    );
+  } catch (error) {
+    if (error instanceof CanceledError) {
+      log.debug('PromptProcessor.process.processLinseerApi', 'Request aborted');
+    } else {
+      log.warn(error);
+    }
+  }
+  return [];
+};
+
 const _processGeneratedSuggestions = (
   generatedSuggestions: string[],
   completionType: CompletionType,
