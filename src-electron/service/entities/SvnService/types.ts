@@ -1,4 +1,4 @@
-import { SvnFileType } from 'shared/types/svn';
+import { SvnStatus } from 'shared/types/svn';
 
 export interface RepoStatusData {
   status: {
@@ -6,11 +6,11 @@ export interface RepoStatusData {
       entry:
         | {
             _attribute: { path: string };
-            ['wc-status']: { _attribute: { item: SvnFileType } };
+            ['wc-status']: { _attribute: { item: SvnStatus } };
           }
         | {
             _attribute: { path: string };
-            ['wc-status']: { _attribute: { item: SvnFileType } };
+            ['wc-status']: { _attribute: { item: SvnStatus } };
           }[];
     };
   };

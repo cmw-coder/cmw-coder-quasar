@@ -15,13 +15,9 @@ import {
   ConfigStoreLoadActionMessage,
   DataStoreLoadActionMessage,
   DebugSyncActionMessage,
-  SvnCommitActionMessage,
-  SvnDiffActionMessage,
 } from 'shared/types/ActionMessage';
-import { ChangedFile } from 'shared/types/svn';
 import { WindowType } from 'shared/types/WindowType';
 import { ChatInsertServerMessage, WsAction } from 'shared/types/WsMessage';
-import { SvnService } from 'service/entities/SvnService';
 
 export class MainWindow extends BaseWindow {
   private readonly _actionApi = new ActionApi('main.MainWindow.');
@@ -119,47 +115,6 @@ export class MainWindow extends BaseWindow {
           this._window,
           new DataStoreLoadActionMessage(dataStore.store),
         );
-      }
-    });
-    this._actionApi.register(ActionType.SvnDiff, async () => {
-      if (this._window) {
-        const websocketService = container.get<WebsocketService>(
-          ServiceType.WEBSOCKET,
-        );
-        let changedFileList: ChangedFile[] | undefined;
-        const projectPath = websocketService.getClientInfo()?.currentProject;
-        if (projectPath && dataStore.store.project[projectPath]?.svn[0]) {
-          changedFileList = await container
-            .get<SvnService>(ServiceType.SVN)
-            .repoDiff(dataStore.store.project[projectPath].svn[0].directory);
-        }
-        sendToRenderer(this._window, new SvnDiffActionMessage(changedFileList));
-      }
-    });
-    this._actionApi.register(ActionType.SvnCommit, async (data) => {
-      if (this._window) {
-        const websocketService = container.get<WebsocketService>(
-          ServiceType.WEBSOCKET,
-        );
-        const projectPath = websocketService.getClientInfo()?.currentProject;
-        if (projectPath && dataStore.store.project[projectPath]?.svn[0]) {
-          try {
-            await container
-              .get<SvnService>(ServiceType.SVN)
-              .commit(
-                dataStore.store.project[projectPath].svn[0].directory,
-                data,
-              );
-            sendToRenderer(this._window, new SvnCommitActionMessage('success'));
-          } catch (e) {
-            sendToRenderer(this._window, new SvnCommitActionMessage(<string>e));
-          }
-        } else {
-          sendToRenderer(
-            this._window,
-            new SvnCommitActionMessage('invalidProject'),
-          );
-        }
       }
     });
 

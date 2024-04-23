@@ -12,25 +12,24 @@ import { DataStoreService } from 'service/entities/DataStoreService';
 import { StatisticsReporterService } from 'service/entities/StatisticsReporterService';
 import { ServiceType } from 'shared/services';
 
-export const searchSvnDirectories = async (
-  folder: string,
-): Promise<string[]> => {
+export const searchSvnDirectories = async (path: string): Promise<string[]> => {
+  log.debug('searchSvnDirectories', { path });
   const directories: string[] = [];
   try {
-    const items = await readdir(folder);
-    for (const item of items) {
-      const filePath = resolve(folder, item);
-      const stats = await stat(filePath);
-      if (stats.isDirectory()) {
+    for (const item of await readdir(path)) {
+      const filePath = resolve(path, item);
+      if ((await stat(filePath)).isDirectory()) {
         if (item === '.svn') {
-          log.debug('Found svn directory:', folder);
-          directories.push(folder);
+          log.debug('Found svn directory:', path);
+          directories.push(path);
         } else {
           directories.push(...(await searchSvnDirectories(filePath)));
         }
       }
     }
-  } catch {}
+  } catch (e) {
+    log.error('searchSvnDirectories', e);
+  }
   return directories;
 };
 

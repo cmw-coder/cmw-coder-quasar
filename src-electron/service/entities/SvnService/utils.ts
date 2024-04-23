@@ -3,10 +3,10 @@ import { parseStringPromise } from 'xml2js';
 
 import { executeCommand } from 'main/utils/common';
 import { RepoStatusData } from 'service/entities/SvnService/types';
-import { SvnStatus } from 'shared/types/svn';
+import { FileStatus } from 'shared/types/svn';
 
 const formatRepoStatusData = (data: RepoStatusData) => {
-  const result: SvnStatus[] = [];
+  const result: FileStatus[] = [];
   const entries = data.status.target.entry;
   if (!entries) {
     return result;
@@ -15,13 +15,13 @@ const formatRepoStatusData = (data: RepoStatusData) => {
     entries.forEach((entry) => {
       result.push({
         path: entry._attribute.path,
-        type: entry['wc-status']._attribute.item,
+        status: entry['wc-status']._attribute.item,
       });
     });
   } else {
     result.push({
       path: entries._attribute.path,
-      type: entries['wc-status']._attribute.item,
+      status: entries['wc-status']._attribute.item,
     });
   }
   return result;
@@ -29,7 +29,7 @@ const formatRepoStatusData = (data: RepoStatusData) => {
 
 export const repoStatus = async (path: string) => {
   const { stdout, stderr } = await executeCommand('svn status --xml', path);
-  log.debug('fileDiff', { path, stdout, stderr });
+  log.debug('repoStatus', { path, stdout, stderr });
   if (stderr && stderr.length) {
     log.error('SVN Get status error:', stderr);
     return [];

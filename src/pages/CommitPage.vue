@@ -10,7 +10,7 @@ import {
   ConfigStoreLoadActionMessage,
 } from 'shared/types/ActionMessage';
 import { ApiStyle } from 'shared/types/model';
-import { ChangedFile } from 'shared/types/svn';
+import { FileChanges } from 'shared/types/svn';
 import { WindowType } from 'shared/types/WindowType';
 import { useHighlighter } from 'stores/highlighter';
 import { ActionApi } from 'types/ActionApi';
@@ -25,6 +25,7 @@ const { codeToHtml } = useHighlighter();
 const { t } = useI18n();
 const { notify } = useQuasar();
 const { matched, query } = useRoute();
+const svnService = useService(ServiceType.SVN);
 
 const baseName = 'pages.CommitPage.';
 const { name } = matched[matched.length - 2];
@@ -33,31 +34,6 @@ const i18n = (relativePath: string) => {
   return t(baseName + relativePath);
 };
 
-const svnService = useService(ServiceType.SVN);
-const projectList = ref<
-  {
-    path: string;
-    changedFileList: ChangedFile[];
-    commitMessage: string;
-  }[]
->([]);
-
-const refreshProjectList = async () => {
-  const res = await svnService.getAllProjectList();
-  projectList.value = res.map((item) => ({
-    ...item,
-    commitMessage: '',
-  }));
-  activeProjectIndex.value = projectList.value.findIndex((item) =>
-    commitQuery.currentFile.includes(item.path),
-  );
-  if (activeProjectIndex.value === -1) {
-    activeProjectIndex.value = 0;
-  }
-};
-
-const activeProjectIndex = ref<number>(0);
-
 const commitQuery = new CommitQuery(query);
 
 const accessToken = ref<string>();
@@ -65,22 +41,29 @@ const endpoint = ref<string>();
 const loadingCommit = ref(false);
 const loadingDiff = ref(false);
 const loadingGenerate = ref(false);
-const selectedIndex = ref(0);
+const selectedFileIndex = ref(0);
+const selectedSvnIndex = ref(0);
 const splitPercentage = ref(40);
+const svnList = ref<
+  {
+    path: string;
+    changedFileList: FileChanges[];
+    commitMessage: string;
+  }[]
+>([]);
 
-const activeProject = computed(() => {
-  return projectList.value[activeProjectIndex.value];
+const selectedSvn = computed(() => {
+  return svnList.value[selectedSvnIndex.value];
 });
 
 const closeWindow = () => window.controlApi.hide(WindowType.Floating);
-
 const generateCommitMessageHandle = async () => {
-  const changedFileList = activeProject.value.changedFileList;
+  const changedFileList = selectedSvn.value.changedFileList;
   if (changedFileList && changedFileList.length) {
     loadingGenerate.value = true;
     const commitPrompt = generateCommitPrompt(changedFileList);
     try {
-      activeProject.value.commitMessage = await generateCommitMessage(
+      selectedSvn.value.commitMessage = await generateCommitMessage(
         endpoint.value || '',
         commitPrompt,
         accessToken.value,
@@ -95,13 +78,29 @@ const generateCommitMessageHandle = async () => {
     loadingGenerate.value = false;
   }
 };
-
+const getLastDirName = (path: string) => {
+  const pathArr = path.split('\\');
+  return pathArr[pathArr.length - 1];
+};
+const refreshProjectList = async () => {
+  const res = await svnService.getAllProjectList();
+  svnList.value = res.map((item) => ({
+    ...item,
+    commitMessage: '',
+  }));
+  selectedSvnIndex.value = svnList.value.findIndex((item) =>
+    commitQuery.currentFile.includes(item.path),
+  );
+  if (selectedSvnIndex.value === -1) {
+    selectedSvnIndex.value = 0;
+  }
+};
 const sendSvnCommitAction = async () => {
   loadingCommit.value = true;
   try {
     await svnService.commit(
-      activeProject.value.path,
-      activeProject.value.commitMessage,
+      selectedSvn.value.path,
+      selectedSvn.value.commitMessage,
     );
     notify({
       type: 'positive',
@@ -140,27 +139,22 @@ onMounted(() => {
   );
   window.actionApi.send(new ConfigStoreLoadActionMessage());
 });
-
-const getLastDirName = (path: string) => {
-  const pathArr = path.split('\\');
-  return pathArr[pathArr.length - 1];
-};
 </script>
 
 <template>
   <q-page class="row items-center justify-evenly q-pa-xl">
-    <div v-if="activeProject" class="side-bar">
+    <div v-if="selectedSvn" class="side-bar">
       <q-list bordered separator>
         <q-item
-          v-for="(item, index) in projectList"
+          v-for="(item, index) in svnList"
           :key="item.path"
           clickable
           v-ripple
-          :active="index === activeProjectIndex"
+          :active="index === selectedSvnIndex"
           @click="
             () => {
-              activeProjectIndex = index;
-              selectedIndex = 0;
+              selectedSvnIndex = index;
+              selectedFileIndex = 0;
             }
           "
         >
@@ -174,7 +168,7 @@ const getLastDirName = (path: string) => {
       </q-list>
     </div>
     <div
-      v-if="activeProject"
+      v-if="selectedSvn"
       class="column col-grow q-gutter-y-md"
       style="padding-left: 140px"
     >
@@ -199,7 +193,7 @@ const getLastDirName = (path: string) => {
         </div>
         <q-card class="diff-card row items-center justify-center" bordered flat>
           <q-splitter
-            v-if="activeProject.changedFileList"
+            v-if="selectedSvn.changedFileList"
             class="full-height full-width"
             :disable="loadingDiff"
             horizontal
@@ -207,30 +201,30 @@ const getLastDirName = (path: string) => {
           >
             <template v-slot:before>
               <q-scroll-area class="full-height full-width">
-                <q-list v-if="activeProject.changedFileList.length" separator>
+                <q-list v-if="selectedSvn.changedFileList.length" separator>
                   <q-item
-                    v-for="(item, index) in activeProject.changedFileList"
+                    v-for="(item, index) in selectedSvn.changedFileList"
                     :key="index"
-                    :active="selectedIndex === index"
+                    :active="selectedFileIndex === index"
                     active-class="bg-grey-4 text-black"
                     clickable
-                    @click="selectedIndex = index"
+                    @click="selectedFileIndex = index"
                   >
                     <q-item-section avatar>
                       <q-icon
-                        v-if="item.type === 'added'"
+                        v-if="item.status === 'added'"
                         name="mdi-file-document-plus"
                         color="positive"
                         size="2rem"
                       />
                       <q-icon
-                        v-if="item.type === 'missing'"
+                        v-if="item.status === 'missing'"
                         name="mdi-file-document-minus"
                         color="negative"
                         size="2rem"
                       />
                       <q-icon
-                        v-if="item.type === 'modified'"
+                        v-if="item.status === 'modified'"
                         name="mdi-file-document-edit"
                         color="warn"
                         size="2rem"
@@ -275,14 +269,14 @@ const getLastDirName = (path: string) => {
             </template>
             <template v-slot:after>
               <q-scroll-area
-                v-if="activeProject.changedFileList[selectedIndex]"
+                v-if="selectedSvn.changedFileList[selectedFileIndex]"
                 class="full-height full-width"
               >
                 <div
                   class="q-pa-sm"
                   v-html="
                     codeToHtml(
-                      activeProject.changedFileList[selectedIndex].diff,
+                      selectedSvn.changedFileList[selectedFileIndex].diff,
                       'diff',
                     )
                   "
@@ -307,8 +301,8 @@ const getLastDirName = (path: string) => {
             color="accent"
             dense
             :disabled="
-              !activeProject.changedFileList ||
-              !activeProject.changedFileList.length ||
+              !selectedSvn.changedFileList ||
+              !selectedSvn.changedFileList.length ||
               loadingCommit
             "
             icon="mdi-creation"
@@ -335,21 +329,21 @@ const getLastDirName = (path: string) => {
         <q-input
           :autofocus="
             !!(
-              activeProject.changedFileList &&
-              activeProject.changedFileList.length
+              selectedSvn.changedFileList &&
+              selectedSvn.changedFileList.length
             )
           "
           autogrow
           clearable
           dense
           :disable="
-            !activeProject.changedFileList ||
-            !activeProject.changedFileList.length ||
+            !selectedSvn.changedFileList ||
+            !selectedSvn.changedFileList.length ||
             loadingCommit
           "
           :maxlength="400"
           outlined
-          v-model="activeProject.commitMessage"
+          v-model="selectedSvn.commitMessage"
         />
       </div>
       <div class="row q-gutter-x-md">
@@ -364,7 +358,7 @@ const getLastDirName = (path: string) => {
         <q-btn
           class="col-grow"
           color="primary"
-          :disabled="!activeProject.commitMessage"
+          :disabled="!selectedSvn.commitMessage"
           :label="i18n('labels.commit')"
           :loading="loadingCommit"
           no-caps
@@ -372,7 +366,7 @@ const getLastDirName = (path: string) => {
         />
       </div>
     </div>
-    <div v-if="!activeProject" class="text-center text-h4">
+    <div v-if="!selectedSvn" class="text-center text-h4">
       {{ i18n('labels.noProject') }}
     </div>
   </q-page>

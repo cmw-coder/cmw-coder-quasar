@@ -6,8 +6,8 @@ import { fileDiff, repoStatus } from 'service/entities/SvnService/utils';
 import { container } from 'service/index';
 import { ServiceType } from 'shared/services';
 import type { SvnServiceBase } from 'shared/services/types/SvnServiceBase';
-import { ChangedFile } from 'shared/types/svn';
 import log from 'electron-log/main';
+import type { WebsocketService } from 'service/entities/WebsocketService';
 
 @injectable()
 export class SvnService implements SvnServiceBase {
@@ -19,7 +19,7 @@ export class SvnService implements SvnServiceBase {
           diff: await fileDiff(status.path, path),
         })),
       )
-    ).map(({ diff, path, type }) => {
+    ).map(({ diff, path, status }) => {
       let additions = 0;
       let deletions = 0;
       diff.split(/\r?\n/).forEach((line) => {
@@ -31,7 +31,7 @@ export class SvnService implements SvnServiceBase {
       });
       return {
         path,
-        type,
+        status,
         additions,
         deletions,
         diff,
@@ -40,23 +40,21 @@ export class SvnService implements SvnServiceBase {
   }
 
   async getAllProjectList() {
-    const result: {
-      path: string;
-      changedFileList: ChangedFile[];
-    }[] = [];
+    const currentProjectPath = container
+      .get<WebsocketService>(ServiceType.WEBSOCKET)
+      .getClientInfo()?.currentProject;
     const dataStore = container.get<DataStoreService>(
       ServiceType.DATA_STORE,
     ).dataStore;
-    const projectPathList = Object.keys(dataStore.store.project);
-    for (let i = 0; i < projectPathList.length; i++) {
-      const projectPath = projectPathList[i];
-      const changedFileList = await this.repoDiff(projectPath);
-      result.push({
-        path: projectPath,
-        changedFileList,
-      });
+    if (currentProjectPath && dataStore.store.project[currentProjectPath]) {
+      return await Promise.all(
+        dataStore.store.project[currentProjectPath].svn.map(async (svn) => ({
+          path: svn.directory,
+          changedFileList: await this.repoDiff(svn.directory),
+        })),
+      );
     }
-    return result;
+    return [];
   }
 
   async commit(path: string, commitMessage: string) {
