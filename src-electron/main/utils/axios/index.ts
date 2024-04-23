@@ -8,6 +8,7 @@ import {
   JudgmentData,
   RefreshData,
 } from 'main/utils/axios/types';
+import { userInfo } from 'os';
 
 const rdTestLoginService = axios.create({
   baseURL: 'http://rdee.h3c.com/kong/RdTestLoginService/api',
@@ -53,7 +54,7 @@ export const generate = async (
 export const generateRd = async (
   baseURL: string,
   data: GenerateRdRequestData,
-  accessToken: string,
+  accessToken?: string,
   signal?: AbortSignal,
 ) => {
   return await axios
@@ -62,8 +63,12 @@ export const generateRd = async (
       signal,
     })
     .post<GenerateRdResponseData[]>('/generateCode', data, {
-      headers: {
-        'x-authorization': `bearer ${accessToken}`,
-      },
+      headers: accessToken
+        ? {
+            'x-authorization': `bearer ${accessToken}`,
+          }
+        : {
+            'X-Authenticated-Userid': userInfo()?.username || 'unknown',
+          },
     });
 };

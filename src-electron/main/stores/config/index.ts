@@ -5,6 +5,7 @@ import {
   huggingFaceStoreDefaultNormal,
   huggingFaceStoreDefaultRoute,
   linseerConfigDefault,
+  linseerConfigDefaultBeta,
 } from 'main/stores/config/default';
 import {
   HuggingFaceConfigType,
@@ -15,7 +16,9 @@ import {
   LinseerStoreType,
 } from 'main/stores/config/types';
 import { judgment, refreshToken } from 'main/utils/axios';
+import { userInfo } from 'os';
 import { NetworkZone, runtimeConfig } from 'shared/config';
+import { betaApiUserList } from 'shared/constants';
 
 const defaultMapping: Record<NetworkZone, HuggingFaceStoreType> = {
   [NetworkZone.Normal]: huggingFaceStoreDefaultNormal,
@@ -107,7 +110,9 @@ export class LinseerConfigStore {
     console.log('LinseerConfigStore constructor');
     this._store = new ElectronStore({
       clearInvalidConfig: true,
-      defaults: linseerConfigDefault,
+      defaults: betaApiUserList.includes(userInfo().username)
+        ? linseerConfigDefaultBeta
+        : linseerConfigDefault,
       migrations: {
         '1.0.1': (store) => {
           log.info('Upgrading "config" store to 1.0.1 ...');

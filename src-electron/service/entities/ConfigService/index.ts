@@ -14,6 +14,7 @@ import { ApiStyle } from 'shared/types/model';
 export class ConfigService implements ConfigServiceBase {
   @inject(ServiceType.WINDOW)
   private _windowService!: WindowService;
+  // 临时指定用户使用LinseerBeta版本
   configStore =
     runtimeConfig.apiStyle === ApiStyle.HuggingFace
       ? new HuggingFaceConfigStore()
