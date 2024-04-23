@@ -108,6 +108,7 @@ export class DataStore {
         svn: [],
       };
       this.store = store;
+      log.debug('Project added:', { path, projectId });
       store.project[path].svn = await Promise.all(
         (await searchSvnDirectories(path)).map(async (svnDirectory) => ({
           directory: svnDirectory,
