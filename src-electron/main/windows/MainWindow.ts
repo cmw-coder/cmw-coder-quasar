@@ -1,4 +1,5 @@
 import { BrowserWindow } from 'electron';
+import log from 'electron-log/main';
 import { resolve } from 'path';
 import { dataStoreDefault } from 'main/stores/data/default';
 import { BaseWindow } from 'main/types/BaseWindow';
@@ -129,6 +130,10 @@ export class MainWindow extends BaseWindow {
         let changedFileList: ChangedFile[] | undefined;
         const projectPath = websocketService.getClientInfo()?.currentProject;
         if (projectPath && dataStore.store.project[projectPath]?.svn[0]) {
+          log.debug('ActionType.SvnDiff', {
+            projectPath,
+            svn: dataStore.store.project[projectPath].svn,
+          });
           changedFileList = await container
             .get<SvnService>(ServiceType.SVN)
             .repoDiff(dataStore.store.project[projectPath].svn[0].directory);

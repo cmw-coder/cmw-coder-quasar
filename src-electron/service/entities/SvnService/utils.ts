@@ -29,7 +29,7 @@ const formatRepoStatusData = (data: RepoStatusData) => {
 
 export const repoStatus = async (path: string) => {
   const { stdout, stderr } = await executeCommand('svn status --xml', path);
-  log.debug('fileDiff', { path, stdout, stderr });
+  log.debug('repoStatus', { path, stdout, stderr });
   if (stderr && stderr.length) {
     log.error('SVN Get status error:', stderr);
     return [];
