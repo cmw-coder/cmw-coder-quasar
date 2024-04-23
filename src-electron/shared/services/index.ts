@@ -1,7 +1,7 @@
 import { AppServiceBase } from 'shared/services/types/AppServiceBase';
 import { ConfigServiceBase } from 'shared/services/types/ConfigServiceBase';
 import { DataStoreServiceBase } from 'shared/services/types/DataStoreServiceBase';
-import { StatisticsReporterServiceBase } from 'shared/services/types/StatisticsReporterServiceBase';
+import { StatisticsServiceBase } from 'shared/services/types/StatisticsServiceBase';
 import { SvnServiceBase } from 'shared/services/types/SvnServiceBase';
 import { UpdaterServiceBase } from 'shared/services/types/UpdaterServiceBase';
 import { WebsocketServiceBase } from 'shared/services/types/WebsocketServiceBase';
@@ -13,7 +13,7 @@ export enum ServiceType {
   App = 'App',
   CONFIG = 'CONFIG',
   DATA_STORE = 'DATA_STORE',
-  STATISTICS_REPORTER = 'STATISTICS_REPORTER',
+  STATISTICS = 'STATISTICS',
   SVN = 'SVN',
   UPDATER = 'UPDATER',
   WEBSOCKET = 'WEBSOCKET',
@@ -24,7 +24,7 @@ export interface ServiceTypeMapping {
   [ServiceType.App]: AppServiceBase;
   [ServiceType.CONFIG]: ConfigServiceBase;
   [ServiceType.DATA_STORE]: DataStoreServiceBase;
-  [ServiceType.STATISTICS_REPORTER]: StatisticsReporterServiceBase;
+  [ServiceType.STATISTICS]: StatisticsServiceBase;
   [ServiceType.SVN]: SvnServiceBase;
   [ServiceType.UPDATER]: UpdaterServiceBase;
   [ServiceType.WEBSOCKET]: WebsocketServiceBase;

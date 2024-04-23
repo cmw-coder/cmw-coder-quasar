@@ -1,4 +1,4 @@
-import { KeptRatio } from 'service/entities/StatisticsReporterService/types';
+import { KeptRatio } from 'service/entities/StatisticsService/types';
 import { HuggingFaceModelType, LinseerModelType } from 'shared/types/model';
 import { CompletionType } from 'shared/types/common';
 

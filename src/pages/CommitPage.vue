@@ -329,8 +329,7 @@ onMounted(() => {
         <q-input
           :autofocus="
             !!(
-              selectedSvn.changedFileList &&
-              selectedSvn.changedFileList.length
+              selectedSvn.changedFileList && selectedSvn.changedFileList.length
             )
           "
           autogrow

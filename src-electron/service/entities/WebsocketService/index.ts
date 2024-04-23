@@ -14,7 +14,7 @@ import {
 import { timer } from 'main/utils/timer';
 import { DataStoreService } from 'service/entities/DataStoreService';
 import type { WindowService } from 'service/entities/WindowService';
-import type { StatisticsReporterService } from 'service/entities/StatisticsReporterService';
+import type { StatisticsService } from 'service/entities/StatisticsService';
 import { ServiceType } from 'shared/services';
 import { WebsocketServiceBase } from 'shared/services/types/WebsocketServiceBase';
 import {
@@ -33,12 +33,6 @@ interface ClientInfo {
 
 @injectable()
 export class WebsocketService implements WebsocketServiceBase {
-  @inject(ServiceType.DATA_STORE)
-  private _dataStoreService!: DataStoreService;
-  @inject(ServiceType.STATISTICS_REPORTER)
-  private _statisticsReporterService!: StatisticsReporterService;
-  @inject(ServiceType.WINDOW)
-  private _windowService!: WindowService;
   private _clientInfoMap = new Map<number, ClientInfo>();
   private _lastActivePid = 0;
   private _handlers = new Map<
@@ -52,6 +46,15 @@ export class WebsocketService implements WebsocketServiceBase {
 
   private promptProcessor = new PromptProcessor();
   private promptExtractor = new PromptExtractor();
+
+  constructor(
+    @inject(ServiceType.DATA_STORE)
+    private _dataStoreService: DataStoreService,
+    @inject(ServiceType.STATISTICS)
+    private _statisticsReporterService: StatisticsService,
+    @inject(ServiceType.WINDOW)
+    private _windowService: WindowService,
+  ) {}
 
   getClientInfo(pid?: number) {
     return this._clientInfoMap.get(pid ?? this._lastActivePid);

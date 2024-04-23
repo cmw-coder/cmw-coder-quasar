@@ -1,5 +1,5 @@
 import { Completions } from 'main/components/PromptProcessor/types';
-import { KeptRatio } from 'service/entities/StatisticsReporterService/types';
+import { KeptRatio } from 'service/entities/StatisticsService/types';
 import { CaretPosition, SymbolInfo } from 'shared/types/common';
 
 export enum WsAction {

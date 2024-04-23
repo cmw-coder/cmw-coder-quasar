@@ -1,7 +1,7 @@
 import {
   productLineMapping,
   secondClassMap,
-} from 'service/entities/StatisticsReporterService/constants';
+} from 'service/entities/StatisticsService/constants';
 import { container } from 'service/index';
 import type { ConfigService } from 'service/entities/ConfigService';
 import { ServiceType } from 'shared/services';

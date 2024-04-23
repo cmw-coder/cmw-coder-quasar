@@ -9,7 +9,7 @@ import {
 import packageJson from 'root/package.json';
 import { container } from 'service';
 import { DataStoreService } from 'service/entities/DataStoreService';
-import { StatisticsReporterService } from 'service/entities/StatisticsReporterService';
+import { StatisticsService } from 'service/entities/StatisticsService';
 import { ServiceType } from 'shared/services';
 
 export const searchSvnDirectories = async (path: string): Promise<string[]> => {
@@ -67,8 +67,8 @@ export const reportProjectAdditions = async () => {
   const dataStore = container.get<DataStoreService>(
     ServiceType.DATA_STORE,
   ).dataStore;
-  const statisticsReporterService = container.get<StatisticsReporterService>(
-    ServiceType.STATISTICS_REPORTER,
+  const statisticsReporterService = container.get<StatisticsService>(
+    ServiceType.STATISTICS,
   );
   return (
     await Promise.all(

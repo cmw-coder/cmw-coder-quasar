@@ -4,7 +4,7 @@ import 'reflect-metadata';
 import { AppService } from 'service/entities/AppService';
 import { ConfigService } from 'service/entities/ConfigService';
 import { DataStoreService } from 'service/entities/DataStoreService';
-import { StatisticsReporterService } from 'service/entities/StatisticsReporterService';
+import { StatisticsService } from 'service/entities/StatisticsService';
 import { SvnService } from 'service/entities/SvnService';
 import { UpdaterService } from 'service/entities/UpdaterService';
 import { WebsocketService } from 'service/entities/WebsocketService';
@@ -25,8 +25,8 @@ container
   .to(DataStoreService)
   .inSingletonScope();
 container
-  .bind<StatisticsReporterService>(ServiceType.STATISTICS_REPORTER)
-  .to(StatisticsReporterService)
+  .bind<StatisticsService>(ServiceType.STATISTICS)
+  .to(StatisticsService)
   .inSingletonScope();
 container.bind<SvnService>(ServiceType.SVN).to(SvnService).inSingletonScope();
 container

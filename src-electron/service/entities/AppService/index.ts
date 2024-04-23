@@ -30,18 +30,18 @@ interface AbstractServicePort {
 
 @injectable()
 export class AppService implements AppServiceBase {
-  @inject(ServiceType.WINDOW)
-  private _windowService!: WindowService;
-  @inject(ServiceType.WEBSOCKET)
-  private _websocketService!: WebsocketService;
-  @inject(ServiceType.UPDATER)
-  private _updaterService!: UpdaterService;
-  @inject(ServiceType.CONFIG)
-  private _configService!: ConfigService;
-  @inject(ServiceType.DATA_STORE)
-  private _dataStoreService!: DataStoreService;
-
-  constructor() {}
+  constructor(
+    @inject(ServiceType.WINDOW)
+    private _windowService: WindowService,
+    @inject(ServiceType.WEBSOCKET)
+    private _websocketService: WebsocketService,
+    @inject(ServiceType.UPDATER)
+    private _updaterService: UpdaterService,
+    @inject(ServiceType.CONFIG)
+    private _configService: ConfigService,
+    @inject(ServiceType.DATA_STORE)
+    private _dataStoreService: DataStoreService,
+  ) {}
 
   init() {
     log.info('AppService init', userInfo().username);

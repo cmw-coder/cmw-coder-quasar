@@ -10,12 +10,11 @@ import type { WindowService } from 'service/entities/WindowService';
 @injectable()
 export class UpdaterService implements UpdaterServiceBase {
   private _updater!: NsisUpdater;
-  @inject(ServiceType.CONFIG)
-  private _configService!: ConfigService;
-  @inject(ServiceType.WINDOW)
-  private _windowService!: WindowService;
 
-  constructor() {}
+  constructor(
+    @inject(ServiceType.CONFIG) private _configService: ConfigService,
+    @inject(ServiceType.WINDOW) private _windowService: WindowService,
+  ) {}
 
   init() {
     this._updater = new NsisUpdater({
