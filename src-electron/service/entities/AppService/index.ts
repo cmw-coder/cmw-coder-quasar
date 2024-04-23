@@ -22,6 +22,7 @@ import { SERVICE_CALL_KEY, ServiceType } from 'shared/services';
 import { AppServiceBase } from 'shared/services/types/AppServiceBase';
 import { ActionMessage, ActionType } from 'shared/types/ActionMessage';
 import { ApiStyle } from 'shared/types/model';
+import { runtimeConfig } from 'shared/config';
 
 interface AbstractServicePort {
   [key: string]: ((...args: unknown[]) => Promise<unknown>) | undefined;
@@ -84,6 +85,7 @@ export class AppService implements AppServiceBase {
       this._websocketService.registerWsActions();
 
       if (
+        runtimeConfig.apiStyle === ApiStyle.Linseer &&
         this._configService.configStore.apiStyle === ApiStyle.Linseer &&
         !(await this._configService.configStore.getAccessToken())
       ) {
