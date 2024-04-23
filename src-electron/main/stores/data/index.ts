@@ -137,4 +137,20 @@ export class DataStore {
       this.store = store;
     }
   }
+
+  async setProjectSvn(projectPath: string, svnPath: string) {
+    const store = this.store;
+    if (
+      store.project[projectPath] &&
+      !store.project[projectPath].svn.find(
+        ({ directory }) => directory === svnPath,
+      )
+    ) {
+      store.project[projectPath].svn.push({
+        directory: svnPath,
+        revision: await getRevision(svnPath),
+      });
+      this.store = store;
+    }
+  }
 }

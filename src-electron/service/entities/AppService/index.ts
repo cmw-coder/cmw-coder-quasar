@@ -82,7 +82,7 @@ export class AppService implements AppServiceBase {
       this._windowService.trayIcon.activate();
 
       this._websocketService.startServer();
-      this._websocketService.registerWsActions();
+      this._websocketService.registerActions();
 
       if (
         runtimeConfig.apiStyle === ApiStyle.Linseer &&

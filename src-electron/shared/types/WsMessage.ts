@@ -15,6 +15,7 @@ export enum WsAction {
   EditorFocusState = 'EditorFocusState',
   EditorPaste = 'EditorPaste',
   EditorSwitchProject = 'EditorSwitchProject',
+  EditorSwitchSvn = 'EditorSwitchSvn',
   HandShake = 'HandShake',
 }
 
@@ -163,6 +164,11 @@ export interface EditorSwitchProjectClientMessage extends WsMessage {
   data: string;
 }
 
+export interface EditorSwitchSvnClientMessage extends WsMessage {
+  action: WsAction.EditorSwitchSvn;
+  data: string;
+}
+
 export interface HandShakeClientMessage extends WsMessage {
   action: WsAction.HandShake;
   data: { pid: number; currentProject: string; version: string };
@@ -208,6 +214,10 @@ export interface WsMessageMapping {
   };
   [WsAction.EditorSwitchProject]: {
     client: EditorSwitchProjectClientMessage;
+    server: void;
+  };
+  [WsAction.EditorSwitchSvn]: {
+    client: EditorSwitchSvnClientMessage;
     server: void;
   };
 }

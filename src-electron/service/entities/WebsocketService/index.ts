@@ -12,6 +12,7 @@ import {
   getProjectData,
 } from 'main/utils/completion';
 import { timer } from 'main/utils/timer';
+import { DataStoreService } from 'service/entities/DataStoreService';
 import type { WindowService } from 'service/entities/WindowService';
 import type { StatisticsReporterService } from 'service/entities/StatisticsReporterService';
 import { ServiceType } from 'shared/services';
@@ -32,10 +33,12 @@ interface ClientInfo {
 
 @injectable()
 export class WebsocketService implements WebsocketServiceBase {
-  @inject(ServiceType.WINDOW)
-  private _windowService!: WindowService;
+  @inject(ServiceType.DATA_STORE)
+  private _dataStoreService!: DataStoreService;
   @inject(ServiceType.STATISTICS_REPORTER)
   private _statisticsReporterService!: StatisticsReporterService;
+  @inject(ServiceType.WINDOW)
+  private _windowService!: WindowService;
   private _clientInfoMap = new Map<number, ClientInfo>();
   private _lastActivePid = 0;
   private _handlers = new Map<
@@ -121,14 +124,7 @@ export class WebsocketService implements WebsocketServiceBase {
     });
   }
 
-  registerWsActions() {
-    this.registerWsAction(
-      WsAction.EditorSwitchProject,
-      ({ data: project }, pid) => {
-        this.setCurrentProject(pid, project);
-      },
-    );
-
+  registerActions() {
     this.registerWsAction(WsAction.CompletionAccept, async ({ data }, pid) => {
       const { actionId, index } = data;
       this._windowService.immersiveWindow.completionClear();
@@ -316,5 +312,27 @@ export class WebsocketService implements WebsocketServiceBase {
         }
       }
     });
+    this.registerWsAction(
+      WsAction.EditorSwitchProject,
+      ({ data: project }, pid) => {
+        this.setCurrentProject(pid, project);
+      },
+    );
+    this.registerWsAction(
+      WsAction.EditorSwitchSvn,
+      async ({ data: svnPath }, pid) => {
+        const project = this.getClientInfo(pid)?.currentProject;
+        if (project && project.length) {
+          try {
+            await this._dataStoreService.dataStore.setProjectSvn(
+              project,
+              svnPath,
+            );
+          } catch (e) {
+            log.error('EditorSwitchSvn', e);
+          }
+        }
+      },
+    );
   }
 }
