@@ -14,20 +14,14 @@ import {
 import packageJson from 'root/package.json';
 import { container } from 'service';
 import type { ConfigService } from 'service/entities/ConfigService';
-import type { DataStoreService } from 'service/entities/DataStoreService';
-import type { WebsocketService } from 'service/entities/WebsocketService';
 import { ServiceType } from 'shared/services';
 import {
   ActionType,
   ConfigStoreLoadActionMessage,
   RouterReloadActionMessage,
-  SvnCommitActionMessage,
-  SvnDiffActionMessage,
   UpdateFinishActionMessage,
   UpdateProgressActionMessage,
 } from 'shared/types/ActionMessage';
-import { ChangedFile } from 'shared/types/svn';
-import { SvnService } from 'service/entities/SvnService';
 import { WindowType } from 'shared/types/WindowType';
 
 export class FloatingWindow extends BaseWindow {
@@ -126,9 +120,6 @@ export class FloatingWindow extends BaseWindow {
   }
 
   protected create() {
-    const dataStore = container.get<DataStoreService>(
-      ServiceType.DATA_STORE,
-    ).dataStore;
     const configStore = container.get<ConfigService>(
       ServiceType.CONFIG,
     ).configStore;
@@ -172,51 +163,6 @@ export class FloatingWindow extends BaseWindow {
           this._window,
           new ConfigStoreLoadActionMessage(configStore.store),
         );
-      }
-    });
-    this._actionApi.register(ActionType.SvnDiff, async () => {
-      if (this._window) {
-        const websocketService = container.get<WebsocketService>(
-          ServiceType.WEBSOCKET,
-        );
-        let changedFileList: ChangedFile[] | undefined;
-        const projectPath = websocketService.getClientInfo()?.currentProject;
-        if (projectPath && dataStore.store.project[projectPath]?.svn[0]) {
-          log.debug('ActionType.SvnDiff', {
-            projectPath,
-            svn: dataStore.store.project[projectPath].svn,
-          });
-          changedFileList = await container
-            .get<SvnService>(ServiceType.SVN)
-            .repoDiff(dataStore.store.project[projectPath].svn[0].directory);
-        }
-        sendToRenderer(this._window, new SvnDiffActionMessage(changedFileList));
-      }
-    });
-    this._actionApi.register(ActionType.SvnCommit, async (data) => {
-      if (this._window) {
-        const websocketService = container.get<WebsocketService>(
-          ServiceType.WEBSOCKET,
-        );
-        const projectPath = websocketService.getClientInfo()?.currentProject;
-        if (projectPath && dataStore.store.project[projectPath]?.svn[0]) {
-          try {
-            await container
-              .get<SvnService>(ServiceType.SVN)
-              .commit(
-                dataStore.store.project[projectPath].svn[0].directory,
-                data,
-              );
-            sendToRenderer(this._window, new SvnCommitActionMessage('success'));
-          } catch (e) {
-            sendToRenderer(this._window, new SvnCommitActionMessage(<string>e));
-          }
-        } else {
-          sendToRenderer(
-            this._window,
-            new SvnCommitActionMessage('invalidProject'),
-          );
-        }
       }
     });
 

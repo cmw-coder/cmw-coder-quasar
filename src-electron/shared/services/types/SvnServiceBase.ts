@@ -1,10 +1,10 @@
-import type { ChangedFile } from 'shared/types/svn';
+import type { FileChanges } from 'shared/types/svn';
 
 export interface SvnServiceBase {
   getAllProjectList(): Promise<
     {
       path: string;
-      changedFileList: ChangedFile[];
+      changedFileList: FileChanges[];
     }[]
   >;
   commit(projectPath: string, message: string): Promise<string>;

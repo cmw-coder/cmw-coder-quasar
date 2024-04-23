@@ -1,9 +1,9 @@
-import { ChangedFile } from 'shared/types/svn';
+import { FileChanges } from 'shared/types/svn';
 import { ApiStyle } from 'shared/types/model';
 import { runtimeConfig } from 'shared/config';
 import { chatWithDeepSeek, chatWithLinseer } from 'boot/axios';
 
-export const generateCommitPrompt = (changedFile: ChangedFile[]) => {
+export const generateCommitPrompt = (changedFile: FileChanges[]) => {
   const requirement = `请为如下的代码变动生成简略的提交信息:
 
   `;
@@ -12,7 +12,7 @@ export const generateCommitPrompt = (changedFile: ChangedFile[]) => {
       (file) =>
         '************************************************************\r\n' +
         `文件路径: ${file.path}\r\n` +
-        `变动类型: ${file.type}\r\n` +
+        `变动类型: ${file.status}\r\n` +
         '变动详情: \r\n' +
         `${file.diff}\r\n` +
         '************************************************************\r\n',

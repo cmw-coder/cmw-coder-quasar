@@ -1,4 +1,4 @@
-export type SvnFileType =
+export type SvnStatus =
   | 'added'
   | 'deleted'
   | 'modified'
@@ -10,13 +10,13 @@ export type SvnFileType =
   | 'missing'
   | '~';
 
-export interface SvnStatus {
+export interface FileStatus {
   path: string;
-  type: SvnFileType;
+  status: SvnStatus;
 }
 
-export type ChangedFile = {
+export type FileChanges = FileStatus & {
   additions: number;
   deletions: number;
   diff: string;
-} & SvnStatus;
+};
