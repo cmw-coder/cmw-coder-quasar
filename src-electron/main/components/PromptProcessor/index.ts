@@ -1,6 +1,6 @@
 import { createHash } from 'crypto';
 import log from 'electron-log/main';
-
+import { userInfo } from 'os';
 import { PromptElements } from 'main/components/PromptExtractor/types';
 import { Completions, LRUCache } from 'main/components/PromptProcessor/types';
 import {
@@ -15,6 +15,7 @@ import { container } from 'service';
 import type { ConfigService } from 'service/entities/ConfigService';
 import { ServiceType } from 'shared/services';
 import { ApiStyle } from 'shared/types/model';
+import { betaApiUserList } from 'main/components/PromptProcessor/apiUserControlData';
 
 export class PromptProcessor {
   private _abortController?: AbortController;
@@ -46,6 +47,10 @@ export class PromptProcessor {
     const type = getCompletionType(promptElements);
     let candidates: string[];
 
+    // 临时指定用户访问版本
+    const username = userInfo().username;
+    if (betaApiUserList.includes(username)) {
+    }
     if (configStore.apiStyle === ApiStyle.HuggingFace) {
       this._abortController = new AbortController();
       candidates = await processHuggingFaceApi(

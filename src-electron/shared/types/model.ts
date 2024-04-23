@@ -12,6 +12,7 @@ export enum LinseerModelType {
   Linseer = 'Linseer',
   Linseer_CClsw = 'Linseer_CClsw',
   Linseer_SR88Driver = 'Linseer_SR88Driver',
+  Linseer_Beta = 'Linseer_Beta',
 }
 
 export enum SubModelType {

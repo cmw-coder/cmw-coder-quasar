@@ -192,6 +192,8 @@ export const processLinseerApi = async (
   return [];
 };
 
+export const processLinseerBetaApi = async () => {};
+
 const _processGeneratedSuggestions = (
   generatedSuggestions: string[],
   completionType: CompletionType,
