@@ -267,7 +267,7 @@ export const linseerConfigDefaultBeta: LinseerStoreType = {
           function: {
             contextLimit: 1500,
             maxTokenCount: 320,
-            stopTokens: ['<fim_pad>', '<|endoftext|>', '</s>', '\n}'],
+            stopTokens: ['<fim_pad>', '<｜end▁of▁sentence｜>', '\n}'],
             subModelType: SubModelType['CmwCoderV1'],
             suggestionCount: 1,
             temperature: 0.2,
@@ -275,7 +275,7 @@ export const linseerConfigDefaultBeta: LinseerStoreType = {
           line: {
             contextLimit: 1500,
             maxTokenCount: 15,
-            stopTokens: ['<fim_pad>', '<|endoftext|>', '</s>'],
+            stopTokens: ['<fim_pad>', '<｜end▁of▁sentence｜>', '\r\n', '\n'],
             subModelType: SubModelType['CmwCoderV1'],
             suggestionCount: 1,
             temperature: 0.2,
@@ -283,16 +283,16 @@ export const linseerConfigDefaultBeta: LinseerStoreType = {
           snippet: {
             contextLimit: 1500,
             maxTokenCount: 40,
-            stopTokens: ['<fim_pad>', '<|endoftext|>', '</s>', '}'],
+            stopTokens: ['<fim_pad>', '<｜end▁of▁sentence｜>', '}'],
             subModelType: SubModelType['CmwCoderV1'],
             suggestionCount: 1,
             temperature: 0.2,
           },
         },
         separateTokens: {
-          end: '<｜fim▁end｜>',
-          middle: '<｜fim▁hole｜>',
-          start: '<｜fim▁begin｜>',
+          end: '<fim_middle>',
+          middle: '<fim_suffix>',
+          start: '<fim_prefix>',
         },
       },
     ],
