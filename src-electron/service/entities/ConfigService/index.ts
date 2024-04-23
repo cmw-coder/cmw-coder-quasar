@@ -2,9 +2,11 @@ import { injectable, inject } from 'inversify';
 
 import { HuggingFaceConfigStore, LinseerConfigStore } from 'main/stores/config';
 import { LinseerConfigType, LinseerDataType } from 'main/stores/config/types';
+import { userInfo } from 'os';
 import { registerAction } from 'preload/types/ActionApi';
 import { WindowService } from 'service/entities/WindowService';
 import { runtimeConfig } from 'shared/config';
+import { betaApiUserList } from 'shared/constants';
 import { ServiceType } from 'shared/services';
 import { ConfigServiceBase } from 'shared/services/types/ConfigServiceBase';
 import { ActionType } from 'shared/types/ActionMessage';
@@ -15,13 +17,13 @@ export class ConfigService implements ConfigServiceBase {
   @inject(ServiceType.WINDOW)
   private _windowService!: WindowService;
   // 临时指定用户使用LinseerBeta版本
-  configStore =
-    runtimeConfig.apiStyle === ApiStyle.HuggingFace
+  configStore = betaApiUserList.includes(userInfo().username)
+    ? new LinseerConfigStore()
+    : runtimeConfig.apiStyle === ApiStyle.HuggingFace
       ? new HuggingFaceConfigStore()
       : new LinseerConfigStore();
 
   constructor() {
-    console.log('ConfigService constructor');
     registerAction(
       ActionType.ConfigStoreSave,
       `main.stores.${ActionType.ConfigStoreSave}`,

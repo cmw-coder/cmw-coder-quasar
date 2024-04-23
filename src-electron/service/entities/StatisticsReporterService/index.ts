@@ -51,7 +51,6 @@ export class StatisticsReporterService
   }
 
   constructor() {
-    console.log('StatisticsReporter constructor');
     setInterval(() => {
       for (const [actionId, data] of this._recentCompletion) {
         if (data.timelines.startGenerate.isValid) {
