@@ -138,50 +138,11 @@ export const loginWithCode = async (userId: string, code: string) => {
   });
 };
 
-// export const chatWithHuggingFace = async (
-//   endpoint: string,
-//   question: string,
-//   historyList: { role: 'assistant' | 'user'; content: string }[],
-// ) => {
-//   let history = '';
-//   for (const item of historyList) {
-//     history +=
-//       item.role === 'assistant'
-//         ? `### Instruction: \n${item.content}\n`
-//         : `### Response: \n${item.content}\n<|EOT|>\n`;
-//   }
-//   return await axios
-//     .create({
-//       baseURL: endpoint,
-//     })
-//     .post<{ generated_text: string }>('/generate', {
-//       inputs:
-//         'You are an AI programming assistant, utilizing the DeepSeek Coder model, ' +
-//         'developed by DeepSeek Company, and you only answer questions related to computer science. ' +
-//         'For politically sensitive questions, security and privacy issues, ' +
-//         'and other non-computer science questions, you will refuse to answer.\n' +
-//         `${history}### Instruction: \n${question}\n### Response: \n`,
-//       parameters: {
-//         best_of: 1,
-//         details: true,
-//         do_sample: true,
-//         max_new_tokens: 256,
-//         repetition_penalty: 1.0,
-//         return_full_text: false,
-//         seed: null,
-//         stop: ['<｜end▁of▁sentence｜>', '<|EOT|>'],
-//         temperature: 0.2,
-//         top_p: 0.9,
-//         truncate: null,
-//         watermark: false,
-//       },
-//     });
-// };
-
 export const chatWithDeepSeek = async (
   endpoint: string,
   question: string,
   historyList: { role: 'assistant' | 'user'; content: string }[],
+  progressCallback?: (content: string) => void,
 ) =>
   await axios
     .create({
@@ -194,21 +155,29 @@ export const chatWithDeepSeek = async (
           content: string;
         };
       }[];
-    }>('/v1/chat/completions', {
-      max_tokens: 1024,
-      messages: [
-        ...historyList,
-        {
-          role: 'user',
-          content: question,
+    }>(
+      '/v1/chat/completions',
+      {
+        max_tokens: 1024,
+        messages: [
+          ...historyList,
+          {
+            role: 'user',
+            content: question,
+          },
+        ],
+        model: 'tgi',
+        seed: 42,
+        stream: true,
+        temperature: 0.001,
+        details: false,
+      },
+      {
+        onDownloadProgress: (progressEvent) => {
+          progressCallback?.(progressEvent.event.target.responseText);
         },
-      ],
-      model: 'tgi',
-      seed: 42,
-      stream: false,
-      temperature: 0.001,
-      details: false,
-    });
+      },
+    );
 
 export const chatWithLinseer = async (
   endpoint: string,

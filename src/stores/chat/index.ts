@@ -61,6 +61,7 @@ export const useChatStore = defineStore('chat', () => {
           'http://10.113.36.127:9204',
           content,
           historyList,
+          (content) => console.log(content),
         );
         if (data.choices[0]?.message?.content) {
           currentResponse.content = data.choices[0]?.message?.content;

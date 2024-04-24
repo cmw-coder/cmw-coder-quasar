@@ -38,6 +38,7 @@ export const generateCommitMessage = async (
       'http://10.113.36.127:9204',
       prompt,
       [],
+      (content) => console.log(content),
     );
     return data.choices[0]?.message?.content || '';
   }

@@ -73,7 +73,7 @@ onBeforeUnmount(() => {
       outlined
       placeholder="Ask any question..."
       v-model="questionText"
-      @keydown.enter.prevent="sendQuestion"
+      @keydown.enter.exact.prevent="sendQuestion"
       style="max-height: 300px; overflow-y: auto"
     >
       <template v-slot:before>
