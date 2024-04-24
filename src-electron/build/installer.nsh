@@ -30,11 +30,6 @@
   StrCpy $SI3_DATA_DIR "$PROFILE\Documents\Source Insight"
   StrCpy $SI4_DATA_DIR "$PROFILE\Documents\Source Insight 4.0"
 
-  Var /GLOBAL SI3_EXECUTABLE
-  Var /GLOBAL SI4_EXECUTABLE
-  StrCpy $SI3_EXECUTABLE "Insight3.exe"
-  StrCpy $SI4_EXECUTABLE "sourceinsight4.exe"
-
   Var /GLOBAL SI3_INSTALL_DIR
   Var /GLOBAL SI4_INSTALL_DIR
   ReadRegDWORD $SI3_INSTALL_DIR HKLM 'SOFTWARE\WOW6432Node\Source Dynamics\Source Insight\3.0\Paths' 'InitDir'
@@ -63,9 +58,9 @@
   RMDir /r /REBOOTOK '$APPDATA\Source Insight'
 
   ${If} $SI3_INSTALL_DIR != ''
-  ${AndIf} ${FileExists} '$SI3_INSTALL_DIR\$SI3_EXECUTABLE'
+  ${AndIf} ${FileExists} '$SI3_INSTALL_DIR\Insight3.exe'
     SetOutPath '$SI3_INSTALL_DIR'
-      File '${BUILD_RESOURCES_DIR}\build\assets\$SI3_EXECUTABLE'
+      File '${BUILD_RESOURCES_DIR}\build\assets\Insight3.exe'
     SetOutPath '$INSTDIR'
 
     ${If} ${FileExists} '$SI3_DATA_DIR\Settings'
@@ -79,9 +74,9 @@
     ${EndIf}
   ${EndIf}
   ${If} $SI4_INSTALL_DIR != ''
-  ${AndIf} ${FileExists} '$SI4_INSTALL_DIR\$SI4_EXECUTABLE'
+  ${AndIf} ${FileExists} '$SI4_INSTALL_DIR\sourceinsight4.exe'
     SetOutPath '$SI4_INSTALL_DIR'
-      File '${BUILD_RESOURCES_DIR}\build\assets\$SI4_EXECUTABLE'
+      File '${BUILD_RESOURCES_DIR}\build\assets\sourceinsight4.exe'
       File '${BUILD_RESOURCES_DIR}\build\assets\msimg32.dll'
     SetOutPath 'C:\ProgramData\Source Insight\4.0'
       File '${BUILD_RESOURCES_DIR}\build\assets\si4.lic'
@@ -101,13 +96,13 @@
 
 !macro customInstall
   ${If} $SI3_INSTALL_DIR != ''
-  ${AndIf} ${FileExists} '$SI3_INSTALL_DIR\$SI3_EXECUTABLE'
-    ${killIfRunning} '$SI3_EXECUTABLE'
+  ${AndIf} ${FileExists} '$SI3_INSTALL_DIR\Insight3.exe'
+    ${killIfRunning} 'Insight3.exe'
     ${installProxy} '$SI3_INSTALL_DIR'
   ${EndIf}
   ${If} $SI4_INSTALL_DIR != ''
-  ${AndIf} ${FileExists} '$SI4_INSTALL_DIR\$SI4_EXECUTABLE'
-    ${killIfRunning} '$SI4_EXECUTABLE'
+  ${AndIf} ${FileExists} '$SI4_INSTALL_DIR\sourceinsight4.exe'
+    ${killIfRunning} 'sourceinsight4.exe'
     ${installProxy} '$SI4_INSTALL_DIR'
   ${EndIf}
 !macroend
