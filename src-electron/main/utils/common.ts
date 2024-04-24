@@ -2,6 +2,7 @@ import { exec } from 'child_process';
 import { BrowserWindow } from 'electron';
 import { readdir, stat } from 'fs/promises';
 import { decode } from 'iconv-lite';
+import { detect } from 'jschardet';
 import path from 'path';
 import { promisify } from 'util';
 
@@ -30,9 +31,13 @@ export const executeCommand = async (
   const { stdout, stderr } = await execAsync(command, {
     cwd: workingDirectory,
   });
+  const needDecode =
+    (stdout.length && detect(stdout).encoding !== 'UTF-8') ||
+    (stderr.length && detect(stderr).encoding !== 'UTF-8');
+
   return {
-    stdout: decode(Buffer.from(stdout), 'GBK'),
-    stderr: decode(Buffer.from(stderr), 'GBK'),
+    stdout: needDecode ? decode(Buffer.from(stdout), 'GBK') : stdout,
+    stderr: needDecode ? decode(Buffer.from(stderr), 'GBK') : stderr,
   };
 };
 
