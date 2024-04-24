@@ -44,8 +44,8 @@ const copySelected = () => {
 };
 
 const mouseUp = (event: MouseEvent) => {
-  selectionX.value = event.pageX + 10;
-  selectionY.value = event.pageY - 80;
+  selectionX.value = event.screenX - window.screenLeft + 10;
+  selectionY.value = event.screenY - window.screenTop - 80;
   selectionText.value = window.getSelection()?.toString() ?? '';
 };
 </script>
