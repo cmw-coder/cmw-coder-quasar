@@ -161,7 +161,7 @@ export const chatWithDeepSeek = async (
       '/v1/chat/completions',
       {
         details: false,
-        max_tokens: 1024,
+        max_tokens: 2048,
         messages: [
           ...historyList,
           {
