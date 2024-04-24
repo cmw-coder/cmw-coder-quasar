@@ -14,10 +14,20 @@ export class SvnService implements SvnServiceBase {
   async repoDiff(path: string) {
     return (
       await Promise.all(
-        (await repoStatus(path)).map(async (status) => ({
-          ...status,
-          diff: await fileDiff(status.path, path),
-        })),
+        (await repoStatus(path)).map(async (status) => {
+          try {
+            return {
+              ...status,
+              diff: await fileDiff(status.path, path),
+            };
+          } catch (e) {
+            log.error('repoDiff', { path, status, e });
+            return {
+              ...status,
+              diff: '',
+            };
+          }
+        }),
       )
     ).map(({ diff, path, status }) => {
       let additions = 0;
