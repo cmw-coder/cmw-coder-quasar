@@ -32,16 +32,17 @@ export const executeCommand = async (
   const { stdout, stderr } = await execAsync(command, {
     cwd: workingDirectory,
   });
+  const needDecode =
+    (stdout.length && detect(stdout).encoding !== 'UTF-8') ||
+    (stderr.length && detect(stderr).encoding !== 'UTF-8');
   log.debug('executeCommand', {
     command,
     workingDirectory,
     stdout,
     stderr,
     encoding: stdout.length ? detect(stdout).encoding : detect(stderr).encoding,
+    needDecode,
   });
-  const needDecode =
-    (stdout.length && detect(stdout).encoding !== 'UTF-8') ||
-    (stderr.length && detect(stderr).encoding !== 'UTF-8');
 
   return {
     stdout: needDecode ? decode(Buffer.from(stdout), 'GBK') : stdout,
