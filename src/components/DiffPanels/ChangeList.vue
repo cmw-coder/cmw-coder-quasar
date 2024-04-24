@@ -6,6 +6,11 @@ import { FileChanges } from 'shared/types/svn';
 const props = defineProps<{ data: FileChanges[] }>();
 const modelValue = defineModel<number>({ required: true });
 
+const getLastDirName = (path: string) => {
+  const pathArr = path.split('\\');
+  return pathArr.at(-1);
+};
+
 watch(props.data, () => (modelValue.value = 0), { deep: true });
 </script>
 
@@ -41,6 +46,9 @@ watch(props.data, () => (modelValue.value = 0), { deep: true });
       </q-item-section>
       <q-item-section>
         <q-item-label>
+          {{ getLastDirName(item.path) }}
+        </q-item-label>
+        <q-item-label class="ellipsis" caption style="direction: rtl">
           {{ item.path }}
         </q-item-label>
       </q-item-section>

@@ -1,5 +1,10 @@
 import { Service, ServiceType } from 'shared/services';
 
+export const getLastDirName = (path: string) => {
+  const pathArr = path.split('\\');
+  return pathArr.at(-1);
+};
+
 export const timeout = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };

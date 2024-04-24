@@ -20,7 +20,7 @@ import {
   generateCommitMessage,
   generateCommitPrompt,
 } from 'utils/commitPrompt';
-import { useService } from 'utils/common';
+import { getLastDirName, useService } from 'utils/common';
 
 const { t } = useI18n();
 const { notify } = useQuasar();
@@ -78,10 +78,7 @@ const generateCommitMessageHandle = async () => {
     loadingGenerate.value = false;
   }
 };
-const getLastDirName = (path: string) => {
-  const pathArr = path.split('\\');
-  return pathArr[pathArr.length - 1];
-};
+
 const refreshProjectList = async () => {
   const res = await svnService.getAllProjectList();
   svnList.value = res.map((item) => ({
