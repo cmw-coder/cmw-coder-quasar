@@ -57,18 +57,17 @@ export const useChatStore = defineStore('chat', () => {
           currentResponse.error = true;
         }
       } else {
-        const { data } = await chatWithDeepSeek(
+        await chatWithDeepSeek(
           'http://10.113.36.127:9204',
           content,
           historyList,
-          (content) => console.log(content),
+          (content) =>
+            (currentResponse.content = content
+              .split('data:')
+              .filter((item) => item.trim() !== '')
+              .map((item) => JSON.parse(item.trim()).choices[0].delta.content)
+              .join('')),
         );
-        if (data.choices[0]?.message?.content) {
-          currentResponse.content = data.choices[0]?.message?.content;
-        } else {
-          currentResponse.content = 'Failed to get response';
-          currentResponse.error = true;
-        }
       }
     } catch {
       currentResponse.content = 'Failed to get response';
