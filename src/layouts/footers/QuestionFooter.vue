@@ -103,10 +103,17 @@ onBeforeUnmount(() => {
 </template>
 
 <style lang="scss" scoped>
-@import "src/css/quasar.variables";
+@import 'src/css/quasar.variables';
+
 .custom-scrollbar {
+  &:hover {
+    ::-webkit-scrollbar-thumb {
+      background-color: $primary;
+      transition: background-color 0.5s linear;
+    }
+  }
+
   ::-webkit-scrollbar {
-    background-color: rgba(0, 0, 0, 0);
     width: 8px;
   }
 
@@ -115,8 +122,9 @@ onBeforeUnmount(() => {
   }
 
   ::-webkit-scrollbar-thumb {
-    background-color: $primary;
+    background-color: rgba(0, 0, 0, 0);
     border-radius: 4px;
+    transition: background-color 0.5s linear;
   }
 
   ::-webkit-scrollbar-button {

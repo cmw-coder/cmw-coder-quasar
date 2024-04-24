@@ -29,7 +29,7 @@ export const generateCommitMessage = async (
 ) => {
   if (runtimeConfig.apiStyle === ApiStyle.Linseer) {
     if (accessToken) {
-      const { data } = await chatWithLinseer(
+      await chatWithLinseer(
         endPoint,
         prompt,
         [],
@@ -41,12 +41,11 @@ export const generateCommitMessage = async (
             .map((item) => JSON.parse(item.trim()).message)
             .join('')),
       );
-      return data[0]?.code as string;
     } else {
       throw new Error('Invalid access token');
     }
   } else {
-    const { data } = await chatWithDeepSeek(
+    await chatWithDeepSeek(
       'http://10.113.36.127:9204',
       prompt,
       [],
@@ -59,6 +58,5 @@ export const generateCommitMessage = async (
             .join(''),
         ),
     );
-    return data.choices[0]?.message?.content || '';
   }
 };

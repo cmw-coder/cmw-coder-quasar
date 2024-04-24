@@ -13,6 +13,16 @@ export default {
         account: 'Account',
       },
     },
+    ChatMessages: {
+      labels: {
+        copySelected: 'Copy selected',
+        copyAll: 'Copy all',
+      },
+      notifications: {
+        copySuccess: 'Selection copied to the clipboard',
+        copyFailure: 'Failed to copy the selection',
+      },
+    },
     CodeBlock: {
       tooltips: {
         copy: 'Copy to clipboard',

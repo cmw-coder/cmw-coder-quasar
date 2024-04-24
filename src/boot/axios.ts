@@ -169,7 +169,7 @@ export const chatWithDeepSeek = async (
             content: question,
           },
         ],
-        model: 'tgi',
+        model: 'deepseek-ai/deepseek-llm-7b-chat',
         seed: 42,
         stop: ['<｜end▁of▁sentence｜>'],
         stream: true,
