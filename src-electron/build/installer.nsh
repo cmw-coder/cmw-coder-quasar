@@ -39,22 +39,17 @@
   Var /GLOBAL SI4_INSTALL_DIR
   ReadRegDWORD $SI3_INSTALL_DIR HKLM 'SOFTWARE\WOW6432Node\Source Dynamics\Source Insight\3.0\Paths' 'InitDir'
   ReadRegDWORD $SI4_INSTALL_DIR HKLM 'SOFTWARE\WOW6432Node\Source Dynamics\Source Insight\4.0\Install' 'InstallDir'
-
-  Var /GLOBAL RELEASE_PATH
-  StrCpy $RELEASE_PATH "\\h3cbjnt23-fs\软件平台3\V7DEV\Comware Leopard 工具\SI插件"
 !macroend
 
 !define installProxy '!insertmacro installProxyImpl'
 !macro installProxyImpl targetPath
-  SetOutPath ${targetPath}
-  File '${BUILD_RESOURCES_DIR}\build\assets\cmw-coder-loader.exe'
-  File '${BUILD_RESOURCES_DIR}\build\assets\loaderdll.dll'
-  File '${BUILD_RESOURCES_DIR}\build\assets\zlib1.dll'
-  Sleep 3000
-  nsExec::Exec '"${targetPath}\cmw-coder-loader.exe" /uninstall'
+  SetOutPath '${targetPath}'
+    File '${BUILD_RESOURCES_DIR}\build\assets\cmw-coder-loader.exe'
+    File '${BUILD_RESOURCES_DIR}\build\assets\loaderdll.dll'
+    File '${BUILD_RESOURCES_DIR}\build\assets\zlib1.dll'
+  SetOutPath '$INSTDIR'
   Sleep 3000
   nsExec::Exec '"${targetPath}\cmw-coder-loader.exe" /install'
-  SetOutPath $INSTDIR
 !macroend
 
 !macro customInit
@@ -69,30 +64,37 @@
 
   ${If} $SI3_INSTALL_DIR != ''
   ${AndIf} ${FileExists} '$SI3_INSTALL_DIR\$SI3_EXECUTABLE'
-    CopyFiles /FILESONLY /SILENT '$RELEASE_PATH\$SI3_EXECUTABLE' $SI3_INSTALL_DIR
+    SetOutPath '$SI3_INSTALL_DIR'
+      File '${BUILD_RESOURCES_DIR}\build\assets\$SI3_EXECUTABLE'
+    SetOutPath '$INSTDIR'
+
     ${If} ${FileExists} '$SI3_DATA_DIR\Settings'
       CreateDirectory '$SI3_DATA_DIR\SettingsBackup'
       CopyFiles /FILESONLY /SILENT '$SI3_DATA_DIR\Settings\*.CF3' '$SI3_DATA_DIR\SettingsBackup'
     ${EndIf}
     ${If} ${FileExists} '$SI3_DATA_DIR\Projects\Base\CMWCODER.em'
       SetOutPath '$SI3_DATA_DIR\Projects\Base'
-      File '${BUILD_RESOURCES_DIR}\build\assets\CMWCODER.em'
-      SetOutPath $INSTDIR
+        File '${BUILD_RESOURCES_DIR}\build\assets\CMWCODER.em'
+      SetOutPath '$INSTDIR'
     ${EndIf}
   ${EndIf}
   ${If} $SI4_INSTALL_DIR != ''
   ${AndIf} ${FileExists} '$SI4_INSTALL_DIR\$SI4_EXECUTABLE'
-    CopyFiles /FILESONLY /SILENT '$RELEASE_PATH\$SI4_EXECUTABLE' $SI4_INSTALL_DIR
-    CopyFiles /FILESONLY /SILENT '$RELEASE_PATH\msimg32.dll' $SI4_INSTALL_DIR
-    CopyFiles /FILESONLY /SILENT '$RELEASE_PATH\si4.lic' 'C:\ProgramData\Source Insight\4.0\si4.lic'
+    SetOutPath '$SI4_INSTALL_DIR'
+      File '${BUILD_RESOURCES_DIR}\build\assets\$SI4_EXECUTABLE'
+      File '${BUILD_RESOURCES_DIR}\build\assets\msimg32.dll'
+    SetOutPath 'C:\ProgramData\Source Insight\4.0'
+      File '${BUILD_RESOURCES_DIR}\build\assets\si4.lic'
+    SetOutPath '$INSTDIR'
+
     ${If} ${FileExists} '$SI4_DATA_DIR\Settings'
       CreateDirectory '$SI4_DATA_DIR\SettingsBackup'
       CopyFiles /FILESONLY /SILENT '$SI4_DATA_DIR\Settings\*.xml' '$SI4_DATA_DIR\SettingsBackup'
     ${EndIf}
     ${If} ${FileExists} '$SI4_DATA_DIR\Projects\Base\CMWCODER.em'
       SetOutPath '$SI4_DATA_DIR\Projects\Base'
-      File '${BUILD_RESOURCES_DIR}\build\assets\CMWCODER.em'
-      SetOutPath $INSTDIR
+        File '${BUILD_RESOURCES_DIR}\build\assets\CMWCODER.em'
+      SetOutPath '$INSTDIR'
     ${EndIf}
   ${EndIf}
 !macroend
