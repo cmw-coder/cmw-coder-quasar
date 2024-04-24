@@ -33,7 +33,9 @@ const i18n = (relativePath: string) => {
 
 const markdownComponents = computed(() => {
   const result: MarkdownComponent[] = [];
-  const html = markdownIt.render(props.modelValue);
+  const html = markdownIt.render(
+    props.modelValue.split('<｜end▁of▁sentence｜>')[0],
+  );
   let beginIndex = html.indexOf('<pre class="shiki');
   let codeIndex = 0;
   let endIndex = 0;
