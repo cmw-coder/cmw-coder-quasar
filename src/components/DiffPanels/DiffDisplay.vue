@@ -6,7 +6,7 @@ const modelValue = defineModel<string>({ required: true });
 </script>
 
 <template>
-  <diff-view :data="{ hunks: [modelValue] }" :diffViewFontSize="11" />
+  <diff-view :data="{ hunks: [modelValue] }" :diffViewFontSize="10" />
 </template>
 
 <style scoped></style>

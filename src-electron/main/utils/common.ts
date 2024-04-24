@@ -1,6 +1,5 @@
 import { exec } from 'child_process';
 import { BrowserWindow } from 'electron';
-import log from 'electron-log/main';
 import { readdir, stat } from 'fs/promises';
 import { decode } from 'iconv-lite';
 import { detect } from 'jschardet';
@@ -36,14 +35,6 @@ export const executeCommand = async (
   const needDecode =
     (stdout.length && detect(stdout).encoding !== 'UTF-8') ||
     (stderr.length && detect(stderr).encoding !== 'UTF-8');
-  log.debug('executeCommand', {
-    command,
-    workingDirectory,
-    stdout,
-    stderr,
-    encoding: stdout.length ? detect(stdout).encoding : detect(stderr).encoding,
-    needDecode,
-  });
 
   return {
     stdout: needDecode ? decode(stdout, 'GBK') : stdout.toString(),

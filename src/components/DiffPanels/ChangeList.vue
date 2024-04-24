@@ -48,12 +48,12 @@ watch(props.data, () => (modelValue.value = 0), { deep: true });
         <q-item-label>
           {{ getLastDirName(item.path) }}
         </q-item-label>
-        <q-item-label class="ellipsis" caption style="direction: rtl">
+        <q-item-label class="ellipsis text-left" caption style="direction: rtl">
           {{ item.path }}
         </q-item-label>
       </q-item-section>
       <q-item-section side top>
-        <q-item-label caption>
+        <q-item-label>
           {{ item.additions }}+ / {{ item.deletions }}-
         </q-item-label>
         <div class="row">
