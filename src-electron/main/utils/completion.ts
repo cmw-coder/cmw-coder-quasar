@@ -35,8 +35,5 @@ export const getProjectData = (project: string): DataProjectType => {
       cause: CompletionErrorCause.projectData,
     });
   }
-  if (!projectData.svn.length) {
-    dataStore.setProjectRevision(project).catch();
-  }
   return projectData;
 };

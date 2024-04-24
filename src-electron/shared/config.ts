@@ -29,4 +29,4 @@ const availableRuntimeConfigs: Record<string, RuntimeConfig> = {
     networkZone: NetworkZone.Normal,
   },
 } as const;
-export const runtimeConfig = availableRuntimeConfigs.Red;
+export const runtimeConfig = availableRuntimeConfigs.DEFAULT_CONFIG;

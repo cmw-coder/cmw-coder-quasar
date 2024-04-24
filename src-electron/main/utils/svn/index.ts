@@ -1,6 +1,4 @@
 import log from 'electron-log/main';
-import { readdir, stat } from 'fs/promises';
-import { resolve } from 'path';
 
 import {
   executeCommand,
@@ -11,27 +9,6 @@ import { container } from 'service';
 import { DataStoreService } from 'service/entities/DataStoreService';
 import { StatisticsService } from 'service/entities/StatisticsService';
 import { ServiceType } from 'shared/services';
-
-export const searchSvnDirectories = async (path: string): Promise<string[]> => {
-  log.debug('searchSvnDirectories', { path });
-  const directories: string[] = [];
-  try {
-    for (const item of await readdir(path)) {
-      const filePath = resolve(path, item);
-      if ((await stat(filePath)).isDirectory()) {
-        if (item === '.svn') {
-          log.debug('Found svn directory:', path);
-          directories.push(path);
-        } else {
-          directories.push(...(await searchSvnDirectories(filePath)));
-        }
-      }
-    }
-  } catch (e) {
-    log.error('searchSvnDirectories', e);
-  }
-  return directories;
-};
 
 export const getRevision = async (path: string): Promise<number> => {
   const { stdout, stderr } = await executeCommand('svn info', path);

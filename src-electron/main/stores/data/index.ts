@@ -11,15 +11,8 @@ import {
   DataStoreTypeBefore_1_0_2,
   DataStoreTypeBefore_1_0_4,
 } from 'main/stores/data/types';
-import { getRevision, searchSvnDirectories } from 'main/utils/svn';
+import { getRevision } from 'main/utils/svn';
 
-const collectSvnData = async (path: string) =>
-  await Promise.all(
-    (await searchSvnDirectories(path)).map(async (directory) => ({
-      directory,
-      revision: await getRevision(directory),
-    })),
-  );
 const getAs = <T>(store: unknown, key: string): T => {
   return <T>(<Conf>store).get(key);
 };
@@ -114,9 +107,6 @@ export class DataStore {
         lastAddedLines: 0,
         svn: [],
       };
-      this.store = store;
-      log.debug('setProjectId', { path, projectId });
-      store.project[path].svn = await collectSvnData(path);
     }
     this.store = store;
   }
@@ -125,15 +115,6 @@ export class DataStore {
     const store = this.store;
     if (store.project[path]) {
       store.project[path].lastAddedLines = lastAddedLines;
-      this.store = store;
-    }
-  }
-
-  async setProjectRevision(path: string) {
-    const store = this.store;
-    log.debug('setProjectRevision', { path });
-    if (store.project[path]) {
-      store.project[path].svn = await collectSvnData(path);
       this.store = store;
     }
   }
