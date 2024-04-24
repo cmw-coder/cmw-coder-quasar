@@ -12,15 +12,15 @@ import { ServiceType } from 'shared/services';
 
 export const getRevision = async (path: string): Promise<number> => {
   const { stdout, stderr } = await executeCommand('svn info', path);
-  log.debug('getRevision', { path, stdout, stderr });
   if (stderr && stderr.length) {
-    log.error('Get revision failed:', stderr);
+    log.error('Get SVN info failed:', stderr);
     return -1;
   }
   const revision = stdout.match(/Last Changed Rev: (\d+)/)?.[1];
   if (revision) {
     return parseInt(revision);
   }
+  log.error('Parse revision failed:', stdout);
   return -1;
 };
 

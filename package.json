@@ -12,6 +12,7 @@
     "publish": "quasar build -m electron --publish"
   },
   "dependencies": {
+    "@git-diff-view/vue": "^0.0.13",
     "@quasar/extras": "^1.16.9",
     "axios": "^1.6.8",
     "electron-log": "^5.1.2",

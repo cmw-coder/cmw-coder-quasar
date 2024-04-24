@@ -4,6 +4,8 @@ import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 
+import ChangeList from 'components/DiffPanels/ChangeList.vue';
+import DiffDisplay from 'components/DiffPanels/DiffDisplay.vue';
 import { ServiceType } from 'shared/services';
 import {
   ActionType,
@@ -12,7 +14,6 @@ import {
 import { ApiStyle } from 'shared/types/model';
 import { FileChanges } from 'shared/types/svn';
 import { WindowType } from 'shared/types/WindowType';
-import { useHighlighter } from 'stores/highlighter';
 import { ActionApi } from 'types/ActionApi';
 import { CommitQuery } from 'types/queries';
 import {
@@ -21,7 +22,6 @@ import {
 } from 'utils/commitPrompt';
 import { useService } from 'utils/common';
 
-const { codeToHtml } = useHighlighter();
 const { t } = useI18n();
 const { notify } = useQuasar();
 const { matched, query } = useRoute();
@@ -143,42 +143,14 @@ onMounted(() => {
 
 <template>
   <q-page class="row items-center justify-evenly q-pa-xl">
-    <div v-if="selectedSvn" class="side-bar">
-      <q-list bordered separator>
-        <q-item
-          v-for="(item, index) in svnList"
-          :key="item.path"
-          clickable
-          v-ripple
-          :active="index === selectedSvnIndex"
-          @click="
-            () => {
-              selectedSvnIndex = index;
-              selectedFileIndex = 0;
-            }
-          "
-        >
-          <q-item-section>
-            <q-tooltip>
-              {{ item.path }}
-            </q-tooltip>
-            {{ getLastDirName(item.path) }}
-          </q-item-section>
-        </q-item>
-      </q-list>
-    </div>
-    <div
-      v-if="selectedSvn"
-      class="column col-grow q-gutter-y-md"
-      style="padding-left: 140px"
-    >
+    <div class="column col-grow q-gutter-y-md">
       <div class="text-center text-h4">
         {{ i18n('labels.title') }}
       </div>
       <div class="column q-gutter-y-md">
         <div class="row items-baseline justify-between">
           <div class="text-bold text-grey text-h6">
-            {{ i18n('labels.changes') }}
+            {{ i18n('labels.selectRepo') }}
           </div>
           <q-btn
             color="primary"
@@ -191,9 +163,29 @@ onMounted(() => {
             @click="refreshProjectList"
           />
         </div>
-        <q-card class="diff-card row items-center justify-center" bordered flat>
+        <q-tabs v-if="svnList.length" v-model="selectedSvnIndex">
+          <q-tab
+            v-for="(item, index) in svnList"
+            :key="index"
+            :label="getLastDirName(item.path)"
+            :name="index"
+          >
+            <q-tooltip>{{ item.path }}</q-tooltip>
+          </q-tab>
+        </q-tabs>
+        <q-skeleton v-else type="QToolbar" />
+      </div>
+      <div class="column q-gutter-y-md">
+        <div class="text-bold text-grey text-h6">
+          {{ i18n('labels.changes') }}
+        </div>
+        <q-card
+          v-if="selectedSvn?.changedFileList"
+          class="diff-card row items-center justify-center"
+          bordered
+          flat
+        >
           <q-splitter
-            v-if="selectedSvn.changedFileList"
             class="full-height full-width"
             :disable="loadingDiff"
             horizontal
@@ -201,70 +193,10 @@ onMounted(() => {
           >
             <template v-slot:before>
               <q-scroll-area class="full-height full-width">
-                <q-list v-if="selectedSvn.changedFileList.length" separator>
-                  <q-item
-                    v-for="(item, index) in selectedSvn.changedFileList"
-                    :key="index"
-                    :active="selectedFileIndex === index"
-                    active-class="bg-grey-4 text-black"
-                    clickable
-                    @click="selectedFileIndex = index"
-                  >
-                    <q-item-section avatar>
-                      <q-icon
-                        v-if="item.status === 'added'"
-                        name="mdi-file-document-plus"
-                        color="positive"
-                        size="2rem"
-                      />
-                      <q-icon
-                        v-if="item.status === 'missing'"
-                        name="mdi-file-document-minus"
-                        color="negative"
-                        size="2rem"
-                      />
-                      <q-icon
-                        v-if="item.status === 'modified'"
-                        name="mdi-file-document-edit"
-                        color="warn"
-                        size="2rem"
-                      />
-                    </q-item-section>
-                    <q-item-section>
-                      <q-item-label>
-                        {{ item.path }}
-                      </q-item-label>
-                    </q-item-section>
-                    <q-item-section side top>
-                      <q-item-label caption>
-                        {{ item.additions }}+ / {{ item.deletions }}-
-                      </q-item-label>
-                      <div class="row">
-                        <q-icon
-                          v-for="sequence in 5"
-                          :key="sequence"
-                          name="mdi-square"
-                          :color="
-                            sequence <=
-                            (item.additions /
-                              (item.additions + item.deletions)) *
-                              5
-                              ? 'positive'
-                              : sequence <=
-                                  (item.deletions /
-                                    (item.additions + item.deletions)) *
-                                    5
-                                ? 'negative'
-                                : 'grey'
-                          "
-                        />
-                      </div>
-                    </q-item-section>
-                  </q-item>
-                </q-list>
-                <div v-else class="text-center text-grey text-h4 text-italic">
-                  {{ i18n('labels.noChanges') }}
-                </div>
+                <change-list
+                  :data="selectedSvn.changedFileList"
+                  v-model="selectedFileIndex"
+                />
               </q-scroll-area>
             </template>
             <template v-slot:after>
@@ -272,14 +204,8 @@ onMounted(() => {
                 v-if="selectedSvn.changedFileList[selectedFileIndex]"
                 class="full-height full-width"
               >
-                <div
-                  class="q-pa-sm"
-                  v-html="
-                    codeToHtml(
-                      selectedSvn.changedFileList[selectedFileIndex].diff,
-                      'diff',
-                    )
-                  "
+                <diff-display
+                  v-model="selectedSvn.changedFileList[selectedFileIndex].diff"
                 />
               </q-scroll-area>
               <div v-else class="text-center text-grey text-h4 text-italic">
@@ -287,10 +213,8 @@ onMounted(() => {
               </div>
             </template>
           </q-splitter>
-          <div v-else class="text-center text-grey text-h3 text-italic">
-            {{ i18n('labels.invalidProject') }}
-          </div>
         </q-card>
+        <q-skeleton v-else class="diff-card rounded-borders" square />
       </div>
       <div class="column q-gutter-y-md">
         <div class="row items-baseline justify-between">
@@ -300,11 +224,7 @@ onMounted(() => {
           <q-btn
             color="accent"
             dense
-            :disabled="
-              !selectedSvn.changedFileList ||
-              !selectedSvn.changedFileList.length ||
-              loadingCommit
-            "
+            :disabled="!selectedSvn?.changedFileList?.length || loadingCommit"
             icon="mdi-creation"
             :label="i18n('labels.generate')"
             :loading="loadingGenerate"
@@ -327,23 +247,17 @@ onMounted(() => {
           </q-btn>
         </div>
         <q-input
-          :autofocus="
-            !!(
-              selectedSvn.changedFileList && selectedSvn.changedFileList.length
-            )
-          "
+          v-if="selectedSvn"
+          :autofocus="!!selectedSvn?.changedFileList?.length"
           autogrow
           clearable
           dense
-          :disable="
-            !selectedSvn.changedFileList ||
-            !selectedSvn.changedFileList.length ||
-            loadingCommit
-          "
+          :disable="!selectedSvn?.changedFileList?.length || loadingCommit"
           :maxlength="400"
           outlined
           v-model="selectedSvn.commitMessage"
         />
+        <q-skeleton v-else type="QInput" />
       </div>
       <div class="row q-gutter-x-md">
         <q-btn
@@ -357,7 +271,7 @@ onMounted(() => {
         <q-btn
           class="col-grow"
           color="primary"
-          :disabled="!selectedSvn.commitMessage"
+          :disabled="!selectedSvn?.commitMessage"
           :label="i18n('labels.commit')"
           :loading="loadingCommit"
           no-caps
@@ -365,25 +279,12 @@ onMounted(() => {
         />
       </div>
     </div>
-    <div v-if="!selectedSvn" class="text-center text-h4">
-      {{ i18n('labels.noProject') }}
-    </div>
   </q-page>
 </template>
 
 <style lang="scss" scoped>
-.side-bar {
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: 140px;
-  height: 100%;
-  background-color: #f5f5f5;
-}
-
 .diff-card {
-  height: calc(100vh - 500px);
+  height: calc(100vh - 630px);
   min-height: 250px;
 }
 </style>
