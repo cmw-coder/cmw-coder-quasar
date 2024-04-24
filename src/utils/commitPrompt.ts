@@ -24,11 +24,23 @@ export const generateCommitPrompt = (changedFile: FileChanges[]) => {
 export const generateCommitMessage = async (
   endPoint: string,
   prompt: string,
+  messageUpdateCallback: (message: string) => void,
   accessToken?: string,
 ) => {
   if (runtimeConfig.apiStyle === ApiStyle.Linseer) {
     if (accessToken) {
-      const { data } = await chatWithLinseer(endPoint, prompt, [], accessToken);
+      const { data } = await chatWithLinseer(
+        endPoint,
+        prompt,
+        [],
+        accessToken,
+        (content) =>
+          messageUpdateCallback(content
+            .split('data:')
+            .filter((item) => item.trim() !== '')
+            .map((item) => JSON.parse(item.trim()).message)
+            .join('')),
+      );
       return data[0]?.code as string;
     } else {
       throw new Error('Invalid access token');
@@ -38,7 +50,14 @@ export const generateCommitMessage = async (
       'http://10.113.36.127:9204',
       prompt,
       [],
-      (content) => console.log(content),
+      (content) =>
+        messageUpdateCallback(
+          content
+            .split('data:')
+            .filter((item) => item.trim() !== '')
+            .map((item) => JSON.parse(item.trim()).choices[0].delta.content)
+            .join(''),
+        ),
     );
     return data.choices[0]?.message?.content || '';
   }

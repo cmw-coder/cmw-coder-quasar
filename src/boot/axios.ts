@@ -45,6 +45,7 @@ const rdTestServiceProxy = axios.create({
   baseURL: 'http://rdee.h3c.com/kong/RdTestServiceProxy-e',
 });
 
+// noinspection JSUnusedGlobalSymbols
 export const agentStream = async (
   input: string,
   progressCallback?: (response: { id: string; data: StepInfo[] }) => void,
@@ -138,6 +139,7 @@ export const loginWithCode = async (userId: string, code: string) => {
   });
 };
 
+// noinspection JSUnusedGlobalSymbols
 export const chatWithDeepSeek = async (
   endpoint: string,
   question: string,
@@ -158,6 +160,7 @@ export const chatWithDeepSeek = async (
     }>(
       '/v1/chat/completions',
       {
+        details: false,
         max_tokens: 1024,
         messages: [
           ...historyList,
@@ -168,9 +171,9 @@ export const chatWithDeepSeek = async (
         ],
         model: 'tgi',
         seed: 42,
+        stop: ['<｜end▁of▁sentence｜>'],
         stream: true,
-        temperature: 0.001,
-        details: false,
+        temperature: 0.5,
       },
       {
         onDownloadProgress: (progressEvent) => {
@@ -179,6 +182,7 @@ export const chatWithDeepSeek = async (
       },
     );
 
+// noinspection JSUnusedGlobalSymbols
 export const chatWithLinseer = async (
   endpoint: string,
   question: string,

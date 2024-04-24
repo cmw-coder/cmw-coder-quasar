@@ -67,14 +67,14 @@ onBeforeUnmount(() => {
 <template>
   <q-footer class="bg-transparent q-pa-md" bordered>
     <q-input
-      class="col-grow"
+      class="col-grow custom-scrollbar"
       autofocus
       autogrow
+      input-style="max-height: 300px"
       outlined
       placeholder="Ask any question..."
       v-model="questionText"
       @keydown.enter.exact.prevent="sendQuestion"
-      style="max-height: 300px; overflow-y: auto"
     >
       <template v-slot:before>
         <q-btn
@@ -102,4 +102,25 @@ onBeforeUnmount(() => {
   </q-footer>
 </template>
 
-<style scoped></style>
+<style lang="scss" scoped>
+@import "src/css/quasar.variables";
+.custom-scrollbar {
+  ::-webkit-scrollbar {
+    background-color: rgba(0, 0, 0, 0);
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: rgba(0, 0, 0, 0);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: $primary;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-button {
+    display: none;
+  }
+}
+</style>

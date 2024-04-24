@@ -44,13 +44,12 @@ export const useChatStore = defineStore('chat', () => {
             content,
             historyList,
             accessToken,
-            (content) => {
-              currentResponse.content = content
+            (content) =>
+              (currentResponse.content = content
                 .split('data:')
                 .filter((item) => item.trim() !== '')
                 .map((item) => JSON.parse(item.trim()).message)
-                .join('');
-            },
+                .join('')),
           );
         } else {
           currentResponse.content = 'Invalid access token';
