@@ -63,10 +63,10 @@ const generateCommitMessageHandle = async () => {
     loadingGenerate.value = true;
     const commitPrompt = generateCommitPrompt(changedFileList);
     try {
-       await generateCommitMessage(
+      await generateCommitMessage(
         endpoint.value || '',
         commitPrompt,
-         (message) => selectedSvn.value.commitMessage = message,
+        (message) => (selectedSvn.value.commitMessage = message),
         accessToken.value,
       );
     } catch (e) {
