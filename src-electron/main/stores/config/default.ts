@@ -266,7 +266,7 @@ export const linseerConfigDefaultBeta: LinseerStoreType = {
         completionConfigs: {
           function: {
             contextLimit: 1500,
-            maxTokenCount: 320,
+            maxTokenCount: 1024,
             stopTokens: ['<fim_pad>', '<｜end▁of▁sentence｜>', '\n}'],
             subModelType: SubModelType['CmwCoderV1'],
             suggestionCount: 1,
@@ -274,7 +274,7 @@ export const linseerConfigDefaultBeta: LinseerStoreType = {
           },
           line: {
             contextLimit: 1500,
-            maxTokenCount: 15,
+            maxTokenCount: 64,
             stopTokens: ['<fim_pad>', '<｜end▁of▁sentence｜>', '\r\n', '\n'],
             subModelType: SubModelType['CmwCoderV1'],
             suggestionCount: 1,
@@ -282,7 +282,7 @@ export const linseerConfigDefaultBeta: LinseerStoreType = {
           },
           snippet: {
             contextLimit: 1500,
-            maxTokenCount: 40,
+            maxTokenCount: 96,
             stopTokens: ['<fim_pad>', '<｜end▁of▁sentence｜>', '}'],
             subModelType: SubModelType['CmwCoderV1'],
             suggestionCount: 1,
