@@ -1,7 +1,7 @@
+import { chatWithDeepSeek, chatWithLinseer } from 'boot/axios';
+import { NetworkZone, runtimeConfig } from 'shared/config';
 import { FileChanges } from 'shared/types/svn';
 import { ApiStyle } from 'shared/types/model';
-import { runtimeConfig } from 'shared/config';
-import { chatWithDeepSeek, chatWithLinseer } from 'boot/axios';
 
 export const generateCommitPrompt = (changedFile: FileChanges[]) => {
   const requirement = `请为如下的代码变动生成简略的提交信息:
@@ -29,24 +29,23 @@ export const generateCommitMessage = async (
 ) => {
   if (runtimeConfig.apiStyle === ApiStyle.Linseer) {
     if (accessToken) {
-      await chatWithLinseer(
-        endPoint,
-        prompt,
-        [],
-        accessToken,
-        (content) =>
-          messageUpdateCallback(content
+      await chatWithLinseer(endPoint, prompt, [], accessToken, (content) =>
+        messageUpdateCallback(
+          content
             .split('data:')
             .filter((item) => item.trim() !== '')
             .map((item) => JSON.parse(item.trim()).message)
-            .join('')),
+            .join(''),
+        ),
       );
     } else {
       throw new Error('Invalid access token');
     }
   } else {
     await chatWithDeepSeek(
-      'http://10.113.36.127:9204',
+      runtimeConfig.networkZone === NetworkZone.Secure
+        ? 'http://10.113.12.206:9192'
+        : 'http://10.113.36.127:9204',
       prompt,
       [],
       (content) =>
