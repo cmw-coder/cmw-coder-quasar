@@ -7,7 +7,7 @@ defineModel<number>('y', { required: true });
 
 <template>
   <q-card
-    class="absolute z-max"
+    class="fixed z-max"
     bordered
     :style="{ left: `${x}px`, top: `${y}px` }"
   >
