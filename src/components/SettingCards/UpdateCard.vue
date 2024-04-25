@@ -6,13 +6,15 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import packageJson from 'app/package.json';
+import { ServiceType } from 'shared/services';
 import { useSettingsStore } from 'stores/settings';
-import { UpdateCheckActionMessage } from 'shared/types/ActionMessage';
+import { useService } from 'utils/common';
 
 const { developerMode } = storeToRefs(useSettingsStore());
 const { t } = useI18n();
 const { notify } = useQuasar();
 const { push } = useRouter();
+const updaterService = useService(ServiceType.UPDATER);
 
 const i18n = (relativePath: string, data?: Record<string, unknown>) => {
   if (data) {
@@ -26,12 +28,10 @@ const checkForUpdateLoading = ref(false);
 const developerModeCounter = ref(0);
 const version = ref(packageJson.version);
 
-const checkForUpdate = () => {
+const checkForUpdate = async () => {
   checkForUpdateLoading.value = true;
-  window.actionApi.send(new UpdateCheckActionMessage());
-  setTimeout(() => {
-    checkForUpdateLoading.value = false;
-  }, 1500);
+  await updaterService.checkUpdate();
+  checkForUpdateLoading.value = false;
 };
 
 const tryEnableDeveloperMode = () => {

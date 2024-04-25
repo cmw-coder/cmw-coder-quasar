@@ -19,7 +19,6 @@ export enum ActionType {
   DataStoreSave = 'DataStoreSave',
   DebugSync = 'DebugSync',
   RouterReload = 'RouterReload',
-  UpdateCheck = 'UpdateCheck',
   UpdateDownload = 'UpdateDownload',
   UpdateFinish = 'UpdateFinish',
   UpdateProgress = 'UpdateProgress',
@@ -150,11 +149,6 @@ export class RouterReloadActionMessage implements ActionMessage {
   data: undefined;
 }
 
-export class UpdateCheckActionMessage implements ActionMessage {
-  type = ActionType.UpdateCheck;
-  data: undefined;
-}
-
 export class UpdateFinishActionMessage implements ActionMessage {
   type = ActionType.UpdateFinish;
   data: undefined;
@@ -198,7 +192,6 @@ export interface ActionMessageMapping {
   [ActionType.DataStoreSave]: DataStoreSaveActionMessage;
   [ActionType.DebugSync]: DebugSyncActionMessage;
   [ActionType.RouterReload]: RouterReloadActionMessage;
-  [ActionType.UpdateCheck]: UpdateCheckActionMessage;
   [ActionType.UpdateDownload]: UpdateDownloadActionMessage;
   [ActionType.UpdateFinish]: UpdateFinishActionMessage;
   [ActionType.UpdateProgress]: UpdateProgressActionMessage;
