@@ -1,11 +1,12 @@
 <script setup lang="ts">
+import { copyToClipboard, useQuasar } from 'quasar';
+import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+
 import AnswerItem from 'components/MessageItems/AnswerItem.vue';
+import CopyButton from 'components/CopyButton.vue';
 import QuestionItem from 'components/MessageItems/QuestionItem.vue';
 import { ChatMessage } from 'stores/chat/types';
-import CopyButton from 'components/CopyButton.vue';
-import { ref } from 'vue';
-import { copyToClipboard, useQuasar } from 'quasar';
-import { useI18n } from 'vue-i18n';
 
 const { notify } = useQuasar();
 const { t } = useI18n();
@@ -44,8 +45,8 @@ const copySelected = () => {
 };
 
 const mouseUp = (event: MouseEvent) => {
-  selectionX.value = event.screenX - window.screenLeft + 10;
-  selectionY.value = event.screenY - window.screenTop - 80;
+  selectionX.value = event.pageX + 10;
+  selectionY.value = event.pageY - 80;
   selectionText.value = window.getSelection()?.toString() ?? '';
 };
 </script>

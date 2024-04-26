@@ -46,7 +46,7 @@ const updateResponse = (confirmed: boolean) => {
   if (confirmed) {
     window.actionApi.send(new UpdateDownloadActionMessage());
   } else if (name === WindowType.Floating) {
-    window.controlApi.hide(WindowType.Floating);
+    window.controlApi.close(WindowType.Floating);
   } else {
     back();
   }

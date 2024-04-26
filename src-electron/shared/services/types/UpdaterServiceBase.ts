@@ -1,1 +1,3 @@
-export interface UpdaterServiceBase {}
+export interface UpdaterServiceBase {
+  checkUpdate(): Promise<void>;
+}

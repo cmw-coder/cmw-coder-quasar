@@ -2,9 +2,9 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
 import { chatWithDeepSeek, chatWithLinseer } from 'boot/axios';
-import { ChatMessage } from 'stores/chat/types';
-import { runtimeConfig } from 'shared/config';
+import { NetworkZone, runtimeConfig } from 'shared/config';
 import { ApiStyle } from 'shared/types/model';
+import { ChatMessage } from 'stores/chat/types';
 
 export const useChatStore = defineStore('chat', () => {
   const currentChatMessages = ref<ChatMessage[]>([]);
@@ -57,7 +57,9 @@ export const useChatStore = defineStore('chat', () => {
         }
       } else {
         await chatWithDeepSeek(
-          'http://10.113.36.127:9204',
+          runtimeConfig.networkZone === NetworkZone.Secure
+            ? 'http://10.113.12.206:9192'
+            : 'http://10.113.36.127:9204',
           content,
           historyList,
           (content) =>

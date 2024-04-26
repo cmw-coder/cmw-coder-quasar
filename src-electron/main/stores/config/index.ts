@@ -52,6 +52,15 @@ export class HuggingFaceConfigStore {
             ].config.endpoints.aiService;
           store.set('config', oldConfig);
         },
+        '1.1.1': (store) => {
+          log.info('Upgrading "config" store to 1.1.1 ...');
+          const oldConfig = store.get('config');
+          oldConfig.endpoints.update =
+            runtimeConfig.networkZone === NetworkZone.Secure
+              ? huggingFaceStoreDefaultRoute.config.endpoints.update
+              : huggingFaceStoreDefaultNormal.config.endpoints.update;
+          store.set('config', oldConfig);
+        },
       },
       name: 'config',
       // schema: huggingFaceStoreSchema,
@@ -141,6 +150,20 @@ export class LinseerConfigStore {
             store.set('apiStyle', linseerConfigDefault.apiStyle);
             store.set('data', linseerConfigDefault.data);
           }
+        },
+        '1.1.1': (store) => {
+          log.info('Upgrading "config" store to 1.1.1 ...');
+          const oldConfig = store.get('config');
+          if (betaApiUserList.includes(userInfo().username)) {
+            oldConfig.endpoints.update =
+              linseerConfigDefaultBeta.config.endpoints.update;
+            oldConfig.modelConfigs =
+              linseerConfigDefaultBeta.config.modelConfigs;
+          } else {
+            oldConfig.endpoints.update =
+              linseerConfigDefault.config.endpoints.update;
+          }
+          store.set('config', oldConfig);
         },
       },
       name: 'config',
