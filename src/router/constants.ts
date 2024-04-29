@@ -55,6 +55,13 @@ export const routes: RouteRecordRaw[] = [
           default: () => import('pages/UpdatePage.vue'),
         },
       },
+      {
+        path: 'start-setting',
+        components: {
+          header: () => import('layouts/headers/FloatingHeader.vue'),
+          default: () => import('pages/StartSetting.vue'),
+        },
+      },
     ],
   },
   {

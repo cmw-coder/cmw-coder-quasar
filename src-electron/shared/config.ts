@@ -1,9 +1,14 @@
 import { ApiStyle } from 'shared/types/model';
 
 export enum NetworkZone {
+  // 红区
   Normal,
+  // 黄、绿区
   Public,
+  // 路由红区
   Secure,
+  // 未知 -- 默认值
+  Unknown,
 }
 
 interface RuntimeConfig {
@@ -29,4 +34,8 @@ const availableRuntimeConfigs: Record<string, RuntimeConfig> = {
     networkZone: NetworkZone.Normal,
   },
 } as const;
+
+/**
+ * @deprecated
+ */
 export const runtimeConfig = availableRuntimeConfigs.DEFAULT_CONFIG;

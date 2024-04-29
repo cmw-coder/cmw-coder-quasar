@@ -240,6 +240,13 @@ export default {
         title: 'Welcome',
       },
     },
+    StartSettingPage: {
+      labels: {
+        title: 'Please set your environment',
+        stepOneTitle: 'Select network zone',
+        stepTwoTitle: 'Set base server url',
+      },
+    },
     ProjectIdPage: {
       labels: {
         confirm: 'Confirm',

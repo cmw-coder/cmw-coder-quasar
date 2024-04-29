@@ -8,14 +8,22 @@ import { FloatingWindow } from 'main/windows/FloatingWindow';
 import { ImmersiveWindow } from 'main/windows/ImmersiveWindow';
 import { MainWindow } from 'main/windows/MainWindow';
 import { WindowServiceBase } from 'shared/services/types/WindowServiceInterBase';
+import { LoginWindow } from 'service/entities/WindowService/windows/LoginWindow';
+import { StartSettingWindow } from 'service/entities/WindowService/windows/StartSettingWindow';
+import { CompletionsWindow } from 'service/entities/WindowService/windows/CompletionsWindow';
 
 @injectable()
 export class WindowService implements WindowServiceBase {
   floatingWindow: FloatingWindow;
   immersiveWindow: ImmersiveWindow;
   mainWindow: MainWindow;
-  trayIcon: TrayIcon;
   immersiveWindowDestroyInterval: NodeJS.Timeout;
+  trayIcon: TrayIcon;
+
+  // @new
+  loginWindow: LoginWindow;
+  startSettingWindow: StartSettingWindow;
+  completionsWindow: CompletionsWindow;
 
   constructor() {
     this.floatingWindow = new FloatingWindow();
@@ -33,5 +41,10 @@ export class WindowService implements WindowServiceBase {
       this.floatingWindow.feedback(),
     );
     this.trayIcon.registerMenuEntry(MenuEntry.Quit, () => app.exit());
+
+    // @new
+    this.loginWindow = new LoginWindow();
+    this.startSettingWindow = new StartSettingWindow();
+    this.completionsWindow = new CompletionsWindow();
   }
 }
