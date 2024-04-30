@@ -70,10 +70,16 @@ export class ConfigService implements ConfigServiceBase {
     this.appConfigStore.set(data);
   }
 
+  /**
+   * @deprecated
+   */
   async saveConfig(data: Partial<LinseerConfigType>) {
     this.configStore.config = data;
   }
 
+  /**
+   * @deprecated
+   */
   async saveData(data: Partial<LinseerDataType>) {
     this.configStore.data = data;
   }

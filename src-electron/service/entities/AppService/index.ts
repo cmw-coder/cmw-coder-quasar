@@ -116,8 +116,8 @@ export class AppService implements AppServiceBase {
 
       // 激活主窗口
       this._windowService.mainWindow.activate();
-      // 激活代码窗口
-      this._windowService.completionsWindow.activate();
+
+      this._dataStoreService.getActiveModelContent();
     });
   }
 

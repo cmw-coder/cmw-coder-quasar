@@ -142,6 +142,9 @@ export const loginWithCode = async (userId: string, code: string) => {
   });
 };
 
+/**
+ * @deprecated
+ */
 // noinspection JSUnusedGlobalSymbols
 export const chatWithDeepSeek = async (
   endpoint: string,
@@ -185,6 +188,9 @@ export const chatWithDeepSeek = async (
       },
     );
 
+/**
+ * @deprecated
+ */
 // noinspection JSUnusedGlobalSymbols
 export const chatWithLinseer = async (
   endpoint: string,
