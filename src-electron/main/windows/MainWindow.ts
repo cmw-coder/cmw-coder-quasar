@@ -19,6 +19,9 @@ import {
 import { WindowType } from 'shared/types/WindowType';
 import { ChatInsertServerMessage, WsAction } from 'shared/types/WsMessage';
 
+/**
+ * @deprecated
+ */
 export class MainWindow extends BaseWindow {
   private readonly _actionApi = new ActionApi('main.MainWindow.');
 

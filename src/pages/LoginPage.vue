@@ -1,43 +1,30 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute, useRouter } from 'vue-router';
-
 import AccountPanel from 'components/LoginPanels/AccountPanel.vue';
 import CodePanel from 'components/LoginPanels/CodePanel.vue';
-import { WindowType } from 'shared/types/WindowType';
-import { LoginQuery } from 'types/queries';
+import { useService } from 'utils/common';
+import { ServiceType } from 'shared/services';
 
 const { t } = useI18n();
-const { matched, query } = useRoute();
-const { replace } = useRouter();
 
 const i18n = (relativePath: string) => {
   return t('pages.LoginPage.' + relativePath);
 };
 
-const { name } = matched[matched.length - 2];
+const configService = useService(ServiceType.CONFIG);
+// const windowService = useService(ServiceType.WINDOW);
 
-const loginQuery = new LoginQuery(query);
-
-const account = ref(loginQuery.userId);
+const account = ref('');
 const tabIndex = ref(0);
 
 const finish = () => {
-  if (loginQuery.showMain) {
-    window.controlApi.show(WindowType.Main);
-  }
-  switch (name) {
-    case WindowType.Floating: {
-      window.controlApi.close(WindowType.Floating);
-      break;
-    }
-    case WindowType.Main: {
-      replace('completions');
-      break;
-    }
-  }
+  console.log('finish');
 };
+
+onMounted(async () => {
+  account.value = await configService.getConfig('username');
+});
 </script>
 
 <template>

@@ -17,6 +17,9 @@ const getAs = <T>(store: unknown, key: string): T => {
   return <T>(<Conf>store).get(key);
 };
 
+/**
+ * @deprecated
+ */
 export class DataStore {
   private _store: ElectronStore<DataStoreType>;
 

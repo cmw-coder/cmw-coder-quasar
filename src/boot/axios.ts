@@ -130,6 +130,9 @@ export const feedBack = async (
     );
 };
 
+/**
+ * @deprecated
+ */
 export const loginWithCode = async (userId: string, code: string) => {
   return await rdTestServiceProxy.get<LoginData>('/EpWeChatLogin/login', {
     params: {

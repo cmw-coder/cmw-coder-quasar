@@ -18,6 +18,9 @@ import { container } from 'service';
 import { DataStoreService } from 'service/entities/DataStoreService';
 import { ServiceType } from 'shared/services';
 
+/**
+ * @deprecated
+ */
 export class ImmersiveWindow extends BaseWindow {
   private readonly _actionApi = new ActionApi('main.ImmersiveWindow.');
 

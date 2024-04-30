@@ -2,9 +2,8 @@
 import { useQuasar } from 'quasar';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-
-import { sendAuthCode } from 'components/LoginPanels/utils';
 import AccountInput from 'components/AccountInput.vue';
+import { api_getAuthCode } from 'src/request/login';
 
 const { t } = useI18n();
 const { notify } = useQuasar();
@@ -13,7 +12,7 @@ const i18n = (relativePath: string) => {
   return t('components.LoginPanels.AccountPanel.' + relativePath);
 };
 
-const emit = defineEmits(['update:modelValue', 'finish', 'navigate']);
+const emit = defineEmits(['update:modelValue', 'navigate']);
 
 export interface Props {
   modelValue?: string;
@@ -34,11 +33,15 @@ const isLoading = ref(false);
 
 const checkAccount = async () => {
   isLoading.value = true;
-  const result = await sendAuthCode(props.modelValue, i18n);
-  if (result.type === 'positive') {
+  try {
+    await api_getAuthCode(props.modelValue);
     emit('navigate');
-  } else {
-    notify(result);
+  } catch (error) {
+    notify({
+      type: 'negative',
+      message: i18n('notifications.codeFailed'),
+      caption: (error as Error).message,
+    });
   }
   isLoading.value = false;
 };

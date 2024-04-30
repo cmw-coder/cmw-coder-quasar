@@ -1,8 +1,6 @@
 import { BrowserWindow } from 'electron';
 import { resolve } from 'path';
 import { dataStoreDefault } from 'main/stores/data/default';
-import { BaseWindow } from 'main/types/BaseWindow';
-import { bypassCors } from 'main/utils/common';
 import { ActionApi, sendToRenderer } from 'preload/types/ActionApi';
 import { ControlType, registerControlCallback } from 'preload/types/ControlApi';
 import { container } from 'service';
@@ -18,6 +16,7 @@ import {
 } from 'shared/types/ActionMessage';
 import { WindowType } from 'shared/types/WindowType';
 import { ChatInsertServerMessage, WsAction } from 'shared/types/WsMessage';
+import { BaseWindow } from 'service/entities/WindowService/windows/BaseWindow';
 
 export class MainWindow extends BaseWindow {
   private readonly _actionApi = new ActionApi('main.MainWindow.');
@@ -38,7 +37,7 @@ export class MainWindow extends BaseWindow {
       ServiceType.CONFIG,
     ).configStore;
     const store = dataStore.store;
-    this._window = new BrowserWindow({
+    const window = new BrowserWindow({
       width: store.window.main.width,
       height: store.window.main.height,
       useContentSize: true,
@@ -50,23 +49,15 @@ export class MainWindow extends BaseWindow {
       },
     });
 
-    bypassCors(this._window);
-
-    this._window.loadURL(process.env.APP_URL).catch((e) => {
-      if (e.code !== 'ERR_ABORTED') {
-        throw e;
-      }
-    });
-
-    this._window.on('closed', () => {
+    window.on('closed', () => {
       this._window = undefined;
     });
-    this._window.on('hide', () => {
+    window.on('hide', () => {
       const store = dataStore.store;
       store.window.main.show = false;
       dataStore.store = store;
     });
-    this._window.on('resized', () => {
+    window.on('resized', () => {
       if (this._window) {
         const store = dataStore.store;
         const [width, height] = this._window.getSize();
@@ -75,12 +66,12 @@ export class MainWindow extends BaseWindow {
         dataStore.store = store;
       }
     });
-    this._window.on('ready-to-show', async () => {
-      if (this._window) {
-        // this._window.webContents.openDevTools();
+    window.on('ready-to-show', async () => {
+      if (this._window && process.env.NODE_ENV === 'development') {
+        this._window.webContents.openDevTools();
       }
     });
-    this._window.on('show', () => {
+    window.on('show', () => {
       const store = dataStore.store;
       store.window.main.show = true;
       dataStore.store = store;
@@ -158,5 +149,7 @@ export class MainWindow extends BaseWindow {
         sendToRenderer(this._window, new DebugSyncActionMessage(message.data));
       }
     });
+
+    return window;
   }
 }

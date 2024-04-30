@@ -25,13 +25,21 @@ _request.interceptors.request.use(async (config) => {
   return config;
 });
 
-_request.interceptors.response.use((response) => {
-  if (response.status === 200) {
-    return response.data;
-  } else {
-    return Promise.reject(response.data || 'Error');
-  }
-});
+_request.interceptors.response.use(
+  (response) => {
+    if (response.status === 200) {
+      return response.data;
+    } else {
+      console.log(response);
+      return Promise.reject(new Error(response.data || 'Error'));
+    }
+  },
+  (error) => {
+    return Promise.reject(
+      new Error(error?.response?.data?.message || error?.message || 'Error'),
+    );
+  },
+);
 
 const request = async <T>(config: AxiosRequestConfig) => {
   const data = await _request(config);
