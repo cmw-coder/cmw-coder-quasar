@@ -1,1 +1,3 @@
-export interface WindowServiceBase {}
+export interface WindowServiceBase {
+  finishStartSetting(): Promise<void>;
+}

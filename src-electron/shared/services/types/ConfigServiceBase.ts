@@ -7,4 +7,5 @@ export interface ConfigServiceBase {
     key: T,
     value: AppConfig[T],
   ): Promise<void>;
+  setConfigs(configs: Partial<AppConfig>): Promise<void>;
 }

@@ -1,6 +1,5 @@
 import { app } from 'electron';
-import { injectable } from 'inversify';
-
+import { inject, injectable } from 'inversify';
 import { TrayIcon } from 'main/components/TrayIcon';
 import { MenuEntry } from 'main/components/TrayIcon/types';
 import { initWindowDestroyInterval } from 'main/init';
@@ -11,6 +10,9 @@ import { WindowServiceBase } from 'shared/services/types/WindowServiceInterBase'
 import { LoginWindow } from 'service/entities/WindowService/windows/LoginWindow';
 import { StartSettingWindow } from 'service/entities/WindowService/windows/StartSettingWindow';
 import { CompletionsWindow } from 'service/entities/WindowService/windows/CompletionsWindow';
+import { NetworkZone } from 'shared/config';
+import { ServiceType } from 'shared/services';
+import { ConfigService } from 'service/entities/ConfigService';
 
 @injectable()
 export class WindowService implements WindowServiceBase {
@@ -25,7 +27,10 @@ export class WindowService implements WindowServiceBase {
   startSettingWindow: StartSettingWindow;
   completionsWindow: CompletionsWindow;
 
-  constructor() {
+  constructor(
+    @inject(ServiceType.CONFIG)
+    private _configService: ConfigService,
+  ) {
     this.floatingWindow = new FloatingWindow();
     this.immersiveWindow = new ImmersiveWindow();
     this.mainWindow = new MainWindow();
@@ -46,5 +51,18 @@ export class WindowService implements WindowServiceBase {
     this.loginWindow = new LoginWindow();
     this.startSettingWindow = new StartSettingWindow();
     this.completionsWindow = new CompletionsWindow();
+  }
+
+  async finishStartSetting() {
+    const config = await this._configService.getConfigs();
+    if (config.networkZone === NetworkZone.Public && !config.token) {
+      // 黄、绿区环境需要登录
+      this.loginWindow.activate();
+      return;
+    } else {
+      // 激活主窗口
+      this.mainWindow.activate();
+    }
+    this.startSettingWindow.destroy();
   }
 }

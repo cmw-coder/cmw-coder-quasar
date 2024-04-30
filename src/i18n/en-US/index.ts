@@ -245,6 +245,17 @@ export default {
         title: 'Please set your environment',
         stepOneTitle: 'Select network zone',
         stepTwoTitle: 'Set base server url',
+        redArea: 'Red',
+        normalArea: 'Yellow/Green',
+        redRouteArea: 'Red Route',
+        finish: 'Finish',
+        continue: 'Continue',
+        back: 'Back',
+      },
+      notifications: {
+        pingError:
+          'Failed to ping the server, Please check your network connection.',
+        pingSuccess: 'Successfully pinged the server',
       },
     },
     ProjectIdPage: {

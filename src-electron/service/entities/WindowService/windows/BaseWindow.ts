@@ -46,6 +46,8 @@ export abstract class BaseWindow {
 
   destroy() {
     if (this._window) {
+      this._window.hide();
+      this._window.close();
       this._window.destroy();
       this._window = undefined;
     }
