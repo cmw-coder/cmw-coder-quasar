@@ -93,6 +93,10 @@ export const agentStream = async (
       },
     },
   );
+
+/**
+ * @deprecated
+ */
 export const authCode = async (userId: string) => {
   return await rdTestServiceProxy.get('/EpWeChatLogin/authCode', {
     params: {
@@ -102,6 +106,9 @@ export const authCode = async (userId: string) => {
   });
 };
 
+/**
+ * @deprecated
+ */
 export const feedBack = async (
   endpoint: string,
   accessToken: string,
