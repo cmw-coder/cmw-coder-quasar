@@ -1,4 +1,8 @@
-import axios, { AxiosRequestConfig, AxiosRequestHeaders } from 'axios';
+import axios, {
+  AxiosProgressEvent,
+  AxiosRequestConfig,
+  AxiosRequestHeaders,
+} from 'axios';
 import type { ConfigService } from 'service/entities/ConfigService';
 import { container } from 'service/index';
 import { NetworkZone } from 'shared/config';
@@ -35,9 +39,23 @@ _request.interceptors.response.use((response) => {
   }
 });
 
-const request = async <T>(config: AxiosRequestConfig) => {
-  const data = await _request(config);
+const request = async <T>(config: AxiosRequestConfig, signal?: AbortSignal) => {
+  const data = await _request({
+    ...config,
+    signal,
+  });
   return data as unknown as T;
 };
+
+export const streamRequest = (
+  config: AxiosRequestConfig,
+  onData: (progressEvent: AxiosProgressEvent) => void,
+  signal?: AbortSignal,
+) =>
+  _request({
+    ...config,
+    onDownloadProgress: onData,
+    signal,
+  });
 
 export default request;

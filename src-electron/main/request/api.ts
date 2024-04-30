@@ -1,5 +1,7 @@
-import request from 'main/request';
+import request, { streamRequest } from 'main/request';
 import { QuestionTemplateFile } from 'shared/types/QuestionTemplate';
+import { QuestionParams } from 'shared/api/QuestionType';
+import { AxiosProgressEvent } from 'axios';
 
 // 获取产品线下的模板文件内容
 export const api_getProductLineQuestionTemplateFile = (productLine: string) =>
@@ -41,3 +43,30 @@ export const api_checkAuthCode = () =>
     url: '/kong/RdTestAiService-b/auth/judgement',
     method: 'get',
   });
+
+// AI 生成
+export const api_question = (data: QuestionParams, signal?: AbortSignal) =>
+  request(
+    {
+      url: '/kong/RdTestAiService/chatgpt/question',
+      method: 'post',
+      data,
+    },
+    signal,
+  );
+
+// AI 流式生成
+export const api_questionStream = (
+  data: QuestionParams,
+  onData: (progressEvent: AxiosProgressEvent) => void,
+  signal?: AbortSignal,
+) =>
+  streamRequest(
+    {
+      url: '/kong/RdTestAiService/chatgpt/question/stream',
+      method: 'post',
+      data,
+    },
+    onData,
+    signal,
+  );
