@@ -195,6 +195,8 @@ export class WebsocketService implements WebsocketServiceBase {
             projectId,
           );
 
+          log.debug('WsAction.CompletionGenerate', data);
+
           const promptElements = await this.promptExtractor.getPromptComponents(
             new RawInputs(data, project),
           );
