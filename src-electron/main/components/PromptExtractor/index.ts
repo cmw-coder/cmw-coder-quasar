@@ -32,7 +32,7 @@ export class PromptExtractor {
     inputs: RawInputs,
     similarSnippetCount: number = 1,
   ): Promise<PromptElements> {
-    log.debug('PromptExtractor.getPromptComponents', inputs);
+    log.debug('PromptExtractor.getPromptComponents', inputs.elements);
     const { elements, document, position, recentFiles } = inputs;
     timer.add('CompletionGenerate', 'CalculatedFileFolder');
 
