@@ -2,7 +2,6 @@ import { app } from 'electron';
 import { inject, injectable } from 'inversify';
 import { TrayIcon } from 'main/components/TrayIcon';
 import { MenuEntry } from 'main/components/TrayIcon/types';
-import { initWindowDestroyInterval } from 'main/init';
 import { FloatingWindow } from 'main/windows/FloatingWindow';
 import { ImmersiveWindow } from 'main/windows/ImmersiveWindow';
 import { WindowServiceBase } from 'shared/services/types/WindowServiceInterBase';
@@ -13,19 +12,26 @@ import { MainWindow } from 'service/entities/WindowService/windows/MainWindow';
 import { NetworkZone } from 'shared/config';
 import { ServiceType } from 'shared/services';
 import { ConfigService } from 'service/entities/ConfigService';
+import { FeedbackWindow } from 'service/entities/WindowService/windows/FeedbackWindow';
 
 @injectable()
 export class WindowService implements WindowServiceBase {
+  /**
+   * @deprecated
+   */
   floatingWindow: FloatingWindow;
+  /**
+   * @deprecated
+   */
   immersiveWindow: ImmersiveWindow;
   mainWindow: MainWindow;
-  immersiveWindowDestroyInterval: NodeJS.Timeout;
   trayIcon: TrayIcon;
 
   // @new
   loginWindow: LoginWindow;
   startSettingWindow: StartSettingWindow;
   completionsWindow: CompletionsWindow;
+  feedbackWindow: FeedbackWindow;
 
   constructor(
     @inject(ServiceType.CONFIG)
@@ -35,15 +41,11 @@ export class WindowService implements WindowServiceBase {
     this.immersiveWindow = new ImmersiveWindow();
     this.mainWindow = new MainWindow();
 
-    this.immersiveWindowDestroyInterval = initWindowDestroyInterval(
-      this.immersiveWindow,
-    );
-
     this.trayIcon = new TrayIcon();
 
     this.trayIcon.onClick(() => this.mainWindow.activate());
     this.trayIcon.registerMenuEntry(MenuEntry.Feedback, () =>
-      this.floatingWindow.feedback(),
+      this.feedbackWindow.activate(),
     );
     this.trayIcon.registerMenuEntry(MenuEntry.Quit, () => app.exit());
 
@@ -51,6 +53,7 @@ export class WindowService implements WindowServiceBase {
     this.loginWindow = new LoginWindow();
     this.startSettingWindow = new StartSettingWindow();
     this.completionsWindow = new CompletionsWindow();
+    this.feedbackWindow = new FeedbackWindow();
   }
 
   async finishStartSetting() {

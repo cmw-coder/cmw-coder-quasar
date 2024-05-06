@@ -19,6 +19,7 @@ export enum WindowType {
   Chat = 'Chat',
   Commit = 'Commit',
   WorkFlow = 'WorkFlow',
+  Feedback = 'Feedback',
 
   Completions = 'Completions',
 }
@@ -35,6 +36,7 @@ export const windowUrlMap: Record<WindowType, string> = {
   [WindowType.Chat]: '/floating/chat',
   [WindowType.Commit]: '/floating/commit',
   [WindowType.WorkFlow]: '/floating/workflow',
+  [WindowType.Feedback]: '/floating/feedback',
 
   [WindowType.Quake]: '/immersive/quake',
   [WindowType.Completions]: '/immersive/completions',

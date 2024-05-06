@@ -10,7 +10,6 @@ import {
 import { generate, generateRd } from 'main/utils/axios';
 import { timer } from 'main/utils/timer';
 import { CompletionType } from 'shared/types/common';
-import { ApiStyle } from 'shared/types/model';
 
 // Start with '//' or '#' or '{' or '/*', or is '***/'
 const detectRegex = /^\/\/|^#|^\{|^\/\*|^\*+\/$/;
@@ -53,6 +52,9 @@ export const getCompletionType = (
   return CompletionType.Line;
 };
 
+/**
+ * @deprecated
+ */
 export const processHuggingFaceApi = async (
   modelConfig: HuggingFaceModelConfigType,
   promptElements: PromptElements,
@@ -70,7 +72,7 @@ export const processHuggingFaceApi = async (
     completionConfig;
 
   log.debug('PromptProcessor.process.processHuggingFaceApi', {
-    inputs: promptElements.stringify(ApiStyle.HuggingFace, separateTokens),
+    inputs: promptElements.stringify(separateTokens),
     parameters: {
       best_of: suggestionCount,
       details: true,
@@ -91,7 +93,7 @@ export const processHuggingFaceApi = async (
     } = await generate(
       endpoint,
       {
-        inputs: promptElements.stringify(ApiStyle.HuggingFace, separateTokens),
+        inputs: promptElements.stringify(separateTokens),
         parameters: {
           best_of: suggestionCount,
           details: true,
@@ -133,6 +135,9 @@ export const processHuggingFaceApi = async (
   return [];
 };
 
+/**
+ * @deprecated
+ */
 export const processLinseerApi = async (
   modelConfig: LinseerModelConfigType,
   accessToken: string,
@@ -156,7 +161,7 @@ export const processLinseerApi = async (
       await generateRd(
         endpoint,
         {
-          question: promptElements.stringify(ApiStyle.Linseer, separateTokens),
+          question: promptElements.stringify(separateTokens),
           model: subModelType,
           maxTokens: maxTokenCount,
           temperature: temperature,
@@ -193,6 +198,9 @@ export const processLinseerApi = async (
   return [];
 };
 
+/**
+ * @deprecated
+ */
 export const processLinseerBetaApi = async (
   modelConfig: LinseerModelConfigType,
   promptElements: PromptElements,
@@ -215,7 +223,7 @@ export const processLinseerBetaApi = async (
       await generateRd(
         endpoint,
         {
-          question: promptElements.stringify(ApiStyle.Linseer, separateTokens),
+          question: promptElements.stringify(separateTokens),
           model: subModelType,
           maxTokens: maxTokenCount,
           temperature: temperature,

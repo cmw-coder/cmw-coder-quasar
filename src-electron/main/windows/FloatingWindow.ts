@@ -24,6 +24,9 @@ import {
 } from 'shared/types/ActionMessage';
 import { WindowType } from 'shared/types/WindowType';
 
+/**
+ * @deprecated
+ */
 export class FloatingWindow extends BaseWindow {
   private readonly _actionApi = new ActionApi('main.FloatingWindow.');
   private _currentRoute = '';

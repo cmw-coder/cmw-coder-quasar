@@ -24,6 +24,9 @@ defaultStoreData.username = userInfo().username;
 @injectable()
 export class ConfigService implements ConfigServiceBase {
   // 临时指定用户使用LinseerBeta版本
+  /**
+   * @deprecated
+   */
   configStore = betaApiUserList.includes(userInfo().username)
     ? new LinseerConfigStore()
     : runtimeConfig.apiStyle === ApiStyle.HuggingFace
@@ -55,6 +58,10 @@ export class ConfigService implements ConfigServiceBase {
   }
 
   async getConfigs() {
+    return this.appConfigStore.store;
+  }
+
+  getConfigsSync() {
     return this.appConfigStore.store;
   }
 

@@ -6,8 +6,10 @@ import { SymbolInfo } from 'main/types/SymbolInfo';
 import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
 import { timer } from 'main/utils/timer';
-import { ApiStyle } from 'shared/types/model';
 import { CompletionGenerateClientMessage } from 'shared/types/WsMessage';
+import { container } from 'service/index';
+import { ServiceType } from 'shared/services';
+import type { DataStoreService } from 'service/entities/DataStoreService';
 
 export class PromptElements {
   file?: string;
@@ -23,46 +25,32 @@ export class PromptElements {
     this.suffix = suffix.trimEnd();
   }
 
-  stringify(apiStyle: ApiStyle, separateTokens: SeparateTokens) {
+  stringify(separateTokens: SeparateTokens) {
+    const dataStoreService = container.get<DataStoreService>(
+      ServiceType.DATA_STORE,
+    );
     const { start, end, middle } = separateTokens;
     const result = Array<string>();
-    if (apiStyle === ApiStyle.HuggingFace) {
-      if (this.folder) {
-        result.push(`<REPO>${this.folder}`);
-      }
-      if (this.file) {
-        result.push(`<FILENAME>${this.file}`);
-      }
-      if (this.language) {
-        result.push(`<LANGUAGE>${this.language}`);
-      }
-      result.push(start);
-      if (this.similarSnippet) {
-        result.push(`${this.similarSnippet}\r\n`);
-      }
-      if (this.symbols) {
-        result.push(`${this.symbols}\r\n`);
-      }
-      result.push(this.prefix);
-      result.push(end);
-      result.push(this.suffix);
-      result.push(middle);
-    } else {
-      result.push(start);
-      if (this.language) {
-        result.push(`Language:${this.language}\r\n\r\n\r\n`);
-      }
-      if (this.symbols) {
-        result.push(`${this.symbols}\r\n`);
-      }
-      if (this.similarSnippet) {
-        result.push(`${this.similarSnippet}\r\n`);
-      }
-      result.push(this.prefix);
-      result.push(middle);
-      result.push(this.suffix);
-      result.push(end);
+    if (this.folder) {
+      result.push(`<REPO>${this.folder}`);
     }
+    if (this.file) {
+      result.push(`<FILENAME>${this.file}`);
+    }
+    if (this.language) {
+      result.push(`<LANGUAGE>${this.language}`);
+    }
+    result.push(start);
+    if (this.similarSnippet) {
+      result.push(`${this.similarSnippet}\r\n`);
+    }
+    if (this.symbols) {
+      result.push(`${this.symbols}\r\n`);
+    }
+    result.push(this.prefix);
+    result.push(end);
+    result.push(this.suffix);
+    result.push(middle);
     return result.join('');
   }
 }

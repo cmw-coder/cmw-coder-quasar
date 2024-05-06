@@ -7,7 +7,12 @@ import { DataStoreType } from 'main/stores/data/types';
 import { registerAction } from 'preload/types/ActionApi';
 import { DataStoreServiceBase } from 'shared/services/types/DataStoreServiceBase';
 import { ActionType } from 'shared/types/ActionMessage';
-import { AppData, WindowData, defaultAppData } from 'shared/types/AppData';
+import {
+  AppData,
+  WindowData,
+  defaultAppData,
+  defaultQuestionTemplateModelContent,
+} from 'shared/types/AppData';
 import { deepClone } from 'shared/utils';
 import { WindowType } from 'shared/types/WindowType';
 import {
@@ -16,7 +21,10 @@ import {
 } from 'main/request/api';
 import { ConfigService } from 'service/entities/ConfigService';
 import { ServiceType } from 'shared/services';
-import { QuestionTemplateFile } from 'shared/types/QuestionTemplate';
+import {
+  QuestionTemplateFile,
+  QuestionTemplateModelContent,
+} from 'shared/types/QuestionTemplate';
 import Logger from 'electron-log';
 
 const defaultStoreData = deepClone(defaultAppData);
@@ -36,8 +44,11 @@ export class DataStoreService implements DataStoreServiceBase {
     defaults: defaultStoreData,
   });
 
-  serverTemplateList: string[] = [];
-  serverTemplate?: QuestionTemplateFile;
+  private serverTemplateList: string[] = [];
+  private serverTemplate?: QuestionTemplateFile;
+  activeModelContent: QuestionTemplateModelContent = deepClone(
+    defaultQuestionTemplateModelContent,
+  );
 
   constructor(
     @inject(ServiceType.CONFIG)
@@ -65,6 +76,10 @@ export class DataStoreService implements DataStoreServiceBase {
     const windowData = this.appDataStore.get('window');
     windowData[windowType] = data;
     this.appDataStore.set('window', windowData);
+  }
+
+  async getAppDataAsync() {
+    return this.appDataStore.store;
   }
 
   getAppdata() {
@@ -122,6 +137,7 @@ export class DataStoreService implements DataStoreServiceBase {
       await this._configService.setConfig('activeModel', activeModel);
       await this._configService.setConfig('activeModelKey', activeModelKey);
     }
-    return this.serverTemplate[activeModel];
+    this.activeModelContent = this.serverTemplate[activeModel];
+    return this.activeModelContent;
   }
 }

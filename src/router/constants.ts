@@ -23,7 +23,6 @@ export const routes: RouteRecordRaw[] = [
       {
         path: 'completions',
         components: {
-          header: () => import('layouts/headers/FloatingHeader.vue'),
           default: () => import('pages/CompletionFloatingPage.vue'),
         },
       },

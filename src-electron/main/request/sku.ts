@@ -1,6 +1,8 @@
 import dayjs from 'dayjs';
 import { userInfo } from 'os';
 import request from 'main/request';
+import { CollectionData } from 'service/entities/StatisticsService/types';
+import log from 'electron-log/main';
 
 export interface ReportSkuDto {
   begin?: number;
@@ -12,7 +14,7 @@ export interface ReportSkuDto {
   secondClass: string;
   skuName: string;
   user: string;
-  userType: 'USER' | 'HOST';
+  userType: string; // 'USER' | 'HOST'
   extra?: string;
   subType?: string;
   hostName?: string;
@@ -33,6 +35,13 @@ export const api_reportSKU = async (data: ReportSkuDto[]) => {
       data: handledData,
     });
   } catch (e) {
-    console.log('sku 上报失败', data, e);
+    log.error('StatisticsReporter Failed', data, e);
   }
 };
+
+export const api_collection_code_v2 = async (data: CollectionData[]) =>
+  request({
+    url: '/kong/RdTestAiService/chatgpt/collection/v2',
+    method: 'post',
+    data,
+  });

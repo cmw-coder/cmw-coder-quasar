@@ -12,6 +12,7 @@ export interface QuestionParams {
   model?: string;
   language?: string;
   maxTokens?: number;
+  temperature?: number;
   topK?: number;
   stop?: string[];
   best_of?: number;
@@ -20,6 +21,7 @@ export interface QuestionParams {
   repetition_penalty?: number;
   subType?: string;
   suffix?: string;
+  plugin?: string;
 }
 
 export interface Answer {

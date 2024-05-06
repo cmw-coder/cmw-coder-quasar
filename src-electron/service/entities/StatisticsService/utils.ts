@@ -1,11 +1,7 @@
-import {
-  productLineMapping,
-  secondClassMap,
-} from 'service/entities/StatisticsService/constants';
 import { container } from 'service/index';
-import type { ConfigService } from 'service/entities/ConfigService';
 import { ServiceType } from 'shared/services';
-import { HuggingFaceModelType, LinseerModelType } from 'shared/types/model';
+import { ReportSkuDto } from 'main/request/sku';
+import type { ConfigService } from 'service/entities/ConfigService';
 
 export const constructData = (
   count: number,
@@ -13,25 +9,23 @@ export const constructData = (
   endTime: number,
   projectId: string,
   version: string,
-  modelType: HuggingFaceModelType | LinseerModelType,
   firstClass: string,
   skuName: string,
-) => {
-  const configService = container.get<ConfigService>(ServiceType.CONFIG);
+): ReportSkuDto[] => {
+  const appConfig = container
+    .get<ConfigService>(ServiceType.CONFIG)
+    .getConfigsSync();
   const basicData = {
     begin: Math.floor(startTime / 1000),
     end: Math.floor(endTime / 1000),
     extra: version,
     product: 'SI',
-    secondClass: secondClassMap[modelType],
+    secondClass: appConfig.activeModelKey,
     subType: projectId,
     type: 'AIGC',
-    user: configService.configStore.config.userId,
+    user: appConfig.username,
     userType: 'USER',
-    productLine:
-      modelType in LinseerModelType
-        ? productLineMapping[modelType as LinseerModelType]
-        : '',
+    productLine: appConfig.activeModel,
   };
 
   return [

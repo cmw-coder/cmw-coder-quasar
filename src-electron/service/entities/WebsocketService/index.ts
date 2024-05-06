@@ -5,7 +5,6 @@ import { Server, type WebSocket } from 'ws';
 import { PromptExtractor } from 'main/components/PromptExtractor';
 import { RawInputs } from 'main/components/PromptExtractor/types';
 import { PromptProcessor } from 'main/components/PromptProcessor';
-import { initWindowDestroyInterval } from 'main/init';
 import {
   CompletionErrorCause,
   getClientVersion,
@@ -130,7 +129,7 @@ export class WebsocketService implements WebsocketServiceBase {
   registerActions() {
     this.registerWsAction(WsAction.CompletionAccept, async ({ data }, pid) => {
       const { actionId, index } = data;
-      this._windowService.immersiveWindow.completionClear();
+      this._windowService.completionsWindow.completionClear();
       try {
         this._statisticsReporterService
           .completionAccept(actionId, index, getClientVersion(pid))
@@ -140,10 +139,10 @@ export class WebsocketService implements WebsocketServiceBase {
       }
     });
     this.registerWsAction(WsAction.CompletionCache, ({ data: isDelete }) => {
-      this._windowService.immersiveWindow.completionUpdate(isDelete);
+      this._windowService.completionsWindow.completionUpdate(isDelete);
     });
     this.registerWsAction(WsAction.CompletionCancel, ({ data }, pid) => {
-      this._windowService.immersiveWindow.completionClear();
+      this._windowService.completionsWindow.completionClear();
       const { actionId, explicit } = data;
       if (explicit) {
         try {
@@ -174,10 +173,6 @@ export class WebsocketService implements WebsocketServiceBase {
     this.registerWsAction(
       WsAction.CompletionGenerate,
       async ({ data }, pid) => {
-        clearInterval(this._windowService.immersiveWindowDestroyInterval);
-        this._windowService.immersiveWindowDestroyInterval =
-          initWindowDestroyInterval(this._windowService.immersiveWindow);
-
         const { caret } = data;
         const actionId = this._statisticsReporterService.completionBegin(caret);
         const project = this.getClientInfo(pid)?.currentProject;
@@ -268,7 +263,7 @@ export class WebsocketService implements WebsocketServiceBase {
           getClientVersion(pid),
         );
         if (candidate) {
-          this._windowService.immersiveWindow.completionSelect(
+          this._windowService.completionsWindow.completionSelect(
             candidate,
             {
               index,
@@ -286,10 +281,8 @@ export class WebsocketService implements WebsocketServiceBase {
       this._windowService.floatingWindow.commit(currentFile);
     });
     this.registerWsAction(WsAction.EditorFocusState, ({ data: isFocused }) => {
-      if (isFocused) {
-        // this._windowService.immersiveWindow.show();
-      } else {
-        this._windowService.immersiveWindow.hide();
+      if (!isFocused) {
+        this._windowService.completionsWindow.hide();
       }
     });
     this.registerWsAction(WsAction.EditorPaste, ({ data }, pid) => {

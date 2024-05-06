@@ -8,8 +8,6 @@ import { v4 as uuid } from 'uuid';
 import { PromptElements } from 'main/components/PromptExtractor/types';
 import { Completions } from 'main/components/PromptProcessor/types';
 import { timer } from 'main/utils/timer';
-import { container } from 'service';
-import { ConfigService } from 'service/entities/ConfigService';
 import {
   skuNameAcceptMapping,
   skuNameGenerateMapping,
@@ -24,7 +22,8 @@ import { constructData } from 'service/entities/StatisticsService/utils';
 import { ServiceType } from 'shared/services';
 import { StatisticsServiceBase } from 'shared/services/types/StatisticsServiceBase';
 import { CaretPosition } from 'shared/types/common';
-import { ApiStyle } from 'shared/types/model';
+import type { ConfigService } from 'service/entities/ConfigService';
+import { api_collection_code_v2, api_reportSKU } from 'main/request/sku';
 
 @injectable()
 export class StatisticsService implements StatisticsServiceBase {
@@ -71,16 +70,13 @@ export class StatisticsService implements StatisticsServiceBase {
 
     const lineLength = candidate.split('\r\n').length;
     try {
-      const configStore = this._configService.configStore;
-      await this._statisticsApi.post(
-        '/report/summary',
+      await api_reportSKU(
         constructData(
           lineLength,
           data.timelines.startAccept.toMillis(),
           DateTime.now().toMillis(),
           data.projectId,
           version,
-          configStore.modelType,
           'CODE',
           skuNameAcceptMapping[data.completions.type],
         ),
@@ -158,31 +154,17 @@ export class StatisticsService implements StatisticsServiceBase {
     log.debug('StatisticsReporter.completionKept', [requestData]);
 
     try {
-      const configStore = container.get<ConfigService>(
-        ServiceType.CONFIG,
-      ).configStore;
       await Promise.all([
-        this._aiServiceApi.post('/chatgpt/collection/v2', [requestData], {
-          headers:
-            configStore.apiStyle === ApiStyle.Linseer
-              ? {
-                  'x-authorization': `bearer ${configStore.data.tokens.access}`,
-                }
-              : {
-                  'X-Authenticated-Userid': configStore.config.userId,
-                },
-        }),
+        api_collection_code_v2([requestData]),
         ratio === KeptRatio.None
           ? undefined
-          : this._statisticsApi.post(
-              '/report/summary',
+          : api_reportSKU(
               constructData(
                 count,
                 data.timelines.startAccept.toMillis(),
                 DateTime.now().toMillis(),
                 data.projectId,
                 version,
-                configStore.modelType,
                 'CODE',
                 skuNameKeptMapping[ratio],
               ),
@@ -223,9 +205,6 @@ export class StatisticsService implements StatisticsServiceBase {
       data.position.line >= 0 &&
       data.position.line != this._lastCursorPosition.line
     ) {
-      const configStore = container.get<ConfigService>(
-        ServiceType.CONFIG,
-      ).configStore;
       log.debug('StatisticsReporter.completionSelected', {
         completions: data.completions,
         position: data.position,
@@ -234,21 +213,17 @@ export class StatisticsService implements StatisticsServiceBase {
         version,
       });
       const lineLength = candidate.split('\r\n').length;
-      this._statisticsApi
-        .post(
-          '/report/summary',
-          constructData(
-            lineLength,
-            data.timelines.startGenerate.toMillis(),
-            data.timelines.endGenerate.toMillis(),
-            data.projectId,
-            version,
-            configStore.modelType,
-            'CODE',
-            skuNameGenerateMapping[data.completions.type],
-          ),
-        )
-        .catch((e) => log.error('StatisticsReporter.completionSelected', e));
+      api_reportSKU(
+        constructData(
+          lineLength,
+          data.timelines.startGenerate.toMillis(),
+          data.timelines.endGenerate.toMillis(),
+          data.projectId,
+          version,
+          'CODE',
+          skuNameGenerateMapping[data.completions.type],
+        ),
+      );
     }
     return candidate;
   }
@@ -276,18 +251,13 @@ export class StatisticsService implements StatisticsServiceBase {
       version,
     });
     try {
-      const configStore = container.get<ConfigService>(
-        ServiceType.CONFIG,
-      ).configStore;
-      await this._statisticsApi.post(
-        '/report/summary',
+      await api_reportSKU(
         constructData(
           count,
           Date.now(),
           Date.now(),
           projectId,
           version,
-          configStore.modelType,
           'INC_CHAR',
           '',
         ),
@@ -312,25 +282,17 @@ export class StatisticsService implements StatisticsServiceBase {
       version,
     });
     try {
-      const configStore = this._configService.configStore;
-      await this._statisticsApi.post(
-        '/report/summary',
-        constructData(
-          count,
-          startTime,
-          endTime,
-          projectId,
-          version,
-          configStore.modelType,
-          'INC',
-          '',
-        ),
+      await api_reportSKU(
+        constructData(count, startTime, endTime, projectId, version, 'INC', ''),
       );
     } catch (e) {
       log.error('StatisticsReporter.incrementLinesFailed', e);
     }
   }
 
+  /**
+   * @deprecated
+   */
   private get _aiServiceApi() {
     const configStore = this._configService.configStore;
     return axios.create({
@@ -338,6 +300,9 @@ export class StatisticsService implements StatisticsServiceBase {
     });
   }
 
+  /**
+   * @deprecated
+   */
   private get _statisticsApi() {
     const configStore = this._configService.configStore;
     return axios.create({
