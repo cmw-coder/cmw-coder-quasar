@@ -40,6 +40,7 @@
 !macro InstallProxyImpl targetPath
   SetOutPath '${targetPath}'
     File '${BUILD_RESOURCES_DIR}\build\assets\cmw-coder-loader.exe'
+    File '${BUILD_RESOURCES_DIR}\build\assets\ctags.exe'
     File '${BUILD_RESOURCES_DIR}\build\assets\loaderdll.dll'
     File '${BUILD_RESOURCES_DIR}\build\assets\zlib1.dll'
   SetOutPath '$INSTDIR'
