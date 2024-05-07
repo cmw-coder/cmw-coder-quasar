@@ -1,19 +1,12 @@
 <script setup lang="ts">
-import { QExpansionItem } from 'quasar';
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-
 import {
-  HuggingFaceModelConfigType,
-  LinseerModelConfigType,
-} from 'app/src-electron/main/stores/config/types';
-import {
-  ActionType,
-  ConfigStoreLoadActionMessage,
-  ConfigStoreSaveActionMessage,
-} from 'shared/types/ActionMessage';
-import { HuggingFaceModelType, LinseerModelType } from 'shared/types/model';
-import { ActionApi } from 'types/ActionApi';
+  api_getProductLineQuestionTemplateFile,
+  api_getUserTemplateList,
+} from 'src/request/api';
+import { useService } from 'utils/common';
+import { ServiceType } from 'app/src-electron/shared/services';
 
 const baseName = 'components.SettingCards.CompletionCard.';
 
@@ -27,42 +20,96 @@ const i18n = (relativePath: string, data?: Record<string, unknown>) => {
   }
 };
 
-const availableModels = ref<HuggingFaceModelType[] | LinseerModelType[]>([]);
-const modelUpdating = ref(false);
-const modelSelectItem = ref<QExpansionItem>();
-const modelType = ref<HuggingFaceModelType | LinseerModelType>();
+const configService = useService(ServiceType.CONFIG);
+const dataStoreService = useService(ServiceType.DATA_STORE);
 
-const updateModelType = (model: HuggingFaceModelType | LinseerModelType) => {
-  modelUpdating.value = true;
-  window.actionApi.send(
-    new ConfigStoreSaveActionMessage({
-      type: 'data',
-      data: {
-        modelType: model,
-      },
-    }),
-  );
-  window.actionApi.send(new ConfigStoreLoadActionMessage());
+const productLineList = ref(<string[]>[]);
+const modelList = ref(
+  <
+    {
+      label: string;
+      value: string;
+      modelKey: string;
+    }[]
+  >[],
+);
+const modelStringList = computed(() =>
+  modelList.value.map((item) => item.label),
+);
+const productLineLoading = ref(false);
+const selectedProductLine = ref('');
+const modelLoading = ref(false);
+const selectedModel = ref('');
+
+const refreshProductLineList = async () => {
+  try {
+    productLineLoading.value = true;
+    const { username, activeTemplate } = await configService.getConfigs();
+
+    productLineList.value = await api_getUserTemplateList(username);
+    selectedProductLine.value = activeTemplate;
+  } finally {
+    productLineLoading.value = false;
+  }
 };
 
-const actionApi = new ActionApi(baseName);
-onMounted(() => {
-  actionApi.register(ActionType.ConfigStoreLoad, (data) => {
-    if (data) {
-      availableModels.value = data.config.modelConfigs.map(
-        (modelConfig: LinseerModelConfigType | HuggingFaceModelConfigType) =>
-          modelConfig.modelType,
-      );
-      modelType.value = data.data.modelType;
-      modelUpdating.value = false;
-      modelSelectItem.value?.hide();
+const refreshModelList = async () => {
+  try {
+    modelLoading.value = true;
+    const { activeModel } = await configService.getConfigs();
+    const templateFileContent = await api_getProductLineQuestionTemplateFile(
+      selectedProductLine.value,
+    );
+    const keys = Object.keys(templateFileContent);
+    if (!keys.includes(activeModel)) {
+      // 所选模型不在模板中
+      await configService.setConfig('activeModel', keys[0]);
+      selectedModel.value = templateFileContent[keys[0]].config.displayName;
     }
-  });
-  window.actionApi.send(new ConfigStoreLoadActionMessage());
+    modelList.value = keys.map((key) => ({
+      label: templateFileContent[key].config.displayName,
+      value: key,
+      modelKey: templateFileContent[key].config.modelKey,
+    }));
+    selectedModel.value = templateFileContent[activeModel].config.displayName;
+  } finally {
+    modelLoading.value = false;
+  }
+};
+
+onMounted(async () => {
+  await refreshProductLineList();
+  await refreshModelList();
 });
-onBeforeUnmount(() => {
-  actionApi.unregister();
-});
+
+watch(
+  () => selectedProductLine.value,
+  async (value) => {
+    if (value) {
+      await configService.setConfig('activeTemplate', value);
+      await dataStoreService.getActiveModelContent();
+      await refreshModelList();
+    }
+  },
+);
+
+watch(
+  () => selectedModel.value,
+  async (value) => {
+    if (value) {
+      console.log('selectedModel', value, modelList.value);
+      const data = modelList.value.find((item) => item.label === value);
+      if (!data) {
+        return;
+      }
+      await configService.setConfigs({
+        activeModel: data.value,
+        activeModelKey: data.modelKey,
+      });
+      await await dataStoreService.getActiveModelContent();
+    }
+  },
+);
 </script>
 
 <template>
@@ -71,36 +118,28 @@ onBeforeUnmount(() => {
       {{ i18n('labels.title') }}
     </q-card-section>
     <q-list bordered separator>
-      <q-expansion-item ref="modelSelectItem" clickable group="settingGroup">
-        <template v-slot:header>
-          <q-item-section>
-            {{ i18n('labels.currentModel') }}
-          </q-item-section>
-          <q-item-section v-if="modelType" side>
-            <div>{{ i18n(`labels.availableModels.${modelType}`) }}</div>
-          </q-item-section>
-        </template>
-        <div
-          v-show="modelUpdating"
-          class="absolute-full row items-center justify-center"
-          style="background-color: rgba(0, 0, 0, 0.4)"
-        >
-          <q-spinner size="6rem" />
-        </div>
-        <q-list>
-          <q-item
-            v-for="(model, index) in availableModels"
-            :key="index"
-            clickable
-            :disable="modelUpdating"
-            @click="updateModelType(model)"
-          >
-            <q-item-section>
-              {{ i18n(`labels.availableModels.${model}`) }}
-            </q-item-section>
-          </q-item>
-        </q-list>
-      </q-expansion-item>
+      <q-item>
+        <q-select
+          v-if="!productLineLoading"
+          style="width: 100%"
+          square
+          outlined
+          v-model="selectedProductLine"
+          :options="productLineList"
+          label="Product Line"
+        />
+      </q-item>
+      <q-item tag="Model">
+        <q-select
+          v-if="!modelLoading"
+          style="width: 100%"
+          square
+          outlined
+          v-model="selectedModel"
+          :options="modelStringList"
+          label="Model"
+        />
+      </q-item>
     </q-list>
   </q-card>
 </template>

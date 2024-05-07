@@ -1,4 +1,5 @@
 import { AppData } from 'shared/types/AppData';
+import { QuestionTemplateModelContent } from 'shared/types/QuestionTemplate';
 
 export interface DataStoreServiceBase {
   getAppDataAsync(): Promise<AppData>;
@@ -9,4 +10,5 @@ export interface DataStoreServiceBase {
   setProjectId(path: string, projectId: string): Promise<void>;
   setProjectLastAddedLines(path: string, lastAddedLines: number): Promise<void>;
   setProjectSvn(projectPath: string, svnPath: string): Promise<void>;
+  getActiveModelContent(): Promise<QuestionTemplateModelContent>;
 }

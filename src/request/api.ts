@@ -1,3 +1,4 @@
+import { QuestionTemplateFile } from 'shared/types/QuestionTemplate';
 import { AxiosProgressEvent } from 'axios';
 import { Answer, FeedbackForm, QuestionParams } from 'shared/api/QuestionType';
 import request, { streamRequest } from 'src/request';
@@ -42,3 +43,20 @@ export const api_feedback = (data: FeedbackForm) => {
     data,
   });
 };
+
+// 获取产品线下的模板文件内容
+export const api_getProductLineQuestionTemplateFile = (productLine: string) =>
+  request<QuestionTemplateFile>({
+    url: '/kong/RdTestAiService/template',
+    method: 'get',
+    params: {
+      productLine,
+    },
+  });
+
+// 获取用户支持的模板
+export const api_getUserTemplateList = (account: string) =>
+  request<string[]>({
+    url: `/kong/RdTestAiService-b/template/lib/config?userId=${account}`,
+    method: 'get',
+  });
