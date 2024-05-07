@@ -1,5 +1,5 @@
 import { AxiosProgressEvent } from 'axios';
-import { Answer, QuestionParams } from 'shared/api/QuestionType';
+import { Answer, FeedbackForm, QuestionParams } from 'shared/api/QuestionType';
 import request, { streamRequest } from 'src/request';
 
 export const api_question = (data: QuestionParams, signal?: AbortSignal) => {
@@ -33,4 +33,12 @@ export const api_questionStream = (
     onData,
     signal,
   );
+};
+
+export const api_feedback = (data: FeedbackForm) => {
+  return request<string>({
+    url: '/kong/RdTestAiService-b/chatgpt/feedback',
+    method: 'post',
+    data,
+  });
 };

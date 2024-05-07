@@ -24,7 +24,6 @@ export interface AppConfig {
   activeModel: string;
   activeModelKey: string;
   activeChat: string;
-  separateTokens: SeparateTokens;
   completionConfigs: {
     function: CompletionConfigType;
     line: CompletionConfigType;

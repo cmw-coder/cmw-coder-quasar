@@ -99,7 +99,7 @@ export const defaultAppData: AppData = {
       show: false,
     },
     [WindowType.Feedback]: {
-      height: 600,
+      height: 800,
       width: 800,
       show: false,
     },

@@ -15,7 +15,21 @@ export abstract class BaseWindow {
     this._url = `${process.env.APP_URL}/#${windowUrlMap[type]}`;
   }
 
-  activate() {
+  activate<
+    T extends {
+      toString: (radix?: number) => string;
+    },
+  >(searchParams?: Record<string, string | T>) {
+    if (searchParams) {
+      for (const key in searchParams) {
+        if (typeof searchParams[key] !== 'string') {
+          searchParams[key] = searchParams[key].toString();
+        }
+      }
+      this._url += `?${new URLSearchParams(
+        <Record<string, string>>searchParams,
+      ).toString()}`;
+    }
     Logger.log(`Activate window: ${this._type} ${this._url}`);
     const dataStoreService = container.get<DataStoreService>(
       ServiceType.DATA_STORE,
@@ -63,6 +77,10 @@ export abstract class BaseWindow {
           dataStoreService.saveWindowData(this._type, windowData);
         }
       });
+
+      this._window.on('closed', () => {
+        this._window = undefined;
+      });
     }
 
     const { x, y, height, width } = dataStoreService.getWindowData(this._type);
@@ -77,6 +95,7 @@ export abstract class BaseWindow {
     } else {
       this._window.center();
     }
+    this._window.show();
   }
 
   destroy() {

@@ -30,3 +30,10 @@ export interface Answer {
   sessionId: number;
   finishReason: string;
 }
+
+export interface FeedbackForm {
+  description: string;
+  pictures: string[];
+  userId: string;
+  version: string;
+}

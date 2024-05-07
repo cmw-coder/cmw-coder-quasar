@@ -225,9 +225,7 @@ export class WebsocketService implements WebsocketServiceBase {
           switch (error.cause) {
             case CompletionErrorCause.accessToken: {
               result = 'failure';
-              this._windowService.floatingWindow.login(
-                this._windowService.mainWindow.isVisible,
-              );
+              this._windowService.loginWindow.activate();
               break;
             }
             case CompletionErrorCause.clientInfo: {
@@ -236,7 +234,8 @@ export class WebsocketService implements WebsocketServiceBase {
             }
             case CompletionErrorCause.projectData: {
               result = 'failure';
-              this._windowService.floatingWindow.projectId(project);
+              this._windowService.projectIdWindow.activate();
+              this._windowService.projectIdWindow.setProject(project);
               break;
             }
           }
@@ -278,7 +277,8 @@ export class WebsocketService implements WebsocketServiceBase {
       }
     });
     this.registerWsAction(WsAction.EditorCommit, ({ data: currentFile }) => {
-      this._windowService.floatingWindow.commit(currentFile);
+      this._windowService.commitWindow.activate();
+      this._windowService.commitWindow.setCurrentFile(currentFile);
     });
     this.registerWsAction(WsAction.EditorFocusState, ({ data: isFocused }) => {
       if (!isFocused) {
@@ -298,7 +298,9 @@ export class WebsocketService implements WebsocketServiceBase {
           const error = <Error>e;
           switch (error.cause) {
             case CompletionErrorCause.projectData: {
-              this._windowService.floatingWindow.projectId(project);
+              console.log('CompletionErrorCause.projectData', error);
+              this._windowService.projectIdWindow.activate();
+              this._windowService.projectIdWindow.setProject(project);
               break;
             }
             default: {
@@ -320,10 +322,7 @@ export class WebsocketService implements WebsocketServiceBase {
         const project = this.getClientInfo(pid)?.currentProject;
         if (project && project.length) {
           try {
-            await this._dataStoreService.dataStore.setProjectSvn(
-              project,
-              svnPath,
-            );
+            await this._dataStoreService.setProjectSvn(project, svnPath);
           } catch (e) {
             log.error('EditorSwitchSvn', e);
           }

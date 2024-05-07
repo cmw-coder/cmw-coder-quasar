@@ -1,4 +1,4 @@
-import { app } from 'electron';
+import { BrowserWindow, app } from 'electron';
 import { inject, injectable } from 'inversify';
 import { TrayIcon } from 'main/components/TrayIcon';
 import { MenuEntry } from 'main/components/TrayIcon/types';
@@ -13,6 +13,9 @@ import { NetworkZone } from 'shared/config';
 import { ServiceType } from 'shared/services';
 import { ConfigService } from 'service/entities/ConfigService';
 import { FeedbackWindow } from 'service/entities/WindowService/windows/FeedbackWindow';
+import { CommitWindow } from 'service/entities/WindowService/windows/CommitWindow';
+import { ProjectIdWindow } from 'service/entities/WindowService/windows/ProjectIdWindow';
+import { WindowType } from 'shared/types/WindowType';
 
 @injectable()
 export class WindowService implements WindowServiceBase {
@@ -30,8 +33,10 @@ export class WindowService implements WindowServiceBase {
   // @new
   loginWindow: LoginWindow;
   startSettingWindow: StartSettingWindow;
+  commitWindow: CommitWindow;
   completionsWindow: CompletionsWindow;
   feedbackWindow: FeedbackWindow;
+  projectIdWindow: ProjectIdWindow;
 
   constructor(
     @inject(ServiceType.CONFIG)
@@ -54,6 +59,8 @@ export class WindowService implements WindowServiceBase {
     this.startSettingWindow = new StartSettingWindow();
     this.completionsWindow = new CompletionsWindow();
     this.feedbackWindow = new FeedbackWindow();
+    this.commitWindow = new CommitWindow();
+    this.projectIdWindow = new ProjectIdWindow();
   }
 
   async finishStartSetting() {
@@ -71,5 +78,56 @@ export class WindowService implements WindowServiceBase {
   async finishLogin() {
     this.mainWindow.activate();
     this.loginWindow.destroy();
+  }
+
+  async closeWindow(type?: WindowType): Promise<void> {
+    if (type) {
+      switch (type) {
+        case WindowType.Login:
+          this.loginWindow.destroy();
+          break;
+        case WindowType.StartSetting:
+          this.startSettingWindow.destroy();
+          break;
+        case WindowType.Completions:
+          this.completionsWindow.destroy();
+          break;
+        case WindowType.Feedback:
+          this.feedbackWindow.destroy();
+          break;
+        case WindowType.Commit:
+          this.commitWindow.destroy();
+          break;
+        case WindowType.ProjectId:
+          this.projectIdWindow.destroy();
+          break;
+        case WindowType.Main:
+          this.mainWindow.destroy();
+          break;
+        case WindowType.Chat:
+          this.mainWindow.destroy();
+          break;
+        case WindowType.WorkFlow:
+          this.mainWindow.destroy();
+          break;
+        case WindowType.Setting:
+          this.mainWindow.destroy();
+          break;
+        case WindowType.Quake:
+          this.mainWindow.destroy();
+          break;
+        default:
+          break;
+      }
+    } else {
+      const focusWindow = BrowserWindow.getFocusedWindow();
+      if (focusWindow) {
+        focusWindow.destroy();
+      }
+    }
+  }
+
+  async getProjectIdWindowActiveProject(): Promise<string | undefined> {
+    return this.projectIdWindow.project;
   }
 }

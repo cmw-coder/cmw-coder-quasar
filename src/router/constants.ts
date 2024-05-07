@@ -41,7 +41,7 @@ export const routes: RouteRecordRaw[] = [
         },
       },
       {
-        path: 'projectId',
+        path: 'project-id',
         components: {
           header: () => import('layouts/headers/FloatingHeader.vue'),
           default: () => import('pages/ProjectIdPage.vue'),

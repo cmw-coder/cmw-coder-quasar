@@ -30,11 +30,6 @@ export const defaultAppConfigNetworkZoneMap: Record<NetworkZone, AppConfig> = {
     activeModel: 'CmwCoder',
     activeModelKey: 'CmwCoder',
     activeChat: 'default',
-    separateTokens: {
-      end: '<fim_middle>',
-      middle: '<fim_suffix>',
-      start: '<fim_prefix>',
-    },
     completionConfigs: {
       function: {
         contextLimit: 1500,
@@ -66,14 +61,9 @@ export const defaultAppConfigNetworkZoneMap: Record<NetworkZone, AppConfig> = {
     refreshToken: '',
     baseServerUrl: defaultServerUrlMap[NetworkZone.Public],
     activeTemplate: 'H3C通用',
-    activeModel: '百业灵犀',
+    activeModel: '百业灵犀-13B',
     activeModelKey: 'LS13B',
     activeChat: 'default',
-    separateTokens: {
-      end: '<fim_middle>',
-      middle: '<fim_suffix>',
-      start: '<fim_prefix>',
-    },
     completionConfigs: {
       function: {
         contextLimit: 1500,
@@ -108,11 +98,6 @@ export const defaultAppConfigNetworkZoneMap: Record<NetworkZone, AppConfig> = {
     activeModel: 'CmwCoder',
     activeModelKey: 'CmwCoder',
     activeChat: 'default',
-    separateTokens: {
-      end: '<fim_middle>',
-      middle: '<fim_suffix>',
-      start: '<fim_prefix>',
-    },
     completionConfigs: {
       function: {
         contextLimit: 1500,
@@ -147,11 +132,6 @@ export const defaultAppConfigNetworkZoneMap: Record<NetworkZone, AppConfig> = {
     activeModel: 'CmwCoder',
     activeModelKey: 'CmwCoder',
     activeChat: 'default',
-    separateTokens: {
-      end: '<fim_middle>',
-      middle: '<fim_suffix>',
-      start: '<fim_prefix>',
-    },
     completionConfigs: {
       function: {
         contextLimit: 1500,

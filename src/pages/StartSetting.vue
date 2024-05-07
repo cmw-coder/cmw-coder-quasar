@@ -58,8 +58,6 @@ const nextHandle = async () => {
       originalAppConfig.activeModelKey =
         defaultNetworkZoneAppConfig.activeModelKey;
       originalAppConfig.activeChat = defaultNetworkZoneAppConfig.activeChat;
-      originalAppConfig.separateTokens =
-        defaultNetworkZoneAppConfig.separateTokens;
       originalAppConfig.completionConfigs =
         defaultNetworkZoneAppConfig.completionConfigs;
 

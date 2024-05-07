@@ -54,9 +54,6 @@ export class PromptProcessor {
           : appConfig.completionConfigs.snippet;
 
     try {
-      console.log('============================');
-      console.log('api_question', promptElements.stringify());
-      console.log('============================');
       const answers = await api_question(
         {
           question: promptElements.stringify(),

@@ -1,16 +1,19 @@
 <script setup lang="ts">
-import { DateTime } from 'luxon';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute } from 'vue-router';
 
 import ProjectIdInput from 'components/ProjectIdInput.vue';
 import { WindowType } from 'shared/types/WindowType';
-import { ProjectIdQuery } from 'types/queries';
-import { ClientSetProjectIdActionMessage } from 'shared/types/ActionMessage';
+import { useService } from 'utils/common';
+import { ServiceType } from 'shared/services';
+import { useQuasar } from 'quasar';
 
 const { t } = useI18n();
-const { matched, query } = useRoute();
+
+const { notify } = useQuasar();
+
+const dataStoreService = useService(ServiceType.DATA_STORE);
+const windowService = useService(ServiceType.WINDOW);
 
 const i18n = (relativePath: string, data?: Record<string, unknown>) => {
   if (data) {
@@ -20,46 +23,52 @@ const i18n = (relativePath: string, data?: Record<string, unknown>) => {
   }
 };
 
-const { name } = matched[matched.length - 2];
-const { project } = new ProjectIdQuery(query);
-
 const error = ref(false);
 const isLoading = ref(false);
 const projectId = ref('');
+const project = ref('');
 
 const finish = () => {
-  if (name === WindowType.Floating) {
-    window.controlApi.close(WindowType.Floating);
-  }
+  windowService.closeWindow(WindowType.ProjectId);
 };
 
 const checkProjectId = async () => {
   isLoading.value = true;
-  window.actionApi.send(
-    new ClientSetProjectIdActionMessage({
-      project,
-      projectId: projectId.value,
-    }),
-  );
+  const activeProject = await windowService.getProjectIdWindowActiveProject();
+  if (!activeProject) {
+    notify({
+      type: 'warning',
+      message: i18n('errors.noProject'),
+    });
+    return;
+  }
+  project.value = activeProject;
+  await dataStoreService.setProjectId(activeProject, projectId.value);
   setTimeout(() => {
     isLoading.value = false;
     finish();
   }, 1000);
 };
 
-const temporaryProjectId = () => {
+const temporaryProjectId = async () => {
   isLoading.value = true;
-  window.actionApi.send(
-    new ClientSetProjectIdActionMessage({
-      project,
-      projectId: `Temp_${DateTime.now().toFormat('yyyyLLdd_HHmmss')}`,
-    }),
-  );
+  const activeProject = await windowService.getProjectIdWindowActiveProject();
+  if (!activeProject) {
+    notify({
+      type: 'warning',
+      message: i18n('errors.noProject'),
+    });
+    return;
+  }
+  project.value = activeProject;
+  await dataStoreService.setProjectId(activeProject, projectId.value);
   setTimeout(() => {
     isLoading.value = false;
     finish();
   }, 1000);
 };
+
+onMounted(async () => {});
 </script>
 
 <template>

@@ -26,6 +26,7 @@ import {
   QuestionTemplateModelContent,
 } from 'shared/types/QuestionTemplate';
 import Logger from 'electron-log';
+import { getRevision } from 'main/utils/svn';
 
 const defaultStoreData = deepClone(defaultAppData);
 
@@ -63,6 +64,9 @@ export class DataStoreService implements DataStoreServiceBase {
     );
   }
 
+  /**
+   * @deprecated
+   */
   async save(data: Partial<DataStoreType>) {
     this.dataStore.store = data;
   }
@@ -80,6 +84,12 @@ export class DataStoreService implements DataStoreServiceBase {
 
   async getAppDataAsync() {
     return this.appDataStore.store;
+  }
+  async setAppDataAsync<T extends keyof AppData>(
+    key: T,
+    value: AppData[T],
+  ): Promise<void> {
+    this.appDataStore.set(key, value);
   }
 
   getAppdata() {
@@ -139,5 +149,41 @@ export class DataStoreService implements DataStoreServiceBase {
     }
     this.activeModelContent = this.serverTemplate[activeModel];
     return this.activeModelContent;
+  }
+
+  async setProjectId(path: string, projectId: string) {
+    const project = this.appDataStore.get('project');
+    if (project[path]) {
+      project[path].id = projectId;
+    } else {
+      project[path] = {
+        id: projectId,
+        lastAddedLines: 0,
+        svn: [],
+      };
+    }
+    this.appDataStore.set('project', project);
+  }
+
+  async setProjectLastAddedLines(path: string, lastAddedLines: number) {
+    const project = this.appDataStore.get('project');
+    if (project[path]) {
+      project[path].lastAddedLines = lastAddedLines;
+      this.appDataStore.set('project', project);
+    }
+  }
+
+  async setProjectSvn(projectPath: string, svnPath: string) {
+    const project = this.appDataStore.get('project');
+    if (
+      project[projectPath] &&
+      !project[projectPath].svn.find(({ directory }) => directory === svnPath)
+    ) {
+      project[projectPath].svn.push({
+        directory: svnPath,
+        revision: await getRevision(svnPath),
+      });
+      this.appDataStore.set('project', project);
+    }
   }
 }

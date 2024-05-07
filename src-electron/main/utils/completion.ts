@@ -25,11 +25,10 @@ export const getClientVersion = (pid: number) => {
 };
 
 export const getProjectData = (project: string): DataProjectType => {
-  const dataStore = container.get<DataStoreService>(
-    ServiceType.DATA_STORE,
-  ).dataStore;
-  const projectData: DataProjectType | undefined =
-    dataStore.store.project[project];
+  const appData = container
+    .get<DataStoreService>(ServiceType.DATA_STORE)
+    .getAppdata();
+  const projectData: DataProjectType | undefined = appData.project[project];
   if (!projectData) {
     throw new Error('Completion Generate Failed, no valid project id.', {
       cause: CompletionErrorCause.projectData,
