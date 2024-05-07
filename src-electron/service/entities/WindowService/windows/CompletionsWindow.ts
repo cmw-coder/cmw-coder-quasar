@@ -41,7 +41,7 @@ export class CompletionsWindow extends BaseWindow {
       skipTaskbar: true,
       show: false,
       frame: false,
-      transparent: compatibility.transparentFallback,
+      transparent: !compatibility.transparentFallback,
       webPreferences: {
         // devTools: false,
         preload: resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD),

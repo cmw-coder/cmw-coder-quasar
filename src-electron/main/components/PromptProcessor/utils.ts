@@ -14,6 +14,7 @@ import { CompletionType } from 'shared/types/common';
 // Start with '//' or '#' or '{' or '/*', or is '***/'
 const detectRegex = /^\/\/|^#|^\{|^\/\*|^\*+\/$/;
 
+// 后文去重
 export const completionsPostProcess = (
   completions: string[],
   promptElements: PromptElements,
@@ -117,7 +118,7 @@ export const processHuggingFaceApi = async (
     } else {
       generatedSuggestions.push(generated_text);
     }
-    return _processGeneratedSuggestions(
+    return processGeneratedSuggestions(
       generatedSuggestions,
       completionType,
       promptElements.prefix,
@@ -183,7 +184,7 @@ export const processLinseerApi = async (
       .filter((completion) => completion.trim().length > 0);
     timer.add('CompletionGenerate', 'generationRequested');
 
-    return _processGeneratedSuggestions(
+    return processGeneratedSuggestions(
       generatedSuggestions,
       completionType,
       promptElements.prefix,
@@ -245,7 +246,7 @@ export const processLinseerBetaApi = async (
       .filter((completion) => completion.trim().length > 0);
     timer.add('CompletionGenerate', 'generationRequested');
 
-    return _processGeneratedSuggestions(
+    return processGeneratedSuggestions(
       generatedSuggestions,
       completionType,
       promptElements.prefix,
@@ -260,7 +261,7 @@ export const processLinseerBetaApi = async (
   return [];
 };
 
-const _processGeneratedSuggestions = (
+export const processGeneratedSuggestions = (
   generatedSuggestions: string[],
   completionType: CompletionType,
   prefix: string,

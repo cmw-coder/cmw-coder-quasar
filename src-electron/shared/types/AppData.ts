@@ -141,14 +141,26 @@ export const defaultQuestionTemplateModelContent: QuestionTemplateModelContent =
     prompt: {
       c: {
         other: {
-          common:
-            '<｜fim▁begin｜>Language:%{Language}%\r\n\r\n%{ImportList}%\r\n%{RelativeDefinition}%\r\n%{NearCode}%<｜fim▁hole｜>%{SuffixCode}%<｜fim▁end｜>',
-          commonMulti:
-            '你是一个 %{Language}% 开发工程师，请进行代码续写。请只返回生成的代码，不要做多余的文字描述。需要续写的代码如下：\r\n%{NearCode}%',
-          commonInline:
-            '<｜fim▁begin｜>Language:%{Language}%\r\n\r\n%{ImportList}%\r\n%{RelativeDefinition}%\r\n%{NearCode}%<｜fim▁hole｜>%{SuffixCode}%<｜fim▁end｜>',
-          embedding:
-            '你是一个 %{Language}% 开发工程师, 请根据以下规则步骤生成代码:\r\n  1. 根据如下示例代码仿写出符合要求的代码\r\n  2. 请只返回仿写的代码，不要做多余的文字描述\r\n====示例代码开始====\r\n%{Corpus}%\r\n====示例代码结束====\r\n我的要求如下：\r\n%{Comment}%',
+          comment: {
+            common:
+              '<｜fim▁begin｜>Language:%{Language}%\r\n\r\n%{ImportList}%\r\n%{RelativeDefinition}%\r\n%{NearCode}%<｜fim▁hole｜>%{SuffixCode}%<｜fim▁end｜>',
+            commonMulti:
+              '你是一个 %{Language}% 开发工程师，请进行代码续写。请只返回生成的代码，不要做多余的文字描述。需要续写的代码如下：\r\n%{NearCode}%',
+            commonInline:
+              '<｜fim▁begin｜>Language:%{Language}%\r\n\r\n%{ImportList}%\r\n%{RelativeDefinition}%\r\n%{NearCode}%<｜fim▁hole｜>%{SuffixCode}%<｜fim▁end｜>',
+            embedding:
+              '你是一个 %{Language}% 开发工程师, 请根据以下规则步骤生成代码:\r\n  1. 根据如下示例代码仿写出符合要求的代码\r\n  2. 请只返回仿写的代码，不要做多余的文字描述\r\n====示例代码开始====\r\n%{Corpus}%\r\n====示例代码结束====\r\n我的要求如下：\r\n%{Comment}%',
+          },
+          code: {
+            common:
+              '<｜fim▁begin｜>Language:%{Language}%\r\n\r\n%{ImportList}%\r\n%{RelativeDefinition}%\r\n%{NearCode}%<｜fim▁hole｜>%{SuffixCode}%<｜fim▁end｜>',
+            commonMulti:
+              '你是一个 %{Language}% 开发工程师，请进行代码续写。请只返回生成的代码，不要做多余的文字描述。需要续写的代码如下：\r\n%{NearCode}%',
+            commonInline:
+              '<｜fim▁begin｜>Language:%{Language}%\r\n\r\n%{ImportList}%\r\n%{RelativeDefinition}%\r\n%{NearCode}%<｜fim▁hole｜>%{SuffixCode}%<｜fim▁end｜>',
+            embedding:
+              '你是一个 %{Language}% 开发工程师, 请根据以下规则步骤生成代码:\r\n  1. 根据如下示例代码仿写出符合要求的代码\r\n  2. 请只返回仿写的代码，不要做多余的文字描述\r\n====示例代码开始====\r\n%{Corpus}%\r\n====示例代码结束====\r\n我的要求如下：\r\n%{Comment}%',
+          },
         },
       },
     },

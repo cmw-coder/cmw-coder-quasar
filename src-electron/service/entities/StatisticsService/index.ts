@@ -4,6 +4,7 @@ import { inject, injectable } from 'inversify';
 import { DateTime } from 'luxon';
 import { extname, basename } from 'path';
 import { v4 as uuid } from 'uuid';
+import dayjs from 'dayjs';
 
 import { PromptElements } from 'main/components/PromptExtractor/types';
 import { Completions } from 'main/components/PromptProcessor/types';
@@ -61,7 +62,17 @@ export class StatisticsService implements StatisticsServiceBase {
       completions: data.completions,
       position: data.position,
       projectId: data.projectId,
-      timelines: data.timelines,
+      timelines: {
+        startGenerate: dayjs(data.timelines.startGenerate.valueOf()).format(
+          'YYYY-MM-DD HH:mm:ss:SSS',
+        ),
+        endGenerate: dayjs(data.timelines.endGenerate.valueOf()).format(
+          'YYYY-MM-DD HH:mm:ss:SSS',
+        ),
+        startAccept: dayjs(data.timelines.startAccept.valueOf()).format(
+          'YYYY-MM-DD HH:mm:ss:SSS',
+        ),
+      },
       version,
     });
 
@@ -109,7 +120,17 @@ export class StatisticsService implements StatisticsServiceBase {
       log.debug('StatisticsReporter.completionCancel', {
         position: data.position,
         projectId: data.projectId,
-        timelines: data.timelines,
+        timelines: {
+          startGenerate: dayjs(data.timelines.startGenerate.valueOf()).format(
+            'YYYY-MM-DD HH:mm:ss:SSS',
+          ),
+          endGenerate: dayjs(data.timelines.endGenerate.valueOf()).format(
+            'YYYY-MM-DD HH:mm:ss:SSS',
+          ),
+          startAccept: dayjs(data.timelines.startAccept.valueOf()).format(
+            'YYYY-MM-DD HH:mm:ss:SSS',
+          ),
+        },
         version,
       });
     }
@@ -209,7 +230,17 @@ export class StatisticsService implements StatisticsServiceBase {
         completions: data.completions,
         position: data.position,
         projectId: data.projectId,
-        timelines: data.timelines,
+        timelines: {
+          startGenerate: dayjs(data.timelines.startGenerate.valueOf()).format(
+            'YYYY-MM-DD HH:mm:ss:SSS',
+          ),
+          endGenerate: dayjs(data.timelines.endGenerate.valueOf()).format(
+            'YYYY-MM-DD HH:mm:ss:SSS',
+          ),
+          startAccept: dayjs(data.timelines.startAccept.valueOf()).format(
+            'YYYY-MM-DD HH:mm:ss:SSS',
+          ),
+        },
         version,
       });
       const lineLength = candidate.split('\r\n').length;

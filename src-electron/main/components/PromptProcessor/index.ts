@@ -5,6 +5,7 @@ import { Completions, LRUCache } from 'main/components/PromptProcessor/types';
 import {
   completionsPostProcess,
   getCompletionType,
+  processGeneratedSuggestions,
 } from 'main/components/PromptProcessor/utils';
 import { timer } from 'main/utils/timer';
 import { container } from 'service';
@@ -53,9 +54,12 @@ export class PromptProcessor {
           : appConfig.completionConfigs.snippet;
 
     try {
+      console.log('============================');
+      console.log('api_question', promptElements.stringify());
+      console.log('============================');
       const answers = await api_question(
         {
-          question: promptElements.stringify(appConfig.separateTokens),
+          question: promptElements.stringify(),
           maxTokens: completionConfig.maxTokenCount,
           temperature: completionConfig.temperature,
           stop: completionConfig.stopTokens,
@@ -72,7 +76,11 @@ export class PromptProcessor {
         this._abortController.signal,
       );
       let candidates = answers.map((answer) => answer.text);
-
+      candidates = processGeneratedSuggestions(
+        candidates,
+        completionType,
+        promptElements.prefix,
+      );
       timer.add('CompletionGenerate', 'generationProcessed');
       this._cache.put(cacheKey, { candidates, type: completionType });
       candidates = completionsPostProcess(candidates, promptElements);

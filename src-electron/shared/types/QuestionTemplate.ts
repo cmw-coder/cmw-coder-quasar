@@ -20,7 +20,10 @@ export interface QuestionTemplateModelContent {
   prompt: Record<
     string,
     {
-      other: PromptTemplate;
+      other: {
+        comment: PromptTemplate;
+        code: PromptTemplate;
+      };
     }
   >;
 }
