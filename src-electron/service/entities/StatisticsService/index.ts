@@ -58,7 +58,7 @@ export class StatisticsService implements StatisticsServiceBase {
       return;
     }
 
-    log.debug('StatisticsReporter.acceptCompletion', {
+    log.debug('StatisticsReporter.completionAccept', {
       completions: data.completions,
       position: data.position,
       projectId: data.projectId,
