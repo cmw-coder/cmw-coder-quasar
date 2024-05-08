@@ -12,7 +12,7 @@ export abstract class BaseWindow {
 
   protected constructor(type: WindowType) {
     this._type = type;
-    this._url = `${process.env.APP_URL}/#${windowUrlMap[type]}`;
+    this._url = `${process.env.APP_URL}#${windowUrlMap[type]}`;
   }
 
   activate<
