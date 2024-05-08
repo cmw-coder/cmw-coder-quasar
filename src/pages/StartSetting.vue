@@ -36,7 +36,7 @@ const nextHandle = async () => {
     stepper.value.next();
   } else {
     // 测试地址是否可以访问通过
-    const pingUrl = `${serverUrl.value}/h3c-ai-assistant/plugin/sourceinsight/`;
+    const pingUrl = `${serverUrl.value}/h3c-ai-assistant/`;
     try {
       pingLoading.value = true;
       await checkUrlAccessible(pingUrl);
