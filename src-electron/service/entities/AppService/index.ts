@@ -21,6 +21,7 @@ import { SERVICE_CALL_KEY, ServiceType } from 'shared/services';
 import { AppServiceBase } from 'shared/services/types/AppServiceBase';
 import { ActionMessage, ActionType } from 'shared/types/ActionMessage';
 import { NetworkZone } from 'shared/config';
+import { WindowType } from 'shared/types/WindowType';
 
 interface AbstractServicePort {
   [key: string]: ((...args: unknown[]) => Promise<unknown>) | undefined;
@@ -70,7 +71,7 @@ export class AppService implements AppServiceBase {
 
     app.on('second-instance', () => {
       app.focus();
-      this._windowService.mainWindow.activate();
+      this._windowService.getWindow(WindowType.Main).activate();
     });
     app.whenReady().then(async () => {
       log.info('Comware Coder is ready');
@@ -101,7 +102,7 @@ export class AppService implements AppServiceBase {
 
       // 引导配置基础环境（黄、绿区 | 红区 | 路由红区）
       if (config.networkZone === NetworkZone.Unknown) {
-        this._windowService.startSettingWindow.activate();
+        this._windowService.getWindow(WindowType.StartSetting).activate();
         return;
       }
 
@@ -110,14 +111,14 @@ export class AppService implements AppServiceBase {
         // this._windowService.floatingWindow.login(
         //   this._windowService.mainWindow.isVisible,
         // );
-        this._windowService.loginWindow.activate();
+        this._windowService.getWindow(WindowType.Login).activate();
         return;
       }
 
       // 激活主窗口
-      this._windowService.mainWindow.activate();
+      this._windowService.getWindow(WindowType.Main).activate();
       // 激活代码窗口
-      this._windowService.completionsWindow.activate();
+      this._windowService.getWindow(WindowType.Completions).activate();
 
       this._dataStoreService.getActiveModelContent();
     });

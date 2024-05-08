@@ -6,9 +6,9 @@ import { ServiceType } from 'shared/services';
 import { WindowType, windowUrlMap } from 'shared/types/WindowType';
 
 export abstract class BaseWindow {
-  protected readonly _type: WindowType;
-  protected _window: BrowserWindow | undefined;
-  private _url: string;
+  readonly _type: WindowType;
+  _window: BrowserWindow | undefined;
+  _url: string;
 
   protected constructor(type: WindowType) {
     this._type = type;

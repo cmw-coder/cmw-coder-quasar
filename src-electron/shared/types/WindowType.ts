@@ -1,13 +1,4 @@
 export enum WindowType {
-  /**
-   * @deprecated
-   */
-  Floating = 'Floating',
-  /**
-   * @deprecated
-   */
-  Immersive = 'Immersive',
-
   Main = 'Main',
   Quake = 'Quake',
 
@@ -22,22 +13,22 @@ export enum WindowType {
   Feedback = 'Feedback',
 
   Completions = 'Completions',
+  Update = 'Update',
 }
 
 export const windowUrlMap: Record<WindowType, string> = {
-  [WindowType.Floating]: '/floating',
-  [WindowType.Immersive]: '/immersive',
   [WindowType.Main]: '/main',
 
   [WindowType.Login]: '/floating/login',
   [WindowType.StartSetting]: '/floating/start-setting',
-  [WindowType.Setting]: '/floating/setting',
+  [WindowType.Setting]: '/floating/settings',
   [WindowType.ProjectId]: '/floating/project-id',
   [WindowType.Chat]: '/floating/chat',
   [WindowType.Commit]: '/floating/commit',
   [WindowType.WorkFlow]: '/floating/workflow',
   [WindowType.Feedback]: '/floating/feedback',
+  [WindowType.Update]: '/floating/update',
 
-  [WindowType.Quake]: '/immersive/quake',
-  [WindowType.Completions]: '/immersive/completions',
+  [WindowType.Quake]: '/floating/quake',
+  [WindowType.Completions]: '/floating/completions',
 };

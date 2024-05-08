@@ -45,8 +45,10 @@ export class TrayIcon {
     this._tray = new Tray(this._icon);
     this._tray.on('click', this._trayClickCallback);
     const contextMenu = Menu.buildFromTemplate([
-      this._createNormalItem(MenuEntry.Feedback, 'Feedback'),
       this._createNormalItem(MenuEntry.About, 'About'),
+      this._createNormalItem(MenuEntry.Feedback, 'Feedback'),
+      this._createNormalItem(MenuEntry.Settings, 'Settings'),
+      this._createNormalItem(MenuEntry.Chat, 'Chat'),
       { type: 'separator' },
       this._createNormalItem(MenuEntry.Quit, 'Quit'),
     ]);

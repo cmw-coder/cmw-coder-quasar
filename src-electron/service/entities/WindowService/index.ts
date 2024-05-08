@@ -2,8 +2,6 @@ import { BrowserWindow, app } from 'electron';
 import { inject, injectable } from 'inversify';
 import { TrayIcon } from 'main/components/TrayIcon';
 import { MenuEntry } from 'main/components/TrayIcon/types';
-import { FloatingWindow } from 'main/windows/FloatingWindow';
-import { ImmersiveWindow } from 'main/windows/ImmersiveWindow';
 import { WindowServiceBase } from 'shared/services/types/WindowServiceInterBase';
 import { LoginWindow } from 'service/entities/WindowService/windows/LoginWindow';
 import { StartSettingWindow } from 'service/entities/WindowService/windows/StartSettingWindow';
@@ -14,111 +12,72 @@ import { ServiceType } from 'shared/services';
 import { ConfigService } from 'service/entities/ConfigService';
 import { FeedbackWindow } from 'service/entities/WindowService/windows/FeedbackWindow';
 import { CommitWindow } from 'service/entities/WindowService/windows/CommitWindow';
+import { SettingWindow } from 'service/entities/WindowService/windows/SettingWindow';
 import { ProjectIdWindow } from 'service/entities/WindowService/windows/ProjectIdWindow';
+import { ChatWindow } from 'service/entities/WindowService/windows/ChatWindow';
 import { WindowType } from 'shared/types/WindowType';
+import { BaseWindow } from './windows/BaseWindow';
+import { defaultAppData } from 'shared/types/AppData';
+
+interface WindowMap {
+  [WindowType.Chat]: ChatWindow;
+  [WindowType.Commit]: CommitWindow;
+  [WindowType.Feedback]: FeedbackWindow;
+  [WindowType.ProjectId]: ProjectIdWindow;
+  [WindowType.Setting]: SettingWindow;
+  [WindowType.StartSetting]: StartSettingWindow;
+  [WindowType.Login]: LoginWindow;
+  [WindowType.Completions]: CompletionsWindow;
+  [WindowType.Main]: MainWindow;
+  [WindowType.Quake]: MainWindow;
+  [WindowType.WorkFlow]: MainWindow;
+  [WindowType.Update]: MainWindow;
+}
 
 @injectable()
 export class WindowService implements WindowServiceBase {
-  /**
-   * @deprecated
-   */
-  floatingWindow: FloatingWindow;
-  /**
-   * @deprecated
-   */
-  immersiveWindow: ImmersiveWindow;
-  mainWindow: MainWindow;
   trayIcon: TrayIcon;
-
-  // @new
-  loginWindow: LoginWindow;
-  startSettingWindow: StartSettingWindow;
-  commitWindow: CommitWindow;
-  completionsWindow: CompletionsWindow;
-  feedbackWindow: FeedbackWindow;
-  projectIdWindow: ProjectIdWindow;
+  windowMap = new Map<WindowType, BaseWindow>();
 
   constructor(
     @inject(ServiceType.CONFIG)
     private _configService: ConfigService,
   ) {
-    this.floatingWindow = new FloatingWindow();
-    this.immersiveWindow = new ImmersiveWindow();
-    this.mainWindow = new MainWindow();
+    this.windowMap.set(WindowType.Chat, new ChatWindow());
+    this.windowMap.set(WindowType.Commit, new CommitWindow());
+    this.windowMap.set(WindowType.Feedback, new FeedbackWindow());
+    this.windowMap.set(WindowType.ProjectId, new ProjectIdWindow());
+    this.windowMap.set(WindowType.Setting, new SettingWindow());
+    this.windowMap.set(WindowType.StartSetting, new StartSettingWindow());
+    this.windowMap.set(WindowType.Login, new LoginWindow());
+    this.windowMap.set(WindowType.Completions, new CompletionsWindow());
+    this.windowMap.set(WindowType.Main, new MainWindow());
+    this.windowMap.set(WindowType.Quake, new MainWindow());
+    this.windowMap.set(WindowType.WorkFlow, new MainWindow());
 
     this.trayIcon = new TrayIcon();
 
-    this.trayIcon.onClick(() => this.mainWindow.activate());
+    this.trayIcon.onClick(() => this.getWindow(WindowType.Main).activate());
     this.trayIcon.registerMenuEntry(MenuEntry.Feedback, () =>
-      this.feedbackWindow.activate(),
+      this.getWindow(WindowType.Feedback).activate(),
     );
+    this.trayIcon.registerMenuEntry(MenuEntry.Settings, () => {
+      this.getWindow(WindowType.Setting).activate();
+    });
+    this.trayIcon.registerMenuEntry(MenuEntry.Chat, () => {
+      this.getWindow(WindowType.Chat).activate();
+    });
     this.trayIcon.registerMenuEntry(MenuEntry.Quit, () => app.exit());
-
-    // @new
-    this.loginWindow = new LoginWindow();
-    this.startSettingWindow = new StartSettingWindow();
-    this.completionsWindow = new CompletionsWindow();
-    this.feedbackWindow = new FeedbackWindow();
-    this.commitWindow = new CommitWindow();
-    this.projectIdWindow = new ProjectIdWindow();
   }
 
-  async finishStartSetting() {
-    const config = await this._configService.getConfigs();
-    if (config.networkZone === NetworkZone.Public && !config.token) {
-      // 黄、绿区环境需要登录
-      this.loginWindow.activate();
-    } else {
-      // 激活主窗口
-      this.mainWindow.activate();
-    }
-    this.startSettingWindow.destroy();
-  }
-
-  async finishLogin() {
-    this.mainWindow.activate();
-    this.loginWindow.destroy();
+  getWindow<T extends WindowType>(type: T): WindowMap[T] {
+    return this.windowMap.get(type) as WindowMap[T];
   }
 
   async closeWindow(type?: WindowType): Promise<void> {
     if (type) {
-      switch (type) {
-        case WindowType.Login:
-          this.loginWindow.destroy();
-          break;
-        case WindowType.StartSetting:
-          this.startSettingWindow.destroy();
-          break;
-        case WindowType.Completions:
-          this.completionsWindow.destroy();
-          break;
-        case WindowType.Feedback:
-          this.feedbackWindow.destroy();
-          break;
-        case WindowType.Commit:
-          this.commitWindow.destroy();
-          break;
-        case WindowType.ProjectId:
-          this.projectIdWindow.destroy();
-          break;
-        case WindowType.Main:
-          this.mainWindow.destroy();
-          break;
-        case WindowType.Chat:
-          this.mainWindow.destroy();
-          break;
-        case WindowType.WorkFlow:
-          this.mainWindow.destroy();
-          break;
-        case WindowType.Setting:
-          this.mainWindow.destroy();
-          break;
-        case WindowType.Quake:
-          this.mainWindow.destroy();
-          break;
-        default:
-          break;
-      }
+      const window = this.getWindow(type);
+      window.destroy();
     } else {
       const focusWindow = BrowserWindow.getFocusedWindow();
       if (focusWindow) {
@@ -127,7 +86,64 @@ export class WindowService implements WindowServiceBase {
     }
   }
 
+  async toggleMaximizeWindow(type?: WindowType): Promise<void> {
+    let window: BrowserWindow | null | undefined;
+    if (type) {
+      window = this.getWindow(type)._window;
+    } else {
+      window = BrowserWindow.getFocusedWindow();
+    }
+    if (window) {
+      window.isMaximized() ? window.unmaximize() : window.maximize();
+    }
+  }
+
+  async defaultWindowSize(type: WindowType): Promise<void> {
+    let window: BrowserWindow | null | undefined;
+    if (type) {
+      window = this.getWindow(type)._window;
+    } else {
+      window = BrowserWindow.getFocusedWindow();
+    }
+    if (window) {
+      const defaultWindowSize = defaultAppData.window[type];
+      window.setSize(
+        defaultWindowSize.width || 600,
+        defaultWindowSize.height || 800,
+      );
+    }
+  }
+
+  async minimizeWindow(type?: WindowType): Promise<void> {
+    let window: BrowserWindow | null | undefined;
+    if (type) {
+      window = this.getWindow(type)._window;
+    } else {
+      window = BrowserWindow.getFocusedWindow();
+    }
+    if (window) {
+      window.minimize();
+    }
+  }
+
+  async finishStartSetting() {
+    const config = await this._configService.getConfigs();
+    if (config.networkZone === NetworkZone.Public && !config.token) {
+      // 黄、绿区环境需要登录
+      this.getWindow(WindowType.Login).activate();
+    } else {
+      // 激活主窗口
+      this.getWindow(WindowType.Main).activate();
+    }
+    this.getWindow(WindowType.StartSetting).destroy();
+  }
+
+  async finishLogin() {
+    this.getWindow(WindowType.Login).activate();
+    this.getWindow(WindowType.Login).destroy();
+  }
+
   async getProjectIdWindowActiveProject(): Promise<string | undefined> {
-    return this.projectIdWindow.project;
+    return this.getWindow(WindowType.ProjectId).project;
   }
 }

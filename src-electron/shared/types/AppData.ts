@@ -88,17 +88,12 @@ export const defaultAppData: AppData = {
       width: 800,
       show: false,
     },
-    [WindowType.Floating]: {
-      height: 600,
+    [WindowType.Feedback]: {
+      height: 800,
       width: 800,
       show: false,
     },
-    [WindowType.Immersive]: {
-      height: 0,
-      width: 0,
-      show: false,
-    },
-    [WindowType.Feedback]: {
+    [WindowType.Update]: {
       height: 800,
       width: 800,
       show: false,

@@ -126,10 +126,10 @@ watch(
           outlined
           v-model="selectedProductLine"
           :options="productLineList"
-          label="Product Line"
+          :label="i18n('labels.productLine')"
         />
       </q-item>
-      <q-item tag="Model">
+      <q-item>
         <q-select
           v-if="!modelLoading"
           style="width: 100%"
@@ -137,7 +137,7 @@ watch(
           outlined
           v-model="selectedModel"
           :options="modelStringList"
-          label="Model"
+          :label="i18n('labels.model')"
         />
       </q-item>
     </q-list>
