@@ -17,7 +17,7 @@ export class TrayIcon {
   private _menuEntryMap = new Map<MenuEntry, () => void>();
   private readonly _title = `Comware Coder v${packageJson.version}`;
   private _tray: Tray | undefined;
-  private _trayClickCallback: () => void = () => log.debug('Tray clicked');
+  private _trayClickCallback: () => void = () => log.info('Tray clicked');
 
   activate() {
     if (!this._tray) {
