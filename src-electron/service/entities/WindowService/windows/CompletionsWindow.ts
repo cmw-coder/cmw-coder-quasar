@@ -67,7 +67,7 @@ export class CompletionsWindow extends BaseWindow {
     position: { x: number; y: number },
   ) {
     if (!this._window) {
-      this.create();
+      this._window = this.create();
     }
     if (this._window) {
       const { compatibility } = container
