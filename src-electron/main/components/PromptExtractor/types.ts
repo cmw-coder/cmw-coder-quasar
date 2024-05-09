@@ -1,4 +1,5 @@
 import { readFile } from 'fs/promises';
+import { decode } from 'iconv-lite';
 import { basename, dirname } from 'path';
 
 import { SymbolInfo } from 'main/types/SymbolInfo';
@@ -106,12 +107,12 @@ export class RawInputs {
     const result = Promise.all(
       this.symbols.map(async ({ path, startLine, endLine }) => ({
         path,
-        content: (
+        content: decode(
           await readFile(path, {
             flag: 'r',
-          })
+          }),
+          'gb2312',
         )
-          .toString()
           .split(/\r?\n/)
           .slice(startLine, endLine + 1)
           .join('\r\n'),
