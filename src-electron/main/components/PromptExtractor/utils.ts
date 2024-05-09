@@ -1,4 +1,5 @@
 import { existsSync, promises } from 'fs';
+import { decode } from 'iconv-lite';
 
 import { REGEXP_WORD } from 'main/components/PromptExtractor/constants';
 import { TextDocument } from 'main/types/TextDocument';
@@ -34,7 +35,7 @@ export const getAllOtherTabContents = async (
     )
   ).map((tabContent, index) => ({
     path: tabPaths[index],
-    content: tabContent.toString(),
+    content: decode(tabContent, 'gb2312'),
   }));
 };
 
