@@ -3,6 +3,20 @@ import { QuestionTemplateFile } from 'shared/types/QuestionTemplate';
 import { Answer, QuestionParams } from 'shared/api/QuestionType';
 import { AxiosProgressEvent } from 'axios';
 
+export const api_refreshToken = (refreshToken: string) =>
+  request<{
+    refresh_token: string;
+    access_token: string;
+    token_type: string;
+    expires_in: number;
+  }>({
+    url: '/kong/RdTestLoginService/api/token/refresh',
+    method: 'post',
+    params: {
+      refreshToken,
+    },
+  });
+
 // 获取产品线下的模板文件内容
 export const api_getProductLineQuestionTemplateFile = (productLine: string) =>
   request<QuestionTemplateFile>({
