@@ -115,6 +115,7 @@ export const processHuggingFaceApi = async (
     } else {
       generatedSuggestions.push(generated_text);
     }
+    log.debug('processHuggingFaceApi.rawResults', generatedSuggestions);
     return _processGeneratedSuggestions(
       generatedSuggestions,
       completionType,
