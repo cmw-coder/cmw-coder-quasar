@@ -6,11 +6,21 @@ import { Position } from 'main/types/vscode/position';
 
 const { readFile } = promises;
 
-export const codeStripEnd = (input: string): string => {
+export const getFunctionPrefix = (input: string): string | undefined => {
   const lines = input.split(/\r?\n/);
   const lastValidCodeLine =
-    lines.findLastIndex((line) => /^\/\/.*|^.*\*\/$/.test(line)) + 1;
-  return lines.slice(lastValidCodeLine).join('\r\n');
+    lines.findLastIndex((line) => /^\/\/.*|^\S+.*?\*\/\s*$/.test(line)) + 1;
+  if (lastValidCodeLine !== -1) {
+    return lines.slice(lastValidCodeLine).join('\r\n');
+  }
+};
+
+export const getFunctionSuffix = (input: string): string | undefined => {
+  const lines = input.split(/\r?\n/);
+  const firstFunctionEndLine = lines.findIndex((line) => /^}\S*/.test(line));
+  if (firstFunctionEndLine !== -1) {
+    return lines.slice(0, firstFunctionEndLine + 1).join('\r\n');
+  }
 };
 
 export const getAllOtherTabContents = async (
@@ -28,7 +38,7 @@ export const getAllOtherTabContents = async (
   }));
 };
 
-export const getContentsAroundContext = (
+export const getRemainedCodeContents = (
   document: TextDocument,
   position: Position,
   prefix: string,
@@ -59,7 +69,7 @@ export const separateTextByLine = (
     rawText = rawText.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
   }
   return rawText
-    .split('\n')
+    .split(/\r?\n/)
     .filter((tabContentLine) => tabContentLine.trim().length > 0);
 };
 

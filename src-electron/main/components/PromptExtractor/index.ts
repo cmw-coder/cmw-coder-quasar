@@ -11,12 +11,13 @@ import {
   SimilarSnippetConfig,
 } from 'main/components/PromptExtractor/types';
 import {
-  codeStripEnd,
+  getFunctionPrefix,
   getAllOtherTabContents,
-  getContentsAroundContext,
+  getRemainedCodeContents,
   getMostSimilarSnippetStartLine,
   separateTextByLine,
   tokenize,
+  getFunctionSuffix,
 } from 'main/components/PromptExtractor/utils';
 import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
@@ -39,8 +40,8 @@ export class PromptExtractor {
       this._getSimilarSnippets(
         document,
         position,
-        elements.prefix,
-        elements.suffix,
+        getFunctionPrefix(elements.prefix) ?? elements.prefix,
+        getFunctionSuffix(elements.suffix) ?? '',
         recentFiles,
       ),
       inputs.relativeDefinitions,
@@ -90,8 +91,8 @@ export class PromptExtractor {
   private async _getSimilarSnippets(
     document: TextDocument,
     position: Position,
-    prefix: string,
-    suffix: string,
+    functionPrefix: string,
+    functionSuffix: string,
     recentFiles: string[],
   ): Promise<SimilarSnippet[]> {
     log.debug({
@@ -112,33 +113,36 @@ export class PromptExtractor {
     }
 
     const startTime = Date.now();
-    const tabLines = (await getAllOtherTabContents(recentFiles)).map(
-      (tabContent) => ({
-        path: tabContent.path,
-        lines: separateTextByLine(tabContent.content, true),
-      }),
-    );
-    const contentsAroundContext = getContentsAroundContext(
+    const tabContentsWithoutComments = (
+      await getAllOtherTabContents(recentFiles)
+    ).map((tabContent) => ({
+      path: tabContent.path,
+      lines: separateTextByLine(tabContent.content, true),
+    }));
+
+    const remainedCodeContents = getRemainedCodeContents(
       document,
       position,
-      codeStripEnd(prefix),
-      suffix,
+      functionPrefix,
+      functionSuffix,
     );
-
-    tabLines.push(
+    tabContentsWithoutComments.push(
       {
         path: document.fileName,
-        lines: contentsAroundContext.before,
+        lines: remainedCodeContents.before,
       },
       {
         path: document.fileName,
-        lines: contentsAroundContext.after,
+        lines: remainedCodeContents.after,
       },
     );
 
     const similarSnippets = Array<SimilarSnippet>();
+    const referenceSnippetLines = separateTextByLine(
+      functionPrefix + functionSuffix,
+    );
 
-    tabLines.forEach(({ path, lines }) => {
+    tabContentsWithoutComments.forEach(({ path, lines }) => {
       const { score, startLine } = getMostSimilarSnippetStartLine(
         lines.map((line) =>
           tokenize(line, [
@@ -147,22 +151,19 @@ export class PromptExtractor {
             IGNORE_COMWARE_INTERNAL,
           ]),
         ),
-        tokenize(prefix, [
+        tokenize(referenceSnippetLines.join('\r\n'), [
           IGNORE_RESERVED_KEYWORDS,
           IGNORE_COMMON_WORD,
           IGNORE_COMWARE_INTERNAL,
         ]),
-        separateTextByLine(prefix, true).length,
+        referenceSnippetLines.length,
       );
       const currentMostSimilarSnippet: SimilarSnippet = {
         path,
         score: score,
         content: lines
-          .slice(
-            startLine,
-            startLine + separateTextByLine(prefix, true).length + 10,
-          )
-          .join('\n'),
+          .slice(startLine, startLine + referenceSnippetLines.length + 10)
+          .join('\r\n'),
       };
 
       similarSnippets.push(currentMostSimilarSnippet);
