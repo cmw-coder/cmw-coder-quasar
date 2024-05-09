@@ -1,11 +1,12 @@
 import log from 'electron-log/main';
 import { NsisUpdater, ProgressInfo, UpdateInfo } from 'electron-updater';
 import { injectable, inject } from 'inversify';
-
+import packageJson from 'root/package.json';
 import { ServiceType } from 'shared/services';
 import { UpdaterServiceBase } from 'shared/services/types/UpdaterServiceBase';
 import type { ConfigService } from 'service/entities/ConfigService';
 import type { WindowService } from 'service/entities/WindowService';
+import { WindowType } from 'shared/types/WindowType';
 
 @injectable()
 export class UpdaterService implements UpdaterServiceBase {
@@ -37,13 +38,23 @@ export class UpdaterService implements UpdaterServiceBase {
       log.info(event);
     });
 
-    this.onAvailable((updateInfo) =>
-      this._windowService.floatingWindow.updateShow(updateInfo),
-    );
+    this.onAvailable((updateInfo) => {
+      const { version, releaseDate } = updateInfo;
+      const searchString = {
+        currentVersion: packageJson.version,
+        newVersion: version,
+        releaseDate,
+      };
+      this._windowService.getWindow(WindowType.Update).activate(searchString);
+    });
     this.onDownloading((progressInfo) =>
-      this._windowService.floatingWindow.updateProgress(progressInfo),
+      this._windowService
+        .getWindow(WindowType.Update)
+        .updateProgress(progressInfo),
     );
-    this.onFinish(() => this._windowService.floatingWindow.updateFinish());
+    this.onFinish(() =>
+      this._windowService.getWindow(WindowType.Update).updateFinish(),
+    );
   }
 
   onAvailable(callback: (updateInfo: UpdateInfo) => void) {

@@ -10,14 +10,15 @@ import { MainWindow } from 'service/entities/WindowService/windows/MainWindow';
 import { NetworkZone } from 'shared/config';
 import { ServiceType } from 'shared/services';
 import { ConfigService } from 'service/entities/ConfigService';
+import { WindowType } from 'shared/types/WindowType';
 import { FeedbackWindow } from 'service/entities/WindowService/windows/FeedbackWindow';
 import { CommitWindow } from 'service/entities/WindowService/windows/CommitWindow';
 import { SettingWindow } from 'service/entities/WindowService/windows/SettingWindow';
 import { ProjectIdWindow } from 'service/entities/WindowService/windows/ProjectIdWindow';
 import { ChatWindow } from 'service/entities/WindowService/windows/ChatWindow';
-import { WindowType } from 'shared/types/WindowType';
-import { BaseWindow } from './windows/BaseWindow';
+import { BaseWindow } from 'service/entities/WindowService/windows/BaseWindow';
 import { defaultAppData } from 'shared/types/AppData';
+import { UpdateWindow } from 'service/entities/WindowService/windows/UpdateWindow';
 
 interface WindowMap {
   [WindowType.Chat]: ChatWindow;
@@ -29,9 +30,9 @@ interface WindowMap {
   [WindowType.Login]: LoginWindow;
   [WindowType.Completions]: CompletionsWindow;
   [WindowType.Main]: MainWindow;
+  [WindowType.Update]: UpdateWindow;
   [WindowType.Quake]: MainWindow;
   [WindowType.WorkFlow]: MainWindow;
-  [WindowType.Update]: MainWindow;
 }
 
 @injectable()
@@ -54,6 +55,7 @@ export class WindowService implements WindowServiceBase {
     this.windowMap.set(WindowType.Main, new MainWindow());
     this.windowMap.set(WindowType.Quake, new MainWindow());
     this.windowMap.set(WindowType.WorkFlow, new MainWindow());
+    this.windowMap.set(WindowType.Update, new UpdateWindow());
 
     this.trayIcon = new TrayIcon();
 

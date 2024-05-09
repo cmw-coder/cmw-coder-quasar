@@ -153,6 +153,7 @@ export class DataStoreService implements DataStoreServiceBase {
 
   async setProjectId(path: string, projectId: string) {
     const project = this.appDataStore.get('project');
+    console.log('setProjectId', path, projectId, project);
     if (project[path]) {
       project[path].id = projectId;
     } else {

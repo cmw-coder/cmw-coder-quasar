@@ -23,6 +23,7 @@ import {
   WsAction,
   WsMessageMapping,
 } from 'shared/types/WsMessage';
+import { WindowType } from 'shared/types/WindowType';
 
 interface ClientInfo {
   client: WebSocket;
@@ -129,7 +130,7 @@ export class WebsocketService implements WebsocketServiceBase {
   registerActions() {
     this.registerWsAction(WsAction.CompletionAccept, async ({ data }, pid) => {
       const { actionId, index } = data;
-      this._windowService.completionsWindow.completionClear();
+      this._windowService.getWindow(WindowType.Completions).completionClear();
       try {
         this._statisticsReporterService
           .completionAccept(actionId, index, getClientVersion(pid))
@@ -139,10 +140,12 @@ export class WebsocketService implements WebsocketServiceBase {
       }
     });
     this.registerWsAction(WsAction.CompletionCache, ({ data: isDelete }) => {
-      this._windowService.completionsWindow.completionUpdate(isDelete);
+      this._windowService
+        .getWindow(WindowType.Completions)
+        .completionUpdate(isDelete);
     });
     this.registerWsAction(WsAction.CompletionCancel, ({ data }, pid) => {
-      this._windowService.completionsWindow.completionClear();
+      this._windowService.getWindow(WindowType.Completions).completionClear();
       const { actionId, explicit } = data;
       if (explicit) {
         try {
@@ -227,7 +230,7 @@ export class WebsocketService implements WebsocketServiceBase {
           switch (error.cause) {
             case CompletionErrorCause.accessToken: {
               result = 'failure';
-              this._windowService.loginWindow.activate();
+              this._windowService.getWindow(WindowType.Login).activate();
               break;
             }
             case CompletionErrorCause.clientInfo: {
@@ -236,8 +239,10 @@ export class WebsocketService implements WebsocketServiceBase {
             }
             case CompletionErrorCause.projectData: {
               result = 'failure';
-              this._windowService.projectIdWindow.activate();
-              this._windowService.projectIdWindow.setProject(project);
+              this._windowService.getWindow(WindowType.ProjectId).activate();
+              this._windowService
+                .getWindow(WindowType.ProjectId)
+                .setProject(project);
               break;
             }
           }
@@ -264,27 +269,32 @@ export class WebsocketService implements WebsocketServiceBase {
           getClientVersion(pid),
         );
         if (candidate) {
-          this._windowService.completionsWindow.completionSelect(
-            candidate,
-            {
-              index,
-              total: this._statisticsReporterService.completionCount(actionId),
-            },
-            height,
-            { x, y },
-          );
+          this._windowService
+            .getWindow(WindowType.Completions)
+            .completionSelect(
+              candidate,
+              {
+                index,
+                total:
+                  this._statisticsReporterService.completionCount(actionId),
+              },
+              height,
+              { x, y },
+            );
         }
       } catch {
         this._statisticsReporterService.completionAbort(actionId);
       }
     });
     this.registerWsAction(WsAction.EditorCommit, ({ data: currentFile }) => {
-      this._windowService.commitWindow.activate();
-      this._windowService.commitWindow.setCurrentFile(currentFile);
+      this._windowService.getWindow(WindowType.Commit).activate();
+      this._windowService
+        .getWindow(WindowType.Commit)
+        .setCurrentFile(currentFile);
     });
     this.registerWsAction(WsAction.EditorFocusState, ({ data: isFocused }) => {
       if (!isFocused) {
-        this._windowService.completionsWindow.hide();
+        this._windowService.getWindow(WindowType.Completions).hide();
       }
     });
     this.registerWsAction(WsAction.EditorPaste, ({ data }, pid) => {
@@ -301,8 +311,10 @@ export class WebsocketService implements WebsocketServiceBase {
           switch (error.cause) {
             case CompletionErrorCause.projectData: {
               console.log('CompletionErrorCause.projectData', error);
-              this._windowService.projectIdWindow.activate();
-              this._windowService.projectIdWindow.setProject(project);
+              this._windowService.getWindow(WindowType.ProjectId).activate();
+              this._windowService
+                .getWindow(WindowType.ProjectId)
+                .setProject(project);
               break;
             }
             default: {

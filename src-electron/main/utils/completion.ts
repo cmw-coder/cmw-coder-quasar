@@ -29,7 +29,7 @@ export const getProjectData = (project: string): DataProjectType => {
     .get<DataStoreService>(ServiceType.DATA_STORE)
     .getAppdata();
   const projectData: DataProjectType | undefined = appData.project[project];
-  if (!projectData) {
+  if (!projectData || !projectData.id) {
     throw new Error('Completion Generate Failed, no valid project id.', {
       cause: CompletionErrorCause.projectData,
     });

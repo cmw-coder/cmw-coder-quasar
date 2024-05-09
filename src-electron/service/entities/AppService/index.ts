@@ -108,9 +108,6 @@ export class AppService implements AppServiceBase {
 
       // 黄、绿区版本调起登录界面
       if (config.networkZone === NetworkZone.Public && !config.token) {
-        // this._windowService.floatingWindow.login(
-        //   this._windowService.mainWindow.isVisible,
-        // );
         this._windowService.getWindow(WindowType.Login).activate();
         return;
       }

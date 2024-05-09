@@ -7,6 +7,7 @@ import { WindowType } from 'shared/types/WindowType';
 import { useService } from 'utils/common';
 import { ServiceType } from 'shared/services';
 import { useQuasar } from 'quasar';
+import { DateTime } from 'luxon';
 
 const { t } = useI18n();
 
@@ -61,7 +62,10 @@ const temporaryProjectId = async () => {
     return;
   }
   project.value = activeProject;
-  await dataStoreService.setProjectId(activeProject, projectId.value);
+  await dataStoreService.setProjectId(
+    activeProject,
+    `Temp_${DateTime.now().toFormat('yyyyLLdd_HHmmss')}`,
+  );
   setTimeout(() => {
     isLoading.value = false;
     finish();
