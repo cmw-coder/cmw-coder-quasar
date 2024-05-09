@@ -41,7 +41,7 @@ export class PromptExtractor {
         document,
         position,
         getFunctionPrefix(elements.prefix) ?? elements.prefix,
-        getFunctionSuffix(elements.suffix) ?? '',
+        getFunctionSuffix(elements.suffix) ?? elements.suffix,
         recentFiles,
       ),
       inputs.relativeDefinitions,
@@ -162,7 +162,7 @@ export class PromptExtractor {
         path,
         score: score,
         content: lines
-          .slice(startLine, startLine + referenceSnippetLines.length + 10)
+          .slice(startLine, startLine + referenceSnippetLines.length)
           .join('\r\n'),
       };
 
