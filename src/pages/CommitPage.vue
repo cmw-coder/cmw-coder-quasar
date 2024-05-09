@@ -1,35 +1,37 @@
 <script lang="ts" setup>
 import { useQuasar } from 'quasar';
-import { computed, onMounted, ref } from 'vue';
+import { PropType, computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute } from 'vue-router';
 
 import ChangeList from 'components/DiffPanels/ChangeList.vue';
 import DiffDisplay from 'components/DiffPanels/DiffDisplay.vue';
 import { ServiceType } from 'shared/services';
 import { FileChanges } from 'shared/types/svn';
 import { WindowType } from 'shared/types/WindowType';
-import { CommitQuery } from 'types/queries';
 import { generateCommitPrompt } from 'utils/commitPrompt';
 import { getLastDirName, useService } from 'utils/common';
 import { api_questionStream } from '../request/api';
 
+const props = defineProps({
+  windowType: {
+    type: String as PropType<WindowType>,
+    default: WindowType.Commit,
+  },
+});
+
 const { t } = useI18n();
 const { notify } = useQuasar();
-const { matched, query } = useRoute();
 const svnService = useService(ServiceType.SVN);
 const configService = useService(ServiceType.CONFIG);
 const windowService = useService(ServiceType.WINDOW);
 
 const baseName = 'pages.CommitPage.';
-const { name } = matched[matched.length - 2];
 
 const i18n = (relativePath: string) => {
   return t(baseName + relativePath);
 };
 
-const commitQuery = new CommitQuery(query);
-
+const currentFile = ref<string>('');
 const loadingCommit = ref(false);
 const loadingDiff = ref(false);
 const loadingGenerate = ref(false);
@@ -86,18 +88,21 @@ const generateCommitMessageHandle = async () => {
 };
 
 const refreshProjectList = async () => {
+  currentFile.value = (await windowService.getCommitWindowCurrentFile()) || '';
   const res = await svnService.getAllProjectList();
+  console.log('getAllProjectList', res, props.windowType, currentFile.value);
   svnList.value = res.map((item) => ({
     ...item,
     commitMessage: '',
   }));
   selectedSvnIndex.value = svnList.value.findIndex((item) =>
-    commitQuery.currentFile.includes(item.path),
+    currentFile.value.includes(item.path),
   );
   if (selectedSvnIndex.value === -1) {
     selectedSvnIndex.value = 0;
   }
 };
+
 const sendSvnCommitAction = async () => {
   loadingCommit.value = true;
   try {
@@ -115,7 +120,7 @@ const sendSvnCommitAction = async () => {
     //   activeProject.value.commitMessage,
     //   'administrator',
     // ).catch();
-    if (name === WindowType.Floating) {
+    if (props.windowType === WindowType.Commit) {
       setTimeout(() => closeWindow(), 2000);
     }
   } catch (e) {
@@ -253,7 +258,7 @@ onMounted(() => {
       </div>
       <div class="row q-gutter-x-md">
         <q-btn
-          v-if="name === WindowType.Floating"
+          v-if="windowType === WindowType.Commit"
           class="col-grow"
           flat
           :label="i18n('labels.cancel')"

@@ -75,10 +75,19 @@ export class AppService implements AppServiceBase {
     });
     app.whenReady().then(async () => {
       log.info('Comware Coder is ready');
-      // this._windowService.floatingWindow.activate();
-      // this._windowService.immersiveWindow.activate();
-      // this._windowService.mainWindow.activate();
-
+      // ========================
+      log.info('Merge Project Data From Old DataStore');
+      const oldProjectData = this._dataStoreService.dataStore.store.project;
+      const newProjectData = this._dataStoreService.getAppdata().project;
+      const oldProjectKeys = Object.keys(oldProjectData);
+      for (let i = 0; i < oldProjectKeys.length; i++) {
+        const key = oldProjectKeys[i];
+        if (newProjectData[key] === undefined) {
+          newProjectData[key] = oldProjectData[key];
+        }
+      }
+      this._dataStoreService.setAppData('project', newProjectData);
+      // ========================
       this._websocketService.startServer();
       this._websocketService.registerActions();
 
@@ -99,6 +108,8 @@ export class AppService implements AppServiceBase {
       );
 
       this._windowService.trayIcon.activate();
+      // 激活代码窗口
+      this._windowService.getWindow(WindowType.Completions).activate();
 
       // 引导配置基础环境（黄、绿区 | 红区 | 路由红区）
       if (config.networkZone === NetworkZone.Unknown) {
@@ -114,8 +125,6 @@ export class AppService implements AppServiceBase {
 
       // 激活主窗口
       this._windowService.getWindow(WindowType.Main).activate();
-      // 激活代码窗口
-      this._windowService.getWindow(WindowType.Completions).activate();
 
       this._dataStoreService.getActiveModelContent();
     });

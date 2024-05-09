@@ -8,4 +8,6 @@ export interface WindowServiceBase {
   minimizeWindow(type?: WindowType): Promise<void>;
   closeWindow(type?: WindowType): Promise<void>;
   getProjectIdWindowActiveProject(): Promise<string | undefined>;
+  getCommitWindowCurrentFile(): Promise<string | undefined>;
+  activeWindow(type: WindowType): Promise<void>;
 }

@@ -287,10 +287,10 @@ export class WebsocketService implements WebsocketServiceBase {
       }
     });
     this.registerWsAction(WsAction.EditorCommit, ({ data: currentFile }) => {
-      this._windowService.getWindow(WindowType.Commit).activate();
       this._windowService
         .getWindow(WindowType.Commit)
         .setCurrentFile(currentFile);
+      this._windowService.getWindow(WindowType.Commit).activate();
     });
     this.registerWsAction(WsAction.EditorFocusState, ({ data: isFocused }) => {
       if (!isFocused) {

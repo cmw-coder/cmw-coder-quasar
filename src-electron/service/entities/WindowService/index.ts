@@ -148,4 +148,12 @@ export class WindowService implements WindowServiceBase {
   async getProjectIdWindowActiveProject(): Promise<string | undefined> {
     return this.getWindow(WindowType.ProjectId).project;
   }
+
+  async getCommitWindowCurrentFile(): Promise<string | undefined> {
+    return this.getWindow(WindowType.Commit).currentFile;
+  }
+
+  async activeWindow(type: WindowType): Promise<void> {
+    this.getWindow(type).activate();
+  }
 }

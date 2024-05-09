@@ -159,6 +159,12 @@ export default {
         labels: {
           title: 'Comware Coder',
         },
+        tooltips: {
+          close: 'Close',
+          defaultSize: 'Restore default size',
+          minimize: 'Minimize',
+          toggleMaximize: 'Toggle maximize',
+        },
       },
       MainHeader: {
         labels: {

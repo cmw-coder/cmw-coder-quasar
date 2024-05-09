@@ -122,4 +122,8 @@ onBeforeUnmount(() => {
 body.body--dark {
   background-color: unset;
 }
+
+body {
+  overflow: hidden;
+}
 </style>

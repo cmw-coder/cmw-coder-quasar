@@ -16,11 +16,14 @@ export const routes: RouteRecordRaw[] = [
       {
         path: 'commit',
         components: {
-          header: () => import('layouts/headers/MainHeader.vue'),
+          header: () => import('layouts/headers/FloatingHeader.vue'),
           default: () => import('pages/CommitPage.vue'),
         },
         props: {
           header: {
+            windowType: WindowType.Commit,
+          },
+          default: {
             windowType: WindowType.Commit,
           },
         },
@@ -39,7 +42,7 @@ export const routes: RouteRecordRaw[] = [
       {
         path: 'feedback',
         components: {
-          header: () => import('layouts/headers/MainHeader.vue'),
+          header: () => import('layouts/headers/FloatingHeader.vue'),
           default: () => import('pages/FeedbackPage.vue'),
         },
         props: {
@@ -51,7 +54,7 @@ export const routes: RouteRecordRaw[] = [
       {
         path: 'login',
         components: {
-          header: () => import('layouts/headers/MainHeader.vue'),
+          header: () => import('layouts/headers/FloatingHeader.vue'),
           default: () => import('pages/LoginPage.vue'),
         },
         props: {
@@ -63,7 +66,7 @@ export const routes: RouteRecordRaw[] = [
       {
         path: 'project-id',
         components: {
-          header: () => import('layouts/headers/MainHeader.vue'),
+          header: () => import('layouts/headers/FloatingHeader.vue'),
           default: () => import('pages/ProjectIdPage.vue'),
         },
         props: {
@@ -75,7 +78,7 @@ export const routes: RouteRecordRaw[] = [
       {
         path: 'update',
         components: {
-          header: () => import('layouts/headers/MainHeader.vue'),
+          header: () => import('layouts/headers/FloatingHeader.vue'),
           default: () => import('pages/UpdatePage.vue'),
         },
         props: {
@@ -87,7 +90,7 @@ export const routes: RouteRecordRaw[] = [
       {
         path: 'start-setting',
         components: {
-          header: () => import('layouts/headers/MainHeader.vue'),
+          header: () => import('layouts/headers/FloatingHeader.vue'),
           default: () => import('pages/StartSetting.vue'),
         },
         props: {
@@ -99,7 +102,7 @@ export const routes: RouteRecordRaw[] = [
       {
         path: 'settings',
         components: {
-          header: () => import('layouts/headers/MainHeader.vue'),
+          header: () => import('layouts/headers/FloatingHeader.vue'),
           default: () => import('pages/SettingsPage.vue'),
         },
         props: {
@@ -144,6 +147,9 @@ export const routes: RouteRecordRaw[] = [
         },
         props: {
           header: {
+            windowType: WindowType.Main,
+          },
+          default: {
             windowType: WindowType.Main,
           },
         },

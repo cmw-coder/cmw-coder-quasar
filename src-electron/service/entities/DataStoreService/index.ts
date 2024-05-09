@@ -96,6 +96,10 @@ export class DataStoreService implements DataStoreServiceBase {
     return this.appDataStore.store;
   }
 
+  setAppData<T extends keyof AppData>(key: T, value: AppData[T]) {
+    this.appDataStore.set(key, value);
+  }
+
   async refreshServerTemplateList() {
     try {
       const username = await this._configService.getConfig('username');
