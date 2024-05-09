@@ -69,18 +69,21 @@ export const processHuggingFaceApi = async (
   const { endpoint, maxTokenCount, stopTokens, suggestionCount, temperature } =
     completionConfig;
 
-  log.debug('PromptProcessor.process.processHuggingFaceApi', {
-    inputs: promptElements.stringify(ApiStyle.HuggingFace, separateTokens),
-    parameters: {
-      best_of: suggestionCount,
-      details: true,
-      do_sample: true,
-      max_new_tokens: maxTokenCount,
-      stop: stopTokens,
-      temperature: temperature,
-      top_p: 0.95,
-    },
-  });
+  log.debug(
+    'PromptProcessor.process.processHuggingFaceApi.postData',
+    JSON.stringify({
+      inputs: promptElements.stringify(ApiStyle.HuggingFace, separateTokens),
+      parameters: {
+        best_of: suggestionCount,
+        details: true,
+        do_sample: true,
+        max_new_tokens: maxTokenCount,
+        stop: stopTokens,
+        temperature: temperature,
+        top_p: 0.95,
+      },
+    }),
+  );
 
   try {
     const {
