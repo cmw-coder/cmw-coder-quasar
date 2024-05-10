@@ -18,7 +18,7 @@ export const getFunctionPrefix = (input: string): string | undefined => {
 
 export const getFunctionSuffix = (input: string): string | undefined => {
   const lines = input.split(/\r?\n/);
-  const firstFunctionEndLine = lines.findIndex((line) => /^}\S*/.test(line));
+  const firstFunctionEndLine = lines.findIndex((line) => /^}\S*|^\/\*.*/.test(line));
   if (firstFunctionEndLine !== -1) {
     return lines.slice(0, firstFunctionEndLine + 1).join('\r\n');
   }

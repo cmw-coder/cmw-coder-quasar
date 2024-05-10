@@ -1,3 +1,4 @@
+import log from 'electron-log/main';
 import { readFile } from 'fs/promises';
 import { decode } from 'iconv-lite';
 import { basename, dirname } from 'path';
@@ -105,18 +106,28 @@ export class RawInputs {
 
   get relativeDefinitions() {
     const result = Promise.all(
-      this.symbols.map(async ({ path, startLine, endLine }) => ({
-        path,
-        content: decode(
-          await readFile(path, {
-            flag: 'r',
-          }),
-          'gb2312',
-        )
-          .split(/\r?\n/)
-          .slice(startLine, endLine + 1)
-          .join('\r\n'),
-      })),
+      this.symbols.map(async ({ path, startLine, endLine }) => {
+        try {
+          return {
+            path,
+            content: decode(
+              await readFile(path, {
+                flag: 'r',
+              }),
+              'gb2312',
+            )
+              .split(/\r?\n/)
+              .slice(startLine, endLine + 1)
+              .join('\r\n'),
+          };
+        } catch (e) {
+          log.warn(e);
+          return {
+            path,
+            content: '',
+          };
+        }
+      }),
     );
 
     timer.add('CompletionGenerate', 'GotRelativeDefinitions');
