@@ -14,6 +14,18 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('layouts/MainLayout.vue'),
     children: [
       {
+        path: 'chat',
+        components: {
+          header: () => import('layouts/headers/FloatingHeader.vue'),
+          default: () => import('pages/ChatIframePage.vue'),
+        },
+        props: {
+          header: {
+            windowType: WindowType.Chat,
+          },
+        },
+      },
+      {
         path: 'commit',
         components: {
           header: () => import('layouts/headers/FloatingHeader.vue'),

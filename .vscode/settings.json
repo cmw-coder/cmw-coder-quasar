@@ -54,6 +54,7 @@
     "undocked",
     "unmaximize",
     "unversioned",
-    "Userid"
+    "Userid",
+    "uuidv"
   ]
 }
