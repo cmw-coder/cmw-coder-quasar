@@ -8,7 +8,7 @@
   "scripts": {
     "lint": "eslint --ext .js,.ts,.vue ./",
     "format": "prettier --write \"**/*.{js,ts,vue,scss,html,md,json}\" --ignore-path .gitignore",
-    "dev": "quasar dev -m electron",
+    "dev": "chcp 65001 && quasar dev -m electron",
     "publish": "quasar build -m electron --publish"
   },
   "dependencies": {

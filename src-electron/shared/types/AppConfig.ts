@@ -24,6 +24,8 @@ export interface AppConfig {
   activeModel: string;
   activeModelKey: string;
   activeChat: string;
+  useMultipleChat: boolean;
+  useEnterSend: boolean;
   completionConfigs: {
     function: CompletionConfigType;
     line: CompletionConfigType;

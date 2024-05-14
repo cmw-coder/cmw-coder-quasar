@@ -30,6 +30,8 @@ export const defaultAppConfigNetworkZoneMap: Record<NetworkZone, AppConfig> = {
     activeModel: 'CmwCoder',
     activeModelKey: 'CmwCoder',
     activeChat: 'default',
+    useEnterSend: false,
+    useMultipleChat: true,
     completionConfigs: {
       function: {
         contextLimit: 1500,
@@ -64,6 +66,8 @@ export const defaultAppConfigNetworkZoneMap: Record<NetworkZone, AppConfig> = {
     activeModel: '百业灵犀-13B',
     activeModelKey: 'LS13B',
     activeChat: 'default',
+    useEnterSend: false,
+    useMultipleChat: true,
     completionConfigs: {
       function: {
         contextLimit: 1500,
@@ -98,6 +102,8 @@ export const defaultAppConfigNetworkZoneMap: Record<NetworkZone, AppConfig> = {
     activeModel: 'CmwCoder',
     activeModelKey: 'CmwCoder',
     activeChat: 'default',
+    useEnterSend: false,
+    useMultipleChat: true,
     completionConfigs: {
       function: {
         contextLimit: 1500,
@@ -132,6 +138,8 @@ export const defaultAppConfigNetworkZoneMap: Record<NetworkZone, AppConfig> = {
     activeModel: 'CmwCoder',
     activeModelKey: 'CmwCoder',
     activeChat: 'default',
+    useEnterSend: false,
+    useMultipleChat: true,
     completionConfigs: {
       function: {
         contextLimit: 1500,
