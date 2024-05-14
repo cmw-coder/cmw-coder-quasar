@@ -27,6 +27,8 @@ import {
 } from 'shared/types/QuestionTemplate';
 import Logger from 'electron-log';
 import { getRevision } from 'main/utils/svn';
+import { LocalChatManager } from 'service/entities/DataStoreService/LocalChatManager';
+import { ChatFileContent } from 'shared/types/ChatMessage';
 
 const defaultStoreData = deepClone(defaultAppData);
 
@@ -50,6 +52,7 @@ export class DataStoreService implements DataStoreServiceBase {
   activeModelContent: QuestionTemplateModelContent = deepClone(
     defaultQuestionTemplateModelContent,
   );
+  localChatManager = new LocalChatManager();
 
   constructor(
     @inject(ServiceType.CONFIG)
@@ -190,5 +193,29 @@ export class DataStoreService implements DataStoreServiceBase {
       });
       this.appDataStore.set('project', project);
     }
+  }
+
+  async getChatList() {
+    return this.localChatManager.getChatList();
+  }
+
+  async getChat(name: string) {
+    return this.localChatManager.getChat(name);
+  }
+
+  async newChat(name: string) {
+    return this.localChatManager.newChat(name);
+  }
+
+  async saveChat(name: string, content: ChatFileContent) {
+    return this.localChatManager.saveChat(name, content);
+  }
+
+  async deleteChat(name: string) {
+    return this.localChatManager.deleteChat(name);
+  }
+
+  async openChatListDir() {
+    return this.localChatManager.openChatListDir();
   }
 }

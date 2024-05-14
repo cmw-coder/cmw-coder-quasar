@@ -76,7 +76,7 @@ export class AiAssistantIframe {
     const configService = useService(ServiceType.CONFIG);
     const dataStoreService = useService(ServiceType.DATA_STORE);
     switch (command) {
-      case UiToExtensionCommand.GET_CONFIG:
+      case UiToExtensionCommand.GET_CONFIG: {
         const config = await configService.getConfigs();
         const modelContent = await dataStoreService.getActiveModelContent();
         const extensionConfig: ExtensionConfig = {
@@ -112,18 +112,62 @@ export class AiAssistantIframe {
           useEnterSend: false,
         };
         return extensionConfig as UiToExtensionCommandExecResultMap[T];
-      case UiToExtensionCommand.SET_CONFIG:
-        const { activeChat, useMultipleChat, useEnterSend } = <ExtensionConfig>(
-          data
-        );
-        await configService.setConfigs({
-          activeChat,
-          useMultipleChat,
-          useEnterSend,
-        });
-        return '' as UiToExtensionCommandExecResultMap[T];
-      case UiToExtensionCommand.GET_THEME:
+      }
+      case UiToExtensionCommand.SET_CONFIG: {
+        await configService.setConfigs(<ExtensionConfig>data);
+        return undefined as UiToExtensionCommandExecResultMap[T];
+      }
+      case UiToExtensionCommand.GET_THEME: {
         return 'DARK' as UiToExtensionCommandExecResultMap[T];
+      }
+      case UiToExtensionCommand.GET_TOKEN: {
+        const { token, refreshToken } = await configService.getConfigs();
+        return {
+          token,
+          refresh_token: refreshToken,
+          token_type: 'bearer',
+        } as UiToExtensionCommandExecResultMap[T];
+      }
+      case UiToExtensionCommand.SET_TOKEN: {
+        const { token, refresh_token } =
+          data as UiToExtensionCommandExecParamsMap[UiToExtensionCommand.SET_TOKEN];
+        await configService.setConfigs({ token, refreshToken: refresh_token });
+        return undefined as UiToExtensionCommandExecResultMap[T];
+      }
+      case UiToExtensionCommand.GET_QUESTION_TEMPLATE: {
+        const modelContent = await dataStoreService.getActiveModelContent();
+        return modelContent as UiToExtensionCommandExecResultMap[T];
+      }
+      case UiToExtensionCommand.GET_CHAT_LIST: {
+        const res = await dataStoreService.getChatList();
+        return res as UiToExtensionCommandExecResultMap[T];
+      }
+      case UiToExtensionCommand.GET_CHAT: {
+        const res = await dataStoreService.getChat(data as string);
+        return res as UiToExtensionCommandExecResultMap[T];
+      }
+      case UiToExtensionCommand.NEW_CHAT: {
+        const name =
+          data as UiToExtensionCommandExecParamsMap[UiToExtensionCommand.NEW_CHAT];
+        await dataStoreService.newChat(name);
+        return name as UiToExtensionCommandExecResultMap[T];
+      }
+      case UiToExtensionCommand.SAVE_CHAT: {
+        const { name, content } =
+          data as UiToExtensionCommandExecParamsMap[UiToExtensionCommand.SAVE_CHAT];
+        await dataStoreService.saveChat(name, content);
+        return name as UiToExtensionCommandExecResultMap[T];
+      }
+      case UiToExtensionCommand.DEL_CHAT: {
+        const name =
+          data as UiToExtensionCommandExecParamsMap[UiToExtensionCommand.DEL_CHAT];
+        await dataStoreService.deleteChat(name);
+        return undefined as UiToExtensionCommandExecResultMap[T];
+      }
+      case UiToExtensionCommand.OPEN_CHAT_LIST_DIR: {
+        await dataStoreService.openChatListDir();
+        return undefined as UiToExtensionCommandExecResultMap[T];
+      }
       default:
         break;
     }

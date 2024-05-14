@@ -1,59 +1,69 @@
 import { ExtensionConfig } from 'shared/types/ExtensionMessageDetails';
+import { QuestionTemplateModelContent } from 'shared/types/QuestionTemplate';
+import { ChatFileContent, ChatItem } from 'shared/types/ChatMessage';
 
 export enum UiToExtensionCommand {
   GET_CONFIG = 'GET_CONFIG',
   SET_CONFIG = 'SET_CONFIG',
   GET_THEME = 'GET_THEME',
-  // GET_STORAGE = 'GET_STORAGE',
-  // GET_TOKEN = 'GET_TOKEN',
-  // GET_QUESTION_TEMPLATE = 'GET_QUESTION_TEMPLATE',
-  // SET_TOKEN = 'SET_TOKEN',
+  GET_TOKEN = 'GET_TOKEN',
+  SET_TOKEN = 'SET_TOKEN',
+  GET_QUESTION_TEMPLATE = 'GET_QUESTION_TEMPLATE',
+  GET_CHAT_LIST = 'GET_CHAT_LIST',
+  GET_CHAT = 'GET_CHAT',
+  NEW_CHAT = 'NEW_CHAT',
+  SAVE_CHAT = 'SAVE_CHAT',
+  DEL_CHAT = 'DEL_CHAT',
+  OPEN_CHAT_LIST_DIR = 'OPEN_CHAT_LIST_DIR',
   // INSERT_CODE = 'INSERT_CODE',
   // COPY_CODE = 'COPY_CODE',
-  // GET_CHAT_LIST = 'GET_CHAT_LIST',
-  // GET_CHAT = 'GET_CHAT',
-  // NEW_CHAT = 'NEW_CHAT',
-  // SAVE_CHAT = 'SAVE_CHAT',
-  // DEL_CHAT = 'DEL_CHAT',
-  // OPEN_CHAT_LIST_DIR = 'OPEN_CHAT_LIST_DIR',
   // REFRESH_WEB_UI = 'REFRESH_WEB_UI',
 }
 
 export interface UiToExtensionCommandExecParamsMap {
   [UiToExtensionCommand.GET_CONFIG]: string;
   [UiToExtensionCommand.SET_CONFIG]: ExtensionConfig;
-  [UiToExtensionCommand.GET_THEME]: void;
-  // [UiToExtensionCommand.GET_STORAGE]: void;
-  // [UiToExtensionCommand.SET_TOKEN]: string;
-  // [UiToExtensionCommand.GET_TOKEN]: void;
-  // [UiToExtensionCommand.GET_QUESTION_TEMPLATE]: void;
+  [UiToExtensionCommand.GET_THEME]: undefined;
+  [UiToExtensionCommand.SET_TOKEN]: {
+    token: string;
+    refresh_token: string;
+    token_type: 'bearer';
+  };
+  [UiToExtensionCommand.GET_TOKEN]: undefined;
+  [UiToExtensionCommand.GET_QUESTION_TEMPLATE]: undefined;
+  [UiToExtensionCommand.GET_CHAT_LIST]: undefined;
+  [UiToExtensionCommand.GET_CHAT]: undefined;
+  [UiToExtensionCommand.NEW_CHAT]: string;
+  [UiToExtensionCommand.SAVE_CHAT]: {
+    name: string;
+    content: ChatFileContent;
+  };
+  [UiToExtensionCommand.DEL_CHAT]: string;
+  [UiToExtensionCommand.OPEN_CHAT_LIST_DIR]: undefined;
   // [UiToExtensionCommand.INSERT_CODE]: string;
   // [UiToExtensionCommand.COPY_CODE]: string;
-  // [UiToExtensionCommand.GET_CHAT_LIST]: void;
-  // [UiToExtensionCommand.GET_CHAT]: void;
-  // [UiToExtensionCommand.NEW_CHAT]: void;
-  // [UiToExtensionCommand.SAVE_CHAT]: void;
-  // [UiToExtensionCommand.DEL_CHAT]: void;
-  // [UiToExtensionCommand.OPEN_CHAT_LIST_DIR]: void;
   // [UiToExtensionCommand.REFRESH_WEB_UI]: void;
 }
 
 export interface UiToExtensionCommandExecResultMap {
   [UiToExtensionCommand.GET_CONFIG]: ExtensionConfig;
-  [UiToExtensionCommand.SET_CONFIG]: string;
-  [UiToExtensionCommand.GET_THEME]: void;
-  // [UiToExtensionCommand.GET_STORAGE]: void;
-  // [UiToExtensionCommand.SET_TOKEN]: string;
-  // [UiToExtensionCommand.GET_TOKEN]: void;
-  // [UiToExtensionCommand.GET_QUESTION_TEMPLATE]: void;
+  [UiToExtensionCommand.SET_CONFIG]: undefined;
+  [UiToExtensionCommand.GET_THEME]: string;
+  [UiToExtensionCommand.SET_TOKEN]: undefined;
+  [UiToExtensionCommand.GET_TOKEN]: {
+    token: string;
+    refresh_token: string;
+    token_type: 'bearer';
+  };
+  [UiToExtensionCommand.GET_QUESTION_TEMPLATE]: QuestionTemplateModelContent;
+  [UiToExtensionCommand.GET_CHAT_LIST]: ChatItem[];
+  [UiToExtensionCommand.GET_CHAT]: ChatFileContent;
+  [UiToExtensionCommand.NEW_CHAT]: string;
+  [UiToExtensionCommand.SAVE_CHAT]: string;
+  [UiToExtensionCommand.DEL_CHAT]: undefined;
+  [UiToExtensionCommand.OPEN_CHAT_LIST_DIR]: undefined;
   // [UiToExtensionCommand.INSERT_CODE]: string;
   // [UiToExtensionCommand.COPY_CODE]: string;
-  // [UiToExtensionCommand.GET_CHAT_LIST]: void;
-  // [UiToExtensionCommand.GET_CHAT]: void;
-  // [UiToExtensionCommand.NEW_CHAT]: void;
-  // [UiToExtensionCommand.SAVE_CHAT]: void;
-  // [UiToExtensionCommand.DEL_CHAT]: void;
-  // [UiToExtensionCommand.OPEN_CHAT_LIST_DIR]: void;
   // [UiToExtensionCommand.REFRESH_WEB_UI]: void;
 }
 
