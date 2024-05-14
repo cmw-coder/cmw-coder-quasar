@@ -19,3 +19,26 @@ export const useService = <T extends ServiceType>(serviceName: T): Service<T> =>
           window.actionApi.service(serviceName, functionName, ...payloads),
     },
   );
+
+export const checkUrlAccessible = (url: string, timeout = 5000) => {
+  return new Promise<void>((resolve, reject) => {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    fetch(url, {
+      signal: controller.signal,
+    })
+      .then((response) => {
+        if (response.ok) {
+          resolve();
+        } else {
+          reject();
+        }
+      })
+      .catch((error) => {
+        reject(error);
+      })
+      .finally(() => {
+        clearTimeout(id);
+      });
+  });
+};

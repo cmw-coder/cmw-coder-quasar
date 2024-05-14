@@ -41,15 +41,16 @@ export const getAddedLines = async (path: string, revision: number) => {
 };
 
 export const reportProjectAdditions = async () => {
-  const dataStore = container.get<DataStoreService>(
+  const dataStoreService = container.get<DataStoreService>(
     ServiceType.DATA_STORE,
-  ).dataStore;
+  );
+  const appData = dataStoreService.getAppdata();
   const statisticsReporterService = container.get<StatisticsService>(
     ServiceType.STATISTICS,
   );
   return (
     await Promise.all(
-      Object.entries(dataStore.store.project).map(
+      Object.entries(appData.project).map(
         async ([path, { id, lastAddedLines, svn }]) => ({
           path,
           id,
@@ -78,7 +79,7 @@ export const reportProjectAdditions = async () => {
         addedLines,
         lastAddedLines,
       });
-      dataStore.setProjectLastAddedLines(path, addedLines);
+      dataStoreService.setProjectLastAddedLines(path, addedLines);
       statisticsReporterService.incrementLines(
         addedLines - lastAddedLines,
         Date.now(),

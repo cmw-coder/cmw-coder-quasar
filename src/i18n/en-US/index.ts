@@ -1,5 +1,3 @@
-import { HuggingFaceModelType, LinseerModelType } from 'shared/types/model';
-
 export default {
   components: {
     AccountInput: {
@@ -100,16 +98,9 @@ export default {
     SettingCards: {
       CompletionCard: {
         labels: {
-          availableModels: {
-            [HuggingFaceModelType.ComwareV1]: 'Comware V1',
-            [HuggingFaceModelType.ComwareV2]: 'Comware V2',
-            [LinseerModelType.Linseer]: 'Linseer',
-            [LinseerModelType.Linseer_SR88Driver]:
-              'Linseer for SR88 Driver Team',
-            [LinseerModelType.Linseer_CClsw]: 'Linseer for CClsw Team',
-          },
-          currentModel: 'Current model',
           title: 'Code Completion',
+          productLine: 'Product Line',
+          model: 'Model',
         },
       },
       GeneralCard: {
@@ -167,6 +158,12 @@ export default {
       FloatingHeader: {
         labels: {
           title: 'Comware Coder',
+        },
+        tooltips: {
+          close: 'Close',
+          defaultSize: 'Restore default size',
+          minimize: 'Minimize',
+          toggleMaximize: 'Toggle maximize',
         },
       },
       MainHeader: {
@@ -238,6 +235,24 @@ export default {
     LoginPage: {
       labels: {
         title: 'Welcome',
+      },
+    },
+    StartSettingPage: {
+      labels: {
+        title: 'Please set your environment',
+        stepOneTitle: 'Select network zone',
+        stepTwoTitle: 'Set base server url',
+        redArea: 'Red',
+        normalArea: 'Yellow/Green',
+        redRouteArea: 'Red Route',
+        finish: 'Finish',
+        continue: 'Continue',
+        back: 'Back',
+      },
+      notifications: {
+        pingError:
+          'Failed to ping the server, Please check your network connection.',
+        pingSuccess: 'Successfully pinged the server',
       },
     },
     ProjectIdPage: {

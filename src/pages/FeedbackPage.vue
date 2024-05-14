@@ -1,19 +1,15 @@
 <script setup lang="ts">
 import { useQuasar } from 'quasar';
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
 import packageJson from 'app/package.json';
-import { feedBack } from 'boot/axios';
 import AccountInput from 'components/AccountInput.vue';
-import {
-  ActionType,
-  ConfigStoreLoadActionMessage,
-} from 'shared/types/ActionMessage';
-import { ActionApi } from 'types/ActionApi';
 import { WindowType } from 'shared/types/WindowType';
-import { ApiStyle } from 'shared/types/model';
+import { api_feedback } from 'src/request/api';
+import { useService } from 'utils/common';
+import { ServiceType } from 'shared/services';
 
 const baseName = 'pages.FeedbackPage.';
 
@@ -22,19 +18,21 @@ const { notify } = useQuasar();
 const { matched } = useRoute();
 const { back } = useRouter();
 
+const configService = useService(ServiceType.CONFIG);
+const windowService = useService(ServiceType.WINDOW);
+
 const i18n = (relativePath: string) => {
   return t(baseName + relativePath);
 };
 
 const { name } = matched[matched.length - 2];
 
-const accessToken = ref('');
 const description = ref('');
-const endpoint = ref('');
 const error = ref(false);
 const images = ref<string[]>([]);
 const loading = ref(false);
 const userId = ref('');
+const baseUrl = ref('');
 const version = ref(packageJson.version);
 
 const onFailed = (info: { files: readonly File[]; xhr: XMLHttpRequest }) => {
@@ -46,19 +44,19 @@ const onUploaded = (info: { files: readonly File[]; xhr: XMLHttpRequest }) => {
   }
 };
 
-const closeWindow = () => window.controlApi.hide(WindowType.Floating);
+const closeWindow = () => {
+  windowService.closeWindow(WindowType.Feedback);
+};
 
 const submit = async () => {
   loading.value = true;
   try {
-    const { data } = await feedBack(
-      endpoint.value,
-      accessToken.value,
-      description.value,
-      userId.value,
-      `Comware Coder ${version.value}`,
-      images.value,
-    );
+    const data = await api_feedback({
+      description: description.value,
+      userId: userId.value,
+      pictures: images.value,
+      version: `Comware Coder ${version.value}`,
+    });
     notify({
       type: 'positive',
       message: i18n('notifications.feedbackSuccess'),
@@ -89,22 +87,10 @@ const submit = async () => {
   loading.value = false;
 };
 
-const actionApi = new ActionApi(baseName);
-onMounted(() => {
-  actionApi.register(
-    ActionType.ConfigStoreLoad,
-    ({ apiStyle, config, data }) => {
-      if (apiStyle == ApiStyle.Linseer) {
-        accessToken.value = data.tokens.access;
-      }
-      endpoint.value = config.endpoints.aiService;
-      userId.value = config.userId;
-    },
-  );
-  window.actionApi.send(new ConfigStoreLoadActionMessage());
-});
-onBeforeUnmount(() => {
-  actionApi.unregister();
+onMounted(async () => {
+  const appConfig = await configService.getConfigs();
+  userId.value = appConfig.username;
+  baseUrl.value = appConfig.baseServerUrl;
 });
 </script>
 
@@ -136,10 +122,10 @@ onBeforeUnmount(() => {
           <q-uploader
             class="full-width"
             batch
-            :disable="!endpoint.length || loading"
+            :disable="!baseUrl.length || loading"
             field-name="files"
             multiple
-            :url="`${endpoint}/chatgpt/graph`"
+            :url="`${baseUrl}/kong/RdTestAiService-b/chatgpt/graph`"
             @failed="onFailed"
             @uploaded="onUploaded"
           />
@@ -160,7 +146,7 @@ onBeforeUnmount(() => {
           :disable="
             !description ||
             !description.length ||
-            !endpoint.length ||
+            !baseUrl.length ||
             !userId ||
             !userId.length ||
             !version.length ||

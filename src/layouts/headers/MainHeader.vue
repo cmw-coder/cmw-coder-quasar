@@ -1,26 +1,45 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { useRoute } from 'vue-router';
-
 import { bus } from 'boot/bus';
 import { WindowType } from 'shared/types/WindowType';
+import { useService } from 'utils/common';
+import { ServiceType } from 'app/src-electron/shared/services';
+import { PropType, onMounted } from 'vue';
+
+const props = defineProps({
+  windowType: {
+    type: String as PropType<WindowType>,
+    required: true,
+  },
+});
 
 const { t } = useI18n();
-const { matched } = useRoute();
 
 const i18n = (relativePath: string) => {
   return t('layouts.headers.MainHeader.' + relativePath);
 };
 
-const { name } = matched[matched.length - 2];
+const windowService = useService(ServiceType.WINDOW);
 
-const defaultSize = () => window.controlApi.resize({}, <WindowType>name);
+const defaultSize = () => {
+  windowService.defaultWindowSize(props.windowType);
+};
 
-const hide = () => window.controlApi.hide(<WindowType>name);
+const hide = () => {
+  windowService.closeWindow(props.windowType);
+};
 
-const minimize = () => window.controlApi.minimize(<WindowType>name);
+const minimize = () => {
+  windowService.minimizeWindow(props.windowType);
+};
 
-const toggleMaximize = () => window.controlApi.toggleMaximize();
+const toggleMaximize = () => {
+  windowService.toggleMaximizeWindow(props.windowType);
+};
+
+onMounted(() => {
+  console.log('MainHeader mounted', props.windowType);
+});
 </script>
 
 <template>

@@ -33,7 +33,7 @@ const sendQuestion = async () => {
     thinking.value = true;
     const currentQuestion = questionText.value.trim();
     questionText.value = '';
-    await askQuestion(endpoint.value, currentQuestion, accessToken.value);
+    await askQuestion(currentQuestion);
     thinking.value = false;
   }
 };

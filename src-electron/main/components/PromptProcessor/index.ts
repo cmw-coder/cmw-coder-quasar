@@ -1,23 +1,18 @@
 import { createHash } from 'crypto';
 import log from 'electron-log/main';
-import { userInfo } from 'os';
 import { PromptElements } from 'main/components/PromptExtractor/types';
 import { Completions, LRUCache } from 'main/components/PromptProcessor/types';
 import {
   completionsPostProcess,
   getCompletionType,
-  processHuggingFaceApi,
-  processLinseerApi,
-  processLinseerBetaApi,
+  processGeneratedSuggestions,
 } from 'main/components/PromptProcessor/utils';
-import { CompletionErrorCause } from 'main/utils/completion';
 import { timer } from 'main/utils/timer';
 import { container } from 'service';
 import type { ConfigService } from 'service/entities/ConfigService';
 import { ServiceType } from 'shared/services';
-import { ApiStyle } from 'shared/types/model';
-import { betaApiUserList } from 'shared/constants';
-import { LinseerModelConfigType } from 'main/stores/config/types';
+import { api_question } from 'main/request/api';
+import { CompletionType } from 'shared/types/common';
 
 export class PromptProcessor {
   private _abortController?: AbortController;
@@ -27,9 +22,10 @@ export class PromptProcessor {
     promptElements: PromptElements,
     projectId: string,
   ): Promise<Completions | undefined> {
-    const configStore = container.get<ConfigService>(
-      ServiceType.CONFIG,
-    ).configStore;
+    const appConfig = await container
+      .get<ConfigService>(ServiceType.CONFIG)
+      .getConfigs();
+
     const cacheKey = createHash('sha1')
       .update(promptElements.prefix.trimEnd())
       .digest('base64');
@@ -46,58 +42,54 @@ export class PromptProcessor {
 
     this._abortController?.abort();
 
-    const type = getCompletionType(promptElements);
-    let candidates: string[];
+    const completionType = getCompletionType(promptElements);
 
-    // 临时指定用户访问LinseerBeta版本
-    const username = userInfo().username;
-    if (betaApiUserList.includes(username)) {
-      this._abortController = new AbortController();
-      candidates = await processLinseerBetaApi(
-        configStore.modelConfig as LinseerModelConfigType,
-        promptElements,
-        type,
-        projectId,
+    this._abortController = new AbortController();
+
+    const completionConfig =
+      completionType === CompletionType.Function
+        ? appConfig.completionConfigs.function
+        : completionType === CompletionType.Line
+          ? appConfig.completionConfigs.line
+          : appConfig.completionConfigs.snippet;
+
+    try {
+      const answers = await api_question(
+        {
+          question: promptElements.stringify(),
+          maxTokens: completionConfig.maxTokenCount,
+          temperature: completionConfig.temperature,
+          stop: completionConfig.stopTokens,
+          suffix: promptElements.suffix,
+          plugin: 'SI',
+          profileModel: appConfig.activeModel,
+          productLine: appConfig.activeTemplate,
+          subType: projectId,
+          templateName:
+            completionType === CompletionType.Line
+              ? 'ShortLineCode'
+              : 'LineCode',
+        },
         this._abortController.signal,
       );
-    } else {
-      if (configStore.apiStyle === ApiStyle.HuggingFace) {
-        this._abortController = new AbortController();
-        candidates = await processHuggingFaceApi(
-          configStore.modelConfig,
-          promptElements,
-          type,
-          this._abortController.signal,
-        );
-      } else {
-        const accessToken = await configStore.getAccessToken();
-        if (!accessToken) {
-          throw new Error('Access token is not available.', {
-            cause: CompletionErrorCause.accessToken,
-          });
-        }
-        this._abortController = new AbortController();
-        candidates = await processLinseerApi(
-          configStore.modelConfig,
-          accessToken,
-          promptElements,
-          type,
-          projectId,
-          this._abortController.signal,
-        );
-      }
-    }
-    this._abortController = undefined;
-    timer.add('CompletionGenerate', 'generationProcessed');
-
-    if (candidates.length) {
-      log.info('PromptProcessor.process.cacheMiss', candidates);
-      this._cache.put(cacheKey, { candidates, type });
-      candidates = completionsPostProcess(candidates, promptElements);
-      return {
+      let candidates = answers.map((answer) => answer.text);
+      candidates = processGeneratedSuggestions(
         candidates,
-        type,
-      };
+        completionType,
+        promptElements.prefix,
+      );
+      timer.add('CompletionGenerate', 'generationProcessed');
+      this._cache.put(cacheKey, { candidates, type: completionType });
+      candidates = completionsPostProcess(candidates, promptElements);
+      if (candidates.length) {
+        return {
+          candidates,
+          type: completionType,
+        };
+      }
+    } catch (e) {
+      log.error('PromptProcessor.process.error', e);
+      return undefined;
     }
   }
 }

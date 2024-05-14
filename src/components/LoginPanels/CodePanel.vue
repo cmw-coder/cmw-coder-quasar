@@ -2,10 +2,9 @@
 import { useQuasar } from 'quasar';
 import { computed, reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-
-import { loginWithCode } from 'boot/axios';
-import { sendAuthCode } from 'components/LoginPanels/utils';
-import { ConfigStoreSaveActionMessage } from 'shared/types/ActionMessage';
+import { api_checkAuthCode, api_getAuthCode } from 'src/request/login';
+import { useService } from 'utils/common';
+import { ServiceType } from 'shared/services';
 
 const { t } = useI18n();
 const { notify } = useQuasar();
@@ -15,6 +14,9 @@ const i18n = (relativePath: string) => {
 };
 
 const emit = defineEmits(['finish', 'navigate']);
+
+const configService = useService(ServiceType.CONFIG);
+const windowService = useService(ServiceType.WINDOW);
 
 export interface Props {
   modelValue?: string;
@@ -41,14 +43,18 @@ const codeInput = reactive({
 
 const getCode = async () => {
   isResendLoading.value = true;
-  const result = await sendAuthCode(props.modelValue, i18n);
-  if (result.type === 'positive') {
+  try {
+    await api_getAuthCode(props.modelValue);
     notify({
-      ...result,
+      type: 'positive',
       message: i18n('notifications.codeSent'),
     });
-  } else {
-    notify(result);
+  } catch (error) {
+    notify({
+      type: 'negative',
+      message: i18n('notifications.codeFailed'),
+      caption: (error as Error).message,
+    });
   }
   isResendLoading.value = false;
 };
@@ -60,49 +66,28 @@ const goBack = () => {
 const login = async () => {
   isLoginLoading.value = true;
   try {
-    const { data } = await loginWithCode(props.modelValue, code.value);
-    if (data.error) {
-      notify({
-        type: 'warning',
-        message: i18n('notifications.loginFailed'),
-        caption: data.error,
-      });
-    } else {
-      window.actionApi.send(
-        new ConfigStoreSaveActionMessage({
-          type: 'config',
-          data: {
-            userId: data.userId,
-          },
-        }),
-      );
-      window.actionApi.send(
-        new ConfigStoreSaveActionMessage({
-          type: 'data',
-          data: {
-            tokens: {
-              access: data.token,
-              refresh: data.refreshToken,
-            },
-          },
-        }),
-      );
-      notify({
-        type: 'positive',
-        message: i18n('notifications.loginSuccess'),
-      });
-      setTimeout(() => {
-        emit('finish');
-      }, 2000);
+    const { userId, token, refreshToken, error } = await api_checkAuthCode(
+      props.modelValue,
+      code.value.trim(),
+    );
+    if (error) {
+      throw new Error(error);
     }
-  } catch (e) {
+    await configService.setConfigs({
+      username: userId,
+      token,
+      refreshToken,
+    });
+    windowService.finishLogin();
+  } catch (error) {
     notify({
       type: 'negative',
       message: i18n('notifications.loginFailed'),
-      caption: i18n('notifications.networkCaption'),
+      caption: (error as Error).message,
     });
+  } finally {
+    isLoginLoading.value = false;
   }
-  isLoginLoading.value = false;
 };
 </script>
 

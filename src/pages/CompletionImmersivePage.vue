@@ -2,12 +2,11 @@
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 
 import { fontSizeTable } from 'shared/constants';
-import {
-  ActionType,
-  DataStoreLoadActionMessage,
-} from 'shared/types/ActionMessage';
+import { ActionType } from 'shared/types/ActionMessage';
 import { useHighlighter } from 'stores/highlighter';
 import { ActionApi } from 'types/ActionApi';
+import { useService } from 'utils/common';
+import { ServiceType } from 'app/src-electron/shared/services';
 
 const baseName = 'pages.CompletionImmersivePage.';
 
@@ -32,8 +31,10 @@ const codeContent = computed(() =>
   ),
 );
 
+const dataStoreService = useService(ServiceType.DATA_STORE);
+
 const actionApi = new ActionApi(baseName);
-onMounted(() => {
+onMounted(async () => {
   actionApi.register(ActionType.CompletionClear, () => {
     cacheOffset.value = 0;
     currentCompletion.value = '';
@@ -67,13 +68,10 @@ onMounted(() => {
       cacheOffset.value += 1;
     }
   });
-  actionApi.register(ActionType.DataStoreLoad, (data) => {
-    if (data) {
-      console.log(data);
-      transparentFallback.value = data.compatibility.transparentFallback;
-    }
-  });
-  window.actionApi.send(new DataStoreLoadActionMessage());
+
+  const appData = await dataStoreService.getAppDataAsync();
+  console.log('CompletionImmersivePage.vue appData', appData);
+  transparentFallback.value = appData.compatibility.transparentFallback;
 });
 onBeforeUnmount(() => {
   actionApi.unregister();
@@ -123,5 +121,9 @@ onBeforeUnmount(() => {
 <style lang="scss">
 body.body--dark {
   background-color: unset;
+}
+
+body {
+  overflow: hidden;
 }
 </style>

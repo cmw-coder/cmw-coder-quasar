@@ -5,7 +5,6 @@ import { Server, type WebSocket } from 'ws';
 import { PromptExtractor } from 'main/components/PromptExtractor';
 import { RawInputs } from 'main/components/PromptExtractor/types';
 import { PromptProcessor } from 'main/components/PromptProcessor';
-import { initWindowDestroyInterval } from 'main/init';
 import {
   CompletionErrorCause,
   getClientVersion,
@@ -24,6 +23,7 @@ import {
   WsAction,
   WsMessageMapping,
 } from 'shared/types/WsMessage';
+import { WindowType } from 'shared/types/WindowType';
 
 interface ClientInfo {
   client: WebSocket;
@@ -130,7 +130,7 @@ export class WebsocketService implements WebsocketServiceBase {
   registerActions() {
     this.registerWsAction(WsAction.CompletionAccept, async ({ data }, pid) => {
       const { actionId, index } = data;
-      this._windowService.immersiveWindow.completionClear();
+      this._windowService.getWindow(WindowType.Completions).completionClear();
       try {
         this._statisticsReporterService
           .completionAccept(actionId, index, getClientVersion(pid))
@@ -140,10 +140,12 @@ export class WebsocketService implements WebsocketServiceBase {
       }
     });
     this.registerWsAction(WsAction.CompletionCache, ({ data: isDelete }) => {
-      this._windowService.immersiveWindow.completionUpdate(isDelete);
+      this._windowService
+        .getWindow(WindowType.Completions)
+        .completionUpdate(isDelete);
     });
     this.registerWsAction(WsAction.CompletionCancel, ({ data }, pid) => {
-      this._windowService.immersiveWindow.completionClear();
+      this._windowService.getWindow(WindowType.Completions).completionClear();
       const { actionId, explicit } = data;
       if (explicit) {
         try {
@@ -174,10 +176,6 @@ export class WebsocketService implements WebsocketServiceBase {
     this.registerWsAction(
       WsAction.CompletionGenerate,
       async ({ data }, pid) => {
-        clearInterval(this._windowService.immersiveWindowDestroyInterval);
-        this._windowService.immersiveWindowDestroyInterval =
-          initWindowDestroyInterval(this._windowService.immersiveWindow);
-
         const { caret } = data;
         const actionId = this._statisticsReporterService.completionBegin(caret);
         const project = this.getClientInfo(pid)?.currentProject;
@@ -232,9 +230,7 @@ export class WebsocketService implements WebsocketServiceBase {
           switch (error.cause) {
             case CompletionErrorCause.accessToken: {
               result = 'failure';
-              this._windowService.floatingWindow.login(
-                this._windowService.mainWindow.isVisible,
-              );
+              this._windowService.getWindow(WindowType.Login).activate();
               break;
             }
             case CompletionErrorCause.clientInfo: {
@@ -243,7 +239,10 @@ export class WebsocketService implements WebsocketServiceBase {
             }
             case CompletionErrorCause.projectData: {
               result = 'failure';
-              this._windowService.floatingWindow.projectId(project);
+              this._windowService.getWindow(WindowType.ProjectId).activate();
+              this._windowService
+                .getWindow(WindowType.ProjectId)
+                .setProject(project);
               break;
             }
           }
@@ -270,28 +269,32 @@ export class WebsocketService implements WebsocketServiceBase {
           getClientVersion(pid),
         );
         if (candidate) {
-          this._windowService.immersiveWindow.completionSelect(
-            candidate,
-            {
-              index,
-              total: this._statisticsReporterService.completionCount(actionId),
-            },
-            height,
-            { x, y },
-          );
+          this._windowService
+            .getWindow(WindowType.Completions)
+            .completionSelect(
+              candidate,
+              {
+                index,
+                total:
+                  this._statisticsReporterService.completionCount(actionId),
+              },
+              height,
+              { x, y },
+            );
         }
       } catch {
         this._statisticsReporterService.completionAbort(actionId);
       }
     });
     this.registerWsAction(WsAction.EditorCommit, ({ data: currentFile }) => {
-      this._windowService.floatingWindow.commit(currentFile);
+      this._windowService
+        .getWindow(WindowType.Commit)
+        .setCurrentFile(currentFile);
+      this._windowService.getWindow(WindowType.Commit).activate();
     });
     this.registerWsAction(WsAction.EditorFocusState, ({ data: isFocused }) => {
-      if (isFocused) {
-        // this._windowService.immersiveWindow.show();
-      } else {
-        this._windowService.immersiveWindow.hide();
+      if (!isFocused) {
+        this._windowService.getWindow(WindowType.Completions).hide();
       }
     });
     this.registerWsAction(WsAction.EditorPaste, ({ data }, pid) => {
@@ -307,7 +310,11 @@ export class WebsocketService implements WebsocketServiceBase {
           const error = <Error>e;
           switch (error.cause) {
             case CompletionErrorCause.projectData: {
-              this._windowService.floatingWindow.projectId(project);
+              console.log('CompletionErrorCause.projectData', error);
+              this._windowService.getWindow(WindowType.ProjectId).activate();
+              this._windowService
+                .getWindow(WindowType.ProjectId)
+                .setProject(project);
               break;
             }
             default: {
@@ -329,10 +336,7 @@ export class WebsocketService implements WebsocketServiceBase {
         const project = this.getClientInfo(pid)?.currentProject;
         if (project && project.length) {
           try {
-            await this._dataStoreService.dataStore.setProjectSvn(
-              project,
-              svnPath,
-            );
+            await this._dataStoreService.setProjectSvn(project, svnPath);
           } catch (e) {
             log.error('EditorSwitchSvn', e);
           }

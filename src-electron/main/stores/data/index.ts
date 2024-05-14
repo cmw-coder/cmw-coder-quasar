@@ -17,6 +17,9 @@ const getAs = <T>(store: unknown, key: string): T => {
   return <T>(<Conf>store).get(key);
 };
 
+/**
+ * @deprecated
+ */
 export class DataStore {
   private _store: ElectronStore<DataStoreType>;
 
@@ -97,6 +100,9 @@ export class DataStore {
     this._store.store = extend(true, this._store.store, value);
   }
 
+  /**
+   * @deprecated
+   */
   async setProjectId(path: string, projectId: string) {
     const store = this.store;
     if (store.project[path]) {
@@ -111,6 +117,9 @@ export class DataStore {
     this.store = store;
   }
 
+  /**
+   * @deprecated
+   */
   async setProjectLastAddedLines(path: string, lastAddedLines: number) {
     const store = this.store;
     if (store.project[path]) {
@@ -119,6 +128,9 @@ export class DataStore {
     }
   }
 
+  /**
+   * @deprecated
+   */
   async setProjectSvn(projectPath: string, svnPath: string) {
     const store = this.store;
     if (

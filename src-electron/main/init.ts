@@ -1,5 +1,8 @@
-import { BaseWindow } from 'main/types/BaseWindow';
+import { BaseWindow } from 'service/entities/WindowService/windows/BaseWindow';
 
+/**
+ * @deprecated
+ */
 export const initWindowDestroyInterval = (baseWindow: BaseWindow) =>
   setInterval(
     () => {

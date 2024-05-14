@@ -9,22 +9,46 @@ export const routes: RouteRecordRaw[] = [
     redirect: '/main',
   },
   {
-    name: WindowType.Floating,
+    name: 'floating',
     path: '/floating',
     component: () => import('layouts/MainLayout.vue'),
     children: [
+      {
+        path: 'chat',
+        components: {
+          header: () => import('layouts/headers/FloatingHeader.vue'),
+          default: () => import('pages/ChatIframePage.vue'),
+        },
+        props: {
+          header: {
+            windowType: WindowType.Chat,
+          },
+        },
+      },
       {
         path: 'commit',
         components: {
           header: () => import('layouts/headers/FloatingHeader.vue'),
           default: () => import('pages/CommitPage.vue'),
         },
+        props: {
+          header: {
+            windowType: WindowType.Commit,
+          },
+          default: {
+            windowType: WindowType.Commit,
+          },
+        },
       },
       {
         path: 'completions',
         components: {
-          header: () => import('layouts/headers/FloatingHeader.vue'),
-          default: () => import('pages/CompletionFloatingPage.vue'),
+          default: () => import('pages/CompletionImmersivePage.vue'),
+        },
+        props: {
+          header: {
+            windowType: WindowType.Completions,
+          },
         },
       },
       {
@@ -33,6 +57,11 @@ export const routes: RouteRecordRaw[] = [
           header: () => import('layouts/headers/FloatingHeader.vue'),
           default: () => import('pages/FeedbackPage.vue'),
         },
+        props: {
+          header: {
+            windowType: WindowType.Feedback,
+          },
+        },
       },
       {
         path: 'login',
@@ -40,12 +69,22 @@ export const routes: RouteRecordRaw[] = [
           header: () => import('layouts/headers/FloatingHeader.vue'),
           default: () => import('pages/LoginPage.vue'),
         },
+        props: {
+          header: {
+            windowType: WindowType.Login,
+          },
+        },
       },
       {
-        path: 'projectId',
+        path: 'project-id',
         components: {
           header: () => import('layouts/headers/FloatingHeader.vue'),
           default: () => import('pages/ProjectIdPage.vue'),
+        },
+        props: {
+          header: {
+            windowType: WindowType.ProjectId,
+          },
         },
       },
       {
@@ -54,24 +93,34 @@ export const routes: RouteRecordRaw[] = [
           header: () => import('layouts/headers/FloatingHeader.vue'),
           default: () => import('pages/UpdatePage.vue'),
         },
-      },
-    ],
-  },
-  {
-    name: WindowType.Immersive,
-    path: '/immersive',
-    component: () => import('layouts/SimpleLayout.vue'),
-    children: [
-      {
-        path: 'completions',
-        components: {
-          default: () => import('pages/CompletionImmersivePage.vue'),
+        props: {
+          header: {
+            windowType: WindowType.Update,
+          },
         },
       },
       {
-        path: 'quake',
+        path: 'start-setting',
         components: {
-          default: () => import('pages/QuakePage.vue'),
+          header: () => import('layouts/headers/FloatingHeader.vue'),
+          default: () => import('pages/StartSetting.vue'),
+        },
+        props: {
+          header: {
+            windowType: WindowType.StartSetting,
+          },
+        },
+      },
+      {
+        path: 'settings',
+        components: {
+          header: () => import('layouts/headers/FloatingHeader.vue'),
+          default: () => import('pages/SettingsPage.vue'),
+        },
+        props: {
+          header: {
+            windowType: WindowType.Setting,
+          },
         },
       },
     ],
@@ -95,6 +144,11 @@ export const routes: RouteRecordRaw[] = [
           // rightDrawer: () => import('layouts/drawers/RightMainDrawer.vue'),
           footer: () => import('layouts/footers/QuestionFooter.vue'),
         },
+        props: {
+          header: {
+            windowType: WindowType.Main,
+          },
+        },
       },
       {
         path: 'commit',
@@ -102,6 +156,14 @@ export const routes: RouteRecordRaw[] = [
           header: () => import('layouts/headers/MainHeader.vue'),
           leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
           default: () => import('pages/CommitPage.vue'),
+        },
+        props: {
+          header: {
+            windowType: WindowType.Main,
+          },
+          default: {
+            windowType: WindowType.Main,
+          },
         },
       },
       {
@@ -111,6 +173,11 @@ export const routes: RouteRecordRaw[] = [
           leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
           default: () => import('pages/DeveloperPage.vue'),
         },
+        props: {
+          header: {
+            windowType: WindowType.Main,
+          },
+        },
       },
       {
         path: 'feedback',
@@ -118,6 +185,11 @@ export const routes: RouteRecordRaw[] = [
           header: () => import('layouts/headers/MainHeader.vue'),
           leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
           default: () => import('pages/FeedbackPage.vue'),
+        },
+        props: {
+          header: {
+            windowType: WindowType.Main,
+          },
         },
       },
       {
@@ -127,6 +199,11 @@ export const routes: RouteRecordRaw[] = [
           leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
           default: () => import('pages/SettingsPage.vue'),
         },
+        props: {
+          header: {
+            windowType: WindowType.Main,
+          },
+        },
       },
       {
         path: 'workflow',
@@ -134,6 +211,11 @@ export const routes: RouteRecordRaw[] = [
           header: () => import('layouts/headers/MainHeader.vue'),
           leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
           default: () => import('pages/WorkflowPage.vue'),
+        },
+        props: {
+          header: {
+            windowType: WindowType.Main,
+          },
         },
       },
     ],

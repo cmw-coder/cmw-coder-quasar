@@ -1,43 +1,37 @@
 <script lang="ts" setup>
 import { useQuasar } from 'quasar';
-import { computed, onMounted, ref } from 'vue';
+import { PropType, computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute } from 'vue-router';
 
 import ChangeList from 'components/DiffPanels/ChangeList.vue';
 import DiffDisplay from 'components/DiffPanels/DiffDisplay.vue';
 import { ServiceType } from 'shared/services';
-import {
-  ActionType,
-  ConfigStoreLoadActionMessage,
-} from 'shared/types/ActionMessage';
-import { ApiStyle } from 'shared/types/model';
 import { FileChanges } from 'shared/types/svn';
 import { WindowType } from 'shared/types/WindowType';
-import { ActionApi } from 'types/ActionApi';
-import { CommitQuery } from 'types/queries';
-import {
-  generateCommitMessage,
-  generateCommitPrompt,
-} from 'utils/commitPrompt';
+import { generateCommitPrompt } from 'utils/commitPrompt';
 import { getLastDirName, useService } from 'utils/common';
+import { api_questionStream } from '../request/api';
+
+const props = defineProps({
+  windowType: {
+    type: String as PropType<WindowType>,
+    default: WindowType.Commit,
+  },
+});
 
 const { t } = useI18n();
 const { notify } = useQuasar();
-const { matched, query } = useRoute();
 const svnService = useService(ServiceType.SVN);
+const configService = useService(ServiceType.CONFIG);
+const windowService = useService(ServiceType.WINDOW);
 
 const baseName = 'pages.CommitPage.';
-const { name } = matched[matched.length - 2];
 
 const i18n = (relativePath: string) => {
   return t(baseName + relativePath);
 };
 
-const commitQuery = new CommitQuery(query);
-
-const accessToken = ref<string>();
-const endpoint = ref<string>();
+const currentFile = ref<string>('');
 const loadingCommit = ref(false);
 const loadingDiff = ref(false);
 const loadingGenerate = ref(false);
@@ -56,18 +50,31 @@ const selectedSvn = computed(() => {
   return svnList.value[selectedSvnIndex.value];
 });
 
-const closeWindow = () => window.controlApi.hide(WindowType.Floating);
+const closeWindow = () => {
+  windowService.closeWindow(WindowType.Commit);
+};
 const generateCommitMessageHandle = async () => {
+  const appConfig = await configService.getConfigs();
   const changedFileList = selectedSvn.value.changedFileList;
   if (changedFileList && changedFileList.length) {
     loadingGenerate.value = true;
     const commitPrompt = generateCommitPrompt(changedFileList);
     try {
-      await generateCommitMessage(
-        endpoint.value || '',
-        commitPrompt,
-        (message) => (selectedSvn.value.commitMessage = message),
-        accessToken.value,
+      await api_questionStream(
+        {
+          question: commitPrompt,
+          productLine: appConfig.activeTemplate,
+          profileModel: appConfig.activeModel,
+          templateName: 'Chat',
+        },
+        (event) => {
+          const responseText = event.event.target.responseText as string;
+          selectedSvn.value.commitMessage = responseText
+            .split('data:')
+            .filter((item) => item.trim() !== '')
+            .map((item) => JSON.parse(item.trim()).message)
+            .join('');
+        },
       );
     } catch (e) {
       notify({
@@ -81,18 +88,21 @@ const generateCommitMessageHandle = async () => {
 };
 
 const refreshProjectList = async () => {
+  currentFile.value = (await windowService.getCommitWindowCurrentFile()) || '';
   const res = await svnService.getAllProjectList();
+  console.log('getAllProjectList', res, props.windowType, currentFile.value);
   svnList.value = res.map((item) => ({
     ...item,
     commitMessage: '',
   }));
   selectedSvnIndex.value = svnList.value.findIndex((item) =>
-    commitQuery.currentFile.includes(item.path),
+    currentFile.value.includes(item.path),
   );
   if (selectedSvnIndex.value === -1) {
     selectedSvnIndex.value = 0;
   }
 };
+
 const sendSvnCommitAction = async () => {
   loadingCommit.value = true;
   try {
@@ -110,7 +120,7 @@ const sendSvnCommitAction = async () => {
     //   activeProject.value.commitMessage,
     //   'administrator',
     // ).catch();
-    if (name === WindowType.Floating) {
+    if (props.windowType === WindowType.Commit) {
       setTimeout(() => closeWindow(), 2000);
     }
   } catch (e) {
@@ -123,19 +133,8 @@ const sendSvnCommitAction = async () => {
   loadingCommit.value = false;
 };
 
-const actionApi = new ActionApi(baseName);
 onMounted(() => {
   refreshProjectList();
-  actionApi.register(
-    ActionType.ConfigStoreLoad,
-    ({ apiStyle, config, data }) => {
-      if (apiStyle == ApiStyle.Linseer) {
-        accessToken.value = data.tokens.access;
-      }
-      endpoint.value = config.endpoints.aiService;
-    },
-  );
-  window.actionApi.send(new ConfigStoreLoadActionMessage());
 });
 </script>
 
@@ -259,7 +258,7 @@ onMounted(() => {
       </div>
       <div class="row q-gutter-x-md">
         <q-btn
-          v-if="name === WindowType.Floating"
+          v-if="windowType === WindowType.Commit"
           class="col-grow"
           flat
           :label="i18n('labels.cancel')"

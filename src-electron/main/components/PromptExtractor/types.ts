@@ -3,69 +3,66 @@ import { readFile } from 'fs/promises';
 import { decode } from 'iconv-lite';
 import { basename, dirname } from 'path';
 
-import { SeparateTokens } from 'main/stores/config/types';
 import { SymbolInfo } from 'main/types/SymbolInfo';
 import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
 import { timer } from 'main/utils/timer';
-import { ApiStyle } from 'shared/types/model';
 import { CompletionGenerateClientMessage } from 'shared/types/WsMessage';
+import { container } from 'service/index';
+import { ServiceType } from 'shared/services';
+import type { DataStoreService } from 'service/entities/DataStoreService';
 
 export class PromptElements {
-  file?: string;
-  folder?: string;
-  language?: string;
+  // NearCode
   prefix: string;
-  similarSnippet?: string;
+  // SuffixCode
   suffix: string;
+  // Language
+  language?: string;
+  // FilePath
+  file?: string;
+  // RepoName
+  folder?: string;
+  // SimilarSnippet
+  similarSnippet?: string;
+  // RelativeDefinition
   symbols?: string;
+  // ImportList
+  importList?: string;
+  // Comment
+  comment?: string;
 
   constructor(prefix: string, suffix: string) {
     this.prefix = prefix.trimStart();
     this.suffix = suffix.trimEnd();
   }
 
-  stringify(apiStyle: ApiStyle, separateTokens: SeparateTokens) {
-    const { start, end, middle } = separateTokens;
-    const result = Array<string>();
-    if (apiStyle === ApiStyle.HuggingFace) {
-      if (this.folder) {
-        result.push(`<REPO>${this.folder}`);
-      }
-      if (this.file) {
-        result.push(`<FILENAME>${this.file}`);
-      }
-      if (this.language) {
-        result.push(`<LANGUAGE>${this.language}`);
-      }
-      result.push(start);
-      if (this.similarSnippet) {
-        result.push(`${this.similarSnippet}\r\n`);
-      }
-      if (this.symbols) {
-        result.push(`${this.symbols}\r\n`);
-      }
-      result.push(this.prefix);
-      result.push(end);
-      result.push(this.suffix);
-      result.push(middle);
-    } else {
-      result.push(start);
-      if (this.language) {
-        result.push(`Language:${this.language}\r\n\r\n\r\n`);
-      }
-      if (this.symbols) {
-        result.push(`${this.symbols}\r\n`);
-      }
-      if (this.similarSnippet) {
-        result.push(`${this.similarSnippet}\r\n`);
-      }
-      result.push(this.prefix);
-      result.push(middle);
-      result.push(this.suffix);
-      result.push(end);
-    }
-    return result.join('');
+  stringify() {
+    const dataStoreService = container.get<DataStoreService>(
+      ServiceType.DATA_STORE,
+    );
+    const { common } =
+      dataStoreService.activeModelContent.prompt['c'].other.code;
+
+    let question = common;
+
+    question = question.replaceAll('%{NearCode}%', this.prefix);
+    question = question.replaceAll('%{SuffixCode}%', this.suffix);
+    question = question.replaceAll('%{Language}%', this.language || '');
+    question = question.replaceAll('%{FilePath}%', this.file || '');
+    question = question.replaceAll('%{RepoName}%', this.folder || '');
+    question = question.replaceAll(
+      '%{SimilarSnippet}%',
+      this.similarSnippet || '',
+    );
+    question = question.replaceAll(
+      '%{RelativeDefinition}%',
+      this.symbols || '',
+    );
+    question = question.replaceAll('%{ImportList}%', this.importList || '');
+    question = question.replaceAll('%{Comment}%', this.comment || '');
+
+    return question;
   }
 }
 

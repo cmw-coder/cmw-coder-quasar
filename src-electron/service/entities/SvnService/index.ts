@@ -53,12 +53,12 @@ export class SvnService implements SvnServiceBase {
     const currentProjectPath = container
       .get<WebsocketService>(ServiceType.WEBSOCKET)
       .getClientInfo()?.currentProject;
-    const dataStore = container.get<DataStoreService>(
-      ServiceType.DATA_STORE,
-    ).dataStore;
-    if (currentProjectPath && dataStore.store.project[currentProjectPath]) {
+    const { project } = container
+      .get<DataStoreService>(ServiceType.DATA_STORE)
+      .getAppdata();
+    if (currentProjectPath && project[currentProjectPath]) {
       return await Promise.all(
-        dataStore.store.project[currentProjectPath].svn.map(async (svn) => ({
+        project[currentProjectPath].svn.map(async (svn) => ({
           path: svn.directory,
           changedFileList: await this.repoDiff(svn.directory),
         })),

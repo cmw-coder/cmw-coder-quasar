@@ -3,6 +3,9 @@ import { QNotifyCreateOptions } from 'quasar';
 
 import { authCode } from 'boot/axios';
 
+/**
+ * @deprecated
+ */
 export const sendAuthCode = async (
   userId: string,
   i18n: (relativePath: string) => string,

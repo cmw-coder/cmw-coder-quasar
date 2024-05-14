@@ -4,7 +4,6 @@ import { inject, injectable } from 'inversify';
 import { DateTime } from 'luxon';
 import { scheduleJob } from 'node-schedule';
 import { release, userInfo, version } from 'os';
-
 import { container } from 'service';
 import { ConfigService } from 'service/entities/ConfigService';
 import { DataStoreService } from 'service/entities/DataStoreService';
@@ -21,8 +20,8 @@ import { ACTION_API_KEY, CONTROL_API_KEY } from 'shared/constants/common';
 import { SERVICE_CALL_KEY, ServiceType } from 'shared/services';
 import { AppServiceBase } from 'shared/services/types/AppServiceBase';
 import { ActionMessage, ActionType } from 'shared/types/ActionMessage';
-import { ApiStyle } from 'shared/types/model';
-import { runtimeConfig } from 'shared/config';
+import { NetworkZone } from 'shared/config';
+import { WindowType } from 'shared/types/WindowType';
 
 interface AbstractServicePort {
   [key: string]: ((...args: unknown[]) => Promise<unknown>) | undefined;
@@ -72,27 +71,27 @@ export class AppService implements AppServiceBase {
 
     app.on('second-instance', () => {
       app.focus();
-      this._windowService.mainWindow.activate();
+      this._windowService.getWindow(WindowType.Main).activate();
     });
     app.whenReady().then(async () => {
       log.info('Comware Coder is ready');
-      this._windowService.floatingWindow.activate();
-      this._windowService.immersiveWindow.activate();
-      this._windowService.mainWindow.activate();
-      this._windowService.trayIcon.activate();
-
+      // ========================
+      log.info('Merge Project Data From Old DataStore');
+      const oldProjectData = this._dataStoreService.dataStore.store.project;
+      const newProjectData = this._dataStoreService.getAppdata().project;
+      const oldProjectKeys = Object.keys(oldProjectData);
+      for (let i = 0; i < oldProjectKeys.length; i++) {
+        const key = oldProjectKeys[i];
+        if (newProjectData[key] === undefined) {
+          newProjectData[key] = oldProjectData[key];
+        }
+      }
+      this._dataStoreService.setAppData('project', newProjectData);
+      // ========================
       this._websocketService.startServer();
       this._websocketService.registerActions();
 
-      if (
-        runtimeConfig.apiStyle === ApiStyle.Linseer &&
-        this._configService.configStore.apiStyle === ApiStyle.Linseer &&
-        !(await this._configService.configStore.getAccessToken())
-      ) {
-        this._windowService.floatingWindow.login(
-          this._windowService.mainWindow.isVisible,
-        );
-      }
+      const config = await this._configService.getConfigs();
 
       this._windowService.trayIcon.notify('正在检查更新……');
       this._updaterService.checkUpdate().catch();
@@ -107,6 +106,27 @@ export class AppService implements AppServiceBase {
           this._updaterService.checkUpdate().catch();
         },
       );
+
+      this._windowService.trayIcon.activate();
+      // 激活代码窗口
+      this._windowService.getWindow(WindowType.Completions).activate();
+
+      // 引导配置基础环境（黄、绿区 | 红区 | 路由红区）
+      if (config.networkZone === NetworkZone.Unknown) {
+        this._windowService.getWindow(WindowType.StartSetting).activate();
+        return;
+      }
+
+      // 黄、绿区版本调起登录界面
+      if (config.networkZone === NetworkZone.Public && !config.token) {
+        this._windowService.getWindow(WindowType.Login).activate();
+        return;
+      }
+
+      // 激活主窗口
+      this._windowService.getWindow(WindowType.Main).activate();
+
+      this._dataStoreService.getActiveModelContent();
     });
   }
 

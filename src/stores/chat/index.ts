@@ -1,19 +1,14 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-
-import { chatWithDeepSeek, chatWithLinseer } from 'boot/axios';
-import { NetworkZone, runtimeConfig } from 'shared/config';
-import { ApiStyle } from 'shared/types/model';
 import { ChatMessage } from 'stores/chat/types';
+import { api_questionStream } from 'app/src/request/api';
+import { useService } from 'utils/common';
+import { ServiceType } from 'shared/services';
 
 export const useChatStore = defineStore('chat', () => {
   const currentChatMessages = ref<ChatMessage[]>([]);
 
-  const askQuestion = async (
-    endPoint: string,
-    content: string,
-    accessToken?: string,
-  ) => {
+  const askQuestion = async (content: string) => {
     const historyList = currentChatMessages.value.map<{
       role: 'assistant' | 'user';
       content: string;
@@ -37,39 +32,25 @@ export const useChatStore = defineStore('chat', () => {
     );
     const currentResponse = currentChatMessages.value[newLength - 1];
     try {
-      if (runtimeConfig.apiStyle == ApiStyle.Linseer) {
-        if (accessToken) {
-          await chatWithLinseer(
-            endPoint,
-            content,
-            historyList,
-            accessToken,
-            (content) =>
-              (currentResponse.content = content
-                .split('data:')
-                .filter((item) => item.trim() !== '')
-                .map((item) => JSON.parse(item.trim()).message)
-                .join('')),
-          );
-        } else {
-          currentResponse.content = 'Invalid access token';
-          currentResponse.error = true;
-        }
-      } else {
-        await chatWithDeepSeek(
-          runtimeConfig.networkZone === NetworkZone.Secure
-            ? 'http://10.113.12.206:9192'
-            : 'http://10.113.36.127:9204',
-          content,
+      const configService = useService(ServiceType.CONFIG);
+      const { activeTemplate, activeModel } = await configService.getConfigs();
+      await api_questionStream(
+        {
+          question: content,
+          templateName: 'Chat',
+          productLine: activeTemplate,
+          profileModel: activeModel,
           historyList,
-          (content) =>
-            (currentResponse.content = content
-              .split('data:')
-              .filter((item) => item.trim() !== '')
-              .map((item) => JSON.parse(item.trim()).choices[0].delta.content)
-              .join('')),
-        );
-      }
+        },
+        (event) => {
+          const responseText = event.event.target.responseText as string;
+          currentResponse.content = responseText
+            .split('data:')
+            .filter((item) => item.trim() !== '')
+            .map((item) => JSON.parse(item.trim()).message)
+            .join('');
+        },
+      );
     } catch {
       currentResponse.content = 'Failed to get response';
       currentResponse.error = true;
