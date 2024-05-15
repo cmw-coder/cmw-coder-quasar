@@ -185,6 +185,12 @@ export class AiAssistantIframe {
         this.refreshHandle();
         return undefined as UiToExtensionCommandExecResultMap[T];
       }
+      case UiToExtensionCommand.COPY_CODE: {
+        const code =
+          data as UiToExtensionCommandExecParamsMap[UiToExtensionCommand.COPY_CODE];
+        await navigator.clipboard.writeText(code);
+        return undefined as UiToExtensionCommandExecResultMap[T];
+      }
       default:
         break;
     }

@@ -16,8 +16,8 @@ export enum UiToExtensionCommand {
   DEL_CHAT = 'DEL_CHAT',
   OPEN_CHAT_LIST_DIR = 'OPEN_CHAT_LIST_DIR',
   REFRESH_WEB_UI = 'REFRESH_WEB_UI',
-  // INSERT_CODE = 'INSERT_CODE',
-  // COPY_CODE = 'COPY_CODE',
+  COPY_CODE = 'COPY_CODE',
+  INSERT_CODE = 'INSERT_CODE',
 }
 
 export interface UiToExtensionCommandExecParamsMap {
@@ -41,8 +41,8 @@ export interface UiToExtensionCommandExecParamsMap {
   [UiToExtensionCommand.DEL_CHAT]: string;
   [UiToExtensionCommand.OPEN_CHAT_LIST_DIR]: undefined;
   [UiToExtensionCommand.REFRESH_WEB_UI]: undefined;
-  // [UiToExtensionCommand.INSERT_CODE]: string;
-  // [UiToExtensionCommand.COPY_CODE]: string;
+  [UiToExtensionCommand.COPY_CODE]: string;
+  [UiToExtensionCommand.INSERT_CODE]: string;
 }
 
 export interface UiToExtensionCommandExecResultMap {
@@ -63,8 +63,8 @@ export interface UiToExtensionCommandExecResultMap {
   [UiToExtensionCommand.DEL_CHAT]: undefined;
   [UiToExtensionCommand.OPEN_CHAT_LIST_DIR]: undefined;
   [UiToExtensionCommand.REFRESH_WEB_UI]: undefined;
-  // [UiToExtensionCommand.INSERT_CODE]: string;
-  // [UiToExtensionCommand.COPY_CODE]: string;
+  [UiToExtensionCommand.COPY_CODE]: undefined;
+  [UiToExtensionCommand.INSERT_CODE]: undefined;
 }
 
 export interface UiToExtensionCommandExecMessage<
