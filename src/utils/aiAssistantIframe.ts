@@ -75,10 +75,12 @@ export class AiAssistantIframe {
     console.log('execCommand', command, data);
     const configService = useService(ServiceType.CONFIG);
     const dataStoreService = useService(ServiceType.DATA_STORE);
+    const websocketService = useService(ServiceType.WEBSOCKET);
     switch (command) {
       case UiToExtensionCommand.GET_CONFIG: {
         const config = await configService.getConfigs();
         const modelContent = await dataStoreService.getActiveModelContent();
+        const projectData = await websocketService.getProjectData();
         const extensionConfig: ExtensionConfig = {
           appType: 'SI',
           serverUrl: config.baseServerUrl,
@@ -107,9 +109,9 @@ export class AiAssistantIframe {
           pluginBaseConfig: undefined,
           temperature: 0.7,
           activeChat: config.activeChat,
-          useMultipleChat: true,
-          subType: '0',
-          useEnterSend: false,
+          useMultipleChat: config.useMultipleChat,
+          subType: projectData?.id || 'NONE',
+          useEnterSend: config.useEnterSend,
         };
         return extensionConfig as UiToExtensionCommandExecResultMap[T];
       }

@@ -24,6 +24,7 @@ import {
   WsMessageMapping,
 } from 'shared/types/WsMessage';
 import { WindowType } from 'shared/types/WindowType';
+import { DataProjectType } from 'shared/types/AppData';
 
 interface ClientInfo {
   client: WebSocket;
@@ -58,6 +59,19 @@ export class WebsocketService implements WebsocketServiceBase {
 
   getClientInfo(pid?: number) {
     return this._clientInfoMap.get(pid ?? this._lastActivePid);
+  }
+
+  async getProjectData() {
+    const project = this.getClientInfo(this._lastActivePid)?.currentProject;
+    if (!project) {
+      return undefined;
+    }
+    const appData = this._dataStoreService.getAppdata();
+    const projectData: DataProjectType | undefined = appData.project[project];
+    if (!projectData || !projectData.id) {
+      return undefined;
+    }
+    return projectData;
   }
 
   registerWsAction<T extends keyof WsMessageMapping>(
