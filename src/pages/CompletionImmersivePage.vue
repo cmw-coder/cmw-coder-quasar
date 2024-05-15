@@ -79,7 +79,11 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <q-page v-if="currentCompletion.length" class="row overflow-hidden">
+  <q-page
+    v-if="currentCompletion.length"
+    class="row overflow-hidden"
+    style="background-color: pink"
+  >
     <div class="column">
       <q-card
         v-show="isMultiLine"

@@ -54,24 +54,20 @@ export class PromptProcessor {
           : appConfig.completionConfigs.snippet;
 
     try {
-      const answers = await api_question(
-        {
-          question: promptElements.stringify(),
-          maxTokens: completionConfig.maxTokenCount,
-          temperature: completionConfig.temperature,
-          stop: completionConfig.stopTokens,
-          suffix: promptElements.suffix,
-          plugin: 'SI',
-          profileModel: appConfig.activeModel,
-          productLine: appConfig.activeTemplate,
-          subType: projectId,
-          templateName:
-            completionType === CompletionType.Line
-              ? 'ShortLineCode'
-              : 'LineCode',
-        },
-        this._abortController.signal,
-      );
+      const params = {
+        question: promptElements.stringify(),
+        maxTokens: completionConfig.maxTokenCount,
+        temperature: completionConfig.temperature,
+        stop: completionConfig.stopTokens,
+        suffix: promptElements.suffix,
+        plugin: 'SI',
+        profileModel: appConfig.activeModel,
+        productLine: appConfig.activeTemplate,
+        subType: projectId,
+        templateName: 'ShortLineCode',
+      };
+      log.debug('api_question params', params);
+      const answers = await api_question(params, this._abortController.signal);
       let candidates = answers.map((answer) => answer.text);
       candidates = processGeneratedSuggestions(
         candidates,
