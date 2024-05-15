@@ -11,6 +11,7 @@ import {
 } from 'shared/types/ExtensionMessage';
 import { ExtensionConfig } from 'shared/types/ExtensionMessageDetails';
 import { deepClone } from 'shared/utils';
+import { ChatInsertServerMessage } from 'shared/types/WsMessage';
 
 export class AiAssistantIframe {
   private promiseMap = new Map<
@@ -23,6 +24,9 @@ export class AiAssistantIframe {
   private iframeUrl!: string;
   private refreshHandle!: () => void;
   private messageEventListener?: (event: MessageEvent) => void;
+  private configService = useService(ServiceType.CONFIG);
+  private dataStoreService = useService(ServiceType.DATA_STORE);
+  private websocketService = useService(ServiceType.WEBSOCKET);
 
   init(iframeWindow: Window, url: string, refreshHandle: () => void) {
     console.log('init', iframeWindow, url);
@@ -83,14 +87,13 @@ export class AiAssistantIframe {
     data: UiToExtensionCommandExecParamsMap[T],
   ): Promise<UiToExtensionCommandExecResultMap[T]> {
     console.log('execCommand', command, data);
-    const configService = useService(ServiceType.CONFIG);
-    const dataStoreService = useService(ServiceType.DATA_STORE);
-    const websocketService = useService(ServiceType.WEBSOCKET);
+
     switch (command) {
       case UiToExtensionCommand.GET_CONFIG: {
-        const config = await configService.getConfigs();
-        const modelContent = await dataStoreService.getActiveModelContent();
-        const projectData = await websocketService.getProjectData();
+        const config = await this.configService.getConfigs();
+        const modelContent =
+          await this.dataStoreService.getActiveModelContent();
+        const projectData = await this.websocketService.getProjectData();
         const extensionConfig: ExtensionConfig = {
           appType: 'SI',
           serverUrl: config.baseServerUrl,
@@ -126,14 +129,14 @@ export class AiAssistantIframe {
         return extensionConfig as UiToExtensionCommandExecResultMap[T];
       }
       case UiToExtensionCommand.SET_CONFIG: {
-        await configService.setConfigs(<ExtensionConfig>data);
+        await this.configService.setConfigs(<ExtensionConfig>data);
         return undefined as UiToExtensionCommandExecResultMap[T];
       }
       case UiToExtensionCommand.GET_THEME: {
         return 'LIGHT' as UiToExtensionCommandExecResultMap[T];
       }
       case UiToExtensionCommand.GET_TOKEN: {
-        const { token, refreshToken } = await configService.getConfigs();
+        const { token, refreshToken } = await this.configService.getConfigs();
         return {
           token,
           refresh_token: refreshToken,
@@ -143,41 +146,45 @@ export class AiAssistantIframe {
       case UiToExtensionCommand.SET_TOKEN: {
         const { token, refresh_token } =
           data as UiToExtensionCommandExecParamsMap[UiToExtensionCommand.SET_TOKEN];
-        await configService.setConfigs({ token, refreshToken: refresh_token });
+        await this.configService.setConfigs({
+          token,
+          refreshToken: refresh_token,
+        });
         return undefined as UiToExtensionCommandExecResultMap[T];
       }
       case UiToExtensionCommand.GET_QUESTION_TEMPLATE: {
-        const modelContent = await dataStoreService.getActiveModelContent();
+        const modelContent =
+          await this.dataStoreService.getActiveModelContent();
         return modelContent as UiToExtensionCommandExecResultMap[T];
       }
       case UiToExtensionCommand.GET_CHAT_LIST: {
-        const res = await dataStoreService.getChatList();
+        const res = await this.dataStoreService.getChatList();
         return res as UiToExtensionCommandExecResultMap[T];
       }
       case UiToExtensionCommand.GET_CHAT: {
-        const res = await dataStoreService.getChat(data as string);
+        const res = await this.dataStoreService.getChat(data as string);
         return res as UiToExtensionCommandExecResultMap[T];
       }
       case UiToExtensionCommand.NEW_CHAT: {
         const name =
           data as UiToExtensionCommandExecParamsMap[UiToExtensionCommand.NEW_CHAT];
-        await dataStoreService.newChat(name);
+        await this.dataStoreService.newChat(name);
         return name as UiToExtensionCommandExecResultMap[T];
       }
       case UiToExtensionCommand.SAVE_CHAT: {
         const { name, content } =
           data as UiToExtensionCommandExecParamsMap[UiToExtensionCommand.SAVE_CHAT];
-        await dataStoreService.saveChat(name, content);
+        await this.dataStoreService.saveChat(name, content);
         return name as UiToExtensionCommandExecResultMap[T];
       }
       case UiToExtensionCommand.DEL_CHAT: {
         const name =
           data as UiToExtensionCommandExecParamsMap[UiToExtensionCommand.DEL_CHAT];
-        await dataStoreService.deleteChat(name);
+        await this.dataStoreService.deleteChat(name);
         return undefined as UiToExtensionCommandExecResultMap[T];
       }
       case UiToExtensionCommand.OPEN_CHAT_LIST_DIR: {
-        await dataStoreService.openChatListDir();
+        await this.dataStoreService.openChatListDir();
         return undefined as UiToExtensionCommandExecResultMap[T];
       }
       case UiToExtensionCommand.REFRESH_WEB_UI: {
@@ -189,6 +196,19 @@ export class AiAssistantIframe {
         const code =
           data as UiToExtensionCommandExecParamsMap[UiToExtensionCommand.COPY_CODE];
         await navigator.clipboard.writeText(code);
+        return undefined as UiToExtensionCommandExecResultMap[T];
+      }
+      case UiToExtensionCommand.INSERT_CODE: {
+        const code =
+          data as UiToExtensionCommandExecParamsMap[UiToExtensionCommand.INSERT_CODE];
+        this.websocketService.send(
+          JSON.stringify(
+            new ChatInsertServerMessage({
+              result: 'success',
+              content: code.replace(/\r\n?/g, '\r\n').replace(/\r?\n/g, '\r\n'),
+            }),
+          ),
+        );
         return undefined as UiToExtensionCommandExecResultMap[T];
       }
       default:
