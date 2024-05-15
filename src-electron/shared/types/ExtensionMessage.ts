@@ -15,9 +15,9 @@ export enum UiToExtensionCommand {
   SAVE_CHAT = 'SAVE_CHAT',
   DEL_CHAT = 'DEL_CHAT',
   OPEN_CHAT_LIST_DIR = 'OPEN_CHAT_LIST_DIR',
+  REFRESH_WEB_UI = 'REFRESH_WEB_UI',
   // INSERT_CODE = 'INSERT_CODE',
   // COPY_CODE = 'COPY_CODE',
-  // REFRESH_WEB_UI = 'REFRESH_WEB_UI',
 }
 
 export interface UiToExtensionCommandExecParamsMap {
@@ -40,9 +40,9 @@ export interface UiToExtensionCommandExecParamsMap {
   };
   [UiToExtensionCommand.DEL_CHAT]: string;
   [UiToExtensionCommand.OPEN_CHAT_LIST_DIR]: undefined;
+  [UiToExtensionCommand.REFRESH_WEB_UI]: undefined;
   // [UiToExtensionCommand.INSERT_CODE]: string;
   // [UiToExtensionCommand.COPY_CODE]: string;
-  // [UiToExtensionCommand.REFRESH_WEB_UI]: void;
 }
 
 export interface UiToExtensionCommandExecResultMap {
@@ -62,9 +62,9 @@ export interface UiToExtensionCommandExecResultMap {
   [UiToExtensionCommand.SAVE_CHAT]: string;
   [UiToExtensionCommand.DEL_CHAT]: undefined;
   [UiToExtensionCommand.OPEN_CHAT_LIST_DIR]: undefined;
+  [UiToExtensionCommand.REFRESH_WEB_UI]: undefined;
   // [UiToExtensionCommand.INSERT_CODE]: string;
   // [UiToExtensionCommand.COPY_CODE]: string;
-  // [UiToExtensionCommand.REFRESH_WEB_UI]: void;
 }
 
 export interface UiToExtensionCommandExecMessage<

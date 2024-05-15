@@ -21,16 +21,26 @@ export class AiAssistantIframe {
   >();
   private iframeWindow!: Window;
   private iframeUrl!: string;
+  private refreshHandle!: () => void;
+  private messageEventListener?: (event: MessageEvent) => void;
 
-  init(iframeWindow: Window, url: string) {
+  init(iframeWindow: Window, url: string, refreshHandle: () => void) {
     console.log('init', iframeWindow, url);
     this.iframeWindow = iframeWindow;
     this.iframeUrl = url;
-    window.addEventListener('message', (event) => {
+    this.refreshHandle = refreshHandle;
+    this.messageEventListener = (event: MessageEvent) => {
       if (this.iframeUrl.includes(event.origin)) {
         this.receiveMessage(<never>event.data);
       }
-    });
+    };
+    window.addEventListener('message', this.messageEventListener);
+  }
+
+  destroy() {
+    if (this.messageEventListener) {
+      window.removeEventListener('message', this.messageEventListener);
+    }
   }
 
   private sendMessage<T extends Commands>(message: SendMessage<T>) {
@@ -120,7 +130,7 @@ export class AiAssistantIframe {
         return undefined as UiToExtensionCommandExecResultMap[T];
       }
       case UiToExtensionCommand.GET_THEME: {
-        return 'DARK' as UiToExtensionCommandExecResultMap[T];
+        return 'LIGHT' as UiToExtensionCommandExecResultMap[T];
       }
       case UiToExtensionCommand.GET_TOKEN: {
         const { token, refreshToken } = await configService.getConfigs();
@@ -168,6 +178,11 @@ export class AiAssistantIframe {
       }
       case UiToExtensionCommand.OPEN_CHAT_LIST_DIR: {
         await dataStoreService.openChatListDir();
+        return undefined as UiToExtensionCommandExecResultMap[T];
+      }
+      case UiToExtensionCommand.REFRESH_WEB_UI: {
+        console.log('refresh web ui', this.iframeWindow);
+        this.refreshHandle();
         return undefined as UiToExtensionCommandExecResultMap[T];
       }
       default:
