@@ -12,6 +12,7 @@ import {
 import { ExtensionConfig } from 'shared/types/ExtensionMessageDetails';
 import { deepClone } from 'shared/utils';
 import { ChatInsertServerMessage } from 'shared/types/WsMessage';
+import { NetworkZone } from 'shared/config';
 
 export class AiAssistantIframe {
   private promiseMap = new Map<
@@ -119,7 +120,10 @@ export class AiAssistantIframe {
             topK: 3,
             useLocalQuestionTemplate: false,
           },
-          pluginBaseConfig: undefined,
+          pluginBaseConfig: {
+            appBuildTarget:
+              config.networkZone === NetworkZone.Public ? 'NORMAL' : 'RED',
+          },
           temperature: 0.7,
           activeChat: config.activeChat,
           useMultipleChat: config.useMultipleChat,

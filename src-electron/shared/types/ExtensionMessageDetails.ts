@@ -23,10 +23,16 @@ export interface ExtensionConfig {
     topK: number;
     useLocalQuestionTemplate: boolean;
   };
-  pluginBaseConfig?: string;
+  pluginBaseConfig: PluginBaseConfig;
   temperature: number;
   activeChat: string;
   useMultipleChat: boolean;
   subType: string;
   useEnterSend: boolean;
+}
+
+export type AppBuildTarget = 'NORMAL' | 'RED' | 'HUAZHI';
+
+interface PluginBaseConfig {
+  appBuildTarget: AppBuildTarget;
 }
