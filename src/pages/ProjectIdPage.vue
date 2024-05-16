@@ -5,7 +5,7 @@ import { useI18n } from 'vue-i18n';
 import ProjectIdInput from 'components/ProjectIdInput.vue';
 import { WindowType } from 'shared/types/WindowType';
 import { useService } from 'utils/common';
-import { ServiceType } from 'shared/services';
+import { ServiceType } from 'shared/types/service';
 import { useQuasar } from 'quasar';
 import { DateTime } from 'luxon';
 

@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n';
 import AccountPanel from 'components/LoginPanels/AccountPanel.vue';
 import CodePanel from 'components/LoginPanels/CodePanel.vue';
 import { useService } from 'utils/common';
-import { ServiceType } from 'shared/services';
+import { ServiceType } from 'shared/types/service';
 
 const { t } = useI18n();
 

@@ -3,7 +3,7 @@ import { useI18n } from 'vue-i18n';
 import { bus } from 'boot/bus';
 import { WindowType } from 'shared/types/WindowType';
 import { useService } from 'utils/common';
-import { ServiceType } from 'app/src-electron/shared/services';
+import { ServiceType } from 'shared/types/service';
 import { PropType, onMounted } from 'vue';
 
 const props = defineProps({

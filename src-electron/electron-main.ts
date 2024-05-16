@@ -1,10 +1,8 @@
-import { container } from 'service';
-import type { AppService } from 'service/entities/AppService';
-import type { UpdaterService } from 'service/entities/UpdaterService';
-import { ServiceType } from 'shared/services';
+import { getService } from 'main/services';
+import { ServiceType } from 'shared/types/service';
 
-const appService = container.get<AppService>(ServiceType.App);
-const updaterService = container.get<UpdaterService>(ServiceType.UPDATER);
+const appService = getService(ServiceType.App);
+const updaterService = getService(ServiceType.UPDATER);
 
 appService.init();
 updaterService.init();

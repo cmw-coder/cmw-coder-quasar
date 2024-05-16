@@ -2,7 +2,7 @@ import { BrowserWindow, ipcRenderer } from 'electron';
 
 import { ACTION_API_KEY } from 'shared/constants/common';
 import { ActionMessageMapping, ActionType } from 'shared/types/ActionMessage';
-import { ServiceType } from 'shared/services';
+import { ServiceType } from 'shared/types/service';
 
 // -------------------------------------------------------------------------------------------------------
 // ↓↓↓↓↓↓↓↓↓↓                                   Local stuff                                     ↓↓↓↓↓↓↓↓↓↓

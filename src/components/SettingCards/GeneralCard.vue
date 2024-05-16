@@ -6,7 +6,7 @@ import { useRouter } from 'vue-router';
 import { WindowType } from 'shared/types/WindowType';
 import { themes, Theme, useSettingsStore } from 'stores/settings';
 import { useService } from 'utils/common';
-import { ServiceType } from 'app/src-electron/shared/services';
+import { ServiceType } from 'shared/types/service';
 
 const baseName = 'components.SettingCards.GeneralCard.';
 
@@ -37,10 +37,8 @@ const updateTransparentFallback = async (value: boolean) => {
   compatibility.transparentFallback = value;
   await dataStoreService.setAppDataAsync('compatibility', compatibility);
   transparentFallback.value = value;
-  windowService.closeWindow(WindowType.Completions);
-  setTimeout(() => {
-    windowService.activeWindow(WindowType.Completions);
-  }, 1000);
+  await windowService.closeWindow(WindowType.Completions);
+  setTimeout(() => windowService.activeWindow(WindowType.Completions), 500);
   transparentFallbackUpdating.value = false;
 };
 

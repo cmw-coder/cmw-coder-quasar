@@ -17,6 +17,7 @@ import { routes } from 'router/constants';
  * with the Router instance.
  */
 
+// noinspection JSUnusedGlobalSymbols
 export default route(function (/* { store, ssrContext } */) {
   const createHistory = process.env.SERVER
     ? createMemoryHistory

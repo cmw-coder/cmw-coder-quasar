@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 
-import { fontSizeTable } from 'shared/constants';
 import { ActionType } from 'shared/types/ActionMessage';
 import { useHighlighter } from 'stores/highlighter';
 import { ActionApi } from 'types/ActionApi';
 import { useService } from 'utils/common';
-import { ServiceType } from 'app/src-electron/shared/services';
+import { FONT_SIZE_MAPPING } from 'shared/constants/common';
+import { ServiceType } from 'shared/types/service';
 
 const baseName = 'pages.CompletionImmersivePage.';
 
@@ -48,8 +48,8 @@ onMounted(async () => {
       currentCompletion.value = completion;
       completionCount.index = count.index;
       completionCount.total = count.total;
-      fontSize.value = fontSizeTable[fontHeight]
-        ? fontSizeTable[fontHeight] * fontHeight
+      fontSize.value = FONT_SIZE_MAPPING[fontHeight]
+        ? FONT_SIZE_MAPPING[fontHeight] * fontHeight
         : -0.000000000506374957617199 * fontHeight ** 6 +
           0.000000123078838391882 * fontHeight ** 5 -
           0.0000118441038684185 * fontHeight ** 4 +

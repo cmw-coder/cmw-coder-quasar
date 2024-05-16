@@ -8,7 +8,7 @@ import {
   defaultServerUrlMap,
 } from 'shared/config';
 import { checkUrlAccessible, useService } from 'utils/common';
-import { ServiceType } from 'shared/services';
+import { ServiceType } from 'shared/types/service';
 
 const baseName = 'pages.StartSettingPage.';
 
@@ -45,7 +45,7 @@ const nextHandle = async () => {
         message: i18n('notifications.pingSuccess'),
       });
       // 保存配置
-      const originalAppConfig = await configService.getConfigs();
+      const originalAppConfig = configService.getConfigs();
       const defaultNetworkZoneAppConfig =
         defaultAppConfigNetworkZoneMap[networkZone.value];
       originalAppConfig.networkZone = networkZone.value;

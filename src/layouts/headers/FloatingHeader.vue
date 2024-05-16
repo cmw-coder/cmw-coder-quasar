@@ -2,7 +2,7 @@
 import { useI18n } from 'vue-i18n';
 import { useQuasar } from 'quasar';
 import { PropType, onMounted } from 'vue';
-import { ServiceType } from 'shared/services';
+import { ServiceType } from 'shared/types/service';
 import { WindowType } from 'shared/types/WindowType';
 import { useService } from 'utils/common';
 

@@ -6,7 +6,7 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import packageJson from 'app/package.json';
-import { ServiceType } from 'shared/services';
+import { ServiceType } from 'shared/types/service';
 import { useSettingsStore } from 'stores/settings';
 import { useService } from 'utils/common';
 

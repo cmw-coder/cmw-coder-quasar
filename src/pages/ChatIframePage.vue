@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { nextTick, onMounted } from 'vue';
 import { useService } from 'utils/common';
-import { ServiceType } from 'shared/services';
+import { ServiceType } from 'shared/types/service';
 import aiAssistantIframe from 'utils/aiAssistantIframe';
 
 const configService = useService(ServiceType.CONFIG);

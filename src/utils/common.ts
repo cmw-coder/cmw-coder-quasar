@@ -1,4 +1,4 @@
-import { Service, ServiceType } from 'shared/services';
+import { Service, ServiceType } from 'shared/types/service';
 
 export const getLastDirName = (path: string) => {
   const pathArr = path.split('\\');

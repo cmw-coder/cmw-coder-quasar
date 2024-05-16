@@ -1,10 +1,11 @@
+import { uid } from 'quasar'
+
+import { useService } from 'utils/common';
 import {
   IframeMessage_Receive,
   IframeMessage_Send,
 } from 'shared/types/ExtensionMessage';
-import { v4 as uuidv4 } from 'uuid';
-import { useService } from 'utils/common';
-import { ServiceType } from 'shared/services';
+import { ServiceType } from 'shared/types/service';
 
 export class AiAssistantIframe {
   private promiseMap = new Map<string, (data: never) => void>();
@@ -26,7 +27,7 @@ export class AiAssistantIframe {
     return new Promise<never>((rs) => {
       if (!message.id) {
         // message.id 不存在  ==> web 执行消息
-        const id = uuidv4();
+        const id = uid();
         this.iframeWindow.postMessage(
           {
             ...message,
@@ -63,7 +64,7 @@ export class AiAssistantIframe {
     const configService = useService(ServiceType.CONFIG);
     const dataStoreService = useService(ServiceType.DATA_STORE);
     if (data.command === 'GET_CONFIG') {
-      const config = await configService.getConfigs();
+      const config = configService.getConfigs();
       const modelContent = await dataStoreService.getActiveModelContent();
       return <never>{
         appType: 'SI',
