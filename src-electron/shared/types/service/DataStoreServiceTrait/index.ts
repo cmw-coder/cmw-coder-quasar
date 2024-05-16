@@ -1,4 +1,7 @@
-import { AppData, ModelConfig } from 'shared/types/service/DataStoreServiceTrait/types';
+import {
+  AppData,
+  ModelConfig,
+} from 'shared/types/service/DataStoreServiceTrait/types';
 
 export interface DataStoreServiceTrait {
   getAppDataAsync(): Promise<AppData>;

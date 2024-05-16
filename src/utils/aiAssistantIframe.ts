@@ -1,4 +1,4 @@
-import { uid } from 'quasar'
+import { uid } from 'quasar';
 
 import { useService } from 'utils/common';
 import {

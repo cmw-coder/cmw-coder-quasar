@@ -1,8 +1,8 @@
 import log from 'electron-log/main';
-import {  injectable } from 'inversify';
+import { injectable } from 'inversify';
 import { DateTime } from 'luxon';
 import { extname, basename } from 'path';
-import { uid } from 'quasar'
+import { uid } from 'quasar';
 
 import { PromptElements } from 'main/components/PromptExtractor/types';
 import { Completions } from 'main/components/PromptProcessor/types';
@@ -10,12 +10,16 @@ import { timer } from 'main/utils/timer';
 import { StatisticsServiceTrait } from 'shared/types/service/StatisticsServiceTrait';
 import { CaretPosition } from 'shared/types/common';
 import { api_collection_code_v2, api_reportSKU } from 'main/request/sku';
-import { CollectionData, CompletionData, KeptRatio } from 'main/services/StatisticsService/types';
+import {
+  CollectionData,
+  CompletionData,
+  KeptRatio,
+} from 'main/services/StatisticsService/types';
 import { constructData } from 'main/services/StatisticsService/utils';
 import {
   skuNameAcceptMapping,
   skuNameGenerateMapping,
-  skuNameKeptMapping
+  skuNameKeptMapping,
 } from 'main/services/StatisticsService/constants';
 
 @injectable()
