@@ -12,6 +12,7 @@ import {
 } from 'shared/types/ActionMessage';
 import { sendToRenderer } from 'preload/types/ActionApi';
 import log from 'electron-log/main';
+import { fontSizeTable } from 'shared/constants';
 
 export class CompletionsWindow extends BaseWindow {
   private destroyTimer?: NodeJS.Timeout;
@@ -30,7 +31,7 @@ export class CompletionsWindow extends BaseWindow {
       minWidth: 0,
       minHeight: 0,
       useContentSize: true,
-      resizable: false,
+      resizable: true,
       movable: false,
       minimizable: false,
       maximizable: false,
@@ -73,23 +74,24 @@ export class CompletionsWindow extends BaseWindow {
       const { compatibility } = container
         .get<DataStoreService>(ServiceType.DATA_STORE)
         .getAppdata();
-      if (compatibility.transparentFallback) {
-        const lines = completion.split('\r\n');
-        this._window.setBounds(
-          {
-            height: Math.round(lines.length * 13.3 + 15),
-            width: Math.max(
-              Math.round(
-                Math.max(...lines.map((line) => line.length)) * 7 + 10,
-              ),
-              100,
-            ),
-          },
-          false,
-        );
-      }
+      let fontHeight = height;
+      const lines = completion.split('\r\n');
+      const longestLine = Math.max(...lines.map((line) => line.length));
+
+      const fontSize = fontSizeTable[fontHeight]
+        ? fontSizeTable[fontHeight] * fontHeight
+        : -0.000000000506374957617199 * fontHeight ** 6 +
+          0.000000123078838391882 * fontHeight ** 5 -
+          0.0000118441038684185 * fontHeight ** 4 +
+          0.000574698566099494 * fontHeight ** 3 -
+          0.0147437317361461 * fontHeight ** 2 +
+          1.09720488138051 * fontHeight;
+      const windowSize = {
+        width: Math.round(fontSize * longestLine),
+        height: Math.round(lines.length * fontHeight),
+      };
       if (compatibility.zoomFix) {
-        height = screen.screenToDipPoint({ x: 0, y: height }).y;
+        fontHeight = screen.screenToDipPoint({ x: 0, y: height }).y;
         position = screen.screenToDipPoint(position);
       }
       this._window.setPosition(
@@ -97,16 +99,17 @@ export class CompletionsWindow extends BaseWindow {
         Math.round(position.y),
         false,
       );
+      this._window.setSize(windowSize.width, windowSize.height, false);
 
       sendToRenderer(
         this._window,
         new CompletionSetActionMessage({
           completion,
           count,
-          fontHeight: height,
+          fontHeight,
+          fontSize,
         }),
       );
-
       this._window.show();
     } else {
       log.warn('Immersive window activate failed');

@@ -1,16 +1,26 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  reactive,
+  ref,
+} from 'vue';
 
-import { fontSizeTable } from 'shared/constants';
 import { ActionType } from 'shared/types/ActionMessage';
 import { useHighlighter } from 'stores/highlighter';
 import { ActionApi } from 'types/ActionApi';
 import { useService } from 'utils/common';
-import { ServiceType } from 'app/src-electron/shared/services';
+import { ServiceType } from 'shared/services';
+import { WindowType } from 'shared/types/WindowType';
 
 const baseName = 'pages.CompletionImmersivePage.';
 
 const { codeToHtml } = useHighlighter();
+
+const multiLineDom = ref<HTMLDivElement>();
+const singleLineDom = ref<HTMLDivElement>();
 
 const cacheOffset = ref(0);
 const completionCount = reactive({
@@ -32,6 +42,7 @@ const codeContent = computed(() =>
 );
 
 const dataStoreService = useService(ServiceType.DATA_STORE);
+const windowService = useService(ServiceType.WINDOW);
 
 const actionApi = new ActionApi(baseName);
 onMounted(async () => {
@@ -43,22 +54,37 @@ onMounted(async () => {
   });
   actionApi.register(
     ActionType.CompletionSet,
-    ({ completion, count, fontHeight }) => {
+    async ({ completion, count, fontHeight, fontSize: _fontSize }) => {
       cacheOffset.value = 0;
       currentCompletion.value = completion;
       completionCount.index = count.index;
       completionCount.total = count.total;
-      fontSize.value = fontSizeTable[fontHeight]
-        ? fontSizeTable[fontHeight] * fontHeight
-        : -0.000000000506374957617199 * fontHeight ** 6 +
-          0.000000123078838391882 * fontHeight ** 5 -
-          0.0000118441038684185 * fontHeight ** 4 +
-          0.000574698566099494 * fontHeight ** 3 -
-          0.0147437317361461 * fontHeight ** 2 +
-          1.09720488138051 * fontHeight;
+      fontSize.value = _fontSize;
       height.value = fontHeight;
-      isMultiLine.value = completion.split('\r\n').length > 1;
-      console.log({ height: height.value, fontSize: fontSize.value });
+      const lines = completion.split('\r\n');
+      isMultiLine.value = lines.length > 1;
+      await nextTick();
+      if (isMultiLine.value && multiLineDom.value) {
+        windowService.setWindowSize(
+          {
+            width: multiLineDom.value.offsetWidth,
+            height: multiLineDom.value.offsetHeight,
+          },
+          WindowType.Completions,
+        );
+      } else if (!isMultiLine.value && singleLineDom.value) {
+        windowService.setWindowSize(
+          {
+            width: singleLineDom.value.offsetWidth,
+            height: singleLineDom.value.offsetHeight,
+          },
+          WindowType.Completions,
+        );
+      }
+      console.log({
+        height: height.value,
+        fontSize: fontSize.value,
+      });
     },
   );
   actionApi.register(ActionType.CompletionUpdate, (isDelete) => {
@@ -79,11 +105,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <q-page
-    v-if="currentCompletion.length"
-    class="row overflow-hidden"
-    style="background-color: pink"
-  >
+  <q-page v-if="currentCompletion.length" class="row overflow-hidden">
     <div class="column">
       <q-card
         v-show="isMultiLine"
@@ -94,9 +116,10 @@ onBeforeUnmount(() => {
           lineHeight: `${height - 1}px`,
         }"
       >
-        <div v-html="codeContent" style="margin-top: -1em" />
+        <div ref="multiLineDom" v-html="codeContent" style="margin-top: -1em" />
       </q-card>
       <div
+        ref="singleLineDom"
         v-show="!isMultiLine"
         class="row q-pa-none q-ma-none"
         style="font-family: Consolas, monospace, serif; white-space: pre"

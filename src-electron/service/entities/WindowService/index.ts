@@ -76,6 +76,25 @@ export class WindowService implements WindowServiceBase {
     return this.windowMap.get(type) as WindowMap[T];
   }
 
+  async setWindowSize(
+    size: {
+      width: number;
+      height: number;
+    },
+    type?: WindowType,
+  ): Promise<void> {
+    let window: BrowserWindow | null | undefined;
+    if (type) {
+      window = this.getWindow(type)._window;
+    } else {
+      window = BrowserWindow.getFocusedWindow();
+    }
+    if (window) {
+      console.log('setWindowSize', type, size);
+      window.setSize(size.width, size.height);
+    }
+  }
+
   async closeWindow(type?: WindowType): Promise<void> {
     if (type) {
       const window = this.getWindow(type);

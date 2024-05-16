@@ -24,6 +24,7 @@ const defaultMapping: Record<NetworkZone, HuggingFaceStoreType> = {
   [NetworkZone.Normal]: huggingFaceStoreDefaultNormal,
   [NetworkZone.Public]: huggingFaceStoreDefaultNormal,
   [NetworkZone.Secure]: huggingFaceStoreDefaultRoute,
+  [NetworkZone.Unknown]: huggingFaceStoreDefaultNormal,
 };
 
 export class HuggingFaceConfigStore {

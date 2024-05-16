@@ -124,8 +124,6 @@ export class AppService implements AppServiceBase {
       }
 
       // 激活主窗口
-      this._windowService.getWindow(WindowType.Main).activate();
-
       this._dataStoreService.getActiveModelContent();
     });
   }

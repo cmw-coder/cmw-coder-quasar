@@ -10,4 +10,11 @@ export interface WindowServiceBase {
   getProjectIdWindowActiveProject(): Promise<string | undefined>;
   getCommitWindowCurrentFile(): Promise<string | undefined>;
   activeWindow(type: WindowType): Promise<void>;
+  setWindowSize(
+    size: {
+      width: number;
+      height: number;
+    },
+    type?: WindowType,
+  ): Promise<void>;
 }
