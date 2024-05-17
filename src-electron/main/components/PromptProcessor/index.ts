@@ -51,22 +51,22 @@ export class PromptProcessor {
           : appConfig.completionConfigs.snippet;
 
     try {
+      const questionParams = {
+        question: await promptElements.stringify(),
+        maxTokens: completionConfig.maxTokenCount,
+        temperature: completionConfig.temperature,
+        stop: completionConfig.stopTokens,
+        suffix: promptElements.suffix,
+        plugin: 'SI',
+        profileModel: appConfig.activeModel,
+        productLine: appConfig.activeTemplate,
+        subType: projectId,
+        templateName:
+          completionType === CompletionType.Line ? 'ShortLineCode' : 'LineCode',
+      };
+      log.debug('PromptProcessor.process.questionParams', questionParams);
       const answers = await api_question(
-        {
-          question: await promptElements.stringify(),
-          maxTokens: completionConfig.maxTokenCount,
-          temperature: completionConfig.temperature,
-          stop: completionConfig.stopTokens,
-          suffix: promptElements.suffix,
-          plugin: 'SI',
-          profileModel: appConfig.activeModel,
-          productLine: appConfig.activeTemplate,
-          subType: projectId,
-          templateName:
-            completionType === CompletionType.Line
-              ? 'ShortLineCode'
-              : 'LineCode',
-        },
+        questionParams,
         this._abortController.signal,
       );
       let candidates = answers.map((answer) => answer.text);
