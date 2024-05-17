@@ -199,7 +199,7 @@ onBeforeUnmount(() => {
             />
           </div>
           <q-scroll-area class="full-width" style="height: 560px">
-            <code-block :src="currentFileContent" />
+            <code-block :html="currentFileContent" />
           </q-scroll-area>
         </q-card-section>
       </q-card>
@@ -270,7 +270,7 @@ onBeforeUnmount(() => {
                   <div>Score: {{ similarSnippet.score }}</div>
                 </div>
                 <q-scroll-area class="full-width" style="height: 443px">
-                  <code-block :src="similarSnippet.content" />
+                  <code-block :html="similarSnippet.content" />
                 </q-scroll-area>
               </q-tab-panel>
             </q-tab-panels>

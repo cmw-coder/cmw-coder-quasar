@@ -3,14 +3,13 @@ import { readFile } from 'fs/promises';
 import { decode } from 'iconv-lite';
 import { basename, dirname } from 'path';
 
+import { getService } from 'main/services';
 import { SymbolInfo } from 'main/types/SymbolInfo';
 import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
 import { timer } from 'main/utils/timer';
 import { CompletionGenerateClientMessage } from 'shared/types/WsMessage';
-import { container } from 'service/index';
-import { ServiceType } from 'shared/services';
-import type { DataStoreService } from 'service/entities/DataStoreService';
+import { ServiceType } from 'shared/types/service';
 
 export class PromptElements {
   // NearCode
@@ -37,12 +36,11 @@ export class PromptElements {
     this.suffix = suffix.trimEnd();
   }
 
-  stringify() {
-    const dataStoreService = container.get<DataStoreService>(
-      ServiceType.DATA_STORE,
-    );
-    const { common } =
-      dataStoreService.activeModelContent.prompt['c'].other.code;
+  async stringify() {
+    const dataStoreService = getService(ServiceType.DATA_STORE);
+    const { common } = (await dataStoreService.getActiveModelContent()).prompt[
+      'c'
+    ].other.code;
 
     let question = common;
 

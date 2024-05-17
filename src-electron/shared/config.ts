@@ -1,15 +1,15 @@
 import { ApiStyle } from 'shared/types/model';
-import { AppConfig } from 'shared/types/AppConfig';
+import { AppConfig } from 'shared/types/service/ConfigServiceTrait/types';
 
 export enum NetworkZone {
   // 红区
-  Normal,
+  Normal = 'Normal',
   // 黄、绿区
-  Public,
+  Public = 'Public',
   // 路由红区
-  Secure,
+  Secure = 'Secure',
   // 未知 -- 默认值
-  Unknown,
+  Unknown = 'Unknown',
 }
 
 export const defaultServerUrlMap: Record<NetworkZone, string> = {
@@ -30,6 +30,8 @@ export const defaultAppConfigNetworkZoneMap: Record<NetworkZone, AppConfig> = {
     activeModel: 'CmwCoder',
     activeModelKey: 'CmwCoder',
     activeChat: 'default',
+    useEnterSend: false,
+    useMultipleChat: true,
     completionConfigs: {
       function: {
         contextLimit: 1500,
@@ -64,6 +66,8 @@ export const defaultAppConfigNetworkZoneMap: Record<NetworkZone, AppConfig> = {
     activeModel: '百业灵犀-13B',
     activeModelKey: 'LS13B',
     activeChat: 'default',
+    useEnterSend: false,
+    useMultipleChat: true,
     completionConfigs: {
       function: {
         contextLimit: 1500,
@@ -98,6 +102,8 @@ export const defaultAppConfigNetworkZoneMap: Record<NetworkZone, AppConfig> = {
     activeModel: 'CmwCoder',
     activeModelKey: 'CmwCoder',
     activeChat: 'default',
+    useEnterSend: false,
+    useMultipleChat: true,
     completionConfigs: {
       function: {
         contextLimit: 1500,
@@ -132,6 +138,8 @@ export const defaultAppConfigNetworkZoneMap: Record<NetworkZone, AppConfig> = {
     activeModel: 'CmwCoder',
     activeModelKey: 'CmwCoder',
     activeChat: 'default',
+    useEnterSend: false,
+    useMultipleChat: true,
     completionConfigs: {
       function: {
         contextLimit: 1500,

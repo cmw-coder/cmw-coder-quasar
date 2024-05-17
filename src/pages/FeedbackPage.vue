@@ -9,7 +9,7 @@ import AccountInput from 'components/AccountInput.vue';
 import { WindowType } from 'shared/types/WindowType';
 import { api_feedback } from 'src/request/api';
 import { useService } from 'utils/common';
-import { ServiceType } from 'shared/services';
+import { ServiceType } from 'shared/types/service';
 
 const baseName = 'pages.FeedbackPage.';
 
@@ -64,7 +64,7 @@ const submit = async () => {
     });
     setTimeout(() => {
       switch (name) {
-        case WindowType.Floating: {
+        case WindowType.Feedback: {
           closeWindow();
           break;
         }
@@ -133,7 +133,7 @@ onMounted(async () => {
       </div>
       <div class="row q-gutter-x-md">
         <q-btn
-          v-if="name === WindowType.Floating"
+          v-if="name === WindowType.Feedback"
           class="col-grow"
           flat
           :label="i18n('labels.cancel')"

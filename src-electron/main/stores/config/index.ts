@@ -15,15 +15,15 @@ import {
   LinseerDataType,
   LinseerStoreType,
 } from 'main/stores/config/types';
-import { judgment, refreshToken } from 'main/utils/axios';
 import { userInfo } from 'os';
 import { NetworkZone, runtimeConfig } from 'shared/config';
-import { betaApiUserList } from 'shared/constants';
+import { betaApiUserList } from 'shared/constants/common';
 
 const defaultMapping: Record<NetworkZone, HuggingFaceStoreType> = {
   [NetworkZone.Normal]: huggingFaceStoreDefaultNormal,
   [NetworkZone.Public]: huggingFaceStoreDefaultNormal,
   [NetworkZone.Secure]: huggingFaceStoreDefaultRoute,
+  [NetworkZone.Unknown]: huggingFaceStoreDefaultNormal,
 };
 
 export class HuggingFaceConfigStore {
@@ -71,10 +71,6 @@ export class HuggingFaceConfigStore {
     return this._store.store;
   }
 
-  get apiStyle() {
-    return this._store.get('apiStyle');
-  }
-
   get config(): HuggingFaceConfigType {
     return this._store.get('config');
   }
@@ -95,19 +91,6 @@ export class HuggingFaceConfigStore {
 
   get endpoints() {
     return this.config.endpoints;
-  }
-
-  get modelConfig() {
-    const { modelConfigs } = this.config;
-    const { modelType } = this.data;
-    return (
-      modelConfigs.find((modelConfig) => modelConfig.modelType === modelType) ??
-      modelConfigs[0]
-    );
-  }
-
-  get modelType() {
-    return this.modelConfig.modelType;
   }
 }
 
@@ -199,48 +182,5 @@ export class LinseerConfigStore {
 
   get endpoints() {
     return this.config.endpoints;
-  }
-
-  get modelConfig() {
-    const { modelConfigs } = this.config;
-    const { modelType } = this.data;
-    return (
-      modelConfigs.find((modelConfig) => modelConfig.modelType === modelType) ??
-      modelConfigs[0]
-    );
-  }
-
-  get modelType() {
-    return this.modelConfig.modelType;
-  }
-
-  async getAccessToken() {
-    if ((await this.checkAccessToken()) || (await this.refreshToken())) {
-      const { tokens } = this.data;
-      return tokens.access;
-    }
-  }
-
-  async checkAccessToken() {
-    const { tokens } = this.data;
-    try {
-      await judgment(tokens.access);
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  async refreshToken() {
-    const currentData = this.data;
-    try {
-      const { data } = await refreshToken(currentData.tokens.refresh);
-      currentData.tokens.access = data.access_token;
-      currentData.tokens.refresh = data.refresh_token;
-      this.data = currentData;
-      return true;
-    } catch (e) {
-      return false;
-    }
   }
 }

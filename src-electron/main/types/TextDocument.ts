@@ -3,13 +3,11 @@ import { decode } from 'iconv-lite';
 
 import { Position } from 'main/types/vscode/position';
 import { Range } from 'main/types/vscode/range';
-import { TextLine } from 'main/types/vscode/textLine';
 
 export class TextDocument {
   fileName: string;
   languageId = 'c';
   version = 0;
-  isClosed = false;
   lineCount: number;
   private readonly _content: string;
 
@@ -19,40 +17,11 @@ export class TextDocument {
     this.lineCount = this._content.split('\n').length;
   }
 
-  lineAt(line: number): TextLine;
-  lineAt(position: Position): TextLine;
-  lineAt(input: unknown): TextLine {
-    const lineNumber =
-      typeof input === 'number' ? input : (<Position>input).line;
-    const text = this._content.split('\n')[lineNumber].replace(/[\r\n]/g, '');
-    return {
-      lineNumber: lineNumber,
-      text: text,
-      range: new Range(lineNumber, 0, lineNumber, text.length),
-      rangeIncludingLineBreak: new Range(
-        lineNumber,
-        0,
-        lineNumber,
-        text.length + 1,
-      ),
-      firstNonWhitespaceCharacterIndex: text.search(/\S/),
-      isEmptyOrWhitespace: text.trim().length === 0,
-    };
-  }
-
   offsetAt(position: Position): number {
     return (
       this._content.split('\n').slice(0, position.line).join('\n').length +
       position.character +
       1
-    );
-  }
-
-  positionAt(offset: number): Position {
-    const linesBefore = this._content.substring(0, offset).split('\n');
-    return new Position(
-      linesBefore.length - 1,
-      offset - linesBefore.slice(0, -1).join('\n').length,
     );
   }
 
@@ -64,29 +33,5 @@ export class TextDocument {
       this.offsetAt(range.start),
       this.offsetAt(range.end),
     );
-  }
-
-  validateRange(range: Range): Range {
-    const startPosition =
-      this.offsetAt(range.start) >= 0 ? range.start : this.positionAt(0);
-    const endPosition =
-      this.offsetAt(range.end) < this._content.length
-        ? range.end
-        : this.positionAt(this._content.length - 1);
-    return new Range(
-      startPosition.line,
-      startPosition.character,
-      endPosition.line,
-      endPosition.character,
-    );
-  }
-
-  validatePosition(position: Position): Position {
-    const offset = this.offsetAt(position);
-    return offset < 0
-      ? this.positionAt(0)
-      : offset >= this._content.length
-        ? this.positionAt(this._content.length - 1)
-        : position;
   }
 }

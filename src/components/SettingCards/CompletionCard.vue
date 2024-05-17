@@ -6,7 +6,7 @@ import {
   api_getUserTemplateList,
 } from 'src/request/api';
 import { useService } from 'utils/common';
-import { ServiceType } from 'app/src-electron/shared/services';
+import { ServiceType } from 'shared/types/service';
 
 const baseName = 'components.SettingCards.CompletionCard.';
 
@@ -106,7 +106,7 @@ watch(
         activeModel: data.value,
         activeModelKey: data.modelKey,
       });
-      await await dataStoreService.getActiveModelContent();
+      await dataStoreService.getActiveModelContent();
     }
   },
 );

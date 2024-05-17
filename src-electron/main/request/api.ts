@@ -1,7 +1,8 @@
-import request, { streamRequest } from 'main/request';
-import { QuestionTemplateFile } from 'shared/types/QuestionTemplate';
-import { Answer, QuestionParams } from 'shared/api/QuestionType';
 import { AxiosProgressEvent } from 'axios';
+
+import request, { streamRequest } from 'main/request';
+import { Answer, QuestionParams } from 'shared/types/api';
+import { ModelConfigMap } from 'shared/types/service/DataStoreServiceTrait/types';
 
 export const api_refreshToken = (refreshToken: string) =>
   request<{
@@ -19,7 +20,7 @@ export const api_refreshToken = (refreshToken: string) =>
 
 // 获取产品线下的模板文件内容
 export const api_getProductLineQuestionTemplateFile = (productLine: string) =>
-  request<QuestionTemplateFile>({
+  request<ModelConfigMap>({
     url: '/kong/RdTestAiService/template',
     method: 'get',
     params: {

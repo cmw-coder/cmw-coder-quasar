@@ -3,7 +3,7 @@ import { ref } from 'vue';
 import { ChatMessage } from 'stores/chat/types';
 import { api_questionStream } from 'app/src/request/api';
 import { useService } from 'utils/common';
-import { ServiceType } from 'shared/services';
+import { ServiceType } from 'shared/types/service';
 
 export const useChatStore = defineStore('chat', () => {
   const currentChatMessages = ref<ChatMessage[]>([]);

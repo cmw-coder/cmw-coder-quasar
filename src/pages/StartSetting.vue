@@ -8,7 +8,7 @@ import {
   defaultServerUrlMap,
 } from 'shared/config';
 import { checkUrlAccessible, useService } from 'utils/common';
-import { ServiceType } from 'shared/services';
+import { ServiceType } from 'shared/types/service';
 
 const baseName = 'pages.StartSettingPage.';
 
@@ -27,6 +27,7 @@ const networkZone: Ref<NetworkZone> = ref(NetworkZone.Normal);
 const serverUrl = ref('');
 const configService = useService(ServiceType.CONFIG);
 const windowService = useService(ServiceType.WINDOW);
+const updaterService = useService(ServiceType.UPDATER);
 
 const pingLoading = ref(false);
 
@@ -64,10 +65,12 @@ const nextHandle = async () => {
       // 保存配置
       await configService.setConfigs(originalAppConfig);
       await windowService.finishStartSetting();
+      await updaterService.init();
     } catch (e) {
       notify({
         type: 'negative',
         message: i18n('notifications.pingError'),
+        caption: (<Error>e).message,
       });
     } finally {
       pingLoading.value = false;
@@ -84,7 +87,13 @@ const nextHandle = async () => {
           {{ i18n('labels.title') }}
         </div>
       </div>
-      <q-stepper v-model="step" ref="stepper" color="primary" animated>
+      <q-stepper
+        ref="stepper"
+        active-color="primary"
+        animated
+        done-color="positive"
+        v-model="step"
+      >
         <q-step
           :name="1"
           :title="i18n('labels.stepOneTitle')"

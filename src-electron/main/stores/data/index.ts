@@ -2,7 +2,6 @@ import Conf from 'conf';
 import log from 'electron-log/main';
 import ElectronStore from 'electron-store';
 import { existsSync } from 'fs';
-import { extend } from 'quasar';
 
 import { dataStoreDefault } from 'main/stores/data/default';
 import {
@@ -11,16 +10,12 @@ import {
   DataStoreTypeBefore_1_0_2,
   DataStoreTypeBefore_1_0_4,
 } from 'main/stores/data/types';
-import { getRevision } from 'main/utils/svn';
 
 const getAs = <T>(store: unknown, key: string): T => {
   return <T>(<Conf>store).get(key);
 };
 
-/**
- * @deprecated
- */
-export class DataStore {
+export class DataStoreBefore1_2_0 {
   private _store: ElectronStore<DataStoreType>;
 
   constructor() {
@@ -94,56 +89,5 @@ export class DataStore {
 
   get store(): DataStoreType {
     return this._store.store;
-  }
-
-  set store(value: Partial<DataStoreType>) {
-    this._store.store = extend(true, this._store.store, value);
-  }
-
-  /**
-   * @deprecated
-   */
-  async setProjectId(path: string, projectId: string) {
-    const store = this.store;
-    if (store.project[path]) {
-      store.project[path].id = projectId;
-    } else {
-      store.project[path] = {
-        id: projectId,
-        lastAddedLines: 0,
-        svn: [],
-      };
-    }
-    this.store = store;
-  }
-
-  /**
-   * @deprecated
-   */
-  async setProjectLastAddedLines(path: string, lastAddedLines: number) {
-    const store = this.store;
-    if (store.project[path]) {
-      store.project[path].lastAddedLines = lastAddedLines;
-      this.store = store;
-    }
-  }
-
-  /**
-   * @deprecated
-   */
-  async setProjectSvn(projectPath: string, svnPath: string) {
-    const store = this.store;
-    if (
-      store.project[projectPath] &&
-      !store.project[projectPath].svn.find(
-        ({ directory }) => directory === svnPath,
-      )
-    ) {
-      store.project[projectPath].svn.push({
-        directory: svnPath,
-        revision: await getRevision(svnPath),
-      });
-      this.store = store;
-    }
   }
 }

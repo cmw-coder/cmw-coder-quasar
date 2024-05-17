@@ -1,9 +1,9 @@
 import { DataProjectType } from 'main/stores/data/types';
 import packageJson from 'root/package.json';
-import { container } from 'service';
-import type { DataStoreService } from 'service/entities/DataStoreService';
-import type { WebsocketService } from 'service/entities/WebsocketService';
-import { ServiceType } from 'shared/services';
+import { ServiceType } from 'shared/types/service';
+import { container } from 'main/services';
+import { WebsocketService } from 'main/services/WebsocketService';
+import { DataStoreService } from 'main/services/DataStoreService';
 
 export enum CompletionErrorCause {
   accessToken = 'accessToken',

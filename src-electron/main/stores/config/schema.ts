@@ -7,15 +7,12 @@ import {
   HuggingFaceConfigType,
   HuggingFaceDataType,
   HuggingFaceModelConfigType,
-  HuggingFaceStoreType,
   LinseerCompletionConfigType,
   LinseerConfigType,
   LinseerDataType,
   LinseerModelConfigType,
-  LinseerStoreType,
 } from 'main/stores/config/types';
 import {
-  ApiStyle,
   HuggingFaceModelType,
   LinseerModelType,
   SubModelType,
@@ -151,26 +148,8 @@ const huggingFaceDataSchema: Schema<HuggingFaceDataType> = {
     enum: Object.keys(HuggingFaceModelType),
   },
 };
-
-export const huggingFaceStoreSchema: Schema<HuggingFaceStoreType> = {
-  apiStyle: {
-    type: 'string',
-    const: ApiStyle.HuggingFace,
-  },
-  config: {
-    type: 'object',
-    required: Object.keys(huggingFaceConfigSchema),
-    additionalProperties: false,
-    properties: huggingFaceConfigSchema,
-  },
-  data: {
-    type: 'object',
-    required: Object.keys(huggingFaceDataSchema),
-    additionalProperties: false,
-    properties: huggingFaceDataSchema,
-  },
-};
-
+Object.keys(huggingFaceConfigSchema);
+Object.keys(huggingFaceDataSchema);
 /// Linseer ------------------------------------------------------------------------------------------------------------
 
 const linseerCompletionConfigSchema: Schema<LinseerCompletionConfigType> = {
@@ -281,22 +260,5 @@ const linseerDataSchema: Schema<LinseerDataType> = {
     },
   },
 };
-
-export const linseerStoreSchema: Schema<LinseerStoreType> = {
-  apiStyle: {
-    type: 'string',
-    const: ApiStyle.Linseer,
-  },
-  config: {
-    type: 'object',
-    required: Object.keys(linseerConfigSchema),
-    additionalProperties: false,
-    properties: linseerConfigSchema,
-  },
-  data: {
-    type: 'object',
-    required: Object.keys(linseerDataSchema),
-    additionalProperties: false,
-    properties: linseerDataSchema,
-  },
-};
+Object.keys(linseerConfigSchema);
+Object.keys(linseerDataSchema);

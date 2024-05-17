@@ -1,6 +1,7 @@
 /* eslint-disable */
 
 declare namespace NodeJS {
+  // noinspection JSUnusedGlobalSymbols
   interface ProcessEnv {
     APPDATA: string;
     APP_URL: string;

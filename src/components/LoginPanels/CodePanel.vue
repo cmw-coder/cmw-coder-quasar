@@ -4,7 +4,7 @@ import { computed, reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { api_checkAuthCode, api_getAuthCode } from 'src/request/login';
 import { useService } from 'utils/common';
-import { ServiceType } from 'shared/services';
+import { ServiceType } from 'shared/types/service';
 
 const { t } = useI18n();
 const { notify } = useQuasar();

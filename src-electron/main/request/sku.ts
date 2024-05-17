@@ -1,8 +1,9 @@
-import { userInfo } from 'os';
-import request from 'main/request';
-import { CollectionData } from 'service/entities/StatisticsService/types';
 import log from 'electron-log/main';
 import { DateTime } from 'luxon';
+import { userInfo } from 'os';
+
+import request from 'main/request';
+import { CollectionData } from 'main/services/StatisticsService/types';
 
 export interface ReportSkuDto {
   begin?: number;

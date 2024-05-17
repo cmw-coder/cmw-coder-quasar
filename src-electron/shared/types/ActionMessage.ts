@@ -4,19 +4,15 @@ import {
   LinseerDataType,
   LinseerStoreType,
 } from 'main/stores/config/types';
-import { DataStoreType } from 'main/stores/data/types';
 import { CompletionCacheClientMessage } from 'shared/types/WsMessage';
 
 export enum ActionType {
-  ClientSetProjectId = 'ClientSetProjectId',
   ChatInsert = 'ChatInsert',
   CompletionClear = 'CompletionClear',
   CompletionSet = 'CompletionSet',
   CompletionUpdate = 'CompletionUpdate',
   ConfigStoreLoad = 'ConfigStoreLoad',
   ConfigStoreSave = 'ConfigStoreSave',
-  DataStoreLoad = 'DataStoreLoad',
-  DataStoreSave = 'DataStoreSave',
   DebugSync = 'DebugSync',
   RouterReload = 'RouterReload',
   UpdateDownload = 'UpdateDownload',
@@ -27,18 +23,6 @@ export enum ActionType {
 export interface ActionMessage {
   type: ActionType;
   data: unknown;
-}
-
-export class ClientSetProjectIdActionMessage implements ActionMessage {
-  type = ActionType.ClientSetProjectId;
-  data: {
-    project: string;
-    projectId: string;
-  };
-
-  constructor(data: { project: string; projectId: string }) {
-    this.data = data;
-  }
 }
 
 export class ChatInsertActionMessage implements ActionMessage {
@@ -61,12 +45,14 @@ export class CompletionSetActionMessage implements ActionMessage {
     completion: string;
     count: { index: number; total: number };
     fontHeight: number;
+    fontSize: number;
   };
 
   constructor(data: {
     completion: string;
     count: { index: number; total: number };
     fontHeight: number;
+    fontSize: number;
   }) {
     this.data = data;
   }
@@ -117,24 +103,6 @@ export class ConfigStoreSaveActionMessage implements ActionMessage {
   }
 }
 
-export class DataStoreLoadActionMessage implements ActionMessage {
-  type = ActionType.DataStoreLoad;
-  data: DataStoreType | undefined;
-
-  constructor(data?: DataStoreType) {
-    this.data = data;
-  }
-}
-
-export class DataStoreSaveActionMessage implements ActionMessage {
-  type = ActionType.DataStoreSave;
-  data: Partial<DataStoreType>;
-
-  constructor(data: Partial<DataStoreType>) {
-    this.data = data;
-  }
-}
-
 export class DebugSyncActionMessage implements ActionMessage {
   type = ActionType.DebugSync;
   data: { content: string; path: string };
@@ -181,15 +149,12 @@ export class UpdateDownloadActionMessage implements ActionMessage {
 }
 
 export interface ActionMessageMapping {
-  [ActionType.ClientSetProjectId]: ClientSetProjectIdActionMessage;
   [ActionType.ChatInsert]: ChatInsertActionMessage;
   [ActionType.CompletionClear]: CompletionClearActionMessage;
   [ActionType.CompletionSet]: CompletionSetActionMessage;
   [ActionType.CompletionUpdate]: CompletionUpdateActionMessage;
   [ActionType.ConfigStoreLoad]: ConfigStoreLoadActionMessage;
   [ActionType.ConfigStoreSave]: ConfigStoreSaveActionMessage;
-  [ActionType.DataStoreLoad]: DataStoreLoadActionMessage;
-  [ActionType.DataStoreSave]: DataStoreSaveActionMessage;
   [ActionType.DebugSync]: DebugSyncActionMessage;
   [ActionType.RouterReload]: RouterReloadActionMessage;
   [ActionType.UpdateDownload]: UpdateDownloadActionMessage;
