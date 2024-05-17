@@ -75,7 +75,7 @@ export class StatisticsService implements StatisticsServiceTrait {
     const lineLength = candidate.split('\r\n').length;
     try {
       await api_reportSKU(
-        constructData(
+        await constructData(
           lineLength,
           data.timelines.startAccept.toMillis(),
           DateTime.now().toMillis(),
@@ -173,7 +173,7 @@ export class StatisticsService implements StatisticsServiceTrait {
         ratio === KeptRatio.None
           ? undefined
           : api_reportSKU(
-              constructData(
+              await constructData(
                 count,
                 data.timelines.startAccept.toMillis(),
                 DateTime.now().toMillis(),
@@ -237,17 +237,17 @@ export class StatisticsService implements StatisticsServiceTrait {
         version,
       });
       const lineLength = candidate.split('\r\n').length;
-      api_reportSKU(
-        constructData(
-          lineLength,
-          data.timelines.startGenerate.toMillis(),
-          data.timelines.endGenerate.toMillis(),
-          data.projectId,
-          version,
-          'CODE',
-          skuNameGenerateMapping[data.completions.type],
-        ),
-      );
+      constructData(
+        lineLength,
+        data.timelines.startGenerate.toMillis(),
+        data.timelines.endGenerate.toMillis(),
+        data.projectId,
+        version,
+        'CODE',
+        skuNameGenerateMapping[data.completions.type],
+      )
+        .then((data) => api_reportSKU(data))
+        .catch((e) => log.warn(e));
     }
     return candidate;
   }
@@ -276,7 +276,7 @@ export class StatisticsService implements StatisticsServiceTrait {
     });
     try {
       await api_reportSKU(
-        constructData(
+        await constructData(
           count,
           Date.now(),
           Date.now(),
@@ -307,7 +307,15 @@ export class StatisticsService implements StatisticsServiceTrait {
     });
     try {
       await api_reportSKU(
-        constructData(count, startTime, endTime, projectId, version, 'INC', ''),
+        await constructData(
+          count,
+          startTime,
+          endTime,
+          projectId,
+          version,
+          'INC',
+          '',
+        ),
       );
     } catch (e) {
       log.error('StatisticsReporter.incrementLinesFailed', e);

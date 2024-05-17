@@ -2,7 +2,7 @@ import { ReportSkuDto } from 'main/request/sku';
 import { getService } from 'main/services';
 import { ServiceType } from 'shared/types/service';
 
-export const constructData = (
+export const constructData = async (
   count: number,
   startTime: number,
   endTime: number,
@@ -10,8 +10,8 @@ export const constructData = (
   version: string,
   firstClass: string,
   skuName: string,
-): ReportSkuDto[] => {
-  const appConfig = getService(ServiceType.CONFIG).getConfigs();
+): Promise<ReportSkuDto[]> => {
+  const appConfig = await getService(ServiceType.CONFIG).getConfigs();
   const basicData = {
     begin: Math.floor(startTime / 1000),
     end: Math.floor(endTime / 1000),

@@ -21,7 +21,7 @@ export class PromptProcessor {
     promptElements: PromptElements,
     projectId: string,
   ): Promise<Completions | undefined> {
-    const appConfig = getService(ServiceType.CONFIG).getConfigs();
+    const appConfig = await getService(ServiceType.CONFIG).getConfigs();
 
     const cacheKey = createHash('sha1')
       .update(promptElements.prefix.trimEnd())

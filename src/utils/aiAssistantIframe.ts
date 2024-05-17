@@ -64,7 +64,7 @@ export class AiAssistantIframe {
     const configService = useService(ServiceType.CONFIG);
     const dataStoreService = useService(ServiceType.DATA_STORE);
     if (data.command === 'GET_CONFIG') {
-      const config = configService.getConfigs();
+      const config = await configService.getConfigs();
       const modelContent = await dataStoreService.getActiveModelContent();
       return <never>{
         appType: 'SI',

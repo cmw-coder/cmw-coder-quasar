@@ -45,7 +45,7 @@ const nextHandle = async () => {
         message: i18n('notifications.pingSuccess'),
       });
       // 保存配置
-      const originalAppConfig = configService.getConfigs();
+      const originalAppConfig = await configService.getConfigs();
       const defaultNetworkZoneAppConfig =
         defaultAppConfigNetworkZoneMap[networkZone.value];
       originalAppConfig.networkZone = networkZone.value;
@@ -68,6 +68,7 @@ const nextHandle = async () => {
       notify({
         type: 'negative',
         message: i18n('notifications.pingError'),
+        caption: (<Error>e).message,
       });
     } finally {
       pingLoading.value = false;
@@ -84,7 +85,13 @@ const nextHandle = async () => {
           {{ i18n('labels.title') }}
         </div>
       </div>
-      <q-stepper v-model="step" ref="stepper" color="primary" animated>
+      <q-stepper
+        ref="stepper"
+        active-color="primary"
+        animated
+        done-color="positive"
+        v-model="step"
+      >
         <q-step
           :name="1"
           :title="i18n('labels.stepOneTitle')"

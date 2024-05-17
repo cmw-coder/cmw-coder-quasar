@@ -59,7 +59,7 @@ export class ConfigService implements ConfigServiceTrait {
     );
   }
 
-  getConfigs() {
+  async getConfigs() {
     return this.appConfigStore.store;
   }
 

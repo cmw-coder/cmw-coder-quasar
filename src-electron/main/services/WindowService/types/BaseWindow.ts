@@ -56,7 +56,7 @@ export abstract class BaseWindow {
           this._window.show();
           this._window.focus();
           if (process.env.NODE_ENV === 'development') {
-            this._window.webContents.openDevTools();
+            this._window.webContents.openDevTools({ mode: 'detach' });
           }
         }
       });
