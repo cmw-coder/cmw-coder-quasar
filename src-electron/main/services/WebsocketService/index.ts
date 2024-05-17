@@ -24,6 +24,7 @@ import { WindowType } from 'shared/types/WindowType';
 import { DataStoreService } from 'main/services/DataStoreService';
 import { StatisticsService } from 'main/services/StatisticsService';
 import { WindowService } from 'main/services/WindowService';
+import { DataProjectType } from 'main/stores/data/types';
 
 interface ClientInfo {
   client: WebSocket;
@@ -343,5 +344,18 @@ export class WebsocketService implements WebsocketServiceTrait {
         }
       },
     );
+  }
+
+  async getProjectData() {
+    const project = this.getClientInfo(this._lastActivePid)?.currentProject;
+    if (!project) {
+      return undefined;
+    }
+    const appData = this._dataStoreService.getAppdata();
+    const projectData: DataProjectType | undefined = appData.project[project];
+    if (!projectData || !projectData.id) {
+      return undefined;
+    }
+    return projectData;
   }
 }

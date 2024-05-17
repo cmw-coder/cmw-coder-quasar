@@ -1,6 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
 import { useService } from 'utils/common';
-import { ServiceType } from 'shared/services';
 import {
   Commands,
   ReceiveMessage,
@@ -10,9 +9,10 @@ import {
   UiToExtensionCommandExecResultMap,
 } from 'shared/types/ExtensionMessage';
 import { ExtensionConfig } from 'shared/types/ExtensionMessageDetails';
-import { deepClone } from 'shared/utils';
 import { ChatInsertServerMessage } from 'shared/types/WsMessage';
 import { NetworkZone } from 'shared/config';
+import { ServiceType } from 'shared/types/service';
+import { extend } from 'quasar';
 
 export class AiAssistantIframe {
   private promiseMap = new Map<
@@ -77,7 +77,7 @@ export class AiAssistantIframe {
     } else {
       // promiseMap 不存在值 ===> 插件执行消息
       const data = await this.execCommand(message.command, message.content);
-      const sendMessage = deepClone(message) as unknown as SendMessage<T>;
+      const sendMessage = extend({}, message) as unknown as SendMessage<T>;
       sendMessage.content = data;
       this.sendMessage(sendMessage);
     }

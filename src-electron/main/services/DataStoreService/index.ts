@@ -22,6 +22,8 @@ import { WindowType } from 'shared/types/WindowType';
 import { ServiceType } from 'shared/types/service';
 import { getRevision } from 'main/utils/svn';
 import { ConfigService } from 'main/services/ConfigService';
+import { ChatFileContent } from 'shared/types/ChatMessage';
+import { LocalChatManager } from 'main/services/DataStoreService/LocalChatManager';
 
 const defaultStoreData = extend<AppData>(true, {}, defaultAppData);
 
@@ -47,6 +49,7 @@ export class DataStoreService implements DataStoreServiceTrait {
     {},
     defaultModelConfig,
   );
+  localChatManager = new LocalChatManager();
 
   constructor(
     @inject(ServiceType.CONFIG)
@@ -178,5 +181,29 @@ export class DataStoreService implements DataStoreServiceTrait {
     } catch (error) {
       log.error('DataStoreService._updateCurrentQuestionTemplateFile', error);
     }
+  }
+
+  async getChatList() {
+    return this.localChatManager.getChatList();
+  }
+
+  async getChat(name: string) {
+    return this.localChatManager.getChat(name);
+  }
+
+  async newChat(name: string) {
+    return this.localChatManager.newChat(name);
+  }
+
+  async saveChat(name: string, content: ChatFileContent) {
+    return this.localChatManager.saveChat(name, content);
+  }
+
+  async deleteChat(name: string) {
+    return this.localChatManager.deleteChat(name);
+  }
+
+  async openChatListDir() {
+    return this.localChatManager.openChatListDir();
   }
 }

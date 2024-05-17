@@ -12,8 +12,8 @@ import { ActionType } from 'shared/types/ActionMessage';
 import { useHighlighter } from 'stores/highlighter';
 import { ActionApi } from 'types/ActionApi';
 import { useService } from 'utils/common';
-import { ServiceType } from 'shared/services';
 import { WindowType } from 'shared/types/WindowType';
+import { ServiceType } from 'shared/types/service';
 
 const baseName = 'pages.CompletionImmersivePage.';
 

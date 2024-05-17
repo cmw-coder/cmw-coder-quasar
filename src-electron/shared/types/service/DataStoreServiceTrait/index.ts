@@ -1,3 +1,4 @@
+import { ChatFileContent, ChatItem } from 'shared/types/ChatMessage';
 import {
   AppData,
   ModelConfig,
@@ -18,4 +19,10 @@ export interface DataStoreServiceTrait {
   setProjectSvn(projectPath: string, svnPath: string): Promise<void>;
 
   getActiveModelContent(): Promise<ModelConfig>;
+  getChatList(): Promise<ChatItem[]>;
+  getChat(name: string): Promise<ChatFileContent>;
+  newChat(name: string): Promise<string>;
+  saveChat(name: string, content: ChatFileContent): Promise<string>;
+  deleteChat(name: string): Promise<void>;
+  openChatListDir(): Promise<void>;
 }
