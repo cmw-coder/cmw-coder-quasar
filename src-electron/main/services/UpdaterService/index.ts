@@ -7,10 +7,12 @@ import { UpdaterServiceTrait } from 'shared/types/service/UpdaterServiceTrait';
 import { WindowType } from 'shared/types/WindowType';
 import { ConfigService } from 'main/services/ConfigService';
 import { WindowService } from 'main/services/WindowService';
+import { NetworkZone } from 'shared/config';
 
 @injectable()
 export class UpdaterService implements UpdaterServiceTrait {
   private _updater!: NsisUpdater;
+  private updateUrl!: string;
 
   constructor(
     @inject(ServiceType.CONFIG) private _configService: ConfigService,
@@ -18,10 +20,15 @@ export class UpdaterService implements UpdaterServiceTrait {
   ) {}
 
   init() {
+    const { baseServerUrl, networkZone } = this._configService.getConfigsSync();
+    this.updateUrl =
+      networkZone === NetworkZone.Public
+        ? `${baseServerUrl}/h3c-ai-assistant/plugin/sourceinsight`
+        : `${baseServerUrl}/h3c-ai-assistant/cmw-coder`;
     this._updater = new NsisUpdater({
       channel: 'release',
       provider: 'generic',
-      url: this._configService.configStore.config.endpoints.update,
+      url: this.updateUrl,
     });
 
     this._updater.autoDownload = false;

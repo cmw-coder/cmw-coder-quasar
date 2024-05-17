@@ -27,6 +27,7 @@ const networkZone: Ref<NetworkZone> = ref(NetworkZone.Normal);
 const serverUrl = ref('');
 const configService = useService(ServiceType.CONFIG);
 const windowService = useService(ServiceType.WINDOW);
+const updaterService = useService(ServiceType.UPDATER);
 
 const pingLoading = ref(false);
 
@@ -64,6 +65,7 @@ const nextHandle = async () => {
       // 保存配置
       await configService.setConfigs(originalAppConfig);
       await windowService.finishStartSetting();
+      await updaterService.init();
     } catch (e) {
       notify({
         type: 'negative',
