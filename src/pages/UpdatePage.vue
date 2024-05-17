@@ -45,8 +45,8 @@ const updateResponse = (confirmed: boolean) => {
   isUpdating.value = confirmed;
   if (confirmed) {
     window.actionApi.send(new UpdateDownloadActionMessage());
-  } else if (name === WindowType.Floating) {
-    window.controlApi.close(WindowType.Floating);
+  } else if (name === WindowType.Update) {
+    window.controlApi.close(WindowType.Update);
   } else {
     back();
   }
@@ -56,8 +56,8 @@ const actionApi = new ActionApi(baseName);
 onMounted(() => {
   actionApi.register(ActionType.UpdateFinish, () => {
     window.actionApi.send(new UpdateFinishActionMessage());
-    if (name === WindowType.Floating) {
-      window.controlApi.hide(WindowType.Floating);
+    if (name === WindowType.Update) {
+      window.controlApi.hide(WindowType.Update);
     }
   });
   actionApi.register(

@@ -1,0 +1,178 @@
+import { BrowserWindow, app } from 'electron';
+import { inject, injectable } from 'inversify';
+import { TrayIcon } from 'main/components/TrayIcon';
+import { MenuEntry } from 'main/components/TrayIcon/types';
+import { WindowServiceTrait } from 'shared/types/service/WindowServiceTrait';
+import { NetworkZone } from 'shared/config';
+import { ServiceType } from 'shared/types/service';
+import { WindowType } from 'shared/types/WindowType';
+import { defaultAppData } from 'shared/types/service/DataStoreServiceTrait/types';
+import { FeedbackWindow } from 'main/services/WindowService/types/FeedbackWindow';
+import { ChatWindow } from 'main/services/WindowService/types/ChatWindow';
+import { CommitWindow } from 'main/services/WindowService/types/CommitWindow';
+import { ProjectIdWindow } from 'main/services/WindowService/types/ProjectIdWindow';
+import { SettingWindow } from 'main/services/WindowService/types/SettingWindow';
+import { StartSettingWindow } from 'main/services/WindowService/types/StartSettingWindow';
+import { LoginWindow } from 'main/services/WindowService/types/LoginWindow';
+import { CompletionsWindow } from 'main/services/WindowService/types/CompletionsWindow';
+import { MainWindow } from 'main/services/WindowService/types/MainWindow';
+import { UpdateWindow } from 'main/services/WindowService/types/UpdateWindow';
+import { BaseWindow } from 'main/services/WindowService/types/BaseWindow';
+import { ConfigService } from 'main/services/ConfigService';
+
+interface WindowMap {
+  [WindowType.Chat]: ChatWindow;
+  [WindowType.Commit]: CommitWindow;
+  [WindowType.Feedback]: FeedbackWindow;
+  [WindowType.ProjectId]: ProjectIdWindow;
+  [WindowType.Setting]: SettingWindow;
+  [WindowType.StartSetting]: StartSettingWindow;
+  [WindowType.Login]: LoginWindow;
+  [WindowType.Completions]: CompletionsWindow;
+  [WindowType.Main]: MainWindow;
+  [WindowType.Update]: UpdateWindow;
+  [WindowType.Quake]: MainWindow;
+  [WindowType.WorkFlow]: MainWindow;
+}
+
+@injectable()
+export class WindowService implements WindowServiceTrait {
+  trayIcon: TrayIcon;
+  windowMap = new Map<WindowType, BaseWindow>();
+
+  constructor(
+    @inject(ServiceType.CONFIG)
+    private _configService: ConfigService,
+  ) {
+    this.windowMap.set(WindowType.Chat, new ChatWindow());
+    this.windowMap.set(WindowType.Commit, new CommitWindow());
+    this.windowMap.set(WindowType.Feedback, new FeedbackWindow());
+    this.windowMap.set(WindowType.ProjectId, new ProjectIdWindow());
+    this.windowMap.set(WindowType.Setting, new SettingWindow());
+    this.windowMap.set(WindowType.StartSetting, new StartSettingWindow());
+    this.windowMap.set(WindowType.Login, new LoginWindow());
+    this.windowMap.set(WindowType.Completions, new CompletionsWindow());
+    this.windowMap.set(WindowType.Main, new MainWindow());
+    this.windowMap.set(WindowType.Quake, new MainWindow());
+    this.windowMap.set(WindowType.WorkFlow, new MainWindow());
+    this.windowMap.set(WindowType.Update, new UpdateWindow());
+
+    this.trayIcon = new TrayIcon();
+
+    this.trayIcon.onClick(() => this.getWindow(WindowType.Main).activate());
+    this.trayIcon.registerMenuEntry(MenuEntry.Feedback, () =>
+      this.getWindow(WindowType.Feedback).activate(),
+    );
+    this.trayIcon.registerMenuEntry(MenuEntry.Settings, () => {
+      this.getWindow(WindowType.Setting).activate();
+    });
+    this.trayIcon.registerMenuEntry(MenuEntry.Chat, () => {
+      this.getWindow(WindowType.Chat).activate();
+    });
+    this.trayIcon.registerMenuEntry(MenuEntry.Quit, () => app.exit());
+  }
+
+  getWindow<T extends WindowType>(type: T): WindowMap[T] {
+    return this.windowMap.get(type) as WindowMap[T];
+  }
+
+  async setWindowSize(
+    size: {
+      width: number;
+      height: number;
+    },
+    type?: WindowType,
+  ): Promise<void> {
+    let window: BrowserWindow | null | undefined;
+    if (type) {
+      window = this.getWindow(type)._window;
+    } else {
+      window = BrowserWindow.getFocusedWindow();
+    }
+    if (window) {
+      console.log('setWindowSize', type, size);
+      window.setSize(size.width, size.height);
+    }
+  }
+
+  async closeWindow(type?: WindowType): Promise<void> {
+    if (type) {
+      const window = this.getWindow(type);
+      window.destroy();
+    } else {
+      const focusWindow = BrowserWindow.getFocusedWindow();
+      if (focusWindow) {
+        focusWindow.destroy();
+      }
+    }
+  }
+
+  async toggleMaximizeWindow(type?: WindowType): Promise<void> {
+    let window: BrowserWindow | null | undefined;
+    if (type) {
+      window = this.getWindow(type)._window;
+    } else {
+      window = BrowserWindow.getFocusedWindow();
+    }
+    if (window) {
+      window.isMaximized() ? window.unmaximize() : window.maximize();
+    }
+  }
+
+  async defaultWindowSize(type: WindowType): Promise<void> {
+    let window: BrowserWindow | null | undefined;
+    if (type) {
+      window = this.getWindow(type)._window;
+    } else {
+      window = BrowserWindow.getFocusedWindow();
+    }
+    if (window) {
+      const defaultWindowSize = defaultAppData.window[type];
+      window.setSize(
+        defaultWindowSize.width || 600,
+        defaultWindowSize.height || 800,
+      );
+    }
+  }
+
+  async minimizeWindow(type?: WindowType): Promise<void> {
+    let window: BrowserWindow | null | undefined;
+    if (type) {
+      window = this.getWindow(type)._window;
+    } else {
+      window = BrowserWindow.getFocusedWindow();
+    }
+    if (window) {
+      window.minimize();
+    }
+  }
+
+  async finishStartSetting() {
+    const config = await this._configService.getConfigs();
+    if (config.networkZone === NetworkZone.Public && !config.token) {
+      // 黄、绿区环境需要登录
+      this.getWindow(WindowType.Login).activate();
+    } else {
+      // 激活主窗口
+      this.getWindow(WindowType.Main).activate();
+    }
+    this.getWindow(WindowType.StartSetting).destroy();
+  }
+
+  async finishLogin() {
+    this.getWindow(WindowType.Login).activate();
+    this.getWindow(WindowType.Login).destroy();
+  }
+
+  async getProjectIdWindowActiveProject(): Promise<string | undefined> {
+    return this.getWindow(WindowType.ProjectId).project;
+  }
+
+  async getCommitWindowCurrentFile(): Promise<string | undefined> {
+    return this.getWindow(WindowType.Commit).currentFile;
+  }
+
+  async activeWindow(type: WindowType): Promise<void> {
+    this.getWindow(type).activate();
+  }
+}

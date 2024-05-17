@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { watch } from 'vue';
 
-import { FileChanges } from 'shared/types/svn';
+import { FileChanges } from 'shared/types/service/SvnServiceTrait/types';
 
 const props = defineProps<{ data: FileChanges[] }>();
 const modelValue = defineModel<number>({ required: true });

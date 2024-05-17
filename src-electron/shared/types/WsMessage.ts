@@ -1,6 +1,6 @@
 import { Completions } from 'main/components/PromptProcessor/types';
-import { KeptRatio } from 'service/entities/StatisticsService/types';
 import { CaretPosition, SymbolInfo } from 'shared/types/common';
+import { KeptRatio } from 'main/services/StatisticsService/types';
 
 export enum WsAction {
   ChatInsert = 'ChatInsert',

@@ -5,10 +5,10 @@ import {
   folderLatestModificationTime,
 } from 'main/utils/common';
 import packageJson from 'root/package.json';
-import { container } from 'service';
-import { DataStoreService } from 'service/entities/DataStoreService';
-import { StatisticsService } from 'service/entities/StatisticsService';
-import { ServiceType } from 'shared/services';
+import { ServiceType } from 'shared/types/service';
+import { container } from 'main/services';
+import { DataStoreService } from 'main/services/DataStoreService';
+import { StatisticsService } from 'main/services/StatisticsService';
 
 export const getRevision = async (path: string): Promise<number> => {
   const { stdout, stderr } = await executeCommand('svn info', path);

@@ -22,7 +22,7 @@ import {
 import { ACTION_API_KEY, CONTROL_API_KEY } from 'shared/constants/common';
 import { ActionMessage } from 'shared/types/ActionMessage';
 import { WindowType } from 'shared/types/WindowType';
-import { SERVICE_CALL_KEY, ServiceType } from 'shared/services';
+import { SERVICE_CALL_KEY, ServiceType } from 'shared/types/service';
 
 contextBridge.exposeInMainWorld(ACTION_API_KEY, {
   register: registerAction,

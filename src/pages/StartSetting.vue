@@ -8,7 +8,7 @@ import {
   defaultServerUrlMap,
 } from 'shared/config';
 import { checkUrlAccessible, useService } from 'utils/common';
-import { ServiceType } from 'shared/services';
+import { ServiceType } from 'shared/types/service';
 
 const baseName = 'pages.StartSettingPage.';
 
@@ -68,6 +68,7 @@ const nextHandle = async () => {
       notify({
         type: 'negative',
         message: i18n('notifications.pingError'),
+        caption: (<Error>e).message,
       });
     } finally {
       pingLoading.value = false;
@@ -84,7 +85,13 @@ const nextHandle = async () => {
           {{ i18n('labels.title') }}
         </div>
       </div>
-      <q-stepper v-model="step" ref="stepper" color="primary" animated>
+      <q-stepper
+        ref="stepper"
+        active-color="primary"
+        animated
+        done-color="positive"
+        v-model="step"
+      >
         <q-step
           :name="1"
           :title="i18n('labels.stepOneTitle')"

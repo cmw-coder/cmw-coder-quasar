@@ -8,11 +8,10 @@ import {
   processGeneratedSuggestions,
 } from 'main/components/PromptProcessor/utils';
 import { timer } from 'main/utils/timer';
-import { container } from 'service';
-import type { ConfigService } from 'service/entities/ConfigService';
-import { ServiceType } from 'shared/services';
+import { ServiceType } from 'shared/types/service';
 import { api_question } from 'main/request/api';
 import { CompletionType } from 'shared/types/common';
+import { getService } from 'main/services';
 
 export class PromptProcessor {
   private _abortController?: AbortController;
@@ -22,9 +21,7 @@ export class PromptProcessor {
     promptElements: PromptElements,
     projectId: string,
   ): Promise<Completions | undefined> {
-    const appConfig = await container
-      .get<ConfigService>(ServiceType.CONFIG)
-      .getConfigs();
+    const appConfig = await getService(ServiceType.CONFIG).getConfigs();
 
     const cacheKey = createHash('sha1')
       .update(promptElements.prefix.trimEnd())
@@ -54,20 +51,24 @@ export class PromptProcessor {
           : appConfig.completionConfigs.snippet;
 
     try {
-      const params = {
-        question: promptElements.stringify(),
-        maxTokens: completionConfig.maxTokenCount,
-        temperature: completionConfig.temperature,
-        stop: completionConfig.stopTokens,
-        suffix: promptElements.suffix,
-        plugin: 'SI',
-        profileModel: appConfig.activeModel,
-        productLine: appConfig.activeTemplate,
-        subType: projectId,
-        templateName: 'ShortLineCode',
-      };
-      log.debug('api_question params', params);
-      const answers = await api_question(params, this._abortController.signal);
+      const answers = await api_question(
+        {
+          question: await promptElements.stringify(),
+          maxTokens: completionConfig.maxTokenCount,
+          temperature: completionConfig.temperature,
+          stop: completionConfig.stopTokens,
+          suffix: promptElements.suffix,
+          plugin: 'SI',
+          profileModel: appConfig.activeModel,
+          productLine: appConfig.activeTemplate,
+          subType: projectId,
+          templateName:
+            completionType === CompletionType.Line
+              ? 'ShortLineCode'
+              : 'LineCode',
+        },
+        this._abortController.signal,
+      );
       let candidates = answers.map((answer) => answer.text);
       candidates = processGeneratedSuggestions(
         candidates,

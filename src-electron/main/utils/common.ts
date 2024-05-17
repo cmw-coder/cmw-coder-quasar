@@ -1,5 +1,4 @@
 import { exec } from 'child_process';
-import { BrowserWindow } from 'electron';
 import { readdir, stat } from 'fs/promises';
 import { decode } from 'iconv-lite';
 import { detect } from 'jschardet';
@@ -7,20 +6,6 @@ import path from 'path';
 import { promisify } from 'util';
 
 const execAsync = promisify(exec);
-
-export const bypassCors = (window: BrowserWindow) =>
-  window.webContents.session.webRequest.onHeadersReceived(
-    (details, callback) => {
-      callback({
-        responseHeaders: {
-          'Access-Control-Allow-Origin': ['*'],
-          'Access-Control-Allow-Headers': ['*'],
-          ...details.responseHeaders,
-        },
-      });
-    },
-  );
-
 export const executeCommand = async (
   command: string,
   workingDirectory?: string,

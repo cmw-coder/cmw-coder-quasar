@@ -2,6 +2,7 @@ import { RouteRecordRaw } from 'vue-router';
 
 import { WindowType } from 'shared/types/WindowType';
 
+// noinspection JSUnusedGlobalSymbols
 export const routes: RouteRecordRaw[] = [
   {
     name: 'root',
@@ -141,7 +142,6 @@ export const routes: RouteRecordRaw[] = [
           header: () => import('layouts/headers/MainHeader.vue'),
           leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
           default: () => import('pages/ChatPage.vue'),
-          // rightDrawer: () => import('layouts/drawers/RightMainDrawer.vue'),
           footer: () => import('layouts/footers/QuestionFooter.vue'),
         },
         props: {

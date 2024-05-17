@@ -4,12 +4,13 @@ import axios, {
   AxiosRequestConfig,
   AxiosRequestHeaders,
 } from 'axios';
-import type { ConfigService } from 'service/entities/ConfigService';
-import type { WindowService } from 'service/entities/WindowService';
-import { container } from 'service/index';
-import { NetworkZone } from 'shared/config';
-import { ServiceType } from 'shared/services';
+
 import { api_refreshToken } from 'main/request/api';
+import { container } from 'main/services';
+import { ConfigService } from 'main/services/ConfigService';
+import { WindowService } from 'main/services/WindowService';
+import { NetworkZone } from 'shared/config';
+import { ServiceType } from 'shared/types/service';
 import { WindowType } from 'shared/types/WindowType';
 
 const _request = axios.create({

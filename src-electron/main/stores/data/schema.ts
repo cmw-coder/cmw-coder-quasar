@@ -1,20 +1,6 @@
 import { Schema } from 'electron-store';
 
-import {
-  DataCompatibilityType,
-  DataProjectType,
-  DataStoreType,
-  DataWindowType,
-} from 'main/stores/data/types';
-
-const dataCompatibilitySchema: Schema<DataCompatibilityType> = {
-  transparentFallback: {
-    type: 'boolean',
-  },
-  zoomFix: {
-    type: 'boolean',
-  },
-};
+import { DataProjectType, DataWindowType } from 'main/stores/data/types';
 
 const dataProjectSchema: Schema<DataProjectType> = {
   id: {
@@ -57,29 +43,5 @@ const dataWindowSchema: Schema<DataWindowType> = {
     },
   },
 };
-
-export const dataStoreSchema: Schema<DataStoreType> = {
-  compatibility: {
-    type: 'object',
-    additionalProperties: {
-      type: 'object',
-      additionalProperties: false,
-      properties: dataCompatibilitySchema,
-    },
-  },
-  project: {
-    type: 'object',
-    additionalProperties: {
-      type: 'object',
-      required: Object.keys(dataProjectSchema),
-      additionalProperties: false,
-      properties: dataProjectSchema,
-    },
-  },
-  window: {
-    type: 'object',
-    required: Object.keys(dataWindowSchema),
-    additionalProperties: false,
-    properties: dataWindowSchema,
-  },
-};
+Object.keys(dataProjectSchema);
+Object.keys(dataWindowSchema);

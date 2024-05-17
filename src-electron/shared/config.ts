@@ -1,15 +1,15 @@
 import { ApiStyle } from 'shared/types/model';
-import { AppConfig } from 'shared/types/AppConfig';
+import { AppConfig } from 'shared/types/service/ConfigServiceTrait/types';
 
 export enum NetworkZone {
   // 红区
-  Normal,
+  Normal = 'Normal',
   // 黄、绿区
-  Public,
+  Public = 'Public',
   // 路由红区
-  Secure,
+  Secure = 'Secure',
   // 未知 -- 默认值
-  Unknown,
+  Unknown = 'Unknown',
 }
 
 export const defaultServerUrlMap: Record<NetworkZone, string> = {

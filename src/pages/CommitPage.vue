@@ -5,8 +5,8 @@ import { useI18n } from 'vue-i18n';
 
 import ChangeList from 'components/DiffPanels/ChangeList.vue';
 import DiffDisplay from 'components/DiffPanels/DiffDisplay.vue';
-import { ServiceType } from 'shared/services';
-import { FileChanges } from 'shared/types/svn';
+import { ServiceType } from 'shared/types/service';
+import { FileChanges } from 'shared/types/service/SvnServiceTrait/types';
 import { WindowType } from 'shared/types/WindowType';
 import { generateCommitPrompt } from 'utils/commitPrompt';
 import { getLastDirName, useService } from 'utils/common';

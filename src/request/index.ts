@@ -1,4 +1,4 @@
-import { ServiceType } from 'shared/services';
+import { ServiceType } from 'shared/types/service';
 import axios, {
   AxiosError,
   AxiosProgressEvent,
