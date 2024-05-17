@@ -123,7 +123,6 @@ export class AppService implements AppServiceBase {
         return;
       }
 
-      // 激活主窗口
       this._dataStoreService.getActiveModelContent();
     });
   }
