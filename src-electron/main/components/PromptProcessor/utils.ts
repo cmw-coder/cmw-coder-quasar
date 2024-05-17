@@ -11,11 +11,14 @@ export const completionsPostProcess = (
   completions: string[],
   promptElements: PromptElements,
 ) => {
-  const firstSuffixLine = promptElements.suffix.trim().split(/\r?\n/)[0].trim();
+  const firstSuffixLine = promptElements.suffix
+    .trimStart()
+    .split(/\r?\n/)[0]
+    .trimEnd();
   return completions.map((completion) => {
     const lines = completion.split(/\r?\n/);
     const sameContentIndex = lines.findIndex(
-      (line) => line.trim().length > 2 && line.trim() === firstSuffixLine,
+      (line) => line.trimEnd() === firstSuffixLine,
     );
     return sameContentIndex === -1
       ? completion
