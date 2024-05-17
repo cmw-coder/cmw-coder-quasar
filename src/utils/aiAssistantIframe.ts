@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { uid } from 'quasar';
 import { useService } from 'utils/common';
 import {
   Commands,
@@ -52,7 +52,7 @@ export class AiAssistantIframe {
     return new Promise<void>((rs) => {
       if (!message.id) {
         // message.id 不存在  ==> ui 执行消息
-        const id = uuidv4();
+        const id = uid();
         this.iframeWindow.postMessage(
           {
             ...message,

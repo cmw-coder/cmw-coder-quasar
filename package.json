@@ -42,7 +42,6 @@
     "@types/markdown-it": "^13.0.8",
     "@types/node": "^16.18.97",
     "@types/node-schedule": "^2.1.7",
-    "@types/uuid": "^9.0.8",
     "@types/ws": "^8.5.10",
     "@types/xml2js": "^0.4.14",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
