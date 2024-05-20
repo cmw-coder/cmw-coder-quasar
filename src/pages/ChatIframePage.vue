@@ -37,12 +37,11 @@ onMounted(async () => {
   <div class="ai-assistant">
     <iframe
       v-if="isShow"
+      aria-description="AI Assistant for Source Insight"
       id="iframeAiAssistant"
-      SI
       name="SI_AI_ASSISTANT"
-      frameborder="0"
       sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-downloads"
-    ></iframe>
+    />
   </div>
 </template>
 
