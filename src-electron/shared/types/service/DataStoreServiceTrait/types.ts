@@ -95,7 +95,7 @@ export const defaultAppData: AppData = {
       width: 800,
       show: false,
     },
-    [WindowType.StartSetting]: {
+    [WindowType.Welcome]: {
       height: 600,
       width: 800,
       show: false,

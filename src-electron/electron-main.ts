@@ -5,4 +5,4 @@ const appService = getService(ServiceType.App);
 const updaterService = getService(ServiceType.UPDATER);
 
 appService.init();
-updaterService.init();
+updaterService.init().catch();

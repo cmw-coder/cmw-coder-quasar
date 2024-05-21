@@ -114,7 +114,7 @@ export class AppService implements AppServiceTrait {
 
       // 引导配置基础环境（黄、绿区 | 红区 | 路由红区）
       if (config.networkZone === NetworkZone.Unknown) {
-        this._windowService.getWindow(WindowType.StartSetting).activate();
+        this._windowService.getWindow(WindowType.Welcome).activate();
         return;
       }
 

@@ -159,17 +159,16 @@ export const FONT_SIZE_MAPPING: Record<number, number> = {
 };
 export const WINDOW_URL_MAPPING: Record<WindowType, string> = {
   [WindowType.Main]: '/main',
+  [WindowType.Quake]: '/floating/quake',
 
-  [WindowType.Login]: '/floating/login',
-  [WindowType.StartSetting]: '/floating/start-setting',
-  [WindowType.Setting]: '/floating/settings',
-  [WindowType.ProjectId]: '/floating/project-id',
   [WindowType.Chat]: '/floating/chat',
   [WindowType.Commit]: '/floating/commit',
-  [WindowType.WorkFlow]: '/floating/workflow',
-  [WindowType.Feedback]: '/floating/feedback',
-  [WindowType.Update]: '/floating/update',
-
-  [WindowType.Quake]: '/floating/quake',
   [WindowType.Completions]: '/floating/completions',
+  [WindowType.Feedback]: '/floating/feedback',
+  [WindowType.Login]: '/floating/login',
+  [WindowType.ProjectId]: '/floating/project-id',
+  [WindowType.Setting]: '/floating/settings',
+  [WindowType.Update]: '/floating/update',
+  [WindowType.Welcome]: '/floating/welcome',
+  [WindowType.WorkFlow]: '/floating/workflow',
 };

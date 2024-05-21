@@ -12,7 +12,7 @@ import { ChatWindow } from 'main/services/WindowService/types/ChatWindow';
 import { CommitWindow } from 'main/services/WindowService/types/CommitWindow';
 import { ProjectIdWindow } from 'main/services/WindowService/types/ProjectIdWindow';
 import { SettingWindow } from 'main/services/WindowService/types/SettingWindow';
-import { StartSettingWindow } from 'main/services/WindowService/types/StartSettingWindow';
+import { WelcomeWindow } from 'main/services/WindowService/types/WelcomeWindow';
 import { LoginWindow } from 'main/services/WindowService/types/LoginWindow';
 import { CompletionsWindow } from 'main/services/WindowService/types/CompletionsWindow';
 import { MainWindow } from 'main/services/WindowService/types/MainWindow';
@@ -23,15 +23,15 @@ import { ConfigService } from 'main/services/ConfigService';
 interface WindowMap {
   [WindowType.Chat]: ChatWindow;
   [WindowType.Commit]: CommitWindow;
-  [WindowType.Feedback]: FeedbackWindow;
-  [WindowType.ProjectId]: ProjectIdWindow;
-  [WindowType.Setting]: SettingWindow;
-  [WindowType.StartSetting]: StartSettingWindow;
-  [WindowType.Login]: LoginWindow;
   [WindowType.Completions]: CompletionsWindow;
+  [WindowType.Feedback]: FeedbackWindow;
+  [WindowType.Login]: LoginWindow;
   [WindowType.Main]: MainWindow;
-  [WindowType.Update]: UpdateWindow;
+  [WindowType.ProjectId]: ProjectIdWindow;
   [WindowType.Quake]: MainWindow;
+  [WindowType.Setting]: SettingWindow;
+  [WindowType.Update]: UpdateWindow;
+  [WindowType.Welcome]: WelcomeWindow;
   [WindowType.WorkFlow]: MainWindow;
 }
 
@@ -49,7 +49,7 @@ export class WindowService implements WindowServiceTrait {
     this.windowMap.set(WindowType.Feedback, new FeedbackWindow());
     this.windowMap.set(WindowType.ProjectId, new ProjectIdWindow());
     this.windowMap.set(WindowType.Setting, new SettingWindow());
-    this.windowMap.set(WindowType.StartSetting, new StartSettingWindow());
+    this.windowMap.set(WindowType.Welcome, new WelcomeWindow());
     this.windowMap.set(WindowType.Login, new LoginWindow());
     this.windowMap.set(WindowType.Completions, new CompletionsWindow());
     this.windowMap.set(WindowType.Main, new MainWindow());
@@ -147,7 +147,12 @@ export class WindowService implements WindowServiceTrait {
     }
   }
 
-  async finishStartSetting() {
+  async finishLogin() {
+    this.getWindow(WindowType.Login).activate();
+    this.getWindow(WindowType.Login).destroy();
+  }
+
+  async finishWelcome() {
     const config = await this._configService.getConfigs();
     if (config.networkZone === NetworkZone.Public && !config.token) {
       // 黄、绿区环境需要登录
@@ -156,12 +161,7 @@ export class WindowService implements WindowServiceTrait {
       // 激活主窗口
       this.getWindow(WindowType.Main).activate();
     }
-    this.getWindow(WindowType.StartSetting).destroy();
-  }
-
-  async finishLogin() {
-    this.getWindow(WindowType.Login).activate();
-    this.getWindow(WindowType.Login).destroy();
+    this.getWindow(WindowType.Welcome).destroy();
   }
 
   async getProjectIdWindowActiveProject(): Promise<string | undefined> {

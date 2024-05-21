@@ -130,6 +130,41 @@ export default {
         },
       },
     },
+    WelcomePanels: {
+      AutoPanel: {
+        labels: {
+          title: 'Detecting network zone...',
+        },
+      },
+      FinishPanel: {
+        labels: {
+          confirm: 'Confirm',
+          title: 'You are all set!',
+          tip: 'You can change common settings here or just start using Comware Coder.',
+        },
+      },
+      ManualPanel: {
+        labels: {
+          normalArea: 'Red',
+          publicArea: 'Yellow/Green',
+          secureArea: 'Red Route',
+          title: 'Auto detect network zone failed, please setup manually',
+        },
+        notifications: {
+          pingError:
+            'Failed to ping the server, Please check your network connection.',
+          pingSuccess: 'Successfully pinged the server',
+        },
+        steps: [
+          {
+            title: 'Select network zone',
+            next: 'Continue',
+            previous: 'Detect again',
+          },
+          { title: 'Set base server url', next: 'Finish', previous: 'Back' },
+        ],
+      },
+    },
   },
   layouts: {
     drawers: {
@@ -262,23 +297,12 @@ export default {
         releaseDate: 'Release date: {releaseDate}',
       },
     },
-    StartSettingPage: {
+    WelcomePage: {
       labels: {
-        title: 'Please set your environment',
-        stepOneTitle: 'Select network zone',
-        stepTwoTitle: 'Set base server url',
-        redArea: 'Red',
-        normalArea: 'Yellow/Green',
-        redRouteArea: 'Red Route',
-        finish: 'Finish',
-        continue: 'Continue',
-        back: 'Back',
+        title: 'Welcome to Comware Coder',
       },
       notifications: {
         configError: 'Failed to save the configuration',
-        pingError:
-          'Failed to ping the server, Please check your network connection.',
-        pingSuccess: 'Successfully pinged the server',
       },
     },
     WorkflowPage: {

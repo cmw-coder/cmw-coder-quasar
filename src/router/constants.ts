@@ -101,18 +101,6 @@ export const routes: RouteRecordRaw[] = [
         },
       },
       {
-        path: 'start-setting',
-        components: {
-          header: () => import('layouts/headers/FloatingHeader.vue'),
-          default: () => import('pages/StartSetting.vue'),
-        },
-        props: {
-          header: {
-            windowType: WindowType.StartSetting,
-          },
-        },
-      },
-      {
         path: 'settings',
         components: {
           header: () => import('layouts/headers/FloatingHeader.vue'),
@@ -121,6 +109,18 @@ export const routes: RouteRecordRaw[] = [
         props: {
           header: {
             windowType: WindowType.Setting,
+          },
+        },
+      },
+      {
+        path: 'welcome',
+        components: {
+          header: () => import('layouts/headers/FloatingHeader.vue'),
+          default: () => import('pages/WelcomePage.vue'),
+        },
+        props: {
+          header: {
+            windowType: WindowType.Welcome,
           },
         },
       },

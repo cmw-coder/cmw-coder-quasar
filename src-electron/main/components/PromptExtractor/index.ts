@@ -162,7 +162,7 @@ export class PromptExtractor {
         path,
         score: score,
         content: lines
-          .slice(startLine, startLine + referenceSnippetLines.length)
+          .slice(startLine, startLine + referenceSnippetLines.length + 10)
           .join('\r\n'),
       };
 

@@ -19,7 +19,7 @@ export class UpdaterService implements UpdaterServiceTrait {
     @inject(ServiceType.WINDOW) private _windowService: WindowService,
   ) {}
 
-  init() {
+  async init() {
     const { baseServerUrl, networkZone } = this._configService.getConfigsSync();
     this.updateUrl =
       networkZone === NetworkZone.Public
