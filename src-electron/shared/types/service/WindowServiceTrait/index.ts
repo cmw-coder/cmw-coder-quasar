@@ -1,8 +1,8 @@
 import { WindowType } from 'shared/types/WindowType';
 
 export interface WindowServiceTrait {
-  finishStartSetting(): Promise<void>;
   finishLogin(): Promise<void>;
+  finishWelcome(): Promise<void>;
   toggleMaximizeWindow(type?: WindowType): Promise<void>;
   defaultWindowSize(type: WindowType): Promise<void>;
   minimizeWindow(type?: WindowType): Promise<void>;

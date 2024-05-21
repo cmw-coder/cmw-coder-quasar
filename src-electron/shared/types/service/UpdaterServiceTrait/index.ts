@@ -1,4 +1,4 @@
 export interface UpdaterServiceTrait {
-  init(): void;
+  init(): Promise<void>;
   checkUpdate(): Promise<void>;
 }

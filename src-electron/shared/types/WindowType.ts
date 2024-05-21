@@ -3,15 +3,14 @@ export enum WindowType {
   Quake = 'Quake',
 
   // @new
-  Login = 'Login',
-  StartSetting = 'StartSetting',
-  Setting = 'Setting',
-  ProjectId = 'ProjectId',
   Chat = 'Chat',
   Commit = 'Commit',
-  WorkFlow = 'WorkFlow',
-  Feedback = 'Feedback',
-
   Completions = 'Completions',
+  Feedback = 'Feedback',
+  Login = 'Login',
+  ProjectId = 'ProjectId',
+  Setting = 'Setting',
   Update = 'Update',
+  Welcome = 'Welcome',
+  WorkFlow = 'WorkFlow',
 }
