@@ -1,5 +1,5 @@
 import ElectronStore from 'electron-store';
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { extend } from 'quasar';
 import { userInfo } from 'os';
 
@@ -12,9 +12,14 @@ import {
 } from 'shared/config';
 import { ConfigServiceTrait } from 'shared/types/service/ConfigServiceTrait';
 import { AppConfig } from 'shared/types/service/ConfigServiceTrait/types';
-import { ActionType } from 'shared/types/ActionMessage';
+import {
+  ActionType,
+  ToggleDarkModeActionMessage,
+} from 'shared/types/ActionMessage';
 import { ApiStyle } from 'shared/types/model';
 import { betaApiUserList } from 'shared/constants/common';
+import { ServiceType } from 'shared/types/service';
+import { WindowService } from 'main/services/WindowService';
 
 const defaultStoreData = extend<AppConfig>(
   true,
@@ -40,7 +45,10 @@ export class ConfigService implements ConfigServiceTrait {
     defaults: defaultStoreData,
   });
 
-  constructor() {
+  constructor(
+    @inject(ServiceType.WINDOW)
+    private _windowService: WindowService,
+  ) {
     registerAction(
       ActionType.ConfigStoreSave,
       `main.stores.${ActionType.ConfigStoreSave}`,
@@ -82,5 +90,8 @@ export class ConfigService implements ConfigServiceTrait {
   async setDarkMode(dark: boolean) {
     this.appConfigStore.set('darkMode', dark);
     // 通知其他窗口切换主题
+    this._windowService.windowMap.forEach((baseWindow) => {
+      baseWindow.sendMessageToRenderer(new ToggleDarkModeActionMessage(dark));
+    });
   }
 }

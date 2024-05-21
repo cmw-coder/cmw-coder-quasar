@@ -22,6 +22,9 @@ onMounted(async () => {
   actionApi.register(ActionType.RouterReload, () => {
     reloadKey.value = !reloadKey.value;
   });
+  actionApi.register(ActionType.ToggleDarkMode, (isDark) => {
+    Dark.set(isDark);
+  });
   const darkMode = await configService.getConfig('darkMode');
   Dark.set(darkMode);
 });

@@ -169,4 +169,5 @@ export interface ActionMessageMapping {
   [ActionType.UpdateDownload]: UpdateDownloadActionMessage;
   [ActionType.UpdateFinish]: UpdateFinishActionMessage;
   [ActionType.UpdateProgress]: UpdateProgressActionMessage;
+  [ActionType.ToggleDarkMode]: ToggleDarkModeActionMessage;
 }
