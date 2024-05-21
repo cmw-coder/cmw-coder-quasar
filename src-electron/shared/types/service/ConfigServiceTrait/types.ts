@@ -20,6 +20,8 @@ export interface AppConfig {
   activeChat: string;
   useMultipleChat: boolean;
   useEnterSend: boolean;
+  darkMode: boolean;
+  developerMode: boolean;
   completionConfigs: {
     function: CompletionConfigType;
     line: CompletionConfigType;

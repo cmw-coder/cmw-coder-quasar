@@ -1,22 +1,44 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia';
 import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { WindowType } from 'shared/types/WindowType';
-import { themes, Theme, useSettingsStore } from 'stores/settings';
 import { useService } from 'utils/common';
 import { ServiceType } from 'shared/types/service';
 
+interface Theme {
+  color: string;
+  darkMode: boolean;
+  icon: string;
+  name: string;
+}
+
+const themes: Theme[] = [
+  {
+    color: 'yellow',
+    darkMode: true,
+    icon: 'dark_mode',
+    name: 'dark',
+  },
+  {
+    color: 'orange',
+    darkMode: false,
+    icon: 'light_mode',
+    name: 'light',
+  },
+];
+
 const baseName = 'components.SettingCards.GeneralCard.';
+
+const theme = ref(themes[1]);
+const developerMode = ref(false);
 
 const dataStoreService = useService(ServiceType.DATA_STORE);
 const windowService = useService(ServiceType.WINDOW);
+const configService = useService(ServiceType.CONFIG);
 
-const { theme, developerMode } = storeToRefs(useSettingsStore());
 const { t } = useI18n();
 const { push } = useRouter();
-const { applyDarkMode } = useSettingsStore();
 
 const i18n = (relativePath: string, data?: Record<string, unknown>) => {
   if (data) {
@@ -51,15 +73,13 @@ const updateZoomFix = async (value: boolean) => {
   zoomFixUpdating.value = false;
 };
 
-const updateTheme = (value: Theme) => {
-  theme.value = value;
-  applyDarkMode();
-  // window.controlApi.reload(WindowType.Floating);
-  // window.controlApi.reload(WindowType.Immersive);
+const updateTheme = async (value: Theme) => {
+  configService.setDarkMode(value.darkMode);
 };
 
 onMounted(async () => {
   const { compatibility } = await dataStoreService.getAppDataAsync();
+  developerMode.value = await configService.getConfig('developerMode');
   transparentFallback.value = compatibility.transparentFallback;
   zoomFix.value = compatibility.zoomFix;
 });

@@ -78,4 +78,9 @@ export class ConfigService implements ConfigServiceTrait {
   async setConfigs(data: Partial<AppConfig>) {
     this.appConfigStore.set(data);
   }
+
+  async setDarkMode(dark: boolean) {
+    this.appConfigStore.set('darkMode', dark);
+    // 通知其他窗口切换主题
+  }
 }
