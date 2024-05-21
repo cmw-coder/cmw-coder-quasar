@@ -134,7 +134,7 @@ export default {
       AutoPanel: {
         labels: {
           title: 'Detecting network zone...',
-        }
+        },
       },
       FinishPanel: {
         labels: {

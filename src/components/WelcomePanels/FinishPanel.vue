@@ -25,7 +25,11 @@ defineEmits<{
       {{ i18n('labels.tip') }}
     </div>
     <general-card />
-    <q-btn color="primary" :label="i18n('labels.confirm')" @click="$emit('finish')" />
+    <q-btn
+      color="primary"
+      :label="i18n('labels.confirm')"
+      @click="$emit('finish')"
+    />
   </div>
 </template>
 
