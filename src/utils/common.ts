@@ -20,25 +20,16 @@ export const useService = <T extends ServiceType>(serviceName: T): Service<T> =>
     },
   );
 
-export const checkUrlAccessible = (url: string, timeout = 5000) => {
-  return new Promise<void>((resolve, reject) => {
+export const checkUrlAccessible = (url: string, timeout = 3000) =>
+  new Promise<boolean>((resolve) => {
     const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), timeout);
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
     fetch(url, {
       signal: controller.signal,
     })
-      .then((response) => {
-        if (response.ok) {
-          resolve();
-        } else {
-          reject();
-        }
-      })
-      .catch((error) => {
-        reject(error);
-      })
+      .then((response) => resolve(response.ok))
+      .catch(() => resolve(false))
       .finally(() => {
-        clearTimeout(id);
+        clearTimeout(timeoutId);
       });
   });
-};

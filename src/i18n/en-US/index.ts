@@ -237,24 +237,6 @@ export default {
         title: 'Welcome',
       },
     },
-    StartSettingPage: {
-      labels: {
-        title: 'Please set your environment',
-        stepOneTitle: 'Select network zone',
-        stepTwoTitle: 'Set base server url',
-        redArea: 'Red',
-        normalArea: 'Yellow/Green',
-        redRouteArea: 'Red Route',
-        finish: 'Finish',
-        continue: 'Continue',
-        back: 'Back',
-      },
-      notifications: {
-        pingError:
-          'Failed to ping the server, Please check your network connection.',
-        pingSuccess: 'Successfully pinged the server',
-      },
-    },
     ProjectIdPage: {
       labels: {
         confirm: 'Confirm',
@@ -278,6 +260,25 @@ export default {
         currentVersion: 'Current version:',
         newVersion: 'New version:',
         releaseDate: 'Release date: {releaseDate}',
+      },
+    },
+    StartSettingPage: {
+      labels: {
+        title: 'Please set your environment',
+        stepOneTitle: 'Select network zone',
+        stepTwoTitle: 'Set base server url',
+        redArea: 'Red',
+        normalArea: 'Yellow/Green',
+        redRouteArea: 'Red Route',
+        finish: 'Finish',
+        continue: 'Continue',
+        back: 'Back',
+      },
+      notifications: {
+        configError: 'Failed to save the configuration',
+        pingError:
+          'Failed to ping the server, Please check your network connection.',
+        pingSuccess: 'Successfully pinged the server',
       },
     },
     WorkflowPage: {

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { Ref, ref } from 'vue';
+import { onMounted, Ref, ref } from 'vue';
 import { QStepper, useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import {
@@ -20,6 +20,12 @@ const i18n = (relativePath: string) => {
   return t(baseName + relativePath);
 };
 
+const options = [
+  { label: i18n('labels.redArea'), value: NetworkZone.Normal },
+  { label: i18n('labels.redRouteArea'), value: NetworkZone.Secure },
+  { label: i18n('labels.normalArea'), value: NetworkZone.Public },
+];
+
 const step = ref(1);
 const stepper = ref(null as unknown as InstanceType<typeof QStepper>);
 
@@ -29,6 +35,7 @@ const configService = useService(ServiceType.CONFIG);
 const windowService = useService(ServiceType.WINDOW);
 const updaterService = useService(ServiceType.UPDATER);
 
+const detectLoading = ref(false);
 const pingLoading = ref(false);
 
 const nextHandle = async () => {
@@ -38,45 +45,76 @@ const nextHandle = async () => {
   } else {
     // 测试地址是否可以访问通过
     const pingUrl = `${serverUrl.value}/h3c-ai-assistant/`;
-    try {
-      pingLoading.value = true;
-      await checkUrlAccessible(pingUrl);
+    pingLoading.value = true;
+    if (await checkUrlAccessible(pingUrl)) {
       notify({
         type: 'positive',
         message: i18n('notifications.pingSuccess'),
       });
-      // 保存配置
-      const originalAppConfig = await configService.getConfigs();
-      const defaultNetworkZoneAppConfig =
-        defaultAppConfigNetworkZoneMap[networkZone.value];
-      originalAppConfig.networkZone = networkZone.value;
-      originalAppConfig.baseServerUrl = serverUrl.value;
+      try {
+        // 保存配置
+        const originalAppConfig = await configService.getConfigs();
+        const defaultNetworkZoneAppConfig =
+          defaultAppConfigNetworkZoneMap[networkZone.value];
+        originalAppConfig.networkZone = networkZone.value;
+        originalAppConfig.baseServerUrl = serverUrl.value;
 
-      // 从默认配置中获取
-      originalAppConfig.activeTemplate =
-        defaultNetworkZoneAppConfig.activeTemplate;
-      originalAppConfig.activeModel = defaultNetworkZoneAppConfig.activeModel;
-      originalAppConfig.activeModelKey =
-        defaultNetworkZoneAppConfig.activeModelKey;
-      originalAppConfig.activeChat = defaultNetworkZoneAppConfig.activeChat;
-      originalAppConfig.completionConfigs =
-        defaultNetworkZoneAppConfig.completionConfigs;
+        // 从默认配置中获取
+        originalAppConfig.activeTemplate =
+          defaultNetworkZoneAppConfig.activeTemplate;
+        originalAppConfig.activeModel = defaultNetworkZoneAppConfig.activeModel;
+        originalAppConfig.activeModelKey =
+          defaultNetworkZoneAppConfig.activeModelKey;
+        originalAppConfig.activeChat = defaultNetworkZoneAppConfig.activeChat;
+        originalAppConfig.completionConfigs =
+          defaultNetworkZoneAppConfig.completionConfigs;
 
-      // 保存配置
-      await configService.setConfigs(originalAppConfig);
-      await windowService.finishStartSetting();
-      await updaterService.init();
-    } catch (e) {
+        // 保存配置
+        await configService.setConfigs(originalAppConfig);
+        await windowService.finishStartSetting();
+        await updaterService.init();
+      } catch (e) {
+        notify({
+          type: 'negative',
+          message: i18n('notifications.configError'),
+          caption: (<Error>e).message,
+        });
+      }
+    } else {
       notify({
         type: 'negative',
         message: i18n('notifications.pingError'),
-        caption: (<Error>e).message,
       });
-    } finally {
-      pingLoading.value = false;
     }
+    pingLoading.value = false;
   }
 };
+
+onMounted(async () => {
+  detectLoading.value = true;
+  const results = new Map<NetworkZone, boolean>(
+    <[NetworkZone, boolean][]>(
+      await Promise.all(
+        [NetworkZone.Normal, NetworkZone.Secure, NetworkZone.Public].map(
+          async (zone: NetworkZone) => [
+            zone,
+            await checkUrlAccessible(
+              `${defaultServerUrlMap[zone]}/h3c-ai-assistant/`,
+            ),
+          ],
+        ),
+      )
+    ),
+  );
+  for (const [zone, result] of results) {
+    if (result) {
+      networkZone.value = zone;
+      stepper.value.next();
+      break;
+    }
+  }
+  detectLoading.value = false;
+});
 </script>
 
 <template>
@@ -100,31 +138,12 @@ const nextHandle = async () => {
           icon="settings"
           :done="step > 0"
         >
-          <div class="q-gutter-sm">
-            <q-radio
-              v-model="networkZone"
-              checked-icon="task_alt"
-              unchecked-icon="panorama_fish_eye"
-              :val="NetworkZone.Normal"
-              :label="i18n('labels.redArea')"
-            />
-            <q-radio
-              v-model="networkZone"
-              checked-icon="task_alt"
-              unchecked-icon="panorama_fish_eye"
-              :val="NetworkZone.Secure"
-              :label="i18n('labels.redRouteArea')"
-            />
-            <q-radio
-              v-model="networkZone"
-              checked-icon="task_alt"
-              unchecked-icon="panorama_fish_eye"
-              :val="NetworkZone.Public"
-              :label="i18n('labels.normalArea')"
-            />
-          </div>
+          <q-option-group
+            color="primary"
+            :options="options"
+            v-model="networkZone"
+          />
         </q-step>
-
         <q-step
           :name="2"
           :title="i18n('labels.stepTwoTitle')"
@@ -133,11 +152,10 @@ const nextHandle = async () => {
         >
           <q-input v-model="serverUrl" label="Server url" />
         </q-step>
-
         <template v-slot:navigation>
           <q-stepper-navigation>
             <q-btn
-              @click="() => nextHandle()"
+              @click="nextHandle"
               color="primary"
               :loading="pingLoading"
               :label="
