@@ -45,7 +45,7 @@ export const useWorkflowStore = defineStore('workflow', () => {
         if (!workflows.value.find((workflow) => workflow.id === id)) {
           workflows.value.push({
             id,
-            name: commitMessage.split(/\r?\n/)[0],
+            name: commitMessage.split(/\r\n?/)[0],
             creator: userId,
             status: 'pending',
             steps: defaultStepInfos,

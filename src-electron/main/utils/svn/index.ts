@@ -31,13 +31,13 @@ export const getAddedLines = async (path: string, revision: number) => {
   );
   log.debug('getAddedLines', { path, revision, stdout, stderr });
   return `${stdout}\r\n${stderr}`
-    .split(/\r?\n/)
+    .split(/\r\n?/)
     .filter((line) => line.startsWith('+') && !line.startsWith('++'))
     .map((line) => line.substring(1))
     .filter((line) => line.trim().length > 0)
-    .join('\r\n')
+    .join('\n')
     .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')
-    .split('\r\n').length;
+    .split('\n').length;
 };
 
 export const reportProjectAdditions = async () => {

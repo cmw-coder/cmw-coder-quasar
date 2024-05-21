@@ -56,7 +56,7 @@ export class PromptExtractor {
     if (similarSnippetsSliced.length) {
       elements.similarSnippet = similarSnippetsSliced
         .map((similarSnippet) => similarSnippet.content)
-        .join('\r\n');
+        .join('\n');
     }
 
     if (relativeDefinitions.length) {
@@ -82,7 +82,7 @@ export class PromptExtractor {
 
       elements.symbols = relativeDefinitions
         .map((relativeDefinition) => relativeDefinition.content)
-        .join('\r\n');
+        .join('\n');
     }
 
     return elements;
@@ -151,7 +151,7 @@ export class PromptExtractor {
             IGNORE_COMWARE_INTERNAL,
           ]),
         ),
-        tokenize(referenceSnippetLines.join('\r\n'), [
+        tokenize(referenceSnippetLines.join('\n'), [
           IGNORE_RESERVED_KEYWORDS,
           IGNORE_COMMON_WORD,
           IGNORE_COMWARE_INTERNAL,
@@ -163,7 +163,7 @@ export class PromptExtractor {
         score: score,
         content: lines
           .slice(startLine, startLine + referenceSnippetLines.length + 10)
-          .join('\r\n'),
+          .join('\n'),
       };
 
       similarSnippets.push(currentMostSimilarSnippet);

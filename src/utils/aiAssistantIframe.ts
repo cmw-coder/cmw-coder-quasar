@@ -209,7 +209,7 @@ export class AiAssistantIframe {
           JSON.stringify(
             new ChatInsertServerMessage({
               result: 'success',
-              content: code.replace(/\r\n?/g, '\r\n').replace(/\r?\n/g, '\r\n'),
+              content: code.replace(/\r\n?/g, '\n'),
             }),
           ),
         );

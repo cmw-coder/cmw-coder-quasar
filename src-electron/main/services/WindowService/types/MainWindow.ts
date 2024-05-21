@@ -54,9 +54,7 @@ export class MainWindow extends BaseWindow {
         JSON.stringify(
           new ChatInsertServerMessage({
             result: 'success',
-            content: content
-              .replace(/\r\n?/g, '\r\n')
-              .replace(/\r?\n/g, '\r\n'),
+            content: content.replace(/\r\n?/g, '\n'),
           }),
         ),
       );

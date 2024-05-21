@@ -74,7 +74,7 @@ export class CompletionsWindow extends BaseWindow {
         .get<DataStoreService>(ServiceType.DATA_STORE)
         .getAppdata();
       if (compatibility.transparentFallback) {
-        const lines = completion.split('\r\n');
+        const lines = completion.split('\n');
         this._window.setBounds(
           {
             height: Math.round(lines.length * 13.3 + 15),

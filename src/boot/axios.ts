@@ -65,7 +65,7 @@ export const agentStream = async (
           const processed = (<XMLHttpRequest>event.target).responseText
             .split(/\r?\n\r?\n/)
             .filter((item) => item.length)
-            .map((item) => item.split(/\r?\n/))
+            .map((item) => item.split(/\r\n?/))
             .filter((list) => list.length === 2)
             .map(
               ([event, data]) =>

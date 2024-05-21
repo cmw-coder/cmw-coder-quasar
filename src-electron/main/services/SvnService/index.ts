@@ -32,7 +32,7 @@ export class SvnService implements SvnServiceTrait {
     ).map(({ diff, path, status }) => {
       let additions = 0;
       let deletions = 0;
-      diff.split(/\r?\n/).forEach((line) => {
+      diff.split(/\r\n?/).forEach((line) => {
         if (line.startsWith('+') && !line.startsWith('+++')) {
           additions++;
         } else if (line.startsWith('-') && !line.startsWith('---')) {

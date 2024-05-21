@@ -72,7 +72,7 @@ export class StatisticsService implements StatisticsServiceTrait {
     this._lastCursorPosition.character = -1;
     this._lastCursorPosition.line = -1;
 
-    const lineLength = candidate.split('\r\n').length;
+    const lineLength = candidate.split('\n').length;
     try {
       await api_reportSKU(
         await constructData(
@@ -236,7 +236,7 @@ export class StatisticsService implements StatisticsServiceTrait {
         },
         version,
       });
-      const lineLength = candidate.split('\r\n').length;
+      const lineLength = candidate.split('\n').length;
       constructData(
         lineLength,
         data.timelines.startGenerate.toMillis(),
