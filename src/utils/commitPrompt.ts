@@ -7,13 +7,13 @@ export const generateCommitPrompt = (changedFile: FileChanges[]) => {
   const changedText = changedFile
     .map(
       (file) =>
-        '************************************************************\r\n' +
-        `文件路径: ${file.path}\r\n` +
-        `变动类型: ${file.status}\r\n` +
-        '变动详情: \r\n' +
-        `${file.diff}\r\n` +
-        '************************************************************\r\n',
+        '************************************************************\n' +
+        `文件路径: ${file.path}\n` +
+        `变动类型: ${file.status}\n` +
+        '变动详情: \n' +
+        `${file.diff}\n` +
+        '************************************************************\n',
     )
-    .join('\r\n');
+    .join('\n');
   return requirement + changedText;
 };

@@ -45,7 +45,7 @@ export const defaultAppConfigNetworkZoneMap: Record<NetworkZone, AppConfig> = {
       line: {
         contextLimit: 1500,
         maxTokenCount: 64,
-        stopTokens: ['<fim_pad>', '<｜end▁of▁sentence｜>', '\r\n', '\n'],
+        stopTokens: ['<fim_pad>', '<｜end▁of▁sentence｜>', '\n'],
         suggestionCount: 1,
         temperature: 0.2,
       },
@@ -83,7 +83,7 @@ export const defaultAppConfigNetworkZoneMap: Record<NetworkZone, AppConfig> = {
       line: {
         contextLimit: 1500,
         maxTokenCount: 64,
-        stopTokens: ['<fim_pad>', '<｜end▁of▁sentence｜>', '\r\n', '\n'],
+        stopTokens: ['<fim_pad>', '<｜end▁of▁sentence｜>', '\n'],
         suggestionCount: 1,
         temperature: 0.2,
       },
@@ -121,7 +121,7 @@ export const defaultAppConfigNetworkZoneMap: Record<NetworkZone, AppConfig> = {
       line: {
         contextLimit: 1500,
         maxTokenCount: 64,
-        stopTokens: ['<fim_pad>', '<｜end▁of▁sentence｜>', '\r\n', '\n'],
+        stopTokens: ['<fim_pad>', '<｜end▁of▁sentence｜>', '\n'],
         suggestionCount: 1,
         temperature: 0.2,
       },
@@ -159,7 +159,7 @@ export const defaultAppConfigNetworkZoneMap: Record<NetworkZone, AppConfig> = {
       line: {
         contextLimit: 1500,
         maxTokenCount: 64,
-        stopTokens: ['<fim_pad>', '<｜end▁of▁sentence｜>', '\r\n', '\n'],
+        stopTokens: ['<fim_pad>', '<｜end▁of▁sentence｜>', '\n'],
         suggestionCount: 1,
         temperature: 0.2,
       },

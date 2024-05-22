@@ -74,7 +74,7 @@ export class CompletionsWindow extends BaseWindow {
         .get<DataStoreService>(ServiceType.DATA_STORE)
         .getAppdata();
       let fontHeight = height;
-      const lines = completion.split('\r\n');
+      const lines = completion.split('\n');
       const longestLine = Math.max(...lines.map((line) => line.length));
 
       const fontSize = FONT_SIZE_MAPPING[fontHeight]

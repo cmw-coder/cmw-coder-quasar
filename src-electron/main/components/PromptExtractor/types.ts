@@ -114,9 +114,9 @@ export class RawInputs {
               }),
               'gb2312',
             )
-              .split(/\r?\n/)
+              .split(/\r\n?/)
               .slice(startLine, endLine + 1)
-              .join('\r\n'),
+              .join('\n'),
           };
         } catch (e) {
           log.warn(e);

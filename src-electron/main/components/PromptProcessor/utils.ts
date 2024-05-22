@@ -13,29 +13,29 @@ export const completionsPostProcess = (
 ) => {
   const firstSuffixLine = promptElements.suffix
     .trimStart()
-    .split(/\r?\n/)[0]
+    .split(/\r\n?/)[0]
     .trimEnd();
   return completions.map((completion) => {
-    const lines = completion.split(/\r?\n/);
+    const lines = completion.split(/\r\n?/);
     const sameContentIndex = lines.findIndex(
       (line) => line.trimEnd() === firstSuffixLine,
     );
     return sameContentIndex === -1
       ? completion
-      : lines.slice(0, sameContentIndex).join('\r\n');
+      : lines.slice(0, sameContentIndex).join('\n');
   });
 };
 
 export const getCompletionType = (
   promptElements: PromptElements,
 ): CompletionType => {
-  const lastLine = promptElements.prefix.split('\r\n').at(-1) ?? '';
+  const lastLine = promptElements.prefix.split('\n').at(-1) ?? '';
   if (lastLine.trim().length > 0) {
     return CompletionType.Line;
   }
 
   const lastNonEmptyLine =
-    promptElements.prefix.trimEnd().split('\r\n').at(-1) ?? '';
+    promptElements.prefix.trimEnd().split('\n').at(-1) ?? '';
   if (
     detectRegex.test(lastNonEmptyLine) &&
     extname(promptElements.file ?? '') !== 'h'
@@ -65,17 +65,15 @@ export const processGeneratedSuggestions = (
     .map((generatedSuggestion) =>
       generatedSuggestion.replace(/\t/g, ' '.repeat(4)),
     )
-    /// Replace '\r' or '\n' with '\r\n'.
-    .map((generatedSuggestion) =>
-      generatedSuggestion.replace(/\r\n?/g, '\r\n').replace(/\r?\n/g, '\r\n'),
-    )
+    /// Replace '\r' or '\r\n' with '\n'.
+    .map((generatedSuggestion) => generatedSuggestion.replace(/\r\n?/g, '\n'))
     /// Filter out leading empty lines.
     .map((generatedSuggestion) => {
-      const lines = generatedSuggestion.split('\r\n');
+      const lines = generatedSuggestion.split('\n');
       const firstNonEmptyLineIndex = lines.findIndex(
         (line) => line.trim().length > 0,
       );
-      return lines.slice(firstNonEmptyLineIndex).join('\r\n');
+      return lines.slice(firstNonEmptyLineIndex).join('\n');
     })
     /// Filter out empty suggestions.
     .filter((generatedSuggestion) => generatedSuggestion.length > 0);
@@ -85,12 +83,12 @@ export const processGeneratedSuggestions = (
       return result;
     }
     case CompletionType.Line: {
-      return result.map((suggestion) => suggestion.split('\r\n')[0].trimEnd());
+      return result.map((suggestion) => suggestion.split('\n')[0].trimEnd());
     }
     case CompletionType.Snippet: {
       return result
         .map((suggestion) => {
-          const lines = suggestion.split('\r\n').slice(0, 5);
+          const lines = suggestion.split('\n').slice(0, 5);
           const lastNonEmptyLineIndex = lines.findLastIndex(
             (line) => line.trim().length > 0,
           );
@@ -99,7 +97,7 @@ export const processGeneratedSuggestions = (
           }
           return lines
             .slice(0, Math.min(4, lastNonEmptyLineIndex + 1))
-            .join('\r\n');
+            .join('\n');
         })
         .filter((suggestion) => suggestion.length > 0);
     }

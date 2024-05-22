@@ -61,7 +61,7 @@ onMounted(async () => {
       completionCount.total = count.total;
       fontSize.value = _fontSize;
       height.value = fontHeight;
-      const lines = completion.split('\r\n');
+      const lines = completion.split('\n');
       isMultiLine.value = lines.length > 1;
       await nextTick();
       if (isMultiLine.value && multiLineDom.value) {
