@@ -83,6 +83,11 @@ onMounted(async () => {
   developerMode.value = await configService.getConfig('developerMode');
   transparentFallback.value = compatibility.transparentFallback;
   zoomFix.value = compatibility.zoomFix;
+  const darkMode = await configService.getConfig('darkMode');
+  const _theme = themes.find((t) => t.darkMode === darkMode);
+  if (_theme) {
+    theme.value = _theme;
+  }
 });
 </script>
 

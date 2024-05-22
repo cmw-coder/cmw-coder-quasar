@@ -137,7 +137,10 @@ export class AiAssistantIframe {
         return undefined as UiToExtensionCommandExecResultMap[T];
       }
       case UiToExtensionCommand.GET_THEME: {
-        return 'LIGHT' as UiToExtensionCommandExecResultMap[T];
+        const darkMode = await this.configService.getConfig('darkMode');
+        return (
+          darkMode ? 'DARK' : 'LIGHT'
+        ) as UiToExtensionCommandExecResultMap[T];
       }
       case UiToExtensionCommand.GET_TOKEN: {
         const { token, refreshToken } = await this.configService.getConfigs();
