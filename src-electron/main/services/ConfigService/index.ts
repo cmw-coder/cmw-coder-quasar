@@ -12,9 +12,15 @@ import {
 } from 'shared/config';
 import { ConfigServiceTrait } from 'shared/types/service/ConfigServiceTrait';
 import { AppConfig } from 'shared/types/service/ConfigServiceTrait/types';
-import { ActionType } from 'shared/types/ActionMessage';
+import {
+  ActionType,
+  ToggleDarkModeActionMessage,
+} from 'shared/types/ActionMessage';
 import { ApiStyle } from 'shared/types/model';
 import { betaApiUserList } from 'shared/constants/common';
+import { container } from 'main/services';
+import { ServiceType } from 'shared/types/service';
+import { WindowService } from 'main/services/WindowService';
 
 const defaultStoreData = extend<AppConfig>(
   true,
@@ -77,5 +83,14 @@ export class ConfigService implements ConfigServiceTrait {
 
   async setConfigs(data: Partial<AppConfig>) {
     this.appConfigStore.set(data);
+  }
+
+  async setDarkMode(dark: boolean) {
+    this.appConfigStore.set('darkMode', dark);
+    // 通知其他窗口切换主题
+    const windowService = container.get<WindowService>(ServiceType.WINDOW);
+    windowService.windowMap.forEach((baseWindow) => {
+      baseWindow.sendMessageToRenderer(new ToggleDarkModeActionMessage(dark));
+    });
   }
 }

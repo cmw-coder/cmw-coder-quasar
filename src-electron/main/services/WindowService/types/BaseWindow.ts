@@ -1,11 +1,12 @@
 import { BrowserWindow } from 'electron';
 import Logger from 'electron-log';
 
-import { WINDOW_URL_MAPPING } from 'shared/constants/common';
+import { ACTION_API_KEY, WINDOW_URL_MAPPING } from 'shared/constants/common';
 import { ServiceType } from 'shared/types/service';
 import { WindowType } from 'shared/types/WindowType';
 import { container } from 'main/services';
 import { DataStoreService } from 'main/services/DataStoreService';
+import { ActionMessageMapping } from 'shared/types/ActionMessage';
 
 export abstract class BaseWindow {
   readonly _type: WindowType;
@@ -105,6 +106,15 @@ export abstract class BaseWindow {
       this._window.destroy();
       this._window = undefined;
     }
+  }
+
+  sendMessageToRenderer<T extends keyof ActionMessageMapping>(
+    message: ActionMessageMapping[T],
+  ): void {
+    if (!this._window) {
+      return;
+    }
+    this._window.webContents.send(ACTION_API_KEY, message);
   }
 
   protected abstract create(): BrowserWindow;

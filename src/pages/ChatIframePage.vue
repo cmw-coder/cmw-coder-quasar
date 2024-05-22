@@ -1,9 +1,13 @@
 <script setup lang="ts">
-import { nextTick, onMounted, ref } from 'vue';
+import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import { timeout, useService } from 'utils/common';
 import aiAssistantIframe from 'utils/aiAssistantIframe';
 import { ServiceType } from 'shared/types/service';
+import { ActionApi } from 'types/ActionApi';
+import { ActionType } from 'shared/types/ActionMessage';
 
+const baseName = 'pages.ChatIframe';
+const actionApi = new ActionApi(baseName);
 const configService = useService(ServiceType.CONFIG);
 
 const isShow = ref(true);
@@ -30,6 +34,13 @@ const init = async () => {
 
 onMounted(async () => {
   init();
+  actionApi.register(ActionType.ToggleDarkMode, () => {
+    refreshHandle();
+  });
+});
+
+onBeforeUnmount(() => {
+  actionApi.unregister();
 });
 </script>
 

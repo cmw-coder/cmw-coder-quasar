@@ -2,7 +2,7 @@ import { BrowserWindow } from 'electron';
 import { resolve } from 'path';
 
 import { dataStoreDefault } from 'main/stores/data/default';
-import { ActionApi, sendToRenderer } from 'preload/types/ActionApi';
+import { ActionApi } from 'preload/types/ActionApi';
 import { ControlType, registerControlCallback } from 'preload/types/ControlApi';
 import { ServiceType } from 'shared/types/service';
 import {
@@ -61,8 +61,7 @@ export class MainWindow extends BaseWindow {
     });
     this._actionApi.register(ActionType.ConfigStoreLoad, () => {
       if (this._window) {
-        sendToRenderer(
-          this._window,
+        this.sendMessageToRenderer(
           new ConfigStoreLoadActionMessage(configStore.store),
         );
       }
@@ -105,7 +104,7 @@ export class MainWindow extends BaseWindow {
     );
     websocketService.registerWsAction(WsAction.DebugSync, (message) => {
       if (this._window) {
-        sendToRenderer(this._window, new DebugSyncActionMessage(message.data));
+        this.sendMessageToRenderer(new DebugSyncActionMessage(message.data));
       }
     });
 

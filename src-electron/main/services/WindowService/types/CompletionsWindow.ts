@@ -1,17 +1,17 @@
 import { BrowserWindow, screen } from 'electron';
-import { WindowType } from 'shared/types/WindowType';
-import { resolve } from 'path';
-import { ServiceType } from 'shared/types/service';
+import log from 'electron-log';
+import { container } from 'main/services';
+import { DataStoreService } from 'main/services/DataStoreService';
 import {
   CompletionClearActionMessage,
   CompletionSetActionMessage,
   CompletionUpdateActionMessage,
 } from 'shared/types/ActionMessage';
-import { sendToRenderer } from 'preload/types/ActionApi';
-import log from 'electron-log/main';
-import { BaseWindow } from 'main/services/WindowService/types/BaseWindow';
-import { container } from 'main/services';
-import { DataStoreService } from 'main/services/DataStoreService';
+import { WindowType } from 'shared/types/WindowType';
+import { ServiceType } from 'shared/types/service';
+import { BaseWindow } from './BaseWindow';
+import { resolve } from 'path';
+import { FONT_SIZE_MAPPING } from 'shared/constants/common';
 
 export class CompletionsWindow extends BaseWindow {
   private destroyTimer?: NodeJS.Timeout;
@@ -30,7 +30,7 @@ export class CompletionsWindow extends BaseWindow {
       minWidth: 0,
       minHeight: 0,
       useContentSize: true,
-      resizable: false,
+      resizable: true,
       movable: false,
       minimizable: false,
       maximizable: false,
@@ -56,7 +56,7 @@ export class CompletionsWindow extends BaseWindow {
   completionClear() {
     if (this._window && this._window.isVisible()) {
       this._window.hide();
-      sendToRenderer(this._window, new CompletionClearActionMessage());
+      this.sendMessageToRenderer(new CompletionClearActionMessage());
     }
   }
 
@@ -73,23 +73,24 @@ export class CompletionsWindow extends BaseWindow {
       const { compatibility } = container
         .get<DataStoreService>(ServiceType.DATA_STORE)
         .getAppdata();
-      if (compatibility.transparentFallback) {
-        const lines = completion.split('\n');
-        this._window.setBounds(
-          {
-            height: Math.round(lines.length * 13.3 + 15),
-            width: Math.max(
-              Math.round(
-                Math.max(...lines.map((line) => line.length)) * 7 + 10,
-              ),
-              100,
-            ),
-          },
-          false,
-        );
-      }
+      let fontHeight = height;
+      const lines = completion.split('\n');
+      const longestLine = Math.max(...lines.map((line) => line.length));
+
+      const fontSize = FONT_SIZE_MAPPING[fontHeight]
+        ? FONT_SIZE_MAPPING[fontHeight] * fontHeight
+        : -0.000000000506374957617199 * fontHeight ** 6 +
+          0.000000123078838391882 * fontHeight ** 5 -
+          0.0000118441038684185 * fontHeight ** 4 +
+          0.000574698566099494 * fontHeight ** 3 -
+          0.0147437317361461 * fontHeight ** 2 +
+          1.09720488138051 * fontHeight;
+      const windowSize = {
+        width: Math.round(fontSize * longestLine),
+        height: Math.round(lines.length * fontHeight),
+      };
       if (compatibility.zoomFix) {
-        height = screen.screenToDipPoint({ x: 0, y: height }).y;
+        fontHeight = screen.screenToDipPoint({ x: 0, y: height }).y;
         position = screen.screenToDipPoint(position);
       }
       this._window.setPosition(
@@ -97,16 +98,15 @@ export class CompletionsWindow extends BaseWindow {
         Math.round(position.y),
         false,
       );
-
-      sendToRenderer(
-        this._window,
+      this._window.setSize(windowSize.width, windowSize.height, false);
+      this.sendMessageToRenderer(
         new CompletionSetActionMessage({
           completion,
           count,
-          fontHeight: height,
+          fontHeight,
+          fontSize,
         }),
       );
-
       this._window.show();
     } else {
       log.warn('Immersive window activate failed');
@@ -118,7 +118,7 @@ export class CompletionsWindow extends BaseWindow {
       this.create();
     }
     if (this._window) {
-      sendToRenderer(this._window, new CompletionUpdateActionMessage(isDelete));
+      this.sendMessageToRenderer(new CompletionUpdateActionMessage(isDelete));
       this._window.show();
     } else {
       log.warn('Immersive window activate failed');

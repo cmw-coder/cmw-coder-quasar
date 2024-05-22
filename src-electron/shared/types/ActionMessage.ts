@@ -18,11 +18,20 @@ export enum ActionType {
   UpdateDownload = 'UpdateDownload',
   UpdateFinish = 'UpdateFinish',
   UpdateProgress = 'UpdateProgress',
+  ToggleDarkMode = 'ToggleDarkMode',
 }
 
 export interface ActionMessage {
   type: ActionType;
   data: unknown;
+}
+
+export class ToggleDarkModeActionMessage implements ActionMessage {
+  type = ActionType.ToggleDarkMode;
+  data: boolean;
+  constructor(data: boolean) {
+    this.data = data;
+  }
 }
 
 export class ChatInsertActionMessage implements ActionMessage {
@@ -160,4 +169,5 @@ export interface ActionMessageMapping {
   [ActionType.UpdateDownload]: UpdateDownloadActionMessage;
   [ActionType.UpdateFinish]: UpdateFinishActionMessage;
   [ActionType.UpdateProgress]: UpdateProgressActionMessage;
+  [ActionType.ToggleDarkMode]: ToggleDarkModeActionMessage;
 }

@@ -32,6 +32,8 @@ export const defaultAppConfigNetworkZoneMap: Record<NetworkZone, AppConfig> = {
     activeChat: 'default',
     useEnterSend: false,
     useMultipleChat: true,
+    darkMode: false,
+    developerMode: false,
     completionConfigs: {
       function: {
         contextLimit: 1500,
@@ -68,6 +70,8 @@ export const defaultAppConfigNetworkZoneMap: Record<NetworkZone, AppConfig> = {
     activeChat: 'default',
     useEnterSend: false,
     useMultipleChat: true,
+    darkMode: false,
+    developerMode: false,
     completionConfigs: {
       function: {
         contextLimit: 1500,
@@ -104,6 +108,8 @@ export const defaultAppConfigNetworkZoneMap: Record<NetworkZone, AppConfig> = {
     activeChat: 'default',
     useEnterSend: false,
     useMultipleChat: true,
+    darkMode: false,
+    developerMode: false,
     completionConfigs: {
       function: {
         contextLimit: 1500,
@@ -140,6 +146,8 @@ export const defaultAppConfigNetworkZoneMap: Record<NetworkZone, AppConfig> = {
     activeChat: 'default',
     useEnterSend: false,
     useMultipleChat: true,
+    darkMode: false,
+    developerMode: false,
     completionConfigs: {
       function: {
         contextLimit: 1500,

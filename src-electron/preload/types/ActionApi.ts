@@ -1,4 +1,4 @@
-import { BrowserWindow, ipcRenderer } from 'electron';
+import { ipcRenderer } from 'electron';
 
 import { ACTION_API_KEY } from 'shared/constants/common';
 import { ActionMessageMapping, ActionType } from 'shared/types/ActionMessage';
@@ -65,13 +65,6 @@ export const sendToMain = <T extends keyof ActionMessageMapping>(
   message: ActionMessageMapping[T],
 ): void => {
   ipcRenderer.send(ACTION_API_KEY, message);
-};
-
-export const sendToRenderer = <T extends keyof ActionMessageMapping>(
-  window: BrowserWindow,
-  message: ActionMessageMapping[T],
-): void => {
-  window.webContents.send(ACTION_API_KEY, message);
 };
 
 export const triggerAction = (actionType: ActionType, data: unknown): void => {

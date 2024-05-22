@@ -1,6 +1,4 @@
 import { ProgressInfo } from 'electron-updater';
-
-import { sendToRenderer } from 'preload/types/ActionApi';
 import {
   UpdateFinishActionMessage,
   UpdateProgressActionMessage,
@@ -14,17 +12,10 @@ export class UpdateWindow extends FloatingBaseWindow {
   }
 
   updateProgress(progressInfo: ProgressInfo) {
-    if (this._window) {
-      sendToRenderer(
-        this._window,
-        new UpdateProgressActionMessage(progressInfo),
-      );
-    }
+    this.sendMessageToRenderer(new UpdateProgressActionMessage(progressInfo));
   }
 
   updateFinish() {
-    if (this._window) {
-      sendToRenderer(this._window, new UpdateFinishActionMessage());
-    }
+    this.sendMessageToRenderer(new UpdateFinishActionMessage());
   }
 }

@@ -11,4 +11,6 @@ export interface ConfigServiceTrait {
   ): Promise<void>;
 
   setConfigs(configs: Partial<AppConfig>): Promise<void>;
+
+  setDarkMode(dark: boolean): Promise<void>;
 }
