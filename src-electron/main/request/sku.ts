@@ -32,6 +32,11 @@ export const api_reportSKU = async (data: ReportSkuDto[]) => {
       hostName: userInfo().username,
       extra: '',
     }));
+    const logData = handledData.map(
+      (item) =>
+        `SKU 上报: ${item.extra} ${item.subType} ${item.type}.${item.product}.${item.firstClass}.${item.secondClass}.${item.skuName} [${item.count}]`,
+    );
+    log.debug(logData.join('\n'));
     await request({
       url: '/kong/RdTestResourceStatistic/report/summary',
       method: 'post',
