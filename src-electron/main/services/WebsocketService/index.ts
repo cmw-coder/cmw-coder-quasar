@@ -104,6 +104,7 @@ export class WebsocketService implements WebsocketServiceTrait {
             cwd: folder,
           },
         );
+        this._promptExtractor.enableSimilarSnippet();
         const similarSnippets = await this._promptExtractor.getSimilarSnippets(
           document,
           position,

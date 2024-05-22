@@ -105,9 +105,9 @@ export class PromptExtractor {
     functionSuffix: string,
     recentFiles: string[],
   ): Promise<SimilarSnippet[]> {
-    log.debug({
-      slowRecentFiles: this._slowRecentFiles,
-      currentRecentFiles: recentFiles,
+    log.debug('PromptExtractor.getSimilarSnippets', {
+      functionPrefix,
+      functionSuffix,
     });
     if (this._slowRecentFiles.length !== 0) {
       if (
@@ -150,6 +150,9 @@ export class PromptExtractor {
     const referenceSnippetLines = separateTextByLine(
       functionPrefix + functionSuffix,
     );
+    log.debug('PromptExtractor.getSimilarSnippets', {
+      referenceSnippetLines,
+    });
 
     tabContentsWithoutComments.forEach(({ path, lines }) => {
       const { score, startLine } = getMostSimilarSnippetStartLine(
