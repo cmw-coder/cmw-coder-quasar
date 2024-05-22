@@ -29,6 +29,11 @@ export class PromptExtractor {
   };
   private _slowRecentFiles: string[] = [];
 
+  enableSimilarSnippet() {
+    this._slowRecentFiles = [];
+    log.info('PromptExtractor.getSimilarSnippets.enable');
+  }
+
   async getPromptComponents(
     inputs: RawInputs,
     similarSnippetCount: number = 1,
@@ -37,7 +42,7 @@ export class PromptExtractor {
     timer.add('CompletionGenerate', 'CalculatedFileFolder');
 
     const [similarSnippets, relativeDefinitions] = await Promise.all([
-      this._getSimilarSnippets(
+      this.getSimilarSnippets(
         document,
         position,
         getFunctionPrefix(elements.prefix) ?? elements.prefix,
@@ -47,7 +52,12 @@ export class PromptExtractor {
       inputs.relativeDefinitions,
     ]);
 
-    const similarSnippetsSliced = similarSnippets.slice(0, similarSnippetCount);
+    const similarSnippetsSliced = similarSnippets
+      .filter(
+        (similarSnippet) =>
+          similarSnippet.score > this._similarSnippetConfig.minScore,
+      )
+      .slice(0, similarSnippetCount);
     log.debug('PromptExtractor.getPromptComponents', {
       minScore: this._similarSnippetConfig.minScore,
       mostSimilarSnippets: similarSnippetsSliced,
@@ -88,7 +98,7 @@ export class PromptExtractor {
     return elements;
   }
 
-  private async _getSimilarSnippets(
+  async getSimilarSnippets(
     document: TextDocument,
     position: Position,
     functionPrefix: string,
@@ -108,8 +118,7 @@ export class PromptExtractor {
         timer.add('CompletionGenerate', 'GotSimilarSnippets');
         return [];
       }
-      this._slowRecentFiles = [];
-      log.info('PromptExtractor._getSimilarSnippets.enable');
+      this.enableSimilarSnippet();
     }
 
     const startTime = Date.now();
@@ -172,7 +181,7 @@ export class PromptExtractor {
     const endTime = Date.now();
     if (endTime - startTime > 1000) {
       log.info(
-        'PromptExtractor._getSimilarSnippets.disable',
+        'PromptExtractor.getSimilarSnippets.disable',
         endTime - startTime,
       );
       this._slowRecentFiles = recentFiles;
@@ -181,10 +190,6 @@ export class PromptExtractor {
     timer.add('CompletionGenerate', 'GotSimilarSnippets');
 
     return similarSnippets
-      .filter(
-        (similarSnippet) =>
-          similarSnippet.score > this._similarSnippetConfig.minScore,
-      )
       .sort((first, second) => first.score - second.score)
       .reverse();
   }

@@ -1,10 +1,19 @@
 import log from 'electron-log/main';
+import { sync } from 'fast-glob';
+import { createServer } from 'http';
 import { inject, injectable } from 'inversify';
-import { Server, type WebSocket } from 'ws';
+import { type WebSocket, WebSocketServer } from 'ws';
 
 import { PromptExtractor } from 'main/components/PromptExtractor';
 import { RawInputs } from 'main/components/PromptExtractor/types';
 import { PromptProcessor } from 'main/components/PromptProcessor';
+import { DataStoreService } from 'main/services/DataStoreService';
+import { StatisticsService } from 'main/services/StatisticsService';
+import { HttpMethod, HttpRouter } from 'main/services/WebsocketService/types';
+import { WindowService } from 'main/services/WindowService';
+import { DataProjectType } from 'main/stores/data/types';
+import { TextDocument } from 'main/types/TextDocument';
+import { Position } from 'main/types/vscode/position';
 import {
   CompletionErrorCause,
   getClientVersion,
@@ -13,6 +22,7 @@ import {
 import { timer } from 'main/utils/timer';
 import { ServiceType } from 'shared/types/service';
 import { WebsocketServiceTrait } from 'shared/types/service/WebsocketServiceTrait';
+import { WindowType } from 'shared/types/WindowType';
 import {
   CompletionGenerateServerMessage,
   HandShakeClientMessage,
@@ -20,11 +30,10 @@ import {
   WsAction,
   WsMessageMapping,
 } from 'shared/types/WsMessage';
-import { WindowType } from 'shared/types/WindowType';
-import { DataStoreService } from 'main/services/DataStoreService';
-import { StatisticsService } from 'main/services/StatisticsService';
-import { WindowService } from 'main/services/WindowService';
-import { DataProjectType } from 'main/stores/data/types';
+import {
+  getFunctionPrefix,
+  getFunctionSuffix,
+} from 'main/components/PromptExtractor/utils';
 
 interface ClientInfo {
   client: WebSocket;
@@ -35,7 +44,6 @@ interface ClientInfo {
 @injectable()
 export class WebsocketService implements WebsocketServiceTrait {
   private _clientInfoMap = new Map<number, ClientInfo>();
-  private _lastActivePid = 0;
   private _handlers = new Map<
     WsAction,
     (
@@ -43,10 +51,11 @@ export class WebsocketService implements WebsocketServiceTrait {
       pid: number,
     ) => WsMessageMapping[keyof WsMessageMapping]['server']
   >();
-  private _server?: Server;
-
-  private promptProcessor = new PromptProcessor();
-  private promptExtractor = new PromptExtractor();
+  private _httpRouter = new HttpRouter();
+  private _lastActivePid = 0;
+  private _promptProcessor = new PromptProcessor();
+  private _promptExtractor = new PromptExtractor();
+  private _webSocketServer?: WebSocketServer;
 
   constructor(
     @inject(ServiceType.DATA_STORE)
@@ -55,7 +64,57 @@ export class WebsocketService implements WebsocketServiceTrait {
     private _statisticsReporterService: StatisticsService,
     @inject(ServiceType.WINDOW)
     private _windowService: WindowService,
-  ) {}
+  ) {
+    this._httpRouter.addRoute('/', HttpMethod.GET, (req, res) => {
+      res.sendJson({
+        message: 'Welcome to the Comware Coder backend!',
+        entries: [
+          {
+            route: '/',
+            method: 'GET',
+            description: 'This welcome page',
+          },
+          {
+            route: '/dev/similar-snippets',
+            method: 'POST',
+            description: 'Test similar snippets',
+          },
+        ],
+      });
+    });
+    this._httpRouter.addRoute(
+      '/dev/similar-snippets',
+      HttpMethod.POST,
+      async (req, res) => {
+        const body = await req.body<{
+          character: number;
+          folder: string;
+          line: number;
+          path: string;
+          prefix: string;
+          suffix: string;
+        }>();
+        const { character, folder, line, path, prefix, suffix } = body;
+        const document = new TextDocument(path);
+        const position = new Position(line, character);
+        const recentFiles = sync(
+          ['**/*.c', '**/*.cc', '**/*.cpp', '**/*.h', '**/*.hpp'],
+          {
+            absolute: true,
+            cwd: folder,
+          },
+        );
+        const similarSnippets = await this._promptExtractor.getSimilarSnippets(
+          document,
+          position,
+          getFunctionPrefix(prefix) ?? prefix,
+          getFunctionSuffix(suffix) ?? suffix,
+          recentFiles,
+        );
+        res.sendJson({ message: 'Success', similarSnippets });
+      },
+    );
+  }
 
   getClientInfo(pid?: number) {
     return this._clientInfoMap.get(pid ?? this._lastActivePid);
@@ -86,11 +145,20 @@ export class WebsocketService implements WebsocketServiceTrait {
   }
 
   startServer() {
-    this._server = new Server({
-      host: '127.0.0.1',
-      port: 3000,
+    const httpServer = createServer(async (req, res) => {
+      this._httpRouter
+        .handleRequest(req, res)
+        .catch((e) =>
+          log.error(
+            'WebsocketService.httpRouter.handleRequest',
+            (<Error>e).message,
+          ),
+        );
     });
-    this._server.on('connection', (client) => {
+    this._webSocketServer = new WebSocketServer({
+      server: httpServer,
+    });
+    this._webSocketServer.on('connection', (client) => {
       let pid: number;
 
       client.on('message', async (message: string) => {
@@ -126,6 +194,7 @@ export class WebsocketService implements WebsocketServiceTrait {
         log.info(`Client (${pid}) disconnected`);
       });
     });
+    httpServer.listen(3000, '127.0.0.1');
   }
 
   registerActions() {
@@ -196,15 +265,16 @@ export class WebsocketService implements WebsocketServiceTrait {
 
           log.debug('WsAction.CompletionGenerate', data);
 
-          const promptElements = await this.promptExtractor.getPromptComponents(
-            new RawInputs(data, project),
-          );
+          const promptElements =
+            await this._promptExtractor.getPromptComponents(
+              new RawInputs(data, project),
+            );
           this._statisticsReporterService.completionUpdatePromptElements(
             actionId,
             promptElements,
           );
 
-          const completions = await this.promptProcessor.process(
+          const completions = await this._promptProcessor.process(
             promptElements,
             projectId,
           );
