@@ -74,6 +74,7 @@ const updateZoomFix = async (value: boolean) => {
 };
 
 const updateTheme = async (value: Theme) => {
+  theme.value = value;
   configService.setDarkMode(value.darkMode);
 };
 
