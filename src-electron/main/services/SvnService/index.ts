@@ -1,13 +1,14 @@
+import log from 'electron-log/main';
 import { injectable } from 'inversify';
 
+import { container } from 'main/services';
+import { DataStoreService } from 'main/services/DataStoreService';
+import { fileDiff, repoStatus } from 'main/services/SvnService/utils';
+import { WebsocketService } from 'main/services/WebsocketService';
 import { executeCommand } from 'main/utils/common';
+import { NEW_LINE_REGEX } from 'shared/constants/common';
 import { ServiceType } from 'shared/types/service';
 import type { SvnServiceTrait } from 'shared/types/service/SvnServiceTrait';
-import log from 'electron-log/main';
-import { fileDiff, repoStatus } from 'main/services/SvnService/utils';
-import { container } from 'main/services';
-import { WebsocketService } from 'main/services/WebsocketService';
-import { DataStoreService } from 'main/services/DataStoreService';
 
 @injectable()
 export class SvnService implements SvnServiceTrait {
@@ -32,7 +33,7 @@ export class SvnService implements SvnServiceTrait {
     ).map(({ diff, path, status }) => {
       let additions = 0;
       let deletions = 0;
-      diff.split(/\r\n?/).forEach((line) => {
+      diff.split(NEW_LINE_REGEX).forEach((line) => {
         if (line.startsWith('+') && !line.startsWith('+++')) {
           additions++;
         } else if (line.startsWith('-') && !line.startsWith('---')) {

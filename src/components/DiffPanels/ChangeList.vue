@@ -2,14 +2,10 @@
 import { watch } from 'vue';
 
 import { FileChanges } from 'shared/types/service/SvnServiceTrait/types';
+import { getLastDirName } from 'utils/common';
 
 const props = defineProps<{ data: FileChanges[] }>();
 const modelValue = defineModel<number>({ required: true });
-
-const getLastDirName = (path: string) => {
-  const pathArr = path.split('\\');
-  return pathArr.at(-1);
-};
 
 watch(props.data, () => (modelValue.value = 0), { deep: true });
 </script>

@@ -1,5 +1,9 @@
-import { uid } from 'quasar';
+import { extend, uid } from 'quasar';
 import { useService } from 'utils/common';
+
+import { NetworkZone } from 'shared/config';
+import { NEW_LINE_REGEX } from 'shared/constants/common';
+import { ServiceType } from 'shared/types/service';
 import {
   Commands,
   ReceiveMessage,
@@ -10,9 +14,6 @@ import {
 } from 'shared/types/ExtensionMessage';
 import { ExtensionConfig } from 'shared/types/ExtensionMessageDetails';
 import { ChatInsertServerMessage } from 'shared/types/WsMessage';
-import { NetworkZone } from 'shared/config';
-import { ServiceType } from 'shared/types/service';
-import { extend } from 'quasar';
 
 export class AiAssistantIframe {
   private promiseMap = new Map<
@@ -212,7 +213,7 @@ export class AiAssistantIframe {
           JSON.stringify(
             new ChatInsertServerMessage({
               result: 'success',
-              content: code.replace(/\r\n?/g, '\n'),
+              content: code.replace(NEW_LINE_REGEX, '\n'),
             }),
           ),
         );

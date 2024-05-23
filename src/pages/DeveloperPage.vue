@@ -4,15 +4,8 @@ import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 
 import CodeBlock from 'components/CodeBlock.vue';
+import { NEW_LINE_REGEX } from 'shared/constants/common';
 import { WindowType } from 'shared/types/WindowType';
-import {
-  getMostSimilarSnippetStartLine,
-  IGNORE_COMMON_WORD,
-  IGNORE_COMWARE_INTERNAL,
-  IGNORE_RESERVED_KEYWORDS,
-  SimilarSnippet,
-  tokenize,
-} from 'utils/developer';
 
 const { t } = useI18n();
 const { matched } = useRoute();
@@ -38,7 +31,7 @@ const selectCurrentFile = (file?: File) => {
     fileReader.onload = (event) => {
       if (event.target?.result) {
         currentFileContent.value = event.target.result.toString();
-        endLine.value = currentFileContent.value.split('\n').length;
+        endLine.value = currentFileContent.value.split(NEW_LINE_REGEX).length;
       } else {
         currentFileContent.value = '';
       }
@@ -58,7 +51,7 @@ const separateTextByLine = (
     rawText = rawText.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
   }
   return rawText
-    .split('\n')
+    .split(NEW_LINE_REGEX)
     .filter((tabContentLine) => tabContentLine.trim().length > 0);
 };
 
@@ -89,7 +82,7 @@ const getReferenceFileLines = () =>
 
 const calculate = async () => {
   if (referenceFiles.value.length) {
-    const currentFileLines = currentFileContent.value.split('\n');
+    const currentFileLines = currentFileContent.value.split(NEW_LINE_REGEX);
     const selectedCurrentFileLines = currentFileLines.splice(
       startLine.value - 1,
       endLine.value - startLine.value + 1,

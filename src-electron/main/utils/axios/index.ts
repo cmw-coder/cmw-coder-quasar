@@ -9,6 +9,8 @@ import {
   RefreshData,
 } from 'main/utils/axios/types';
 import { userInfo } from 'os';
+import { getService } from 'main/services';
+import { ServiceType } from 'shared/types/service';
 
 const rdTestLoginService = axios.create({
   baseURL: 'http://rdee.h3c.com/kong/RdTestLoginService/api',
@@ -68,7 +70,9 @@ export const generateRd = async (
             'x-authorization': `bearer ${accessToken}`,
           }
         : {
-            'X-Authenticated-Userid': userInfo()?.username || 'unknown',
+            'X-Authenticated-Userid': await getService(
+              ServiceType.CONFIG,
+            ).getConfig('username'),
           },
     });
 };

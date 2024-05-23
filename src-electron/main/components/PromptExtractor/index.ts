@@ -1,4 +1,5 @@
 import log from 'electron-log/main';
+
 import {
   IGNORE_COMMON_WORD,
   IGNORE_COMWARE_INTERNAL,
@@ -7,7 +8,6 @@ import {
 import {
   PromptElements,
   RawInputs,
-  SimilarSnippet,
   SimilarSnippetConfig,
 } from 'main/components/PromptExtractor/types';
 import {
@@ -22,6 +22,7 @@ import {
 import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
 import { timer } from 'main/utils/timer';
+import { SimilarSnippet } from 'shared/types/common';
 
 export class PromptExtractor {
   private _similarSnippetConfig: SimilarSnippetConfig = {

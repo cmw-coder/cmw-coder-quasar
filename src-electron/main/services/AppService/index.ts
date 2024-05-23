@@ -3,7 +3,7 @@ import log from 'electron-log/main';
 import { inject, injectable } from 'inversify';
 import { DateTime } from 'luxon';
 import { scheduleJob } from 'node-schedule';
-import { release, userInfo, version } from 'os';
+import { release, version } from 'os';
 import { container } from 'main/services';
 import { ConfigService } from 'main/services/ConfigService';
 import { DataStoreService } from 'main/services/DataStoreService';
@@ -43,7 +43,7 @@ export class AppService implements AppServiceTrait {
   ) {}
 
   init() {
-    log.info('AppService init', userInfo().username);
+    log.info('AppService init');
     this.initApplication();
     this.initAdditionReport();
     this.initIpcMain();

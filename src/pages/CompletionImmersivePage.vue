@@ -8,12 +8,13 @@ import {
   ref,
 } from 'vue';
 
+import { NEW_LINE_REGEX } from 'shared/constants/common';
 import { ActionType } from 'shared/types/ActionMessage';
+import { WindowType } from 'shared/types/WindowType';
+import { ServiceType } from 'shared/types/service';
 import { useHighlighter } from 'stores/highlighter';
 import { ActionApi } from 'types/ActionApi';
 import { useService } from 'utils/common';
-import { WindowType } from 'shared/types/WindowType';
-import { ServiceType } from 'shared/types/service';
 
 const baseName = 'pages.CompletionImmersivePage.';
 
@@ -61,7 +62,7 @@ onMounted(async () => {
       completionCount.total = count.total;
       fontSize.value = _fontSize;
       height.value = fontHeight;
-      const lines = completion.split('\n');
+      const lines = completion.split(NEW_LINE_REGEX);
       isMultiLine.value = lines.length > 1;
       await nextTick();
       if (isMultiLine.value && multiLineDom.value) {

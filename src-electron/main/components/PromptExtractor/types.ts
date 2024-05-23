@@ -8,6 +8,7 @@ import { SymbolInfo } from 'main/types/SymbolInfo';
 import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
 import { timer } from 'main/utils/timer';
+import { NEW_LINE_REGEX } from 'shared/constants/common';
 import { CompletionGenerateClientMessage } from 'shared/types/WsMessage';
 import { ServiceType } from 'shared/types/service';
 
@@ -64,12 +65,6 @@ export class PromptElements {
   }
 }
 
-export interface SimilarSnippet {
-  path: string;
-  score: number;
-  content: string;
-}
-
 export interface SimilarSnippetConfig {
   minScore: number;
 }
@@ -114,7 +109,7 @@ export class RawInputs {
               }),
               'gb2312',
             )
-              .split(/\r\n?/)
+              .split(NEW_LINE_REGEX)
               .slice(startLine, endLine + 1)
               .join('\n'),
           };

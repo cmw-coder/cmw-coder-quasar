@@ -4,20 +4,22 @@ import { decode } from 'iconv-lite';
 import { REGEXP_WORD } from 'main/components/PromptExtractor/constants';
 import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
+import { NEW_LINE_REGEX } from 'shared/constants/common';
 
 const { readFile } = promises;
 
 export const getFunctionPrefix = (input: string): string | undefined => {
-  const lines = input.split(/\r\n?/);
-  const lastValidCodeLine =
-    lines.findLastIndex((line) => /^\/\/.*|^\S+.*?\*\/\s*$/.test(line)) + 1;
+  const lines = input.split(NEW_LINE_REGEX);
+  const lastValidCodeLine = lines.findLastIndex((line) =>
+    /^\/\/.*|^\S+.*?\*\/\s*$/.test(line),
+  );
   if (lastValidCodeLine !== -1) {
-    return lines.slice(lastValidCodeLine).join('\n');
+    return lines.slice(lastValidCodeLine + 1).join('\n');
   }
 };
 
 export const getFunctionSuffix = (input: string): string | undefined => {
-  const lines = input.split(/\r\n?/);
+  const lines = input.split(NEW_LINE_REGEX);
   const firstFunctionEndLine = lines.findIndex((line) =>
     /^}\S*|^\/\*.*/.test(line),
   );
@@ -72,7 +74,7 @@ export const separateTextByLine = (
     rawText = rawText.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
   }
   return rawText
-    .split(/\r\n?/)
+    .split(NEW_LINE_REGEX)
     .filter((tabContentLine) => tabContentLine.trim().length > 0);
 };
 

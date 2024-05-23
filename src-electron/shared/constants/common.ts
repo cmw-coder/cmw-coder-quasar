@@ -1,7 +1,7 @@
 import { WindowType } from 'shared/types/WindowType';
 
 export const ACTION_API_KEY = 'actionApi' as const;
-export const betaApiUserList = [
+export const BETA_API_USER_LIST = [
   // 开发测试
   'z25347',
   // IP 和网络监控业务开发部
@@ -157,6 +157,7 @@ export const FONT_SIZE_MAPPING: Record<number, number> = {
   74: 0.934,
   104: 0.927,
 };
+export const NEW_LINE_REGEX = /\r\n|\r|\n/g;
 export const WINDOW_URL_MAPPING: Record<WindowType, string> = {
   [WindowType.Main]: '/main',
   [WindowType.Quake]: '/floating/quake',

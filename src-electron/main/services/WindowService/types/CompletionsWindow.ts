@@ -1,17 +1,18 @@
 import { BrowserWindow, screen } from 'electron';
 import log from 'electron-log';
+import { resolve } from 'path';
+
 import { container } from 'main/services';
 import { DataStoreService } from 'main/services/DataStoreService';
+import { BaseWindow } from 'main/services/WindowService/types/BaseWindow';
+import { FONT_SIZE_MAPPING, NEW_LINE_REGEX } from 'shared/constants/common';
 import {
   CompletionClearActionMessage,
   CompletionSetActionMessage,
   CompletionUpdateActionMessage,
 } from 'shared/types/ActionMessage';
-import { WindowType } from 'shared/types/WindowType';
 import { ServiceType } from 'shared/types/service';
-import { BaseWindow } from './BaseWindow';
-import { resolve } from 'path';
-import { FONT_SIZE_MAPPING } from 'shared/constants/common';
+import { WindowType } from 'shared/types/WindowType';
 
 export class CompletionsWindow extends BaseWindow {
   private destroyTimer?: NodeJS.Timeout;
@@ -74,7 +75,7 @@ export class CompletionsWindow extends BaseWindow {
         .get<DataStoreService>(ServiceType.DATA_STORE)
         .getAppdata();
       let fontHeight = height;
-      const lines = completion.split('\n');
+      const lines = completion.split(NEW_LINE_REGEX);
       const longestLine = Math.max(...lines.map((line) => line.length));
 
       const fontSize = FONT_SIZE_MAPPING[fontHeight]

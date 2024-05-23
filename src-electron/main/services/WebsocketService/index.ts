@@ -95,40 +95,58 @@ export class WebsocketService implements WebsocketServiceTrait {
           suffix: string;
         }>();
         const { character, folder, line, path, prefix, suffix } = body;
-        const document = new TextDocument(path);
-        const position = new Position(line, character);
-        const recentFiles = sync(
-          ['**/*.c', '**/*.cc', '**/*.cpp', '**/*.h', '**/*.hpp'],
-          {
-            absolute: true,
-            cwd: folder,
-          },
-        );
         this._promptExtractor.enableSimilarSnippet();
-        const similarSnippets = await this._promptExtractor.getSimilarSnippets(
-          document,
-          position,
-          getFunctionPrefix(prefix) ?? prefix,
-          getFunctionSuffix(suffix) ?? suffix,
-          recentFiles,
+        const similarSnippets = await this.getSimilarSnippets(
+          character,
+          folder,
+          line,
+          path,
+          prefix,
+          suffix,
         );
         res.sendJson({ message: 'Success', similarSnippets });
       },
     );
   }
 
-  getClientInfo(pid?: number) {
-    return this._clientInfoMap.get(pid ?? this._lastActivePid);
+  async getProjectData() {
+    const project = this.getClientInfo(this._lastActivePid)?.currentProject;
+    if (!project) {
+      return undefined;
+    }
+    const appData = this._dataStoreService.getAppdata();
+    const projectData: DataProjectType | undefined = appData.project[project];
+    if (!projectData || !projectData.id) {
+      return undefined;
+    }
+    return projectData;
   }
 
-  registerWsAction<T extends keyof WsMessageMapping>(
-    wsAction: T,
-    callback: (
-      message: WsMessageMapping[T]['client'],
-      pid: number,
-    ) => WsMessageMapping[T]['server'],
+  async getSimilarSnippets(
+    character: number,
+    folder: string,
+    line: number,
+    path: string,
+    prefix: string,
+    suffix: string,
   ) {
-    this._handlers.set(wsAction, callback);
+    const document = new TextDocument(path);
+    const position = new Position(line, character);
+    const recentFiles = sync(
+      ['**/*.c', '**/*.cc', '**/*.cpp', '**/*.h', '**/*.hpp'],
+      {
+        absolute: true,
+        cwd: folder,
+      },
+    );
+    this._promptExtractor.enableSimilarSnippet();
+    return this._promptExtractor.getSimilarSnippets(
+      document,
+      position,
+      getFunctionPrefix(prefix) ?? prefix,
+      getFunctionSuffix(suffix) ?? suffix,
+      recentFiles,
+    );
   }
 
   send(message: string, pid?: number) {
@@ -138,11 +156,8 @@ export class WebsocketService implements WebsocketServiceTrait {
     }
   }
 
-  setCurrentProject(pid: number, currentProject: string) {
-    const clientInfo = this._clientInfoMap.get(pid);
-    if (clientInfo) {
-      clientInfo.currentProject = currentProject;
-    }
+  getClientInfo(pid?: number) {
+    return this._clientInfoMap.get(pid ?? this._lastActivePid);
   }
 
   startServer() {
@@ -199,7 +214,7 @@ export class WebsocketService implements WebsocketServiceTrait {
   }
 
   registerActions() {
-    this.registerWsAction(WsAction.CompletionAccept, async ({ data }, pid) => {
+    this._registerWsAction(WsAction.CompletionAccept, async ({ data }, pid) => {
       const { actionId, index } = data;
       this._windowService.getWindow(WindowType.Completions).completionClear();
       try {
@@ -210,12 +225,12 @@ export class WebsocketService implements WebsocketServiceTrait {
         this._statisticsReporterService.completionAbort(actionId);
       }
     });
-    this.registerWsAction(WsAction.CompletionCache, ({ data: isDelete }) => {
+    this._registerWsAction(WsAction.CompletionCache, ({ data: isDelete }) => {
       this._windowService
         .getWindow(WindowType.Completions)
         .completionUpdate(isDelete);
     });
-    this.registerWsAction(WsAction.CompletionCancel, ({ data }, pid) => {
+    this._registerWsAction(WsAction.CompletionCancel, ({ data }, pid) => {
       this._windowService.getWindow(WindowType.Completions).completionClear();
       const { actionId, explicit } = data;
       if (explicit) {
@@ -228,7 +243,7 @@ export class WebsocketService implements WebsocketServiceTrait {
       }
       this._statisticsReporterService.completionAbort(actionId);
     });
-    this.registerWsAction(WsAction.CompletionEdit, ({ data }, pid) => {
+    this._registerWsAction(WsAction.CompletionEdit, ({ data }, pid) => {
       const { actionId, count, editedContent, ratio } = data;
       try {
         this._statisticsReporterService
@@ -244,7 +259,7 @@ export class WebsocketService implements WebsocketServiceTrait {
         this._statisticsReporterService.completionAbort(actionId);
       }
     });
-    this.registerWsAction(
+    this._registerWsAction(
       WsAction.CompletionGenerate,
       async ({ data }, pid) => {
         const { caret } = data;
@@ -328,7 +343,7 @@ export class WebsocketService implements WebsocketServiceTrait {
         }
       },
     );
-    this.registerWsAction(WsAction.CompletionSelect, ({ data }, pid) => {
+    this._registerWsAction(WsAction.CompletionSelect, ({ data }, pid) => {
       const {
         actionId,
         index,
@@ -358,18 +373,18 @@ export class WebsocketService implements WebsocketServiceTrait {
         this._statisticsReporterService.completionAbort(actionId);
       }
     });
-    this.registerWsAction(WsAction.EditorCommit, ({ data: currentFile }) => {
+    this._registerWsAction(WsAction.EditorCommit, ({ data: currentFile }) => {
       this._windowService
         .getWindow(WindowType.Commit)
         .setCurrentFile(currentFile);
       this._windowService.getWindow(WindowType.Commit).activate();
     });
-    this.registerWsAction(WsAction.EditorFocusState, ({ data: isFocused }) => {
+    this._registerWsAction(WsAction.EditorFocusState, ({ data: isFocused }) => {
       if (!isFocused) {
         this._windowService.getWindow(WindowType.Completions).hide();
       }
     });
-    this.registerWsAction(WsAction.EditorPaste, ({ data }, pid) => {
+    this._registerWsAction(WsAction.EditorPaste, ({ data }, pid) => {
       const { count } = data;
       const project = this.getClientInfo(pid)?.currentProject;
       if (project && project.length) {
@@ -396,13 +411,16 @@ export class WebsocketService implements WebsocketServiceTrait {
         }
       }
     });
-    this.registerWsAction(
+    this._registerWsAction(
       WsAction.EditorSwitchProject,
       ({ data: project }, pid) => {
-        this.setCurrentProject(pid, project);
+        const clientInfo = this._clientInfoMap.get(pid);
+        if (clientInfo) {
+          clientInfo.currentProject = project;
+        }
       },
     );
-    this.registerWsAction(
+    this._registerWsAction(
       WsAction.EditorSwitchSvn,
       async ({ data: svnPath }, pid) => {
         const project = this.getClientInfo(pid)?.currentProject;
@@ -417,16 +435,13 @@ export class WebsocketService implements WebsocketServiceTrait {
     );
   }
 
-  async getProjectData() {
-    const project = this.getClientInfo(this._lastActivePid)?.currentProject;
-    if (!project) {
-      return undefined;
-    }
-    const appData = this._dataStoreService.getAppdata();
-    const projectData: DataProjectType | undefined = appData.project[project];
-    if (!projectData || !projectData.id) {
-      return undefined;
-    }
-    return projectData;
+  private _registerWsAction<T extends keyof WsMessageMapping>(
+    wsAction: T,
+    callback: (
+      message: WsMessageMapping[T]['client'],
+      pid: number,
+    ) => WsMessageMapping[T]['server'],
+  ) {
+    this._handlers.set(wsAction, callback);
   }
 }

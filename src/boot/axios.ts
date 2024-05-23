@@ -1,6 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 
 import { StepInfo } from 'stores/workflow/types';
+import { NEW_LINE_REGEX } from 'shared/constants/common';
 
 declare module '@vue/runtime-core' {
   // noinspection JSUnusedGlobalSymbols
@@ -65,7 +66,7 @@ export const agentStream = async (
           const processed = (<XMLHttpRequest>event.target).responseText
             .split(/\r?\n\r?\n/)
             .filter((item) => item.length)
-            .map((item) => item.split(/\r\n?/))
+            .map((item) => item.split(NEW_LINE_REGEX))
             .filter((list) => list.length === 2)
             .map(
               ([event, data]) =>

@@ -9,6 +9,12 @@ export enum CompletionType {
   Snippet = 'Snippet',
 }
 
+export interface SimilarSnippet {
+  path: string;
+  score: number;
+  content: string;
+}
+
 export interface SymbolInfo {
   endLine: number;
   name: string;

@@ -1,33 +1,39 @@
 import log from 'electron-log/main';
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { DateTime } from 'luxon';
 import { extname, basename } from 'path';
 import { uid } from 'quasar';
 
 import { PromptElements } from 'main/components/PromptExtractor/types';
 import { Completions } from 'main/components/PromptProcessor/types';
-import { timer } from 'main/utils/timer';
-import { StatisticsServiceTrait } from 'shared/types/service/StatisticsServiceTrait';
-import { CaretPosition } from 'shared/types/common';
 import { api_collection_code_v2, api_reportSKU } from 'main/request/sku';
+import { ConfigService } from 'main/services/ConfigService';
+import {
+  skuNameAcceptMapping,
+  skuNameGenerateMapping,
+  skuNameKeptMapping,
+} from 'main/services/StatisticsService/constants';
 import {
   CollectionData,
   CompletionData,
   KeptRatio,
 } from 'main/services/StatisticsService/types';
 import { constructData } from 'main/services/StatisticsService/utils';
-import {
-  skuNameAcceptMapping,
-  skuNameGenerateMapping,
-  skuNameKeptMapping,
-} from 'main/services/StatisticsService/constants';
+import { timer } from 'main/utils/timer';
+import { NEW_LINE_REGEX } from 'shared/constants/common';
+import { CaretPosition } from 'shared/types/common';
+import { ServiceType } from 'shared/types/service';
+import { StatisticsServiceTrait } from 'shared/types/service/StatisticsServiceTrait';
 
 @injectable()
 export class StatisticsService implements StatisticsServiceTrait {
   private _lastCursorPosition: CaretPosition = { character: -1, line: -1 };
   private _recentCompletion = new Map<string, CompletionData>();
 
-  constructor() {
+  constructor(
+    @inject(ServiceType.CONFIG)
+    private _configService: ConfigService,
+  ) {
     setInterval(() => {
       for (const [actionId, data] of this._recentCompletion) {
         if (data.timelines.startGenerate.isValid) {
@@ -72,7 +78,7 @@ export class StatisticsService implements StatisticsServiceTrait {
     this._lastCursorPosition.character = -1;
     this._lastCursorPosition.line = -1;
 
-    const lineLength = candidate.split('\n').length;
+    const lineLength = candidate.split(NEW_LINE_REGEX).length;
     try {
       await api_reportSKU(
         await constructData(
@@ -84,6 +90,7 @@ export class StatisticsService implements StatisticsServiceTrait {
           'CODE',
           skuNameAcceptMapping[data.completions.type],
         ),
+        this._configService.getConfigsSync().username,
       );
     } catch (e) {
       log.error('StatisticsReporter.completionAccept.failed', e);
@@ -182,6 +189,7 @@ export class StatisticsService implements StatisticsServiceTrait {
                 'CODE',
                 skuNameKeptMapping[ratio],
               ),
+              this._configService.getConfigsSync().username,
             ),
       ]);
     } catch (e) {
@@ -236,7 +244,7 @@ export class StatisticsService implements StatisticsServiceTrait {
         },
         version,
       });
-      const lineLength = candidate.split('\n').length;
+      const lineLength = candidate.split(NEW_LINE_REGEX).length;
       constructData(
         lineLength,
         data.timelines.startGenerate.toMillis(),
@@ -246,7 +254,9 @@ export class StatisticsService implements StatisticsServiceTrait {
         'CODE',
         skuNameGenerateMapping[data.completions.type],
       )
-        .then((data) => api_reportSKU(data))
+        .then((data) =>
+          api_reportSKU(data, this._configService.getConfigsSync().username),
+        )
         .catch((e) => log.warn(e));
     }
     return candidate;
@@ -285,6 +295,7 @@ export class StatisticsService implements StatisticsServiceTrait {
           'INC_CHAR',
           '',
         ),
+        this._configService.getConfigsSync().username,
       );
     } catch (e) {
       log.error('StatisticsReporter.copiedLines.failed', e);
@@ -316,6 +327,7 @@ export class StatisticsService implements StatisticsServiceTrait {
           'INC',
           '',
         ),
+        this._configService.getConfigsSync().username,
       );
     } catch (e) {
       log.error('StatisticsReporter.incrementLinesFailed', e);

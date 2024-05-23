@@ -17,7 +17,7 @@ import {
   ToggleDarkModeActionMessage,
 } from 'shared/types/ActionMessage';
 import { ApiStyle } from 'shared/types/model';
-import { betaApiUserList } from 'shared/constants/common';
+import { BETA_API_USER_LIST } from 'shared/constants/common';
 import { container } from 'main/services';
 import { ServiceType } from 'shared/types/service';
 import { WindowService } from 'main/services/WindowService';
@@ -35,7 +35,7 @@ export class ConfigService implements ConfigServiceTrait {
   /**
    * @deprecated
    */
-  configStore = betaApiUserList.includes(userInfo().username)
+  configStore = BETA_API_USER_LIST.includes(userInfo().username)
     ? new LinseerConfigStore()
     : runtimeConfig.apiStyle === ApiStyle.HuggingFace
       ? new HuggingFaceConfigStore()

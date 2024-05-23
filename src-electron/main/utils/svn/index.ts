@@ -9,6 +9,7 @@ import { ServiceType } from 'shared/types/service';
 import { container } from 'main/services';
 import { DataStoreService } from 'main/services/DataStoreService';
 import { StatisticsService } from 'main/services/StatisticsService';
+import { NEW_LINE_REGEX } from 'shared/constants/common';
 
 export const getRevision = async (path: string): Promise<number> => {
   const { stdout, stderr } = await executeCommand('svn info', path);
@@ -30,14 +31,18 @@ export const getAddedLines = async (path: string, revision: number) => {
     path,
   );
   log.debug('getAddedLines', { path, revision, stdout, stderr });
-  return `${stdout}\r\n${stderr}`
-    .split(/\r\n?/)
-    .filter((line) => line.startsWith('+') && !line.startsWith('++'))
-    .map((line) => line.substring(1))
-    .filter((line) => line.trim().length > 0)
-    .join('\n')
-    .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')
-    .split('\n').length;
+  return (
+    `${stdout}\n${stderr}`
+      .split(NEW_LINE_REGEX)
+      // Filter out lines that are not added lines
+      .filter((line) => line.startsWith('+') && !line.startsWith('++'))
+      // Filter out single line comments
+      .filter((line) => !/\/\*[\s\S]*?\*\/|\/\/.*/g.test(line))
+      // Remove the '+' sign
+      .map((line) => line.substring(1))
+      // Filter out empty lines
+      .filter((line) => line.trim().length > 0).length
+  );
 };
 
 export const reportProjectAdditions = async () => {

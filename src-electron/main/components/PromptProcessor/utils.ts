@@ -1,6 +1,7 @@
 import { extname } from 'path';
 
 import { PromptElements } from 'main/components/PromptExtractor/types';
+import { NEW_LINE_REGEX } from 'shared/constants/common';
 import { CompletionType } from 'shared/types/common';
 
 // Start with '//' or '#' or '{' or '/*', or is '***/'
@@ -13,10 +14,10 @@ export const completionsPostProcess = (
 ) => {
   const firstSuffixLine = promptElements.suffix
     .trimStart()
-    .split(/\r\n?/)[0]
+    .split(NEW_LINE_REGEX)[0]
     .trimEnd();
   return completions.map((completion) => {
-    const lines = completion.split(/\r\n?/);
+    const lines = completion.split(NEW_LINE_REGEX);
     const sameContentIndex = lines.findIndex(
       (line) => line.trimEnd() === firstSuffixLine,
     );
@@ -29,13 +30,13 @@ export const completionsPostProcess = (
 export const getCompletionType = (
   promptElements: PromptElements,
 ): CompletionType => {
-  const lastLine = promptElements.prefix.split('\n').at(-1) ?? '';
+  const lastLine = promptElements.prefix.split(NEW_LINE_REGEX).at(-1) ?? '';
   if (lastLine.trim().length > 0) {
     return CompletionType.Line;
   }
 
   const lastNonEmptyLine =
-    promptElements.prefix.trimEnd().split('\n').at(-1) ?? '';
+    promptElements.prefix.trimEnd().split(NEW_LINE_REGEX).at(-1) ?? '';
   if (
     detectRegex.test(lastNonEmptyLine) &&
     extname(promptElements.file ?? '') !== 'h'
@@ -65,8 +66,10 @@ export const processGeneratedSuggestions = (
     .map((generatedSuggestion) =>
       generatedSuggestion.replace(/\t/g, ' '.repeat(4)),
     )
-    /// Replace '\r' or '\r\n' with '\n'.
-    .map((generatedSuggestion) => generatedSuggestion.replace(/\r\n?/g, '\n'))
+    /// Use '\n' as new line separator.
+    .map((generatedSuggestion) =>
+      generatedSuggestion.replace(NEW_LINE_REGEX, '\n'),
+    )
     /// Filter out leading empty lines.
     .map((generatedSuggestion) => {
       const lines = generatedSuggestion.split('\n');
@@ -83,12 +86,14 @@ export const processGeneratedSuggestions = (
       return result;
     }
     case CompletionType.Line: {
-      return result.map((suggestion) => suggestion.split('\n')[0].trimEnd());
+      return result.map((suggestion) =>
+        suggestion.split(NEW_LINE_REGEX)[0].trimEnd(),
+      );
     }
     case CompletionType.Snippet: {
       return result
         .map((suggestion) => {
-          const lines = suggestion.split('\n').slice(0, 5);
+          const lines = suggestion.split(NEW_LINE_REGEX).slice(0, 5);
           const lastNonEmptyLineIndex = lines.findLastIndex(
             (line) => line.trim().length > 0,
           );

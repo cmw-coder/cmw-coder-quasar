@@ -17,7 +17,7 @@ import {
 } from 'main/stores/config/types';
 import { userInfo } from 'os';
 import { NetworkZone, runtimeConfig } from 'shared/config';
-import { betaApiUserList } from 'shared/constants/common';
+import { BETA_API_USER_LIST } from 'shared/constants/common';
 
 const defaultMapping: Record<NetworkZone, HuggingFaceStoreType> = {
   [NetworkZone.Normal]: huggingFaceStoreDefaultNormal,
@@ -100,7 +100,7 @@ export class LinseerConfigStore {
   constructor() {
     this._store = new ElectronStore({
       clearInvalidConfig: true,
-      defaults: betaApiUserList.includes(userInfo().username)
+      defaults: BETA_API_USER_LIST.includes(userInfo().username)
         ? linseerConfigDefaultBeta
         : linseerConfigDefault,
       migrations: {
@@ -127,7 +127,7 @@ export class LinseerConfigStore {
           store.set('config', oldConfig);
         },
         '1.1.0': (store) => {
-          if (betaApiUserList.includes(userInfo().username)) {
+          if (BETA_API_USER_LIST.includes(userInfo().username)) {
             log.info('Upgrading "config" store to 1.1.0 ...');
             store.set('config', linseerConfigDefaultBeta.config);
             store.set('apiStyle', linseerConfigDefault.apiStyle);
@@ -137,7 +137,7 @@ export class LinseerConfigStore {
         '1.1.1': (store) => {
           log.info('Upgrading "config" store to 1.1.1 ...');
           const oldConfig = store.get('config');
-          if (betaApiUserList.includes(userInfo().username)) {
+          if (BETA_API_USER_LIST.includes(userInfo().username)) {
             oldConfig.endpoints.update =
               linseerConfigDefaultBeta.config.endpoints.update;
             oldConfig.modelConfigs =

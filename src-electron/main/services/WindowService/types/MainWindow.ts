@@ -8,15 +8,15 @@ import { ServiceType } from 'shared/types/service';
 import {
   ActionType,
   ConfigStoreLoadActionMessage,
-  DebugSyncActionMessage,
 } from 'shared/types/ActionMessage';
 import { WindowType } from 'shared/types/WindowType';
-import { ChatInsertServerMessage, WsAction } from 'shared/types/WsMessage';
+import { ChatInsertServerMessage } from 'shared/types/WsMessage';
 import { DataStoreService } from 'main/services/DataStoreService';
 import { BaseWindow } from 'main/services/WindowService/types/BaseWindow';
 import { container } from 'main/services';
 import { ConfigService } from 'main/services/ConfigService';
 import { WebsocketService } from 'main/services/WebsocketService';
+import { NEW_LINE_REGEX } from 'shared/constants/common';
 
 export class MainWindow extends BaseWindow {
   private readonly _actionApi = new ActionApi('main.MainWindow.');
@@ -54,7 +54,7 @@ export class MainWindow extends BaseWindow {
         JSON.stringify(
           new ChatInsertServerMessage({
             result: 'success',
-            content: content.replace(/\r\n?/g, '\n'),
+            content: content.replace(NEW_LINE_REGEX, '\n'),
           }),
         ),
       );
@@ -97,14 +97,6 @@ export class MainWindow extends BaseWindow {
         this._window?.unmaximize();
       } else {
         this._window?.maximize();
-      }
-    });
-    const websocketService = container.get<WebsocketService>(
-      ServiceType.WEBSOCKET,
-    );
-    websocketService.registerWsAction(WsAction.DebugSync, (message) => {
-      if (this._window) {
-        this.sendMessageToRenderer(new DebugSyncActionMessage(message.data));
       }
     });
 

@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
 import { agentStream } from 'boot/axios';
+import { NEW_LINE_REGEX } from 'shared/constants/common';
 import { StepInfo, Workflow } from 'stores/workflow/types';
 
 const defaultStepInfos: StepInfo[] = [
@@ -45,7 +46,7 @@ export const useWorkflowStore = defineStore('workflow', () => {
         if (!workflows.value.find((workflow) => workflow.id === id)) {
           workflows.value.push({
             id,
-            name: commitMessage.split(/\r\n?/)[0],
+            name: commitMessage.split(NEW_LINE_REGEX)[0],
             creator: userId,
             status: 'pending',
             steps: defaultStepInfos,

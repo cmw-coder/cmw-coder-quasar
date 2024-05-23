@@ -1,6 +1,5 @@
 import log from 'electron-log/main';
 import { DateTime } from 'luxon';
-import { userInfo } from 'os';
 
 import request from 'main/request';
 import { CollectionData } from 'main/services/StatisticsService/types';
@@ -21,7 +20,7 @@ export interface ReportSkuDto {
   hostName?: string;
 }
 
-export const api_reportSKU = async (data: ReportSkuDto[]) => {
+export const api_reportSKU = async (data: ReportSkuDto[], username: string) => {
   try {
     const handledData = data.map((item) => ({
       ...item,
@@ -29,7 +28,7 @@ export const api_reportSKU = async (data: ReportSkuDto[]) => {
         ? item.begin
         : Math.trunc(DateTime.now().valueOf() / 1000),
       end: item.end ? item.end : Math.trunc(DateTime.now().valueOf() / 1000),
-      hostName: userInfo().username,
+      hostName: username,
       extra: '',
     }));
     const logData = handledData.map(

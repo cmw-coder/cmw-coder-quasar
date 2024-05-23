@@ -3,6 +3,7 @@ import { decode } from 'iconv-lite';
 
 import { Position } from 'main/types/vscode/position';
 import { Range } from 'main/types/vscode/range';
+import { NEW_LINE_REGEX } from 'shared/constants/common';
 
 export class TextDocument {
   fileName: string;
@@ -14,12 +15,13 @@ export class TextDocument {
   constructor(filePath: string) {
     this._content = decode(readFileSync(filePath), 'gb2312');
     this.fileName = filePath;
-    this.lineCount = this._content.split('\n').length;
+    this.lineCount = this._content.split(NEW_LINE_REGEX).length;
   }
 
   offsetAt(position: Position): number {
     return (
-      this._content.split('\n').slice(0, position.line).join('\n').length +
+      this._content.split(NEW_LINE_REGEX).slice(0, position.line).join('\n')
+        .length +
       position.character +
       1
     );
