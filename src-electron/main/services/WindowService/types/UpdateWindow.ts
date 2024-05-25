@@ -8,7 +8,7 @@ import { FloatingBaseWindow } from 'main/services/WindowService/types/FloatingBa
 
 export class UpdateWindow extends FloatingBaseWindow {
   constructor() {
-    super(WindowType.Chat);
+    super(WindowType.Update);
   }
 
   updateProgress(progressInfo: ProgressInfo) {
