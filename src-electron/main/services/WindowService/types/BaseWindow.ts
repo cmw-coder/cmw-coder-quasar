@@ -29,7 +29,7 @@ export abstract class BaseWindow {
           searchParams[key] = searchParams[key].toString();
         }
       }
-      this._url += `?${new URLSearchParams(
+      this._url = `${process.env.APP_URL}#${WINDOW_URL_MAPPING[this._type]}?${new URLSearchParams(
         <Record<string, string>>searchParams,
       ).toString()}`;
     }
