@@ -12,6 +12,8 @@ import {
 import { WindowType } from 'shared/types/WindowType';
 import { ActionApi } from 'types/ActionApi';
 import { UpdateQuery } from 'types/queries';
+import { useService } from 'utils/common';
+import { ServiceType } from 'shared/types/service';
 
 const baseName = 'pages.UpdatePage.';
 
@@ -19,6 +21,7 @@ const { humanStorageSize } = format;
 const { t } = useI18n();
 const { matched, query } = useRoute();
 const { back } = useRouter();
+const windowService = useService(ServiceType.WINDOW);
 
 const i18n = (relativePath: string, data?: Record<string, unknown>) => {
   if (data) {
@@ -46,7 +49,7 @@ const updateResponse = (confirmed: boolean) => {
   if (confirmed) {
     window.actionApi.send(new UpdateDownloadActionMessage());
   } else if (name === WindowType.Update) {
-    window.controlApi.close(WindowType.Update);
+    windowService.closeWindow(WindowType.Update);
   } else {
     back();
   }
@@ -57,7 +60,7 @@ onMounted(() => {
   actionApi.register(ActionType.UpdateFinish, () => {
     window.actionApi.send(new UpdateFinishActionMessage());
     if (name === WindowType.Update) {
-      window.controlApi.hide(WindowType.Update);
+      windowService.closeWindow(WindowType.Update);
     }
   });
   actionApi.register(
