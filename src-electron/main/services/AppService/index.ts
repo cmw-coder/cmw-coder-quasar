@@ -22,6 +22,7 @@ import { ActionMessage, ActionType } from 'shared/types/ActionMessage';
 import { NetworkZone } from 'shared/config';
 import { WindowType } from 'shared/types/WindowType';
 import { AppServiceTrait } from 'shared/types/service/AppServiceTrait';
+import { LinseerDataType } from 'main/stores/config/types';
 
 interface AbstractServicePort {
   [key: string]: ((...args: unknown[]) => Promise<unknown>) | undefined;
@@ -88,6 +89,22 @@ export class AppService implements AppServiceTrait {
         }
       }
       this._dataStoreService.setAppData('project', newProjectData);
+      // ========================
+
+      // ========================
+      log.info('Merge Config Data From Old DataStore');
+      const oldConfigData = this._configService.configStore
+        .data as unknown as LinseerDataType;
+      if (
+        oldConfigData.tokens &&
+        oldConfigData.tokens.access &&
+        oldConfigData.tokens.refresh
+      ) {
+        await this._configService.setConfigs({
+          token: oldConfigData.tokens.access,
+          refreshToken: oldConfigData.tokens.refresh,
+        });
+      }
       // ========================
       this._websocketService.startServer();
       this._websocketService.registerActions();
