@@ -5,9 +5,10 @@ import { NEW_LINE_REGEX } from 'shared/constants/common';
 import { CompletionType } from 'shared/types/common';
 
 // Start with '//' or '#' or '{' or '/*', or is '***/'
-const detectRegex = /^\/\/|^#|^\{|^\/\*|^\*+\/$/;
+const functionHeaderEndRegex = /^\/\/|^#|^\{|^\/\*|^\*+\/$/;
+// Line that only have (part of) comment
+const pureCommentRegex = /^\s*\/\/|\*\/\s*$/;
 
-// 后文去重
 export const completionsPostProcess = (
   completions: string[],
   promptElements: PromptElements,
@@ -30,22 +31,25 @@ export const completionsPostProcess = (
 export const getCompletionType = (
   promptElements: PromptElements,
 ): CompletionType => {
-  const lastLine = promptElements.prefix.split(NEW_LINE_REGEX).at(-1) ?? '';
-  if (lastLine.trim().length > 0) {
+  if (
+    (promptElements.prefix.split(NEW_LINE_REGEX).at(-1) ?? '').trim().length > 0
+  ) {
     return CompletionType.Line;
   }
 
   const lastNonEmptyLine =
     promptElements.prefix.trimEnd().split(NEW_LINE_REGEX).at(-1) ?? '';
   if (
-    detectRegex.test(lastNonEmptyLine) &&
+    functionHeaderEndRegex.test(lastNonEmptyLine) &&
     extname(promptElements.file ?? '') !== 'h'
   ) {
     return CompletionType.Function;
   }
-  if (promptElements.similarSnippet) {
+
+  if (pureCommentRegex.test(lastNonEmptyLine) || promptElements.similarSnippet) {
     return CompletionType.Snippet;
   }
+
   return CompletionType.Line;
 };
 
