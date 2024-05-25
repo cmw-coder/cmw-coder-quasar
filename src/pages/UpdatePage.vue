@@ -2,7 +2,7 @@
 import { format } from 'quasar';
 import { onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 
 import {
   ActionType,
@@ -19,8 +19,7 @@ const baseName = 'pages.UpdatePage.';
 
 const { humanStorageSize } = format;
 const { t } = useI18n();
-const { matched, query } = useRoute();
-const { back } = useRouter();
+const { query } = useRoute();
 const windowService = useService(ServiceType.WINDOW);
 
 const i18n = (relativePath: string, data?: Record<string, unknown>) => {
@@ -31,7 +30,6 @@ const i18n = (relativePath: string, data?: Record<string, unknown>) => {
   }
 };
 
-const { name } = matched[matched.length - 2];
 const { currentVersion, newVersion, releaseDate } = new UpdateQuery(query);
 
 const isUpdating = ref(false);
@@ -48,10 +46,8 @@ const updateResponse = (confirmed: boolean) => {
   isUpdating.value = confirmed;
   if (confirmed) {
     window.actionApi.send(new UpdateDownloadActionMessage());
-  } else if (name === WindowType.Update) {
-    windowService.closeWindow(WindowType.Update);
   } else {
-    back();
+    windowService.closeWindow(WindowType.Update);
   }
 };
 
@@ -59,9 +55,7 @@ const actionApi = new ActionApi(baseName);
 onMounted(() => {
   actionApi.register(ActionType.UpdateFinish, () => {
     window.actionApi.send(new UpdateFinishActionMessage());
-    if (name === WindowType.Update) {
-      windowService.closeWindow(WindowType.Update);
-    }
+    windowService.closeWindow(WindowType.Update);
   });
   actionApi.register(
     ActionType.UpdateProgress,
