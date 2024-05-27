@@ -35,17 +35,6 @@ export class MainWindow extends BaseWindow {
     ).configStore;
     const window = this._createWindow();
 
-    window.on('closed', () => {
-      this._window = undefined;
-    });
-    window.on('hide', () => (this._showState = false));
-    window.on('ready-to-show', async () => {
-      if (this._window && process.env.NODE_ENV === 'development') {
-        this._window.webContents.openDevTools();
-      }
-    });
-    window.on('show', () => (this._showState = true));
-
     this._actionApi.register(ActionType.ChatInsert, (content) => {
       const websocketService = container.get<WebsocketService>(
         ServiceType.WEBSOCKET,
@@ -117,11 +106,5 @@ export class MainWindow extends BaseWindow {
         preload: resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD),
       },
     });
-  }
-
-  private set _showState(showState: boolean) {
-    const windowData = this._dataStoreService.getWindowData(WindowType.Main);
-    windowData.show = showState;
-    this._dataStoreService.saveWindowData(WindowType.Main, windowData);
   }
 }

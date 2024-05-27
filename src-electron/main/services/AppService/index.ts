@@ -146,7 +146,12 @@ export class AppService implements AppServiceTrait {
         .catch((e) => log.error('app.ready', e));
 
       // 激活主界面
-      this._windowService.getWindow(WindowType.Main).activate();
+      if (this._dataStoreService.getAppdata().window.Main.show) {
+        this._windowService.getWindow(WindowType.Main).activate();
+      } else {
+        this._windowService.getWindow(WindowType.Main).activate();
+        this._windowService.getWindow(WindowType.Main)._window?.hide();
+      }
     });
   }
 

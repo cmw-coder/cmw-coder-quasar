@@ -84,6 +84,17 @@ export abstract class BaseWindow {
       this._window.on('closed', () => {
         this._window = undefined;
       });
+
+      this._window.on('show', () => {
+        const windowData = dataStoreService.getWindowData(this._type);
+        windowData.show = true;
+        dataStoreService.saveWindowData(this._type, windowData);
+      });
+      this._window.on('hide', () => {
+        const windowData = dataStoreService.getWindowData(this._type);
+        windowData.show = false;
+        dataStoreService.saveWindowData(this._type, windowData);
+      });
     }
 
     const { x, y, height, width } = dataStoreService.getWindowData(this._type);
