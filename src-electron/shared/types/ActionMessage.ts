@@ -7,7 +7,6 @@ import {
 import { CompletionCacheClientMessage } from 'shared/types/WsMessage';
 
 export enum ActionType {
-  ChatInsert = 'ChatInsert',
   CompletionClear = 'CompletionClear',
   CompletionSet = 'CompletionSet',
   CompletionUpdate = 'CompletionUpdate',
@@ -30,15 +29,6 @@ export class ToggleDarkModeActionMessage implements ActionMessage {
   type = ActionType.ToggleDarkMode;
   data: boolean;
   constructor(data: boolean) {
-    this.data = data;
-  }
-}
-
-export class ChatInsertActionMessage implements ActionMessage {
-  type = ActionType.ChatInsert;
-  data: string;
-
-  constructor(data: string) {
     this.data = data;
   }
 }
@@ -158,7 +148,6 @@ export class UpdateDownloadActionMessage implements ActionMessage {
 }
 
 export interface ActionMessageMapping {
-  [ActionType.ChatInsert]: ChatInsertActionMessage;
   [ActionType.CompletionClear]: CompletionClearActionMessage;
   [ActionType.CompletionSet]: CompletionSetActionMessage;
   [ActionType.CompletionUpdate]: CompletionUpdateActionMessage;
