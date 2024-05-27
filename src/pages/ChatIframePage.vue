@@ -18,7 +18,7 @@ const refreshHandle = async () => {
   await timeout(500);
   isShow.value = true;
   await nextTick();
-  init();
+  await init();
 };
 
 const init = async () => {
@@ -33,7 +33,7 @@ const init = async () => {
 };
 
 onMounted(async () => {
-  init();
+  await init();
   actionApi.register(ActionType.ToggleDarkMode, () => {
     refreshHandle();
   });

@@ -11,16 +11,6 @@ export default {
         account: 'Account',
       },
     },
-    ChatMessages: {
-      labels: {
-        copySelected: 'Copy selected',
-        copyAll: 'Copy all',
-      },
-      notifications: {
-        copySuccess: 'Selection copied to the clipboard',
-        copyFailure: 'Failed to copy the selection',
-      },
-    },
     CodeBlock: {
       tooltips: {
         copy: 'Copy to clipboard',
@@ -72,15 +62,6 @@ export default {
           loginFailed: 'Login failed',
           loginSuccess: 'Login successfully',
           networkCaption: 'Please check your network',
-        },
-      },
-    },
-    MessageItems: {
-      AnswerItem: {
-        notifications: {
-          copyFailure: 'Failed to copy the answer',
-          copyManual: 'Please copy the answer manually',
-          copySuccess: 'The answer has been copied to the clipboard',
         },
       },
     },
@@ -215,12 +196,6 @@ export default {
     },
   },
   pages: {
-    ChatPage: {
-      labels: {
-        intro: 'AI assisted coding for H3C',
-        title: 'Comware Coder',
-      },
-    },
     CommitPage: {
       labels: {
         cancel: 'Cancel',

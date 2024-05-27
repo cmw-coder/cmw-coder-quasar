@@ -44,14 +44,6 @@ export class AppService implements AppServiceTrait {
   ) {}
 
   init() {
-    log.info('AppService init');
-    this.initApplication();
-    this.initAdditionReport();
-    this.initIpcMain();
-    this.initShortcutHandler();
-  }
-
-  initApplication() {
     log.initialize();
     log.transports.file.format = '{text}';
     log.transports.file.transforms.push(({ data, message }) => {
@@ -60,7 +52,14 @@ export class AppService implements AppServiceTrait {
         `[${DateTime.fromJSDate(date).toISO()}] ${variables?.processType}.${level.toUpperCase()}: ${data}`,
       ];
     });
+    log.info('AppService init');
+    this.initApplication();
+    this.initAdditionReport();
+    this.initIpcMain();
+    this.initShortcutHandler();
+  }
 
+  initApplication() {
     log.info(`OS version: ${version()} (${release()})`);
     if (!app.requestSingleInstanceLock()) {
       app.quit();

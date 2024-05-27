@@ -10,13 +10,10 @@ import {
   ConfigStoreLoadActionMessage,
 } from 'shared/types/ActionMessage';
 import { WindowType } from 'shared/types/WindowType';
-import { ChatInsertServerMessage } from 'shared/types/WsMessage';
 import { DataStoreService } from 'main/services/DataStoreService';
 import { BaseWindow } from 'main/services/WindowService/types/BaseWindow';
 import { container } from 'main/services';
 import { ConfigService } from 'main/services/ConfigService';
-import { WebsocketService } from 'main/services/WebsocketService';
-import { NEW_LINE_REGEX } from 'shared/constants/common';
 
 export class MainWindow extends BaseWindow {
   private readonly _actionApi = new ActionApi('main.MainWindow.');
@@ -34,20 +31,6 @@ export class MainWindow extends BaseWindow {
       ServiceType.CONFIG,
     ).configStore;
     const window = this._createWindow();
-
-    this._actionApi.register(ActionType.ChatInsert, (content) => {
-      const websocketService = container.get<WebsocketService>(
-        ServiceType.WEBSOCKET,
-      );
-      websocketService.send(
-        JSON.stringify(
-          new ChatInsertServerMessage({
-            result: 'success',
-            content: content.replace(NEW_LINE_REGEX, '\n'),
-          }),
-        ),
-      );
-    });
     this._actionApi.register(ActionType.ConfigStoreLoad, () => {
       if (this._window) {
         this.sendMessageToRenderer(
