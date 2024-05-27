@@ -7,6 +7,7 @@ export interface WindowServiceTrait {
   defaultWindowSize(type: WindowType): Promise<void>;
   minimizeWindow(type?: WindowType): Promise<void>;
   closeWindow(type?: WindowType): Promise<void>;
+  hideWindow(type?: WindowType): Promise<void>;
   getProjectIdWindowActiveProject(): Promise<string | undefined>;
   getCommitWindowCurrentFile(): Promise<string | undefined>;
   activeWindow(type: WindowType): Promise<void>;

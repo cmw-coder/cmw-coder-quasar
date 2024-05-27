@@ -26,7 +26,11 @@ const defaultSize = () => {
 };
 
 const hide = () => {
-  windowService.closeWindow(props.windowType);
+  if (props.windowType === WindowType.Main) {
+    windowService.hideWindow(props.windowType);
+  } else {
+    windowService.closeWindow(props.windowType);
+  }
 };
 
 const minimize = () => {

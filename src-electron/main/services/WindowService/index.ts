@@ -107,6 +107,18 @@ export class WindowService implements WindowServiceTrait {
     }
   }
 
+  async hideWindow(type?: WindowType | undefined): Promise<void> {
+    if (type) {
+      const window = this.getWindow(type);
+      window._window?.hide();
+    } else {
+      const focusWindow = BrowserWindow.getFocusedWindow();
+      if (focusWindow) {
+        focusWindow.hide();
+      }
+    }
+  }
+
   async toggleMaximizeWindow(type?: WindowType): Promise<void> {
     let window: BrowserWindow | null | undefined;
     if (type) {
