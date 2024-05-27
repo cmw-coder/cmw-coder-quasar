@@ -141,8 +141,7 @@ export const routes: RouteRecordRaw[] = [
         components: {
           header: () => import('layouts/headers/MainHeader.vue'),
           leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
-          default: () => import('pages/ChatPage.vue'),
-          footer: () => import('layouts/footers/QuestionFooter.vue'),
+          default: () => import('pages/ChatIframePage.vue'),
         },
         props: {
           header: {

@@ -58,7 +58,7 @@ onBeforeUnmount(() => {
 
 <style lang="scss" scoped>
 .ai-assistant {
-  height: calc(100vh - 33px);
+  height: 100%;
   width: 100vw;
   position: relative;
   overflow: hidden;

@@ -31,7 +31,7 @@ bus.on('drawer', (action, position) => {
       :model-value="leftDrawerOpen"
       name="leftDrawer"
     />
-    <q-page-container>
+    <q-page-container style="height: 100vh">
       <router-view />
     </q-page-container>
     <router-view
