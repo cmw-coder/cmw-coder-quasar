@@ -6,10 +6,16 @@ import { ServiceType } from 'shared/types/service';
 import { WindowType } from 'shared/types/WindowType';
 import { useService } from 'utils/common';
 
+type ControlType = 'defaultSize' | 'minimize' | 'toggleMaximize' | 'close';
+
 const props = defineProps({
   windowType: {
     type: String as PropType<WindowType>,
     required: true,
+  },
+  controlList: {
+    type: Array as PropType<ControlType[]>,
+    default: () => ['defaultSize', 'minimize', 'toggleMaximize', 'close'],
   },
 });
 
@@ -49,22 +55,41 @@ onMounted(() => {
       <q-icon name="mdi-assistant" />
       <div>{{ i18n('labels.title') }}</div>
       <q-space />
-      <q-btn flat icon="mdi-resize" stretch @click="defaultSize">
+      <q-btn
+        v-if="controlList.includes('defaultSize')"
+        flat
+        icon="mdi-resize"
+        stretch
+        @click="defaultSize"
+      >
         <q-tooltip :delay="1000">
           {{ i18n('tooltips.defaultSize') }}
         </q-tooltip>
       </q-btn>
-      <q-btn flat icon="mdi-minus" stretch @click="minimize">
+      <q-btn
+        v-if="controlList.includes('minimize')"
+        flat
+        icon="mdi-minus"
+        stretch
+        @click="minimize"
+      >
         <q-tooltip :delay="1000">
           {{ i18n('tooltips.minimize') }}
         </q-tooltip>
       </q-btn>
-      <q-btn flat icon="crop_square" stretch @click="toggleMaximize">
+      <q-btn
+        v-if="controlList.includes('toggleMaximize')"
+        flat
+        icon="crop_square"
+        stretch
+        @click="toggleMaximize"
+      >
         <q-tooltip :delay="1000">
           {{ i18n('tooltips.toggleMaximize') }}
         </q-tooltip>
       </q-btn>
       <q-btn
+        v-if="controlList.includes('close')"
         class="close-button"
         flat
         icon="mdi-window-close"

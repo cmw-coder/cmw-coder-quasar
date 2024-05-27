@@ -73,6 +73,7 @@ export const routes: RouteRecordRaw[] = [
         props: {
           header: {
             windowType: WindowType.Login,
+            controlList: ['defaultSize', 'minimize', 'toggleMaximize'],
           },
         },
       },
@@ -85,6 +86,7 @@ export const routes: RouteRecordRaw[] = [
         props: {
           header: {
             windowType: WindowType.ProjectId,
+            controlList: ['defaultSize', 'minimize', 'toggleMaximize'],
           },
         },
       },
@@ -97,6 +99,7 @@ export const routes: RouteRecordRaw[] = [
         props: {
           header: {
             windowType: WindowType.Update,
+            controlList: ['defaultSize', 'minimize', 'toggleMaximize'],
           },
         },
       },
@@ -121,6 +124,7 @@ export const routes: RouteRecordRaw[] = [
         props: {
           header: {
             windowType: WindowType.Welcome,
+            controlList: ['defaultSize', 'minimize', 'toggleMaximize'],
           },
         },
       },
