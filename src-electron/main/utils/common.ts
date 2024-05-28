@@ -50,3 +50,9 @@ export const folderLatestModificationTime = async (
   } catch {}
   return latestTime;
 };
+
+export const timeout = (time = 0) => {
+  return new Promise((resolve) => {
+    setTimeout(resolve, time);
+  });
+};

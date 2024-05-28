@@ -13,12 +13,22 @@ import {
 } from 'shared/types/ActionMessage';
 import { ServiceType } from 'shared/types/service';
 import { WindowType } from 'shared/types/WindowType';
+import { timeout } from 'main/utils/common';
+
+const RE_CREATE_TIME = 1000 * 60 * 30;
 
 export class CompletionsWindow extends BaseWindow {
-  private _destroyTimer?: NodeJS.Timeout;
+  private _reCreateTimer?: NodeJS.Timeout;
 
   constructor() {
     super(WindowType.Completions);
+  }
+
+  initReCreateTimer() {
+    this._reCreateTimer = setInterval(() => {
+      this.destroy();
+      this.activate();
+    }, RE_CREATE_TIME);
   }
 
   protected create(): BrowserWindow {
@@ -62,17 +72,19 @@ export class CompletionsWindow extends BaseWindow {
     }
   }
 
-  completionSelect(
+  async completionSelect(
     completion: string,
     count: { index: number; total: number },
     height: number,
     position: { x: number; y: number },
   ) {
     if (!this._window) {
-      this._window = this.create();
       this.activate();
+      //TODO 确保渲染窗口成功加载且可接受消息数据, 当下用简单的延迟处理
+      await timeout(2000);
     }
     if (this._window) {
+      console.log('CompletionsWindow.completionSelect 2');
       const { compatibility } = container
         .get<DataStoreService>(ServiceType.DATA_STORE)
         .getAppdata();
@@ -130,18 +142,5 @@ export class CompletionsWindow extends BaseWindow {
 
   hide() {
     this._window?.hide();
-  }
-
-  activate(): void {
-    clearTimeout(this._destroyTimer);
-    this._destroyTimer = setTimeout(
-      () => {
-        clearTimeout(this._destroyTimer);
-        this._destroyTimer = undefined;
-        super.destroy();
-      },
-      1000 * 60 * 30,
-    );
-    super.activate();
   }
 }

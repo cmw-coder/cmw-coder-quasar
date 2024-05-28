@@ -125,6 +125,7 @@ export class AppService implements AppServiceTrait {
       this._windowService.trayIcon.activate();
       // 激活代码窗口
       this._windowService.getWindow(WindowType.Completions).activate();
+      this._windowService.getWindow(WindowType.Completions).initReCreateTimer();
 
       // 引导配置基础环境（黄、绿区 | 红区 | 路由红区）
       if (config.networkZone === NetworkZone.Unknown) {
