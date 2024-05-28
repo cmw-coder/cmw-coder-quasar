@@ -194,6 +194,7 @@ export class PromptExtractor {
     timer.add('CompletionGenerate', 'GotSimilarSnippets');
 
     return similarSnippets
+      .filter((mostSimilarSnippet) => mostSimilarSnippet.score > 0)
       .sort((first, second) => first.score - second.score)
       .reverse();
   }

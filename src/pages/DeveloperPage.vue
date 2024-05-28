@@ -1,138 +1,90 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute } from 'vue-router';
 
 import CodeBlock from 'components/CodeBlock.vue';
 import { NEW_LINE_REGEX } from 'shared/constants/common';
+import { SimilarSnippet } from 'shared/types/common';
+import { ServiceType } from 'shared/types/service';
 import { WindowType } from 'shared/types/WindowType';
+import { useHighlighter } from 'stores/highlighter';
+import { useService } from 'utils/common';
 
+const { codeToHtml } = useHighlighter();
 const { t } = useI18n();
-const { matched } = useRoute();
 
 const i18n = (relativePath: string) => {
   return t('pages.DeveloperPage.' + relativePath);
 };
 
-const { name } = matched[matched.length - 2];
+const websocketService = useService(ServiceType.WEBSOCKET);
+const windowService = useService(ServiceType.WINDOW);
 
-const currentFile = ref<File>();
-const currentFileContent = ref('');
 const currentTab = ref('');
-const referenceFiles = ref<File[]>([]);
-const startLine = ref(1);
-const endLine = ref(1);
+const caret = reactive({
+  character: 0,
+  line: 0,
+});
+const currentFile = reactive({
+  content: '',
+  error: false,
+  loading: false,
+  path: '',
+});
+const referenceFolder = reactive({
+  error: false,
+  loading: false,
+  path: '',
+});
 const similarSnippets = ref<SimilarSnippet[]>([]);
 
-const selectCurrentFile = (file?: File) => {
-  currentFile.value = file;
-  if (currentFile.value) {
-    const fileReader = new FileReader();
-    fileReader.onload = (event) => {
-      if (event.target?.result) {
-        currentFileContent.value = event.target.result.toString();
-        endLine.value = currentFileContent.value.split(NEW_LINE_REGEX).length;
-      } else {
-        currentFileContent.value = '';
-      }
-    };
-    fileReader.readAsText(currentFile.value, 'gbk');
-  } else {
-    currentFileContent.value = '';
-    similarSnippets.value = [];
+const checkReferenceFolder = async () => {
+  if (referenceFolder.path) {
+    referenceFolder.loading = true;
+    referenceFolder.error = !(await websocketService.checkFolderExist(
+      referenceFolder.path,
+    ));
+    referenceFolder.loading = false;
   }
 };
 
-const separateTextByLine = (
-  rawText: string,
-  removeComments = false,
-): string[] => {
-  if (removeComments) {
-    rawText = rawText.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
+const getCurrentFileContent = async () => {
+  if (currentFile.path) {
+    currentFile.loading = true;
+    const content = await websocketService.getFileContent(currentFile.path);
+    if (content) {
+      currentFile.content = codeToHtml(content, 'c');
+      currentFile.error = false;
+    } else {
+      currentFile.error = true;
+    }
+    currentFile.loading = false;
   }
-  return rawText
-    .split(NEW_LINE_REGEX)
-    .filter((tabContentLine) => tabContentLine.trim().length > 0);
 };
-
-const getReferenceFileLines = () =>
-  Promise.all(
-    referenceFiles.value.map(
-      (file): Promise<{ path: string; lines: string[] }> => {
-        const reader = new FileReader();
-        return new Promise((resolve) => {
-          reader.onload = (event) => {
-            if (event.target?.result) {
-              resolve({
-                path: file.name,
-                lines: separateTextByLine(event.target.result.toString(), true),
-              });
-            } else {
-              resolve({
-                path: file.name,
-                lines: [],
-              });
-            }
-          };
-          reader.readAsText(file, 'gbk');
-        });
-      },
-    ),
-  );
 
 const calculate = async () => {
-  if (referenceFiles.value.length) {
-    const currentFileLines = currentFileContent.value.split(NEW_LINE_REGEX);
-    const selectedCurrentFileLines = currentFileLines.splice(
-      startLine.value - 1,
-      endLine.value - startLine.value + 1,
+  if (currentFile.path && referenceFolder.path) {
+    const contentLines = currentFile.content.split(NEW_LINE_REGEX);
+    const prefixLines = contentLines.slice(
+      caret.line > 100 ? caret.line - 100 : 0,
+      caret.line,
     );
-    const referenceFileContents = await getReferenceFileLines();
-    referenceFileContents.push({
-      path: currentFile.value?.name ?? 'currentFile',
-      lines: separateTextByLine(currentFileLines.join('\n'), true),
+    prefixLines.at(-1)?.substring(0, caret.character);
+    const suffixLines = contentLines.slice(caret.line, caret.line + 30);
+    suffixLines.at(0)?.substring(caret.character);
+    console.log({
+      prefix: prefixLines.join('\n'),
+      suffix: suffixLines.join('\n'),
     });
 
-    const mostSimilarSnippets = Array<SimilarSnippet>();
-
-    referenceFileContents.forEach(({ path, lines }) => {
-      const { score, startLine } = getMostSimilarSnippetStartLine(
-        lines.map((line) =>
-          tokenize(line, [
-            IGNORE_RESERVED_KEYWORDS,
-            IGNORE_COMMON_WORD,
-            IGNORE_COMWARE_INTERNAL,
-          ]),
-        ),
-        tokenize(selectedCurrentFileLines.join('\n'), [
-          IGNORE_RESERVED_KEYWORDS,
-          IGNORE_COMMON_WORD,
-          IGNORE_COMWARE_INTERNAL,
-        ]),
-        separateTextByLine(selectedCurrentFileLines.join('\n'), true).length,
-      );
-      const currentMostSimilarSnippet: SimilarSnippet = {
-        path,
-        score: score,
-        line: startLine + 1,
-        content: lines
-          .slice(
-            startLine,
-            startLine +
-              separateTextByLine(selectedCurrentFileLines.join('\n'), true)
-                .length,
-          )
-          .join('\n'),
-      };
-      mostSimilarSnippets.push(currentMostSimilarSnippet);
-    });
-
-    console.log(mostSimilarSnippets);
-
-    similarSnippets.value = mostSimilarSnippets
-      .filter((mostSimilarSnippet) => mostSimilarSnippet.score > 0)
-      .sort((first, second) => first.score - second.score)
-      .reverse();
+    similarSnippets.value = await websocketService.getSimilarSnippets(
+      caret.character,
+      referenceFolder.path,
+      caret.line,
+      currentFile.path,
+      prefixLines.join('\n'),
+      suffixLines.join('\n'),
+    );
     currentTab.value = similarSnippets.value[0].path;
   } else {
     similarSnippets.value = [];
@@ -140,16 +92,12 @@ const calculate = async () => {
 };
 
 onMounted(() => {
-  if (name) {
-    window.controlApi.devTools(<WindowType>name);
-    window.controlApi.resize({ width: 1600, height: 900 }, <WindowType>name);
-  }
+  windowService.setWindowSize({ width: 1600, height: 900 }, WindowType.Main);
+  windowService.openDevTools(WindowType.Main);
 });
 
 onBeforeUnmount(() => {
-  if (name) {
-    window.controlApi.resize({}, <WindowType>name);
-  }
+  windowService.defaultWindowSize(WindowType.Main);
 });
 </script>
 
@@ -158,42 +106,49 @@ onBeforeUnmount(() => {
     <div class="column col-6 q-gutter-y-md">
       <q-card bordered flat>
         <q-card-section class="q-gutter-y-md">
-          <div class="text-h5">
-            {{ i18n('labels.currentFile') }}
+          <div class="row items-baseline q-col-gutter-x-md">
+            <div class="text-h5">
+              {{ i18n('labels.currentFile') }}
+            </div>
+            <q-input
+              class="col-grow"
+              clearable
+              dense
+              :error="currentFile.error"
+              label="Input current file path"
+              :loading="currentFile.loading"
+              outlined
+              v-model="currentFile.path"
+              @blur="getCurrentFileContent"
+              @keyup.enter.stop="getCurrentFileContent"
+            />
           </div>
-          <q-file
-            accept=".c, .cc, .cpp, .h, .hpp"
-            clearable
-            label="Click to pick file"
-            outlined
-            :model-value="currentFile"
-            @clear="selectCurrentFile()"
-            @update:model-value="selectCurrentFile"
-          />
         </q-card-section>
-        <q-card-section v-if="currentFileContent" class="q-gutter-y-md">
+        <q-card-section class="q-gutter-y-md">
           <div class="row items-center q-col-gutter-x-md">
-            <div class="text-h5">Window Size</div>
+            <div class="text-h5">Caret Position</div>
             <q-input
               class="col-grow"
               dense
-              label="Start Line"
+              label="Cursor line"
               outlined
               type="number"
-              v-model="startLine"
+              v-model="caret.line"
             />
             <q-input
               class="col-grow"
               dense
-              label="End Line"
+              label="Cursor character"
               outlined
               type="number"
-              v-model="endLine"
+              v-model="caret.character"
             />
           </div>
-          <q-scroll-area class="full-width" style="height: 560px">
-            <code-block :html="currentFileContent" />
-          </q-scroll-area>
+          <q-card bordered flat>
+            <q-scroll-area class="full-width" style="height: 600px">
+              <code-block :html="currentFile.content" style="max-width: 80ch" />
+            </q-scroll-area>
+          </q-card>
         </q-card-section>
       </q-card>
     </div>
@@ -204,28 +159,35 @@ onBeforeUnmount(() => {
             {{ i18n('labels.referenceFiles') }}
           </div>
           <div class="row q-col-gutter-x-md">
-            <q-file
+            <q-input
               class="col-grow"
-              accept=".c, .cc, .cpp, .h, .hpp"
               clearable
-              label="Click to pick files"
-              multiple
+              :error="referenceFolder.error"
+              label="Input current file path"
+              :loading="referenceFolder.loading"
               outlined
-              use-chips
-              v-model="referenceFiles"
+              v-model="referenceFolder.path"
+              @blur="checkReferenceFolder"
+              @keyup.enter.stop="checkReferenceFolder"
             >
               <template v-slot:after>
                 <q-btn
+                  class="full-height"
                   color="primary"
-                  :disable="referenceFiles.length === 0 || !currentFile"
-                  label="Calculate"
-                  no-caps
-                  size="lg"
-                  unelevated
+                  :disable="
+                    !currentFile.path ||
+                    currentFile.error ||
+                    currentFile.loading ||
+                    !referenceFolder.path ||
+                    referenceFolder.error ||
+                    referenceFolder.loading
+                  "
+                  icon="mdi-file-find"
+                  outline
                   @click="calculate"
                 />
               </template>
-            </q-file>
+            </q-input>
           </div>
         </q-card-section>
         <q-card-section v-if="similarSnippets.length" class="q-gutter-y-md">
@@ -245,9 +207,13 @@ onBeforeUnmount(() => {
               <q-tab
                 v-for="(similarSnippet, index) in similarSnippets"
                 :key="index"
-                :label="similarSnippet.path"
+                :label="similarSnippet.path.split('/').at(-1)"
                 :name="similarSnippet.path"
-              />
+              >
+                <q-tooltip>
+                  {{ similarSnippet.path }}
+                </q-tooltip>
+              </q-tab>
             </q-tabs>
           </q-card>
           <q-card bordered flat>
@@ -255,15 +221,16 @@ onBeforeUnmount(() => {
               <q-tab-panel
                 v-for="(similarSnippet, index) in similarSnippets"
                 :key="index"
-                class="q-gutter-y-md"
+                class="q-gutter-y-xs"
                 :name="similarSnippet.path"
               >
-                <div class="row justify-between">
-                  <div>Start Line: {{ similarSnippet.line }}</div>
-                  <div>Score: {{ similarSnippet.score }}</div>
-                </div>
-                <q-scroll-area class="full-width" style="height: 443px">
-                  <code-block :html="similarSnippet.content" />
+                <div>Score: {{ similarSnippet.score }}</div>
+                <q-separator />
+                <q-scroll-area class="full-width" style="height: 420px">
+                  <code-block
+                    :html="codeToHtml(similarSnippet.content, 'c')"
+                    style="max-width: 80ch"
+                  />
                 </q-scroll-area>
               </q-tab-panel>
             </q-tab-panels>

@@ -1,5 +1,7 @@
 import log from 'electron-log/main';
 import { sync } from 'fast-glob';
+import { existsSync } from 'fs';
+import { lstat, readFile } from 'fs/promises';
 import { createServer } from 'http';
 import { inject, injectable } from 'inversify';
 import { type WebSocket, WebSocketServer } from 'ws';
@@ -34,6 +36,7 @@ import {
   getFunctionPrefix,
   getFunctionSuffix,
 } from 'main/components/PromptExtractor/utils';
+import { decode } from 'iconv-lite';
 
 interface ClientInfo {
   client: WebSocket;
@@ -107,6 +110,19 @@ export class WebsocketService implements WebsocketServiceTrait {
         res.sendJson({ message: 'Success', similarSnippets });
       },
     );
+  }
+
+  async checkFolderExist(path: string): Promise<boolean> {
+    return existsSync(path) && (await lstat(path)).isDirectory();
+  }
+
+  async getFileContent(path: string): Promise<string | undefined> {
+    try {
+      return decode(await readFile(path), 'gbk');
+    } catch (e) {
+      log.error('getFileContent', e);
+      return undefined;
+    }
   }
 
   async getProjectData() {

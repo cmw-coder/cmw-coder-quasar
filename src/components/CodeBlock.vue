@@ -17,11 +17,9 @@ const emit = defineEmits(['copy', 'insert']);
 </script>
 
 <template>
-  <q-card v-if="html.length" flat>
-    <q-card-section class="q-px-none">
-      <div class="shiki-codes" v-html="html" style="word-wrap: break-word" />
-    </q-card-section>
-    <div class="row q-gutter-x-sm absolute-top-right q-pa-sm">
+  <div>
+    <div class="shiki-codes" v-html="html" style="word-wrap: break-word" />
+    <div class="row q-gutter-x-sm absolute-top-right q-pa-md">
       <q-btn
         color="grey-7"
         dense
@@ -57,7 +55,29 @@ const emit = defineEmits(['copy', 'insert']);
         </q-tooltip>
       </q-btn>
     </div>
-  </q-card>
+  </div>
 </template>
 
-<style scoped></style>
+<style lang="scss">
+.shiki {
+  code {
+    counter-reset: step;
+    counter-increment: step 0;
+  }
+
+  code .line::before {
+    content: counter(step);
+    counter-increment: step;
+    width: 2rem;
+    margin-left: 0.5rem;
+    padding-right: 0.5rem;
+    display: inline-block;
+    text-align: right;
+    background-color: #e0e0e0;
+  }
+
+  pre {
+    border-radius: 3px;
+  }
+}
+</style>

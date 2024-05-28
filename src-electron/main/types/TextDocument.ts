@@ -8,7 +8,6 @@ import { NEW_LINE_REGEX } from 'shared/constants/common';
 export class TextDocument {
   fileName: string;
   languageId = 'c';
-  version = 0;
   lineCount: number;
   private readonly _content: string;
 

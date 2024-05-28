@@ -187,4 +187,16 @@ export class WindowService implements WindowServiceTrait {
   async activeWindow(type: WindowType): Promise<void> {
     this.getWindow(type).activate();
   }
+
+  async openDevTools(type?: WindowType): Promise<void> {
+    let window: BrowserWindow | null | undefined;
+    if (type) {
+      window = this.getWindow(type)._window;
+    } else {
+      window = BrowserWindow.getFocusedWindow();
+    }
+    if (window) {
+      window.webContents.openDevTools({ mode: 'undocked' });
+    }
+  }
 }

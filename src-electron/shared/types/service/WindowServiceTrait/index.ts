@@ -18,4 +18,5 @@ export interface WindowServiceTrait {
     },
     type?: WindowType,
   ): Promise<void>;
+  openDevTools(type?: WindowType): Promise<void>;
 }
