@@ -46,7 +46,10 @@ export const getCompletionType = (
     return CompletionType.Function;
   }
 
-  if (pureCommentRegex.test(lastNonEmptyLine) || promptElements.similarSnippet) {
+  if (
+    pureCommentRegex.test(lastNonEmptyLine) ||
+    promptElements.similarSnippet
+  ) {
     return CompletionType.Snippet;
   }
 

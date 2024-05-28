@@ -1,17 +1,9 @@
-import {
-  HuggingFaceStoreType,
-  LinseerConfigType,
-  LinseerDataType,
-  LinseerStoreType,
-} from 'main/stores/config/types';
 import { CompletionCacheClientMessage } from 'shared/types/WsMessage';
 
 export enum ActionType {
   CompletionClear = 'CompletionClear',
   CompletionSet = 'CompletionSet',
   CompletionUpdate = 'CompletionUpdate',
-  ConfigStoreLoad = 'ConfigStoreLoad',
-  ConfigStoreSave = 'ConfigStoreSave',
   DebugSync = 'DebugSync',
   RouterReload = 'RouterReload',
   UpdateDownload = 'UpdateDownload',
@@ -66,42 +58,6 @@ export class CompletionUpdateActionMessage implements ActionMessage {
   }
 }
 
-export class ConfigStoreLoadActionMessage implements ActionMessage {
-  type = ActionType.ConfigStoreLoad;
-  data: LinseerStoreType | HuggingFaceStoreType | undefined;
-
-  constructor(data?: LinseerStoreType | HuggingFaceStoreType) {
-    this.data = data;
-  }
-}
-
-export class ConfigStoreSaveActionMessage implements ActionMessage {
-  type = ActionType.ConfigStoreSave;
-  data:
-    | {
-        type: 'config';
-        data: Partial<LinseerConfigType>;
-      }
-    | {
-        type: 'data';
-        data: Partial<LinseerDataType>;
-      };
-
-  constructor(
-    data:
-      | {
-          type: 'config';
-          data: Partial<LinseerConfigType>;
-        }
-      | {
-          type: 'data';
-          data: Partial<LinseerDataType>;
-        },
-  ) {
-    this.data = data;
-  }
-}
-
 export class DebugSyncActionMessage implements ActionMessage {
   type = ActionType.DebugSync;
   data: { content: string; path: string };
@@ -151,8 +107,6 @@ export interface ActionMessageMapping {
   [ActionType.CompletionClear]: CompletionClearActionMessage;
   [ActionType.CompletionSet]: CompletionSetActionMessage;
   [ActionType.CompletionUpdate]: CompletionUpdateActionMessage;
-  [ActionType.ConfigStoreLoad]: ConfigStoreLoadActionMessage;
-  [ActionType.ConfigStoreSave]: ConfigStoreSaveActionMessage;
   [ActionType.DebugSync]: DebugSyncActionMessage;
   [ActionType.RouterReload]: RouterReloadActionMessage;
   [ActionType.UpdateDownload]: UpdateDownloadActionMessage;

@@ -2,7 +2,6 @@
  * @deprecated
  */
 export enum ApiStyle {
-  HuggingFace = 'HuggingFace',
   Linseer = 'Linseer',
 }
 
@@ -33,5 +32,4 @@ export enum SubModelType {
   'linseer-code-13b-sr88drv' = 'linseer-code-13b-sr88drv',
   'linseer-code-multi-line' = 'linseer-code-multi-line',
   'CmwCoder' = 'CmwCoder',
-  'CmwCoderV1' = 'CmwCoderV1',
 }

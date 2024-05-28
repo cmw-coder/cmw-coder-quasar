@@ -1,22 +1,15 @@
 import { BrowserWindow } from 'electron';
 import { resolve } from 'path';
 
-import { dataStoreDefault } from 'main/stores/data/default';
-import { ActionApi } from 'preload/types/ActionApi';
-import { ControlType, registerControlCallback } from 'preload/types/ControlApi';
-import { ServiceType } from 'shared/types/service';
-import {
-  ActionType,
-  ConfigStoreLoadActionMessage,
-} from 'shared/types/ActionMessage';
-import { WindowType } from 'shared/types/WindowType';
+import { container } from 'main/services';
 import { DataStoreService } from 'main/services/DataStoreService';
 import { BaseWindow } from 'main/services/WindowService/types/BaseWindow';
-import { container } from 'main/services';
-import { ConfigService } from 'main/services/ConfigService';
+import { dataStoreDefault } from 'main/stores/data/default';
+import { ControlType, registerControlCallback } from 'preload/types/ControlApi';
+import { ServiceType } from 'shared/types/service';
+import { WindowType } from 'shared/types/WindowType';
 
 export class MainWindow extends BaseWindow {
-  private readonly _actionApi = new ActionApi('main.MainWindow.');
   private _dataStoreService: DataStoreService;
 
   constructor() {
@@ -27,17 +20,7 @@ export class MainWindow extends BaseWindow {
   }
 
   protected create() {
-    const configStore = container.get<ConfigService>(
-      ServiceType.CONFIG,
-    ).configStore;
     const window = this._createWindow();
-    this._actionApi.register(ActionType.ConfigStoreLoad, () => {
-      if (this._window) {
-        this.sendMessageToRenderer(
-          new ConfigStoreLoadActionMessage(configStore.store),
-        );
-      }
-    });
 
     registerControlCallback(this._type, ControlType.DevTools, () =>
       this._window?.webContents.openDevTools({ mode: 'undocked' }),

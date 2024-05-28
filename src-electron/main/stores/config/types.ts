@@ -1,9 +1,4 @@
-import {
-  ApiStyle,
-  HuggingFaceModelType,
-  LinseerModelType,
-  SubModelType,
-} from 'shared/types/model';
+import { ApiStyle, LinseerModelType, SubModelType } from 'shared/types/model';
 
 export interface SeparateTokens {
   end: string;
@@ -22,41 +17,6 @@ export interface CommonConfigType {
     port: number;
   };
   userId: string;
-}
-
-/// HuggingFace --------------------------------------------------------------------------------------------------------
-
-export interface HuggingFaceCompletionConfigType {
-  contextLimit: number;
-  endpoint: string;
-  maxTokenCount: number;
-  stopTokens: string[];
-  suggestionCount: number;
-  temperature: number;
-}
-
-export interface HuggingFaceModelConfigType {
-  completionConfigs: {
-    function: HuggingFaceCompletionConfigType;
-    line: HuggingFaceCompletionConfigType;
-    snippet: HuggingFaceCompletionConfigType;
-  };
-  modelType: HuggingFaceModelType;
-  separateTokens: SeparateTokens;
-}
-
-export interface HuggingFaceConfigType extends CommonConfigType {
-  modelConfigs: HuggingFaceModelConfigType[];
-}
-
-export interface HuggingFaceDataType {
-  modelType: HuggingFaceModelType;
-}
-
-export interface HuggingFaceStoreType {
-  apiStyle: ApiStyle.HuggingFace;
-  config: HuggingFaceConfigType;
-  data: HuggingFaceDataType;
 }
 
 /// Linseer ------------------------------------------------------------------------------------------------------------

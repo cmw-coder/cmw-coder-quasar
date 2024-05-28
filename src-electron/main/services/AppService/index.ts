@@ -22,7 +22,6 @@ import { ActionMessage, ActionType } from 'shared/types/ActionMessage';
 import { NetworkZone } from 'shared/config';
 import { WindowType } from 'shared/types/WindowType';
 import { AppServiceTrait } from 'shared/types/service/AppServiceTrait';
-import { LinseerDataType } from 'main/stores/config/types';
 
 interface AbstractServicePort {
   [key: string]: ((...args: unknown[]) => Promise<unknown>) | undefined;
@@ -76,7 +75,7 @@ export class AppService implements AppServiceTrait {
     app.whenReady().then(async () => {
       log.info('Comware Coder is ready');
       // ========================
-      log.info('Merge Project Data From Old DataStore');
+      log.info('Migrate data from old data store (< 1.2.0)');
       const oldProjectData =
         this._dataStoreService.dataStoreBefore1_2_0.store.project;
       const newProjectData = this._dataStoreService.getAppdata().project;
@@ -91,9 +90,8 @@ export class AppService implements AppServiceTrait {
       // ========================
 
       // ========================
-      log.info('Merge Config Data From Old DataStore');
-      const oldConfigData = this._configService.configStore
-        .data as unknown as LinseerDataType;
+      log.info('Migrate data from old config store (< 1.2.0)');
+      const oldConfigData = this._configService.configStore.data;
       if (
         oldConfigData.tokens &&
         oldConfigData.tokens.access &&

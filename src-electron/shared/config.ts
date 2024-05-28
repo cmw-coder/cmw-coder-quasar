@@ -1,4 +1,3 @@
-import { ApiStyle } from 'shared/types/model';
 import { AppConfig } from 'shared/types/service/ConfigServiceTrait/types';
 
 export enum NetworkZone {
@@ -173,38 +172,3 @@ export const defaultAppConfigNetworkZoneMap: Record<NetworkZone, AppConfig> = {
     },
   },
 };
-
-/**
- * @deprecated
- */
-interface RuntimeConfig {
-  apiStyle: ApiStyle;
-  networkZone: NetworkZone;
-}
-
-/**
- * @deprecated
- */
-const availableRuntimeConfigs: Record<string, RuntimeConfig> = {
-  DEFAULT_CONFIG: {
-    apiStyle: ApiStyle.Linseer,
-    networkZone: NetworkZone.Normal,
-  },
-  Red: {
-    apiStyle: ApiStyle.HuggingFace,
-    networkZone: NetworkZone.Normal,
-  },
-  Route: {
-    apiStyle: ApiStyle.HuggingFace,
-    networkZone: NetworkZone.Secure,
-  },
-  Yellow: {
-    apiStyle: ApiStyle.Linseer,
-    networkZone: NetworkZone.Normal,
-  },
-} as const;
-
-/**
- * @deprecated
- */
-export const runtimeConfig = availableRuntimeConfigs.DEFAULT_CONFIG;
