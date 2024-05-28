@@ -29,11 +29,13 @@ export class PromptProcessor {
     const completionCached = this._cache.get(cacheKey);
     if (completionCached) {
       log.debug('PromptProcessor.process.cacheHit', completionCached);
-      completionCached.candidates = completionsPostProcess(
-        completionCached.candidates,
-        promptElements,
-      );
-      return completionCached;
+      return {
+        candidates: completionsPostProcess(
+          completionCached.candidates,
+          promptElements,
+        ),
+        type: completionCached.type,
+      };
     }
     timer.add('CompletionGenerate', 'generationCheckedCache');
 
@@ -76,11 +78,11 @@ export class PromptProcessor {
         promptElements.prefix,
       );
       timer.add('CompletionGenerate', 'generationProcessed');
-      this._cache.put(cacheKey, { candidates, type: completionType });
-      candidates = completionsPostProcess(candidates, promptElements);
       if (candidates.length) {
+        log.info('PromptProcessor.process.cacheMiss', candidates);
+        this._cache.put(cacheKey, { candidates, type: completionType });
         return {
-          candidates,
+          candidates: completionsPostProcess(candidates, promptElements),
           type: completionType,
         };
       }
