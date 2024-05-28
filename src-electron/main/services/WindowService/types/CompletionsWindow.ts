@@ -84,7 +84,6 @@ export class CompletionsWindow extends BaseWindow {
       await timeout(2000);
     }
     if (this._window) {
-      console.log('CompletionsWindow.completionSelect 2');
       const { compatibility } = container
         .get<DataStoreService>(ServiceType.DATA_STORE)
         .getAppdata();
