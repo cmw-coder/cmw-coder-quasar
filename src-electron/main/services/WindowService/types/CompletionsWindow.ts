@@ -15,7 +15,8 @@ import { ServiceType } from 'shared/types/service';
 import { WindowType } from 'shared/types/WindowType';
 
 export class CompletionsWindow extends BaseWindow {
-  private destroyTimer?: NodeJS.Timeout;
+  private _destroyTimer?: NodeJS.Timeout;
+
   constructor() {
     super(WindowType.Completions);
   }
@@ -131,28 +132,16 @@ export class CompletionsWindow extends BaseWindow {
     this._window?.hide();
   }
 
-  show() {
-    this._window?.show();
-  }
-
   activate(): void {
-    if (this.destroyTimer) {
-      clearTimeout(this.destroyTimer);
-    }
-    this.destroyTimer = setTimeout(
+    clearTimeout(this._destroyTimer);
+    this._destroyTimer = setTimeout(
       () => {
-        this.destroy();
+        clearTimeout(this._destroyTimer);
+        this._destroyTimer = undefined;
+        super.destroy();
       },
       1000 * 60 * 30,
     );
     super.activate();
-  }
-
-  destroy(): void {
-    if (this.destroyTimer) {
-      clearTimeout(this.destroyTimer);
-      this.destroyTimer = undefined;
-    }
-    super.destroy();
   }
 }
