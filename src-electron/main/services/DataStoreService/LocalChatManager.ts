@@ -2,6 +2,7 @@ import { app, shell } from 'electron';
 import path from 'path';
 import * as fs from 'fs';
 import { ChatFileContent, ChatItem } from 'shared/types/ChatMessage';
+import log from 'electron-log/main';
 
 const defaultChatFileContent: ChatFileContent = {
   createTime: new Date().valueOf(),
@@ -9,7 +10,7 @@ const defaultChatFileContent: ChatFileContent = {
 };
 
 export class LocalChatManager {
-  private localChatDir: string;
+  private readonly localChatDir: string;
 
   constructor() {
     this.localChatDir = path.join(app.getPath('userData'), 'chatList');
@@ -80,6 +81,8 @@ export class LocalChatManager {
   }
 
   openChatListDir() {
-    shell.openPath(this.localChatDir);
+    shell
+      .openPath(this.localChatDir)
+      .catch((e) => log.warn('openChatListDir', e));
   }
 }

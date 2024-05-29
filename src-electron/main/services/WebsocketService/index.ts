@@ -68,7 +68,7 @@ export class WebsocketService implements WebsocketServiceTrait {
     @inject(ServiceType.WINDOW)
     private _windowService: WindowService,
   ) {
-    this._httpRouter.addRoute('/', HttpMethod.GET, (req, res) => {
+    this._httpRouter.addRoute('/', HttpMethod.GET, (_, res) => {
       res.sendJson({
         message: 'Welcome to the Comware Coder backend!',
         entries: [
@@ -383,7 +383,8 @@ export class WebsocketService implements WebsocketServiceTrait {
               },
               height,
               { x, y },
-            );
+            )
+            .catch((e) => log.warn('WsAction.CompletionSelect', e));
         }
       } catch {
         this._statisticsReporterService.completionAbort(actionId);

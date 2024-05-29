@@ -7,6 +7,7 @@ import { WindowType } from 'shared/types/WindowType';
 import { container } from 'main/services';
 import { DataStoreService } from 'main/services/DataStoreService';
 import { ActionMessageMapping } from 'shared/types/ActionMessage';
+import log from 'electron-log/main';
 
 export abstract class BaseWindow {
   readonly _type: WindowType;
@@ -51,7 +52,7 @@ export abstract class BaseWindow {
           });
         },
       );
-      this._window.loadURL(this._url);
+      this._window.loadURL(this._url).catch((e) => log.warn('loadURL', e));
       this._window.once('ready-to-show', () => {
         if (this._window) {
           this._window.show();
