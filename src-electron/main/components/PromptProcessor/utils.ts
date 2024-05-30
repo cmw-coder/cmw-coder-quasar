@@ -14,8 +14,8 @@ export const completionsPostProcess = (
   promptElements: PromptElements,
 ) => {
   const firstSuffixLine = promptElements.suffix
-    .trimStart()
-    .split(NEW_LINE_REGEX)[0]
+    .split(NEW_LINE_REGEX)
+    .filter((line) => line.trim().length)[0]
     .trimEnd();
   return completions.map((completion) => {
     const lines = completion.split(NEW_LINE_REGEX);
