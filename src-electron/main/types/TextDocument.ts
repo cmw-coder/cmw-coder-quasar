@@ -19,7 +19,7 @@ export class TextDocument {
 
   offsetAt(position: Position): number {
     return (
-      this._content.split(NEW_LINE_REGEX).slice(0, position.line).join('\n')
+      this._content.split('\n').slice(0, position.line).join('\n')
         .length +
       position.character +
       1
