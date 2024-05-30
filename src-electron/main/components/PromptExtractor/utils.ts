@@ -1,3 +1,4 @@
+import log from 'electron-log/main';
 import { existsSync, promises } from 'fs';
 import { decode } from 'iconv-lite';
 
@@ -53,14 +54,18 @@ export const getRemainedCodeContents = (
   after: string[];
 } => {
   const rawText = document.getText();
+  log.debug('getRemainedCodeContents',{
+    before: rawText.substring(0, document.offsetAt(position) - prefix.length),
+    after: rawText.substring(document.offsetAt(position) + suffix.length),
+  });
 
   return {
     before: separateTextByLine(
-      rawText.slice(0, document.offsetAt(position) - prefix.length),
+      rawText.substring(0, document.offsetAt(position) - prefix.length),
       true,
     ),
     after: separateTextByLine(
-      rawText.slice(document.offsetAt(position) + suffix.length),
+      rawText.substring(document.offsetAt(position) + suffix.length),
       true,
     ),
   };

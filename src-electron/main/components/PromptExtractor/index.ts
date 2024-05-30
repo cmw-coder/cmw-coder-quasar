@@ -106,13 +106,6 @@ export class PromptExtractor {
     functionSuffix: string,
     recentFiles: string[],
   ): Promise<SimilarSnippet[]> {
-    log.debug('PromptExtractor.getSimilarSnippets', {
-      filename: document.fileName,
-      functionPrefix,
-      functionSuffix,
-      position,
-      recentFiles,
-    });
     if (this._slowRecentFiles.length !== 0) {
       if (
         !this._slowRecentFiles.some(
