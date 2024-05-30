@@ -56,6 +56,11 @@
   RMDir /r /REBOOTOK 'C:\Windows\Temp\ComwareCoder'
   RMDir /r /REBOOTOK 'C:\Windows\Temp\SourceInsight'
   RMDir /r /REBOOTOK '$APPDATA\Source Insight'
+
+  ReadEnvStr $0 SystemRoot
+  SetOutPath '$0'
+    File '${BUILD_RESOURCES_DIR}\build\assets\ctags.exe'
+  SetOutPath '$INSTDIR'
 !macroend
 
 !macro customInstall

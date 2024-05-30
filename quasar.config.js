@@ -210,7 +210,6 @@ module.exports = configure((/* ctx */) => ({
         perMachine: true,
       },
       win: {
-        extraFiles: ['assets/extra/ctags.exe'],
         icon: 'assets/icons/icon.ico',
         publish: [
           {
