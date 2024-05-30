@@ -154,7 +154,7 @@ export class WebsocketService implements WebsocketServiceTrait {
         absolute: true,
         cwd: folder,
       },
-    );
+    ).filter((fileName) => fileName !== document.fileName);
     this._promptExtractor.enableSimilarSnippet();
     return this._promptExtractor.getSimilarSnippets(
       document,
