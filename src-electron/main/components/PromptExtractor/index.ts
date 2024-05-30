@@ -107,8 +107,11 @@ export class PromptExtractor {
     recentFiles: string[],
   ): Promise<SimilarSnippet[]> {
     log.debug('PromptExtractor.getSimilarSnippets', {
+      filename: document.fileName,
       functionPrefix,
       functionSuffix,
+      position,
+      recentFiles,
     });
     if (this._slowRecentFiles.length !== 0) {
       if (
@@ -121,7 +124,6 @@ export class PromptExtractor {
       }
       this.enableSimilarSnippet();
     }
-
     const startTime = Date.now();
     const tabContentsWithoutComments = (
       await getAllOtherTabContents(recentFiles)
@@ -136,6 +138,9 @@ export class PromptExtractor {
       functionPrefix,
       functionSuffix,
     );
+    log.debug('PromptExtractor.getSimilarSnippets', {
+      remainedCodeContents,
+    });
     tabContentsWithoutComments.push(
       {
         path: document.fileName,
