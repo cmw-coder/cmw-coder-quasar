@@ -135,9 +135,6 @@ export class PromptExtractor {
       functionPrefix,
       functionSuffix,
     );
-    log.debug('PromptExtractor.getSimilarSnippets', {
-      remainedCodeContents,
-    });
     tabContentsWithoutComments.push(
       {
         path: document.fileName,

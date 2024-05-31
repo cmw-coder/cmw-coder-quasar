@@ -55,8 +55,14 @@ export const getRemainedCodeContents = (
 } => {
   const rawText = document.getText();
   log.debug('getRemainedCodeContents', {
-    before: rawText.substring(0, document.offsetAt(position) - prefix.length),
-    after: rawText.substring(document.offsetAt(position) + suffix.length),
+    before: rawText.substring(
+      document.offsetAt(position) - prefix.length - 1000,
+      document.offsetAt(position) - prefix.length,
+    ),
+    after: rawText.substring(
+      document.offsetAt(position) + suffix.length,
+      document.offsetAt(position) + suffix.length + 1000,
+    ),
     offsetAt: document.offsetAt(position),
     prefixLength: prefix.length,
     suffixLength: suffix.length,

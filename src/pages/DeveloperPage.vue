@@ -53,7 +53,7 @@ const getCurrentFileContent = async () => {
     currentFile.loading = true;
     const content = await websocketService.getFileContent(currentFile.path);
     if (content) {
-      currentFile.content = codeToHtml(content, 'c');
+      currentFile.content = content;
       currentFile.error = false;
     } else {
       currentFile.error = true;
@@ -149,7 +149,7 @@ onBeforeUnmount(() => {
               <q-card bordered flat>
                 <q-scroll-area class="full-width" style="height: 633px">
                   <code-block
-                    :html="currentFile.content"
+                    :html="codeToHtml(currentFile.content, 'c')"
                     style="max-width: 80ch"
                   />
                 </q-scroll-area>
