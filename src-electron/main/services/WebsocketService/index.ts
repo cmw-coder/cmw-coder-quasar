@@ -4,6 +4,7 @@ import { existsSync } from 'fs';
 import { lstat, readFile } from 'fs/promises';
 import { createServer } from 'http';
 import { inject, injectable } from 'inversify';
+import { resolve } from 'path/posix';
 import { type WebSocket, WebSocketServer } from 'ws';
 
 import { PromptExtractor } from 'main/components/PromptExtractor';
@@ -146,6 +147,7 @@ export class WebsocketService implements WebsocketServiceTrait {
     prefix: string,
     suffix: string,
   ) {
+    path = resolve(path);
     const document = new TextDocument(path);
     const position = new Position(line, character);
     const recentFiles = sync(
@@ -154,7 +156,9 @@ export class WebsocketService implements WebsocketServiceTrait {
         absolute: true,
         cwd: folder,
       },
-    ).filter((fileName) => fileName !== document.fileName);
+    )
+      .map((fileName) => resolve(fileName))
+      .filter((fileName) => fileName !== document.fileName);
     this._promptExtractor.enableSimilarSnippet();
     return this._promptExtractor.getSimilarSnippets(
       document,
