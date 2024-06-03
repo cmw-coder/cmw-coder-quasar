@@ -160,13 +160,17 @@ export class WebsocketService implements WebsocketServiceTrait {
       .map((fileName) => fileName.split(sep).join(posix.sep))
       .filter((fileName) => fileName !== document.fileName);
     this._promptExtractor.enableSimilarSnippet();
-    return this._promptExtractor.getSimilarSnippets(
+    const similarSnippets = this._promptExtractor.getSimilarSnippets(
       document,
       position,
       getFunctionPrefix(prefix) ?? prefix,
       getFunctionSuffix(suffix) ?? suffix,
       recentFiles,
     );
+    log.debug('WebsocketService.getSimilarSnippets', {
+      similarSnippets,
+    });
+    return similarSnippets;
   }
 
   send(message: string, pid?: number) {
