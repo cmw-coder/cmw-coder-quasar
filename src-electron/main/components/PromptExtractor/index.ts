@@ -28,10 +28,10 @@ export class PromptExtractor {
   private _similarSnippetConfig: SimilarSnippetConfig = {
     minScore: 0.5,
   };
-  private _slowRecentFiles: string[] = [];
+  private _slowRecentFiles?: string[];
 
   enableSimilarSnippet() {
-    this._slowRecentFiles = [];
+    this._slowRecentFiles = undefined;
     log.info('PromptExtractor.getSimilarSnippets.enable');
   }
 
@@ -110,7 +110,7 @@ export class PromptExtractor {
       fileName: document.fileName,
       recentFiles,
     });
-    if (this._slowRecentFiles.length !== 0) {
+    if (this._slowRecentFiles) {
       if (
         !this._slowRecentFiles.some(
           (slowFile) => !recentFiles.includes(slowFile),
