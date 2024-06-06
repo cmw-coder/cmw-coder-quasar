@@ -90,7 +90,6 @@ export class StatisticsService implements StatisticsServiceTrait {
           'CODE',
           skuNameAcceptMapping[data.completions.type],
         ),
-        this._configService.getConfigsSync().username,
       );
     } catch (e) {
       log.error('StatisticsReporter.completionAccept.failed', e);
@@ -189,7 +188,6 @@ export class StatisticsService implements StatisticsServiceTrait {
                 'CODE',
                 skuNameKeptMapping[ratio],
               ),
-              this._configService.getConfigsSync().username,
             ),
       ]);
     } catch (e) {
@@ -254,9 +252,7 @@ export class StatisticsService implements StatisticsServiceTrait {
         'CODE',
         skuNameGenerateMapping[data.completions.type],
       )
-        .then((data) =>
-          api_reportSKU(data, this._configService.getConfigsSync().username),
-        )
+        .then((data) => api_reportSKU(data))
         .catch((e) => log.warn(e));
     }
     return candidate;
@@ -295,7 +291,6 @@ export class StatisticsService implements StatisticsServiceTrait {
           'INC_CHAR',
           '',
         ),
-        this._configService.getConfigsSync().username,
       );
     } catch (e) {
       log.error('StatisticsReporter.copiedLines.failed', e);
@@ -327,7 +322,6 @@ export class StatisticsService implements StatisticsServiceTrait {
           'INC',
           '',
         ),
-        this._configService.getConfigsSync().username,
       );
     } catch (e) {
       log.error('StatisticsReporter.incrementLinesFailed', e);
