@@ -29,7 +29,6 @@ export const api_reportSKU = async (data: ReportSkuDto[], username: string) => {
         : Math.trunc(DateTime.now().valueOf() / 1000),
       end: item.end ? item.end : Math.trunc(DateTime.now().valueOf() / 1000),
       hostName: username,
-      extra: '',
     }));
     const logData = handledData.map(
       (item) =>
