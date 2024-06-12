@@ -22,6 +22,7 @@ import {
 import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
 import { timer } from 'main/utils/timer';
+import path from 'path';
 import { SimilarSnippet } from 'shared/types/common';
 
 export class PromptExtractor {
@@ -68,6 +69,28 @@ export class PromptExtractor {
       elements.similarSnippet = similarSnippetsSliced
         .map((similarSnippet) => similarSnippet.content)
         .join('\n');
+
+      const selfFileSimilarSnippets = similarSnippetsSliced.filter(
+        (item) => item.path === document.fileName,
+      );
+      const otherFileSimilarSnippets = similarSnippetsSliced.filter(
+        (item) => item.path !== document.fileName,
+      );
+
+      if (selfFileSimilarSnippets.length) {
+        elements.prefix =
+          selfFileSimilarSnippets
+            .map((similarSnippet) => similarSnippet.content)
+            .join('\n') + elements.prefix;
+      }
+      if (otherFileSimilarSnippets.length) {
+        elements.neighborSnippet = otherFileSimilarSnippets
+          .map(
+            (similarSnippet) =>
+              `<file_sep>${path.basename(similarSnippet.path)}\n${similarSnippet.content}`,
+          )
+          .join('\n');
+      }
     }
 
     if (relativeDefinitions.length) {
@@ -94,6 +117,27 @@ export class PromptExtractor {
       elements.symbols = relativeDefinitions
         .map((relativeDefinition) => relativeDefinition.content)
         .join('\n');
+
+      const selfFileRelativeDefinitions = relativeDefinitions.filter(
+        (item) => item.path === document.fileName,
+      );
+      const otherFileRelativeDefinitions = relativeDefinitions.filter(
+        (item) => item.path !== document.fileName,
+      );
+      if (selfFileRelativeDefinitions.length) {
+        elements.prefix =
+          selfFileRelativeDefinitions
+            .map((relativeDefinition) => relativeDefinition.content)
+            .join('\n') + elements.prefix;
+      }
+      if (otherFileRelativeDefinitions.length) {
+        elements.neighborSnippet = otherFileRelativeDefinitions
+          .map(
+            (relativeDefinition) =>
+              `<file_sep>${path.basename(relativeDefinition.path)}\n${relativeDefinition.content}`,
+          )
+          .join('\n');
+      }
     }
 
     return elements;

@@ -31,6 +31,8 @@ export class PromptElements {
   importList?: string;
   // Comment
   comment?: string;
+  // NeighborSnippet
+  neighborSnippet?: string;
 
   constructor(prefix: string, suffix: string) {
     this.prefix = prefix.trimStart();
@@ -45,6 +47,12 @@ export class PromptElements {
 
     let question = common;
 
+    console.log('stringify', this.neighborSnippet);
+
+    question = question.replaceAll(
+      '%{NeighborSnippet}%',
+      this.neighborSnippet || '',
+    );
     question = question.replaceAll('%{NearCode}%', this.prefix);
     question = question.replaceAll('%{SuffixCode}%', this.suffix);
     question = question.replaceAll('%{Language}%', this.language || '');
