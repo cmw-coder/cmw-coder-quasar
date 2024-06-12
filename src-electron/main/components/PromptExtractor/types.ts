@@ -46,13 +46,11 @@ export class PromptElements {
     ].other.code;
 
     let question = common;
-
-    console.log('stringify', this.neighborSnippet);
-
     question = question.replaceAll(
       '%{NeighborSnippet}%',
       this.neighborSnippet || '',
     );
+    log.debug('PromptElements.stringify NeighborSnippet', this.neighborSnippet);
     question = question.replaceAll('%{NearCode}%', this.prefix);
     question = question.replaceAll('%{SuffixCode}%', this.suffix);
     question = question.replaceAll('%{Language}%', this.language || '');
