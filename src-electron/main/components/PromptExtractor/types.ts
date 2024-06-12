@@ -99,7 +99,7 @@ export class RawInputs {
 
     const relativePath = this.document.fileName.substring(this.project.length);
     this.elements.language = this.document.languageId;
-    this.elements.file = basename(relativePath);
+    this.elements.file = basename(this.document.fileName);
     this.elements.folder = dirname(relativePath);
   }
 
