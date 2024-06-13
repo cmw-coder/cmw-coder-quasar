@@ -71,17 +71,21 @@ export class PromptExtractor {
         .join('\n');
 
       const selfFileSimilarSnippets = similarSnippetsSliced.filter(
-        (item) => item.path === document.fileName,
+        (item) =>
+          item.path.toLocaleLowerCase() ===
+          document.fileName.toLocaleLowerCase(),
       );
       const otherFileSimilarSnippets = similarSnippetsSliced.filter(
-        (item) => item.path !== document.fileName,
+        (item) =>
+          item.path.toLocaleLowerCase() !==
+          document.fileName.toLocaleLowerCase(),
       );
 
       if (selfFileSimilarSnippets.length) {
-        elements.prefix =
+        elements.currentFilePrefix =
           selfFileSimilarSnippets
             .map((similarSnippet) => similarSnippet.content)
-            .join('\n') + elements.prefix;
+            .join('\n') + elements.currentFilePrefix;
       }
       if (otherFileSimilarSnippets.length) {
         elements.neighborSnippet = otherFileSimilarSnippets
@@ -119,16 +123,20 @@ export class PromptExtractor {
         .join('\n');
 
       const selfFileRelativeDefinitions = relativeDefinitions.filter(
-        (item) => item.path === document.fileName,
+        (item) =>
+          item.path.toLocaleLowerCase() ===
+          document.fileName.toLocaleLowerCase(),
       );
       const otherFileRelativeDefinitions = relativeDefinitions.filter(
-        (item) => item.path !== document.fileName,
+        (item) =>
+          item.path.toLocaleLowerCase() !==
+          document.fileName.toLocaleLowerCase(),
       );
       if (selfFileRelativeDefinitions.length) {
-        elements.prefix =
+        elements.currentFilePrefix =
           selfFileRelativeDefinitions
             .map((relativeDefinition) => relativeDefinition.content)
-            .join('\n') + elements.prefix;
+            .join('\n') + elements.currentFilePrefix;
       }
       if (otherFileRelativeDefinitions.length) {
         elements.neighborSnippet = otherFileRelativeDefinitions

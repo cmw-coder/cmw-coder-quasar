@@ -33,10 +33,13 @@ export class PromptElements {
   comment?: string;
   // NeighborSnippet
   neighborSnippet?: string;
+  // CurrentFilePrefix
+  currentFilePrefix: string;
 
   constructor(prefix: string, suffix: string) {
     this.prefix = prefix.trimStart();
     this.suffix = suffix.trimEnd();
+    this.currentFilePrefix = this.prefix;
   }
 
   async stringify() {
@@ -50,7 +53,10 @@ export class PromptElements {
       '%{NeighborSnippet}%',
       this.neighborSnippet || '',
     );
-    log.debug('PromptElements.stringify NeighborSnippet', this.neighborSnippet);
+    question = question.replaceAll(
+      '%{CurrentFilePrefix}%',
+      this.currentFilePrefix || '',
+    );
     question = question.replaceAll('%{NearCode}%', this.prefix);
     question = question.replaceAll('%{SuffixCode}%', this.suffix);
     question = question.replaceAll('%{Language}%', this.language || '');
