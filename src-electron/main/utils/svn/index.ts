@@ -30,7 +30,6 @@ export const getAddedLines = async (path: string, revision: number) => {
     `svn diff -r ${revision}`,
     path,
   );
-  log.debug('getAddedLines', { path, revision, stdout, stderr });
   return (
     `${stdout}\n${stderr}`
       .split(NEW_LINE_REGEX)
