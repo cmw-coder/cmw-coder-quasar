@@ -31,10 +31,15 @@ export class PromptElements {
   importList?: string;
   // Comment
   comment?: string;
+  // NeighborSnippet
+  neighborSnippet?: string;
+  // CurrentFilePrefix
+  currentFilePrefix: string;
 
   constructor(prefix: string, suffix: string) {
     this.prefix = prefix.trimStart();
     this.suffix = suffix.trimEnd();
+    this.currentFilePrefix = this.prefix;
   }
 
   async stringify() {
@@ -44,7 +49,14 @@ export class PromptElements {
     ].other.code;
 
     let question = common;
-
+    question = question.replaceAll(
+      '%{NeighborSnippet}%',
+      this.neighborSnippet || '',
+    );
+    question = question.replaceAll(
+      '%{CurrentFilePrefix}%',
+      this.currentFilePrefix || '',
+    );
     question = question.replaceAll('%{NearCode}%', this.prefix.replaceAll(/\/\*{2,}(.*?\n.*?){5,}?.*\*{2,}\//g, ''));
     question = question.replaceAll('%{SuffixCode}%', this.suffix);
     question = question.replaceAll('%{Language}%', this.language || '');
@@ -93,7 +105,7 @@ export class RawInputs {
 
     const relativePath = this.document.fileName.substring(this.project.length);
     this.elements.language = this.document.languageId;
-    this.elements.file = basename(relativePath);
+    this.elements.file = basename(this.document.fileName);
     this.elements.folder = dirname(relativePath);
   }
 
