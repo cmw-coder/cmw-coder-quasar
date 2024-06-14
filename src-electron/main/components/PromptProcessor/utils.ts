@@ -13,6 +13,13 @@ export const completionsPostProcess = (
   completions: string[],
   promptElements: PromptElements,
 ) => {
+  completions = completions.map((completion) => {
+    const lines = completion.split(NEW_LINE_REGEX);
+    return lines
+      .filter((line, index, array) => index === 0 || line !== array[index - 1])
+      .join('\n');
+  });
+
   const lastPrefixLine = promptElements.prefix
     .split(NEW_LINE_REGEX)
     .filter((line) => line.trim().length)
