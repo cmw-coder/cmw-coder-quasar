@@ -9,6 +9,7 @@ import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
 import { timer } from 'main/utils/timer';
 import { NEW_LINE_REGEX } from 'shared/constants/common';
+import { CompletionType } from 'shared/types/common';
 import { CompletionGenerateClientMessage } from 'shared/types/WsMessage';
 import { ServiceType } from 'shared/types/service';
 
@@ -42,7 +43,7 @@ export class PromptElements {
     this.currentFilePrefix = this.prefix;
   }
 
-  async stringify() {
+  async stringify(completionType: CompletionType) {
     const dataStoreService = getService(ServiceType.DATA_STORE);
     const { common } = (await dataStoreService.getActiveModelContent()).prompt[
       'c'
@@ -57,7 +58,12 @@ export class PromptElements {
       '%{CurrentFilePrefix}%',
       this.currentFilePrefix || '',
     );
-    question = question.replaceAll('%{NearCode}%', this.prefix.replaceAll(/\/\*{2,}(.*?\n.*?){5,}?.*\*{2,}\//g, ''));
+    question = question.replaceAll(
+      '%{NearCode}%',
+      completionType === CompletionType.Function
+        ? this.prefix
+        : this.prefix.replaceAll(/\/\*{2,}(.*?\n.*?){5,}?.*\*{2,}\//g, ''),
+    );
     question = question.replaceAll('%{SuffixCode}%', this.suffix);
     question = question.replaceAll('%{Language}%', this.language || '');
     question = question.replaceAll('%{FilePath}%', this.file || '');

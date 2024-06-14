@@ -54,7 +54,7 @@ export class PromptProcessor {
 
     try {
       const questionParams = {
-        question: await promptElements.stringify(),
+        question: await promptElements.stringify(completionType),
         maxTokens: completionConfig.maxTokenCount,
         temperature: completionConfig.temperature,
         stop: completionConfig.stopTokens,
