@@ -56,7 +56,9 @@ export class PromptElements {
     );
     question = question.replaceAll(
       '%{CurrentFilePrefix}%',
-      this.currentFilePrefix || '',
+      completionType === CompletionType.Function
+        ? this.currentFilePrefix
+        : this.currentFilePrefix.replaceAll(/\/\*{2,}(.*?\n.*?){5,}?.*\*{2,}\//g, ''),
     );
     question = question.replaceAll(
       '%{NearCode}%',
