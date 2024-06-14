@@ -1,6 +1,7 @@
 import { createHash } from 'crypto';
 import log from 'electron-log/main';
 import { PromptElements } from 'main/components/PromptExtractor/types';
+import { getBoundingSuffix } from 'main/components/PromptExtractor/utils';
 import { Completions, LRUCache } from 'main/components/PromptProcessor/types';
 import {
   completionsPostProcess,
@@ -58,7 +59,8 @@ export class PromptProcessor {
         maxTokens: completionConfig.maxTokenCount,
         temperature: completionConfig.temperature,
         stop: completionConfig.stopTokens,
-        suffix: promptElements.suffix,
+        suffix:
+          getBoundingSuffix(promptElements.suffix) ?? promptElements.suffix,
         plugin: 'SI',
         profileModel: appConfig.activeModel,
         productLine: appConfig.activeTemplate,

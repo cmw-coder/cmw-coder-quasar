@@ -6,32 +6,55 @@ import { REGEXP_WORD } from 'main/components/PromptExtractor/constants';
 import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
 import { NEW_LINE_REGEX } from 'shared/constants/common';
+import { CompletionType } from 'shared/types/common';
 
 const { readFile } = promises;
 
-export const getFunctionPrefix = (input: string): string | undefined => {
+export const getBoundingPrefix = (input: string): string | undefined => {
   const lines = input.split(NEW_LINE_REGEX);
-  const lastValidCodeLine = lines.findLastIndex((line) =>
+  const firstCommentEndLine = lines.findIndex((line) =>
     /^\/\/.*|^\S+.*?\*\/\s*$/.test(line),
   );
-  if (lastValidCodeLine !== -1) {
-    return lines.slice(lastValidCodeLine + 1).join('\n');
+  if (firstCommentEndLine !== -1) {
+    return lines.slice(firstCommentEndLine + 1).join('\n');
+  }
+};
+
+export const getBoundingSuffix = (input: string): string | undefined => {
+  const lines = input.split(NEW_LINE_REGEX);
+  const lastFunctionEndLine = lines.findLastIndex((line) => /^}\S*/.test(line));
+  if (lastFunctionEndLine !== -1) {
+    return lines.slice(0, lastFunctionEndLine + 1).join('\n');
+  }
+  const lastCommentStartLine = lines.findLastIndex((line) =>
+    /^\/\*.*/.test(line),
+  );
+  if (lastCommentStartLine !== -1) {
+    return lines.slice(0, lastCommentStartLine).join('\n');
+  }
+};
+
+export const getFunctionPrefix = (input: string): string | undefined => {
+  const lines = input.split(NEW_LINE_REGEX);
+  const lastCommentEndLine = lines.findLastIndex((line) =>
+    /^\/\/.*|^\S+.*?\*\/\s*$/.test(line),
+  );
+  if (lastCommentEndLine !== -1) {
+    return lines.slice(lastCommentEndLine + 1).join('\n');
   }
 };
 
 export const getFunctionSuffix = (input: string): string | undefined => {
   const lines = input.split(NEW_LINE_REGEX);
-  const firstFunctionEndLine = lines.findIndex((line) =>
-    /^}\S*/.test(line),
-  );
+  const firstFunctionEndLine = lines.findIndex((line) => /^}\S*/.test(line));
   if (firstFunctionEndLine !== -1) {
     return lines.slice(0, firstFunctionEndLine + 1).join('\n');
   }
-  const firstFunctionStartLine = lines.findIndex((line) =>
+  const firstCommentStartLine = lines.findIndex((line) =>
     /^\/\*.*/.test(line),
   );
-  if (firstFunctionStartLine !== -1) {
-    return lines.slice(0, firstFunctionStartLine).join('\n');
+  if (firstCommentStartLine !== -1) {
+    return lines.slice(0, firstCommentStartLine).join('\n');
   }
 };
 
@@ -85,6 +108,14 @@ export const getRemainedCodeContents = (
     ),
   };
 };
+
+export const removeFunctionHeader = (
+  input: string,
+  completionType: CompletionType,
+): string =>
+  completionType === CompletionType.Function
+    ? input
+    : input.replaceAll(/\/\*{2,}(.*?\n.*?){5,}?.*\*{2,}\//g, '');
 
 export const separateTextByLine = (
   rawText: string,

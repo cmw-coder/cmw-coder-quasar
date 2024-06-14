@@ -3,6 +3,11 @@ import { readFile } from 'fs/promises';
 import { decode } from 'iconv-lite';
 import { basename, dirname } from 'path';
 
+import {
+  getBoundingPrefix,
+  getBoundingSuffix,
+  removeFunctionHeader,
+} from 'main/components/PromptExtractor/utils';
 import { getService } from 'main/services';
 import { SymbolInfo } from 'main/types/SymbolInfo';
 import { TextDocument } from 'main/types/TextDocument';
@@ -40,7 +45,7 @@ export class PromptElements {
   constructor(prefix: string, suffix: string) {
     this.prefix = prefix.trimStart();
     this.suffix = suffix.trimEnd();
-    this.currentFilePrefix = this.prefix;
+    this.currentFilePrefix = getBoundingPrefix(this.prefix) ?? this.prefix;
   }
 
   async stringify(completionType: CompletionType) {
@@ -56,17 +61,22 @@ export class PromptElements {
     );
     question = question.replaceAll(
       '%{CurrentFilePrefix}%',
-      completionType === CompletionType.Function
-        ? this.currentFilePrefix
-        : this.currentFilePrefix.replaceAll(/\/\*{2,}(.*?\n.*?){5,}?.*\*{2,}\//g, ''),
+      removeFunctionHeader(this.currentFilePrefix, completionType),
     );
     question = question.replaceAll(
       '%{NearCode}%',
-      completionType === CompletionType.Function
-        ? this.prefix
-        : this.prefix.replaceAll(/\/\*{2,}(.*?\n.*?){5,}?.*\*{2,}\//g, ''),
+      removeFunctionHeader(
+        getBoundingPrefix(this.prefix) ?? this.prefix,
+        completionType,
+      ),
     );
-    question = question.replaceAll('%{SuffixCode}%', this.suffix);
+    question = question.replaceAll(
+      '%{SuffixCode}%',
+      removeFunctionHeader(
+        getBoundingSuffix(this.suffix) ?? this.suffix,
+        completionType,
+      ),
+    );
     question = question.replaceAll('%{Language}%', this.language || '');
     question = question.replaceAll('%{FilePath}%', this.file || '');
     question = question.replaceAll('%{RepoName}%', this.folder || '');
