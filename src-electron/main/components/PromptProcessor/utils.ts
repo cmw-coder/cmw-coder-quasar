@@ -13,6 +13,18 @@ export const completionsPostProcess = (
   completions: string[],
   promptElements: PromptElements,
 ) => {
+  const lastPrefixLine = promptElements.prefix
+    .split(NEW_LINE_REGEX)
+    .filter((line) => line.trim().length)
+    .at(-1);
+  completions = completions.map((completion) => {
+    const lines = completion.split(NEW_LINE_REGEX);
+    const sameContentIndex = lines.findIndex((line) => line === lastPrefixLine);
+    return sameContentIndex === -1
+      ? completion
+      : lines.slice(sameContentIndex).join('\n');
+  });
+
   const firstSuffixLine = promptElements.suffix
     .split(NEW_LINE_REGEX)
     .filter((line) => line.trim().length)[0]
