@@ -11,6 +11,7 @@ import { ToggleDarkModeActionMessage } from 'shared/types/ActionMessage';
 import { ServiceType } from 'shared/types/service';
 import { ConfigServiceTrait } from 'shared/types/service/ConfigServiceTrait';
 import { AppConfig } from 'shared/types/service/ConfigServiceTrait/types';
+import log from 'electron-log/main';
 
 const defaultStoreData = extend<AppConfig>(
   true,
@@ -26,6 +27,15 @@ export class ConfigService implements ConfigServiceTrait {
   appConfigStore = new ElectronStore<AppConfig>({
     name: 'appConfig',
     defaults: defaultStoreData,
+    migrations: {
+      '1.2.1': (store) => {
+        log.info('Upgrading "appConfig" store to 1.2.1 ...');
+        const activeModelKey = store.get('activeModelKey');
+        if (activeModelKey === 'CmwCoder') {
+          store.set('activeModelKey', 'CMW');
+        }
+      },
+    },
   });
 
   constructor() {}
