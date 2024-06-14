@@ -27,7 +27,7 @@ export const completionsPostProcess = (
     ?.trimStart();
   completions = completions.map((completion) => {
     const lines = completion.split(NEW_LINE_REGEX);
-    const sameContentIndex = lines.findIndex((line) => line.trimStart() === lastPrefixLine);
+    const sameContentIndex = lines.findLastIndex((line) => line.trimStart() === lastPrefixLine);
     return sameContentIndex === -1
       ? completion
       : lines.slice(sameContentIndex).join('\n');
