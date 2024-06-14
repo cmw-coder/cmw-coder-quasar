@@ -57,7 +57,7 @@ export class PromptElements {
       '%{CurrentFilePrefix}%',
       this.currentFilePrefix || '',
     );
-    question = question.replaceAll('%{NearCode}%', this.prefix);
+    question = question.replaceAll('%{NearCode}%', this.prefix.replaceAll(/\/\*{2,}(.*?\n.*?){5,}?.*\*{2,}\//g, ''));
     question = question.replaceAll('%{SuffixCode}%', this.suffix);
     question = question.replaceAll('%{Language}%', this.language || '');
     question = question.replaceAll('%{FilePath}%', this.file || '');

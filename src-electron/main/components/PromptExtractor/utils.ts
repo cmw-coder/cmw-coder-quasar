@@ -22,10 +22,16 @@ export const getFunctionPrefix = (input: string): string | undefined => {
 export const getFunctionSuffix = (input: string): string | undefined => {
   const lines = input.split(NEW_LINE_REGEX);
   const firstFunctionEndLine = lines.findIndex((line) =>
-    /^}\S*|^\/\*.*/.test(line),
+    /^}\S*/.test(line),
   );
   if (firstFunctionEndLine !== -1) {
     return lines.slice(0, firstFunctionEndLine + 1).join('\n');
+  }
+  const firstFunctionStartLine = lines.findIndex((line) =>
+    /^\/\*.*/.test(line),
+  );
+  if (firstFunctionStartLine !== -1) {
+    return lines.slice(0, firstFunctionStartLine).join('\n');
   }
 };
 

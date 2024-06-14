@@ -13,6 +13,25 @@ export const completionsPostProcess = (
   completions: string[],
   promptElements: PromptElements,
 ) => {
+  completions = completions.map((completion) => {
+    const lines = completion.split(NEW_LINE_REGEX);
+    return lines
+      .filter((line, index, array) => index === 0 || line !== array[index - 1])
+      .join('\n');
+  });
+
+  const lastPrefixLine = promptElements.prefix
+    .split(NEW_LINE_REGEX)
+    .filter((line) => line.trim().length)
+    .at(-1);
+  completions = completions.map((completion) => {
+    const lines = completion.split(NEW_LINE_REGEX);
+    const sameContentIndex = lines.findIndex((line) => line === lastPrefixLine);
+    return sameContentIndex === -1
+      ? completion
+      : lines.slice(sameContentIndex).join('\n');
+  });
+
   const firstSuffixLine = promptElements.suffix
     .split(NEW_LINE_REGEX)
     .filter((line) => line.trim().length)[0]
