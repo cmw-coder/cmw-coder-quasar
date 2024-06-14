@@ -23,10 +23,11 @@ export const completionsPostProcess = (
   const lastPrefixLine = promptElements.prefix
     .split(NEW_LINE_REGEX)
     .filter((line) => line.trim().length)
-    .at(-1);
+    .at(-1)
+    ?.trimStart();
   completions = completions.map((completion) => {
     const lines = completion.split(NEW_LINE_REGEX);
-    const sameContentIndex = lines.findIndex((line) => line === lastPrefixLine);
+    const sameContentIndex = lines.findIndex((line) => line.trimStart() === lastPrefixLine);
     return sameContentIndex === -1
       ? completion
       : lines.slice(sameContentIndex).join('\n');
