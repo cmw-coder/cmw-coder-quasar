@@ -113,7 +113,7 @@ export class AppService implements AppServiceTrait {
 
       scheduleJob(
         {
-          hour: 4,
+          hour: [1, 13],
           minute: 0,
         },
         () => {
