@@ -4,8 +4,8 @@ import { PromptElements } from 'main/components/PromptExtractor/types';
 import { NEW_LINE_REGEX } from 'shared/constants/common';
 import { CompletionType } from 'shared/types/common';
 
-// Start with '//' or '#' or '{' or '/*', or is '***/'
-const functionHeaderEndRegex = /^\/\/|^#|^\{|^\/\*|^\*+\/$/;
+// Start with '//', '#', '{', '/**' or end with '**/'
+const functionHeaderEndRegex = /^\/\/|^#|^\{|^\/\*{2,}|\*{2,}\/\s+$/;
 // Line that only have (part of) comment
 const pureCommentRegex = /^\s*\/\/|\*\/\s*$/;
 
