@@ -4,49 +4,10 @@ import { PromptElements } from 'main/components/PromptExtractor/types';
 import { NEW_LINE_REGEX } from 'shared/constants/common';
 import { CompletionType } from 'shared/types/common';
 
-// Start with '//' or '#' or '{' or '/*', or is '***/'
-const functionHeaderEndRegex = /^\/\/|^#|^\{|^\/\*|^\*+\/$/;
+// Start with '//', '#', '{', '/**' or end with '**/'
+const functionHeaderEndRegex = /^\/\/|^#|^\{|^\/\*{2,}|\*{2,}\/\s+$/;
 // Line that only have (part of) comment
 const pureCommentRegex = /^\s*\/\/|\*\/\s*$/;
-
-export const completionsPostProcess = (
-  completions: string[],
-  promptElements: PromptElements,
-) => {
-  completions = completions.map((completion) => {
-    const lines = completion.split(NEW_LINE_REGEX);
-    return lines
-      .filter((line, index, array) => index === 0 || line !== array[index - 1])
-      .join('\n');
-  });
-
-  const lastPrefixLine = promptElements.prefix
-    .split(NEW_LINE_REGEX)
-    .filter((line) => line.trim().length)
-    .at(-1)
-    ?.trimStart();
-  completions = completions.map((completion) => {
-    const lines = completion.split(NEW_LINE_REGEX);
-    const sameContentIndex = lines.findLastIndex((line) => line.trimStart() === lastPrefixLine);
-    return sameContentIndex === -1
-      ? completion
-      : lines.slice(sameContentIndex).join('\n');
-  });
-
-  const firstSuffixLine = promptElements.suffix
-    .split(NEW_LINE_REGEX)
-    .filter((line) => line.trim().length)[0]
-    .trimEnd();
-  return completions.map((completion) => {
-    const lines = completion.split(NEW_LINE_REGEX);
-    const sameContentIndex = lines.findIndex(
-      (line) => line.trimEnd() === firstSuffixLine,
-    );
-    return sameContentIndex === -1
-      ? completion
-      : lines.slice(0, sameContentIndex).join('\n');
-  });
-};
 
 export const getCompletionType = (
   promptElements: PromptElements,

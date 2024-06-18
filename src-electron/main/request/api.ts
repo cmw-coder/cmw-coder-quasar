@@ -60,11 +60,8 @@ export const api_checkAuthCode = () =>
   });
 
 // AI 生成
-export const api_question = (data: QuestionParams, signal?: AbortSignal) => {
-  if (!data.plugin) {
-    data.plugin = 'SI';
-  }
-  return request<Answer[]>(
+export const api_question = (data: QuestionParams, signal?: AbortSignal) =>
+  request<Answer[]>(
     {
       url: '/kong/RdTestAiService/chatgpt/question',
       method: 'post',
@@ -72,7 +69,6 @@ export const api_question = (data: QuestionParams, signal?: AbortSignal) => {
     },
     signal,
   );
-};
 
 // AI 流式生成
 export const api_questionStream = (

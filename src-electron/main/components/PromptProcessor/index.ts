@@ -4,7 +4,6 @@ import { PromptElements } from 'main/components/PromptExtractor/types';
 import { getBoundingSuffix } from 'main/components/PromptExtractor/utils';
 import { Completions, LRUCache } from 'main/components/PromptProcessor/types';
 import {
-  completionsPostProcess,
   getCompletionType,
   processGeneratedSuggestions,
 } from 'main/components/PromptProcessor/utils';
@@ -30,13 +29,7 @@ export class PromptProcessor {
     const completionCached = this._cache.get(cacheKey);
     if (completionCached) {
       log.debug('PromptProcessor.process.cacheHit', completionCached);
-      return {
-        candidates: completionsPostProcess(
-          completionCached.candidates,
-          promptElements,
-        ),
-        type: completionCached.type,
-      };
+      return completionCached;
     }
     timer.add('CompletionGenerate', 'generationCheckedCache');
 
@@ -84,7 +77,7 @@ export class PromptProcessor {
         log.info('PromptProcessor.process.cacheMiss', candidates);
         this._cache.put(cacheKey, { candidates, type: completionType });
         return {
-          candidates: completionsPostProcess(candidates, promptElements),
+          candidates: candidates,
           type: completionType,
         };
       }
