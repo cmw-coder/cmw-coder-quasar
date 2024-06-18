@@ -98,7 +98,7 @@ export const removeFunctionHeader = (
 ): string =>
   completionType === CompletionType.Function
     ? input
-    : input.replaceAll(/\/\*\*([^\n]*?\n){5,}?.*\*\*\//g, '');
+    : input.replaceAll(/\/\*\*(?:(?!.*\*\/)[^\n]*\n){5,}?[\s\S]*?\*\*\//g, '');
 
 export const separateTextByLine = (
   rawText: string,
