@@ -12,11 +12,20 @@ import { WindowService } from 'main/services/WindowService';
 export class UpdaterService implements UpdaterServiceTrait {
   private _updater!: NsisUpdater;
   private updateUrl!: string;
+  updateData!: {
+    currentVersion: string;
+    newVersion: string;
+    releaseDate: string;
+  };
 
   constructor(
     @inject(ServiceType.CONFIG) private _configService: ConfigService,
     @inject(ServiceType.WINDOW) private _windowService: WindowService,
   ) {}
+
+  async getUpdateData() {
+    return this.updateData;
+  }
 
   async init() {
     const { baseServerUrl } = this._configService.getConfigsSync();
@@ -43,12 +52,12 @@ export class UpdaterService implements UpdaterServiceTrait {
 
     this.onAvailable((updateInfo) => {
       const { version, releaseDate } = updateInfo;
-      const searchString = {
+      this.updateData = {
         currentVersion: packageJson.version,
         newVersion: version,
         releaseDate,
       };
-      this._windowService.getWindow(WindowType.Update).activate(searchString);
+      this._windowService.getWindow(WindowType.Update).show();
     });
     this.onDownloading((progressInfo) =>
       this._windowService

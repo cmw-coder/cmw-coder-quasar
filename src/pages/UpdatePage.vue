@@ -2,7 +2,6 @@
 import { format } from 'quasar';
 import { onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute } from 'vue-router';
 
 import {
   ActionType,
@@ -11,7 +10,6 @@ import {
 } from 'shared/types/ActionMessage';
 import { WindowType } from 'shared/types/WindowType';
 import { ActionApi } from 'types/ActionApi';
-import { UpdateQuery } from 'types/queries';
 import { useService } from 'utils/common';
 import { ServiceType } from 'shared/types/service';
 
@@ -19,8 +17,8 @@ const baseName = 'pages.UpdatePage.';
 
 const { humanStorageSize } = format;
 const { t } = useI18n();
-const { query } = useRoute();
 const windowService = useService(ServiceType.WINDOW);
+const updaterService = useService(ServiceType.UPDATER);
 
 const i18n = (relativePath: string, data?: Record<string, unknown>) => {
   if (data) {
@@ -30,8 +28,6 @@ const i18n = (relativePath: string, data?: Record<string, unknown>) => {
   }
 };
 
-const { currentVersion, newVersion, releaseDate } = new UpdateQuery(query);
-
 const isUpdating = ref(false);
 
 const progress = reactive({
@@ -40,6 +36,12 @@ const progress = reactive({
   transferred: 0,
   percent: 0,
   bytesPerSecond: 0,
+});
+
+const updateInfo = reactive({
+  currentVersion: '',
+  newVersion: '',
+  releaseDate: '',
 });
 
 const updateResponse = (confirmed: boolean) => {
@@ -52,7 +54,7 @@ const updateResponse = (confirmed: boolean) => {
 };
 
 const actionApi = new ActionApi(baseName);
-onMounted(() => {
+onMounted(async () => {
   actionApi.register(ActionType.UpdateFinish, () => {
     window.actionApi.send(new UpdateFinishActionMessage());
     windowService.closeWindow(WindowType.Update);
@@ -67,6 +69,11 @@ onMounted(() => {
       progress.bytesPerSecond = bytesPerSecond;
     },
   );
+  const { currentVersion, newVersion, releaseDate } =
+    await updaterService.getUpdateData();
+  updateInfo.currentVersion = currentVersion;
+  updateInfo.newVersion = newVersion;
+  updateInfo.releaseDate = releaseDate;
 });
 onBeforeUnmount(() => {
   actionApi.unregister();
@@ -84,16 +91,18 @@ onBeforeUnmount(() => {
           <div>
             {{ i18n('labels.currentVersion') }}
           </div>
-          <q-badge>{{ currentVersion }}</q-badge>
+          <q-badge>{{ updateInfo.currentVersion }}</q-badge>
         </div>
         <div class="row q-gutter-x-xs">
           <div>
             {{ i18n('labels.newVersion') }}
           </div>
-          <q-badge>{{ newVersion }}</q-badge>
+          <q-badge>{{ updateInfo.newVersion }}</q-badge>
         </div>
         <div>
-          {{ i18n('labels.releaseDate', { releaseDate }) }}
+          {{
+            i18n('labels.releaseDate', { releaseDate: updateInfo.releaseDate })
+          }}
         </div>
       </q-card-section>
       <q-card-section v-show="isUpdating">

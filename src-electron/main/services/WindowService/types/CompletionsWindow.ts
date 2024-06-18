@@ -27,11 +27,11 @@ export class CompletionsWindow extends BaseWindow {
   initReCreateTimer() {
     this._reCreateTimer = setInterval(() => {
       this.destroy();
-      this.activate();
+      this.create();
     }, RE_CREATE_TIME);
   }
 
-  protected create(): BrowserWindow {
+  create(): BrowserWindow {
     const { compatibility } = container
       .get<DataStoreService>(ServiceType.DATA_STORE)
       .getAppdata();
@@ -79,7 +79,7 @@ export class CompletionsWindow extends BaseWindow {
     position: { x: number; y: number },
   ) {
     if (!this._window) {
-      this.activate();
+      this.show();
       //TODO 确保渲染窗口成功加载且可接受消息数据, 当下用简单的延迟处理
       await timeout(2000);
     }
@@ -123,7 +123,7 @@ export class CompletionsWindow extends BaseWindow {
       );
       this._window.show();
     } else {
-      log.warn('Immersive window activate failed');
+      log.warn('Completion window activate failed');
     }
   }
 
@@ -135,11 +135,7 @@ export class CompletionsWindow extends BaseWindow {
       this.sendMessageToRenderer(new CompletionUpdateActionMessage(isDelete));
       this._window.show();
     } else {
-      log.warn('Immersive window activate failed');
+      log.warn('Completion window activate failed');
     }
-  }
-
-  hide() {
-    this._window?.hide();
   }
 }
