@@ -30,13 +30,6 @@ export class PromptProcessor {
     if (completionCached) {
       log.debug('PromptProcessor.process.cacheHit', completionCached);
       return completionCached;
-      // return {
-      //   candidates: completionsPostProcess(
-      //     completionCached.candidates,
-      //     promptElements,
-      //   ),
-      //   type: completionCached.type,
-      // };
     }
     timer.add('CompletionGenerate', 'generationCheckedCache');
 
@@ -87,10 +80,6 @@ export class PromptProcessor {
           candidates: candidates,
           type: completionType,
         };
-        // return {
-        //   candidates: completionsPostProcess(candidates, promptElements),
-        //   type: completionType,
-        // };
       }
     } catch (e) {
       log.error('PromptProcessor.process.error', e);
