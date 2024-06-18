@@ -49,9 +49,7 @@ export const getFunctionSuffix = (input: string): string | undefined => {
   if (firstFunctionEndLine !== -1) {
     return lines.slice(0, firstFunctionEndLine + 1).join('\n');
   }
-  const firstCommentStartLine = lines.findIndex((line) =>
-    /^\/\*.*/.test(line),
-  );
+  const firstCommentStartLine = lines.findIndex((line) => /^\/\*.*/.test(line));
   if (firstCommentStartLine !== -1) {
     return lines.slice(0, firstCommentStartLine).join('\n');
   }
