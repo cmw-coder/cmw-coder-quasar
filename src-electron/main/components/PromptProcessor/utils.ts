@@ -21,10 +21,10 @@ export const getCompletionType = (
 
   const lastNonEmptyLine =
     promptElements.prefix.trimEnd().split(NEW_LINE_REGEX).at(-1) ?? '';
-  log.debug({
+  log.debug('getCompletionType', {
     lastNonEmptyLine,
     functionHeaderEndTest: functionHeaderEndRegex.test(lastNonEmptyLine),
-    extension: extname(promptElements.file ?? '')
+    extension: extname(promptElements.file ?? ''),
   });
   if (
     functionHeaderEndRegex.test(lastNonEmptyLine) &&
