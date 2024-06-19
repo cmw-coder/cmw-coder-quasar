@@ -85,21 +85,5 @@ export const processGeneratedSuggestions = (
         suggestion.split(NEW_LINE_REGEX)[0].trimEnd(),
       );
     }
-    // case CompletionType.Snippet: {
-    //   return result
-    //     .map((suggestion) => {
-    //       const lines = suggestion.split(NEW_LINE_REGEX).slice(0, 5);
-    //       const lastNonEmptyLineIndex = lines.findLastIndex(
-    //         (line) => line.trim().length > 0,
-    //       );
-    //       if (lastNonEmptyLineIndex < 0) {
-    //         return '';
-    //       }
-    //       return lines
-    //         .slice(0, Math.min(4, lastNonEmptyLineIndex + 1))
-    //         .join('\n');
-    //     })
-    //     .filter((suggestion) => suggestion.length > 0);
-    // }
   }
 };
