@@ -1,3 +1,4 @@
+import log from 'electron-log/main';
 import { extname } from 'path';
 
 import { PromptElements } from 'main/components/PromptExtractor/types';
@@ -5,7 +6,7 @@ import { NEW_LINE_REGEX } from 'shared/constants/common';
 import { CompletionType } from 'shared/types/common';
 
 // Start with '//', '#', '{', '/**' or end with '**/'
-const functionHeaderEndRegex = /^\/\/|^#|^\{|^\/\*{2,}|\*{2,}\/\s+$/;
+const functionHeaderEndRegex = /^\/\/|^#|^\{|^\/\*\*|\*\*\/\s*$/;
 // Line that only have (part of) comment
 const pureCommentRegex = /^\s*\/\/|\*\/\s*$/;
 
@@ -20,6 +21,11 @@ export const getCompletionType = (
 
   const lastNonEmptyLine =
     promptElements.prefix.trimEnd().split(NEW_LINE_REGEX).at(-1) ?? '';
+  log.debug('getCompletionType', {
+    lastNonEmptyLine,
+    functionHeaderEndTest: functionHeaderEndRegex.test(lastNonEmptyLine),
+    extension: extname(promptElements.file ?? ''),
+  });
   if (
     functionHeaderEndRegex.test(lastNonEmptyLine) &&
     extname(promptElements.file ?? '') !== 'h'
