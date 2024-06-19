@@ -8,7 +8,7 @@ export class FloatingBaseWindow extends BaseWindow {
     super(type);
   }
 
-  protected create(): BrowserWindow {
+  create(): BrowserWindow {
     return new BrowserWindow({
       width: 800,
       height: 600,

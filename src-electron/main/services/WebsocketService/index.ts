@@ -341,7 +341,7 @@ export class WebsocketService implements WebsocketServiceTrait {
           switch (error.cause) {
             case CompletionErrorCause.accessToken: {
               result = 'failure';
-              this._windowService.getWindow(WindowType.Login).activate();
+              this._windowService.getWindow(WindowType.Login).show();
               break;
             }
             case CompletionErrorCause.clientInfo: {
@@ -350,7 +350,7 @@ export class WebsocketService implements WebsocketServiceTrait {
             }
             case CompletionErrorCause.projectData: {
               result = 'failure';
-              this._windowService.getWindow(WindowType.ProjectId).activate();
+              this._windowService.getWindow(WindowType.ProjectId).show();
               this._windowService
                 .getWindow(WindowType.ProjectId)
                 .setProject(project);
@@ -402,7 +402,7 @@ export class WebsocketService implements WebsocketServiceTrait {
       this._windowService
         .getWindow(WindowType.Commit)
         .setCurrentFile(currentFile);
-      this._windowService.getWindow(WindowType.Commit).activate();
+      this._windowService.getWindow(WindowType.Commit).show();
     });
     this._registerWsAction(WsAction.EditorFocusState, ({ data: isFocused }) => {
       if (!isFocused) {
@@ -423,7 +423,7 @@ export class WebsocketService implements WebsocketServiceTrait {
           switch (error.cause) {
             case CompletionErrorCause.projectData: {
               console.log('CompletionErrorCause.projectData', error);
-              this._windowService.getWindow(WindowType.ProjectId).activate();
+              this._windowService.getWindow(WindowType.ProjectId).show();
               this._windowService
                 .getWindow(WindowType.ProjectId)
                 .setProject(project);

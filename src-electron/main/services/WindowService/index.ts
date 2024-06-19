@@ -59,15 +59,15 @@ export class WindowService implements WindowServiceTrait {
 
     this.trayIcon = new TrayIcon();
 
-    this.trayIcon.onClick(() => this.getWindow(WindowType.Main).activate());
+    this.trayIcon.onClick(() => this.getWindow(WindowType.Main).show());
     this.trayIcon.registerMenuEntry(MenuEntry.Feedback, () =>
-      this.getWindow(WindowType.Feedback).activate(),
+      this.getWindow(WindowType.Feedback).show(),
     );
     this.trayIcon.registerMenuEntry(MenuEntry.Settings, () => {
-      this.getWindow(WindowType.Setting).activate();
+      this.getWindow(WindowType.Setting).show();
     });
     this.trayIcon.registerMenuEntry(MenuEntry.Chat, () => {
-      this.getWindow(WindowType.Chat).activate();
+      this.getWindow(WindowType.Chat).show();
     });
     this.trayIcon.registerMenuEntry(MenuEntry.Quit, () => app.exit());
   }
@@ -160,7 +160,7 @@ export class WindowService implements WindowServiceTrait {
   }
 
   async finishLogin() {
-    this.getWindow(WindowType.Login).activate();
+    this.getWindow(WindowType.Login).show();
     this.getWindow(WindowType.Login).destroy();
   }
 
@@ -168,10 +168,10 @@ export class WindowService implements WindowServiceTrait {
     const config = await this._configService.getConfigs();
     if (config.networkZone === NetworkZone.Public && !config.token) {
       // 黄、绿区环境需要登录
-      this.getWindow(WindowType.Login).activate();
+      this.getWindow(WindowType.Login).show();
     } else {
       // 激活主窗口
-      this.getWindow(WindowType.Main).activate();
+      this.getWindow(WindowType.Main).show();
     }
     this.getWindow(WindowType.Welcome).destroy();
   }
@@ -185,7 +185,7 @@ export class WindowService implements WindowServiceTrait {
   }
 
   async activeWindow(type: WindowType): Promise<void> {
-    this.getWindow(type).activate();
+    this.getWindow(type).show();
   }
 
   async openDevTools(type?: WindowType): Promise<void> {

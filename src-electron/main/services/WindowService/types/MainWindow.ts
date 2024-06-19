@@ -17,7 +17,7 @@ export class MainWindow extends BaseWindow {
     );
   }
 
-  protected create() {
+  create() {
     return new BrowserWindow({
       width: 600,
       height: 800,

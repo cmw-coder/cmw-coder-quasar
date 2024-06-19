@@ -19,22 +19,8 @@ export abstract class BaseWindow {
     this._url = `${process.env.APP_URL}#${WINDOW_URL_MAPPING[type]}`;
   }
 
-  activate<
-    T extends {
-      toString: (radix?: number) => string;
-    },
-  >(searchParams?: Record<string, string | T>) {
-    if (searchParams) {
-      for (const key in searchParams) {
-        if (typeof searchParams[key] !== 'string') {
-          searchParams[key] = searchParams[key].toString();
-        }
-      }
-      this._url = `${process.env.APP_URL}#${WINDOW_URL_MAPPING[this._type]}?${new URLSearchParams(
-        <Record<string, string>>searchParams,
-      ).toString()}`;
-    }
-    Logger.log(`Activate window: ${this._type} ${this._url}`);
+  show() {
+    Logger.log(`Show window: ${this._type} ${this._url}`);
     const dataStoreService = container.get<DataStoreService>(
       ServiceType.DATA_STORE,
     );
@@ -127,6 +113,12 @@ export abstract class BaseWindow {
       return;
     }
     this._window.webContents.send(ACTION_API_KEY, message);
+  }
+
+  hide() {
+    if (this._window) {
+      this._window.hide();
+    }
   }
 
   protected abstract create(): BrowserWindow;

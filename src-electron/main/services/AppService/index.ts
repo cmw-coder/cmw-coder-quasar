@@ -70,7 +70,7 @@ export class AppService implements AppServiceTrait {
 
     app.on('second-instance', () => {
       app.focus();
-      this._windowService.getWindow(WindowType.Main).activate();
+      this._windowService.getWindow(WindowType.Main).show();
     });
     app.whenReady().then(async () => {
       log.info('Comware Coder is ready');
@@ -123,19 +123,19 @@ export class AppService implements AppServiceTrait {
       );
 
       this._windowService.trayIcon.activate();
-      // 激活代码窗口
-      this._windowService.getWindow(WindowType.Completions).activate();
+      // 创建代码窗口
+      this._windowService.getWindow(WindowType.Completions).create();
       this._windowService.getWindow(WindowType.Completions).initReCreateTimer();
 
       // 引导配置基础环境（黄、绿区 | 红区 | 路由红区）
       if (config.networkZone === NetworkZone.Unknown) {
-        this._windowService.getWindow(WindowType.Welcome).activate();
+        this._windowService.getWindow(WindowType.Welcome).show();
         return;
       }
 
       // 黄、绿区版本调起登录界面
       if (config.networkZone === NetworkZone.Public && !config.token) {
-        this._windowService.getWindow(WindowType.Login).activate();
+        this._windowService.getWindow(WindowType.Login).show();
         return;
       }
 
@@ -143,12 +143,10 @@ export class AppService implements AppServiceTrait {
         .getActiveModelContent()
         .catch((e) => log.error('app.ready', e));
 
-      // 激活主界面
+      // 创建主界面
+      this._windowService.getWindow(WindowType.Main).create();
       if (this._dataStoreService.getAppdata().window.Main.show) {
-        this._windowService.getWindow(WindowType.Main).activate();
-      } else {
-        this._windowService.getWindow(WindowType.Main).activate();
-        this._windowService.getWindow(WindowType.Main)._window?.hide();
+        this._windowService.getWindow(WindowType.Main).show();
       }
     });
   }
