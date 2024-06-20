@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { useQuasar } from 'quasar';
-import { PropType, onMounted } from 'vue';
+import { PropType, onBeforeUnmount, onMounted } from 'vue';
 import { ServiceType } from 'shared/types/service';
 import { WindowType } from 'shared/types/WindowType';
 import { useService } from 'utils/common';
@@ -44,8 +44,23 @@ const i18n = (relativePath: string) => {
   return t('layouts.headers.FloatingHeader.' + relativePath);
 };
 
+const bodyMouseInHandler = () => {
+  windowService.mouseMoveInOrOutWindow(props.windowType);
+};
+
+const bodyMouseOutHandler = () => {
+  windowService.mouseMoveInOrOutWindow(props.windowType);
+};
+
 onMounted(() => {
   console.log('FloatingHeader mounted', props.windowType);
+  document.body.addEventListener('mouseenter', bodyMouseInHandler);
+  document.body.addEventListener('mouseleave', bodyMouseOutHandler);
+});
+
+onBeforeUnmount(() => {
+  document.body.removeEventListener('mouseenter', bodyMouseInHandler);
+  document.body.removeEventListener('mouseleave', bodyMouseInHandler);
 });
 </script>
 

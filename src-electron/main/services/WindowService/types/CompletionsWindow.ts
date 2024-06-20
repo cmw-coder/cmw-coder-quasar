@@ -1,4 +1,4 @@
-import { BrowserWindow, screen } from 'electron';
+import { screen } from 'electron';
 import log from 'electron-log';
 import { resolve } from 'path';
 
@@ -21,22 +21,10 @@ export class CompletionsWindow extends BaseWindow {
   private _reCreateTimer?: NodeJS.Timeout;
 
   constructor() {
-    super(WindowType.Completions);
-  }
-
-  initReCreateTimer() {
-    this._reCreateTimer = setInterval(() => {
-      this.destroy();
-      this.create();
-    }, RE_CREATE_TIME);
-  }
-
-  create(): BrowserWindow {
     const { compatibility } = container
       .get<DataStoreService>(ServiceType.DATA_STORE)
       .getAppdata();
-
-    const window = new BrowserWindow({
+    super(WindowType.Completions, {
       width: compatibility.transparentFallback ? 0 : 3840,
       height: compatibility.transparentFallback ? 0 : 2160,
       minWidth: 0,
@@ -59,10 +47,25 @@ export class CompletionsWindow extends BaseWindow {
         preload: resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD),
       },
     });
+  }
 
-    window.setAlwaysOnTop(true, 'pop-up-menu');
-    window.setIgnoreMouseEvents(!compatibility.transparentFallback);
-    return window;
+  initReCreateTimer() {
+    this._reCreateTimer = setInterval(() => {
+      this.destroy();
+      this.create();
+    }, RE_CREATE_TIME);
+  }
+
+  afterCreated(): void {
+    super.afterCreated();
+    if (!this._window) {
+      return;
+    }
+    const { compatibility } = container
+      .get<DataStoreService>(ServiceType.DATA_STORE)
+      .getAppdata();
+    this._window.setAlwaysOnTop(true, 'pop-up-menu');
+    this._window.setIgnoreMouseEvents(!compatibility.transparentFallback);
   }
 
   completionClear() {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { Dark } from 'quasar';
 
 import { ActionType } from 'shared/types/ActionMessage';
@@ -18,6 +18,7 @@ const reloadKey = ref(false);
 const configService = useService(ServiceType.CONFIG);
 
 const actionApi = new ActionApi(baseName);
+
 onMounted(async () => {
   actionApi.register(ActionType.RouterReload, () => {
     reloadKey.value = !reloadKey.value;
@@ -27,9 +28,6 @@ onMounted(async () => {
   });
   const darkMode = await configService.getConfig('darkMode');
   Dark.set(darkMode);
-});
-onBeforeUnmount(() => {
-  actionApi.unregister();
 });
 </script>
 
