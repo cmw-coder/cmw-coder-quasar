@@ -4,7 +4,7 @@ import { bus } from 'boot/bus';
 import { WindowType } from 'shared/types/WindowType';
 import { useService } from 'utils/common';
 import { ServiceType } from 'shared/types/service';
-import { PropType, onMounted } from 'vue';
+import { PropType, onBeforeUnmount, onMounted } from 'vue';
 
 const props = defineProps({
   windowType: {
@@ -41,8 +41,23 @@ const toggleMaximize = () => {
   windowService.toggleMaximizeWindow(props.windowType);
 };
 
+const bodyMouseInHandler = () => {
+  windowService.mouseMoveInOrOutWindow(props.windowType);
+};
+
+const bodyMouseOutHandler = () => {
+  windowService.mouseMoveInOrOutWindow(props.windowType);
+};
+
 onMounted(() => {
-  console.log('MainHeader mounted', props.windowType);
+  console.log('FloatingHeader mounted', props.windowType);
+  document.body.addEventListener('mouseenter', bodyMouseInHandler);
+  document.body.addEventListener('mouseleave', bodyMouseOutHandler);
+});
+
+onBeforeUnmount(() => {
+  document.body.removeEventListener('mouseenter', bodyMouseInHandler);
+  document.body.removeEventListener('mouseleave', bodyMouseInHandler);
 });
 </script>
 

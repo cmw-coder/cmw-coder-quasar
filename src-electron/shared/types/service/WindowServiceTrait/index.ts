@@ -19,4 +19,5 @@ export interface WindowServiceTrait {
     type?: WindowType,
   ): Promise<void>;
   openDevTools(type?: WindowType): Promise<void>;
+  mouseMoveInOrOutWindow(type: WindowType): Promise<void>;
 }

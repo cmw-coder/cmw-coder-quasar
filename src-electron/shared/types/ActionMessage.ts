@@ -5,7 +5,6 @@ export enum ActionType {
   CompletionSet = 'CompletionSet',
   CompletionUpdate = 'CompletionUpdate',
   DebugSync = 'DebugSync',
-  RouterReload = 'RouterReload',
   UpdateDownload = 'UpdateDownload',
   UpdateFinish = 'UpdateFinish',
   UpdateProgress = 'UpdateProgress',
@@ -67,11 +66,6 @@ export class DebugSyncActionMessage implements ActionMessage {
   }
 }
 
-export class RouterReloadActionMessage implements ActionMessage {
-  type = ActionType.RouterReload;
-  data: undefined;
-}
-
 export class UpdateFinishActionMessage implements ActionMessage {
   type = ActionType.UpdateFinish;
   data: undefined;
@@ -108,7 +102,6 @@ export interface ActionMessageMapping {
   [ActionType.CompletionSet]: CompletionSetActionMessage;
   [ActionType.CompletionUpdate]: CompletionUpdateActionMessage;
   [ActionType.DebugSync]: DebugSyncActionMessage;
-  [ActionType.RouterReload]: RouterReloadActionMessage;
   [ActionType.UpdateDownload]: UpdateDownloadActionMessage;
   [ActionType.UpdateFinish]: UpdateFinishActionMessage;
   [ActionType.UpdateProgress]: UpdateProgressActionMessage;

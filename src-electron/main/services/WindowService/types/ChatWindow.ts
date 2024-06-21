@@ -3,6 +3,8 @@ import { WindowType } from 'shared/types/WindowType';
 
 export class ChatWindow extends FloatingBaseWindow {
   constructor() {
-    super(WindowType.Chat);
+    super(WindowType.Chat, {
+      edgeHide: true,
+    });
   }
 }

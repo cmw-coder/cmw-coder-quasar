@@ -1,4 +1,4 @@
-import { BrowserWindow, app } from 'electron';
+import { BrowserWindow, app, screen } from 'electron';
 import { inject, injectable } from 'inversify';
 import { TrayIcon } from 'main/components/TrayIcon';
 import { MenuEntry } from 'main/components/TrayIcon/types';
@@ -197,6 +197,26 @@ export class WindowService implements WindowServiceTrait {
     }
     if (window) {
       window.webContents.openDevTools({ mode: 'undocked' });
+    }
+  }
+
+  async mouseMoveInOrOutWindow(type: WindowType): Promise<void> {
+    const baseWindow = this.getWindow(type);
+    const window = baseWindow._window;
+    if (baseWindow && window) {
+      const { x, y, height, width } = window?.getBounds();
+      const { x: mouseX, y: mouseY } = screen.getCursorScreenPoint();
+      if (
+        mouseX >= x &&
+        mouseX <= x + width &&
+        mouseY >= y &&
+        mouseY <= y + height
+      ) {
+        // 鼠标在窗口中
+        baseWindow.mouseIn();
+      } else {
+        baseWindow.mouseOut();
+      }
     }
   }
 }
