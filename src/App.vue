@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { Dark } from 'quasar';
 
 import { ActionType } from 'shared/types/ActionMessage';
@@ -9,7 +9,6 @@ import { useService } from 'utils/common';
 import { ServiceType } from 'shared/types/service';
 
 const baseName = 'web.app.';
-
 const { initialize } = useHighlighter();
 
 initialize().then();
@@ -20,14 +19,14 @@ const configService = useService(ServiceType.CONFIG);
 const actionApi = new ActionApi(baseName);
 
 onMounted(async () => {
-  actionApi.register(ActionType.RouterReload, () => {
-    reloadKey.value = !reloadKey.value;
-  });
   actionApi.register(ActionType.ToggleDarkMode, (isDark) => {
     Dark.set(isDark);
   });
   const darkMode = await configService.getConfig('darkMode');
   Dark.set(darkMode);
+});
+onBeforeUnmount(() => {
+  actionApi.unregister();
 });
 </script>
 

@@ -100,23 +100,19 @@ export abstract class BaseWindow {
         dataStoreService.saveWindowData(this._type, windowData);
       }
     });
-
     this._window.on('moved', () => {
       if (this._window) {
         this.moveHandler();
       }
     });
-
     this._window.on('closed', () => {
       this._window = undefined;
     });
-
     this._window.on('show', () => {
       const windowData = dataStoreService.getWindowData(this._type);
       windowData.show = true;
       dataStoreService.saveWindowData(this._type, windowData);
     });
-
     this._window.on('hide', () => {
       const windowData = dataStoreService.getWindowData(this._type);
       windowData.show = false;
@@ -185,11 +181,7 @@ export abstract class BaseWindow {
     dataStoreService.saveWindowData(this._type, windowData);
     if (!this.options?.edgeHide) return;
     const { y: yBound } = this._window.getBounds();
-    if (yBound <= 0) {
-      this.isInEdgeState = true;
-    } else {
-      this.isInEdgeState = false;
-    }
+    this.isInEdgeState = yBound <= 0;
   }
 
   mouseIn() {
@@ -209,11 +201,13 @@ export abstract class BaseWindow {
     const bounds = this._window.getBounds();
     const { x, width, height } = bounds;
     let { y } = bounds;
-    let yEnd = y + height;
+    const yEnd = y + height;
     if (yEnd > 10) {
       y -= yEnd - 10;
-      yEnd -= yEnd - 10;
-      this._window.setBounds({ x: x, y: y, width: width, height: height });
+      this._window.setBounds(
+        { x: x, y: y, width: width, height: height },
+        true,
+      );
     }
   }
 
@@ -225,6 +219,6 @@ export abstract class BaseWindow {
     if (y < 0) {
       y = 0;
     }
-    this._window.setBounds({ x: x, y: y, width: width, height: height });
+    this._window.setBounds({ x: x, y: y, width: width, height: height }, true);
   }
 }
