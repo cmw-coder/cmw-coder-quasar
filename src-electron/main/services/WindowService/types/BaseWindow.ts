@@ -30,7 +30,6 @@ const defaultBrowserWindowConstructorOptions: windowOptions = {
   show: false,
   frame: false,
   transparent: false,
-  backgroundColor: '#000',
   webPreferences: {
     // devTools: false,
     preload: resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD),
