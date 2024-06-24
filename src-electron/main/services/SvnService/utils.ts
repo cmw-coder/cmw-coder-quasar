@@ -4,6 +4,11 @@ import { parseStringPromise } from 'xml2js';
 import { executeCommand } from 'main/utils/common';
 import { FileStatus } from 'shared/types/service/SvnServiceTrait/types';
 import { RepoStatusData } from 'main/services/SvnService/types';
+import path from 'path';
+
+export const svnPath = process.env.PROD
+  ? path.join(process.resourcesPath, 'extraResources', 'svn', 'svn.exe')
+  : path.join(__dirname, '../../extraResources/svn/svn.exe');
 
 const formatRepoStatusData = (data: RepoStatusData) => {
   const result: FileStatus[] = [];
@@ -28,7 +33,10 @@ const formatRepoStatusData = (data: RepoStatusData) => {
 };
 
 export const repoStatus = async (path: string) => {
-  const { stdout, stderr } = await executeCommand('svn status --xml', path);
+  const { stdout, stderr } = await executeCommand(
+    `${svnPath} status --xml`,
+    path,
+  );
   log.debug('repoStatus', { path, stdout, stderr });
   if (stderr && stderr.length) {
     log.error('SVN Get status error:', stderr);
@@ -45,7 +53,10 @@ export const repoStatus = async (path: string) => {
 };
 
 export const fileDiff = async (path: string, cwd?: string) => {
-  const { stdout, stderr } = await executeCommand(`svn diff ${path}`, cwd);
+  const { stdout, stderr } = await executeCommand(
+    `${svnPath} diff ${path}`,
+    cwd,
+  );
   log.debug('fileDiff', { filePath: path, cwd, stdout, stderr });
   if (stderr && stderr.length) {
     throw new Error(stderr);

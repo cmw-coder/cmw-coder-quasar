@@ -224,6 +224,13 @@ module.exports = configure((/* ctx */) => ({
           },
         ],
       },
+      extraResources: [
+        {
+          from: './extraResources/',
+          to: 'extraResources',
+          filter: ['**/*'],
+        },
+      ],
     },
     unPackagedInstallParams: ['install', '--prod', '--no-frozen-lockfile'],
   },
