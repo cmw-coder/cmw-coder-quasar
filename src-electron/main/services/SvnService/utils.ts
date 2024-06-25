@@ -7,7 +7,7 @@ import { RepoStatusData } from 'main/services/SvnService/types';
 import path from 'path';
 
 export const svnPath = process.env.PROD
-  ? path.join(process.resourcesPath, 'extraResources', 'svn', 'svn.exe')
+  ? `"${path.join(process.resourcesPath, 'extraResources', 'svn', 'svn.exe')}"`
   : path.join(__dirname, '../../extraResources/svn/svn.exe');
 
 const formatRepoStatusData = (data: RepoStatusData) => {
