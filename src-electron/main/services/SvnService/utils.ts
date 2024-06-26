@@ -3,12 +3,8 @@ import { parseStringPromise } from 'xml2js';
 
 import { executeCommand } from 'main/utils/common';
 import { FileStatus } from 'shared/types/service/SvnServiceTrait/types';
+import { svnPath } from 'main/services/SvnService/constants';
 import { RepoStatusData } from 'main/services/SvnService/types';
-import path from 'path';
-
-export const svnPath = process.env.PROD
-  ? `"${path.join(process.resourcesPath, 'extraResources', 'svn', 'svn.exe')}"`
-  : path.join(__dirname, '../../extraResources/svn/svn.exe');
 
 const formatRepoStatusData = (data: RepoStatusData) => {
   const result: FileStatus[] = [];

@@ -9,8 +9,8 @@ import { ServiceType } from 'shared/types/service';
 import { container } from 'main/services';
 import { DataStoreService } from 'main/services/DataStoreService';
 import { StatisticsService } from 'main/services/StatisticsService';
+import { svnPath } from 'main/services/SvnService/constants';
 import { NEW_LINE_REGEX } from 'shared/constants/common';
-import { svnPath } from 'main/services/SvnService/utils';
 
 export const getRevision = async (path: string): Promise<number> => {
   const { stdout, stderr } = await executeCommand(`${svnPath} info`, path);

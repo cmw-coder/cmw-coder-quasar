@@ -226,9 +226,8 @@ module.exports = configure((/* ctx */) => ({
       },
       extraResources: [
         {
-          from: './extraResources/',
-          to: 'extraResources',
-          filter: ['**/*'],
+          from: 'src-electron/assets/svn',
+          to: 'svn',
         },
       ],
     },

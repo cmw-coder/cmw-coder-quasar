@@ -3,7 +3,8 @@ import { injectable } from 'inversify';
 
 import { container } from 'main/services';
 import { DataStoreService } from 'main/services/DataStoreService';
-import { fileDiff, repoStatus, svnPath } from 'main/services/SvnService/utils';
+import { svnPath } from 'main/services/SvnService/constants';
+import { fileDiff, repoStatus } from 'main/services/SvnService/utils';
 import { WebsocketService } from 'main/services/WebsocketService';
 import { executeCommand } from 'main/utils/common';
 import { NEW_LINE_REGEX } from 'shared/constants/common';
