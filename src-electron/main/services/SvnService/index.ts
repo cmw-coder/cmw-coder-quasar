@@ -3,6 +3,7 @@ import { injectable } from 'inversify';
 
 import { container } from 'main/services';
 import { DataStoreService } from 'main/services/DataStoreService';
+import { svnPath } from 'main/services/SvnService/constants';
 import { fileDiff, repoStatus } from 'main/services/SvnService/utils';
 import { WebsocketService } from 'main/services/WebsocketService';
 import { executeCommand } from 'main/utils/common';
@@ -70,7 +71,7 @@ export class SvnService implements SvnServiceTrait {
 
   async commit(path: string, commitMessage: string) {
     const { stdout, stderr } = await executeCommand(
-      `svn commit -m ${commitMessage}`,
+      `${svnPath} commit -m ${commitMessage}`,
       path,
     );
     log.debug('commit', { path, commitMessage, stdout, stderr });

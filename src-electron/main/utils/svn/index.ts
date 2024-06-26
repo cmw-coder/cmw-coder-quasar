@@ -9,10 +9,11 @@ import { ServiceType } from 'shared/types/service';
 import { container } from 'main/services';
 import { DataStoreService } from 'main/services/DataStoreService';
 import { StatisticsService } from 'main/services/StatisticsService';
+import { svnPath } from 'main/services/SvnService/constants';
 import { NEW_LINE_REGEX } from 'shared/constants/common';
 
 export const getRevision = async (path: string): Promise<number> => {
-  const { stdout, stderr } = await executeCommand('svn info', path);
+  const { stdout, stderr } = await executeCommand(`${svnPath} info`, path);
   if (stderr && stderr.length) {
     log.error('Get SVN info failed:', stderr);
     return -1;
@@ -27,7 +28,7 @@ export const getRevision = async (path: string): Promise<number> => {
 
 export const getAddedLines = async (path: string, revision: number) => {
   const { stdout, stderr } = await executeCommand(
-    `svn diff -r ${revision}`,
+    `${svnPath} diff -r ${revision}`,
     path,
   );
   return (

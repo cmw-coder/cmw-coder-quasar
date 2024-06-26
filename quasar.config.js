@@ -224,6 +224,12 @@ module.exports = configure((/* ctx */) => ({
           },
         ],
       },
+      extraResources: [
+        {
+          from: 'src-electron/assets/svn',
+          to: 'svn',
+        },
+      ],
     },
     unPackagedInstallParams: ['install', '--prod', '--no-frozen-lockfile'],
   },
