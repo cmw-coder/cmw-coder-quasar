@@ -120,6 +120,11 @@ export const defaultAppData: AppData = {
       width: 800,
       show: false,
     },
+    [WindowType.CodeSelectedTips]: {
+      height: 100,
+      width: 400,
+      show: false,
+    },
   },
 };
 

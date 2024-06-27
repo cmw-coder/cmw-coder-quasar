@@ -40,6 +40,17 @@ export class DataStoreService implements DataStoreServiceTrait {
   private appDataStore = new ElectronStore<AppData>({
     name: 'appData',
     defaults: defaultStoreData,
+    migrations: {
+      '1.2.6': (store) => {
+        log.info('Upgrading "appData" store to 1.2.6 ...');
+        const appData = store.store;
+        if (!appData.window[WindowType.CodeSelectedTips]) {
+          appData.window[WindowType.CodeSelectedTips] =
+            defaultAppData.window[WindowType.CodeSelectedTips];
+          store.set('window', appData.window);
+        }
+      },
+    },
   });
 
   private serverTemplateList: string[] = [];

@@ -128,6 +128,17 @@ export const routes: RouteRecordRaw[] = [
           },
         },
       },
+      {
+        path: 'code-selected-tips',
+        components: {
+          default: () => import('pages/CodeSelectedTipsPage.vue'),
+        },
+        props: {
+          header: {
+            windowType: WindowType.CodeSelectedTips,
+          },
+        },
+      },
     ],
   },
   {
@@ -214,6 +225,19 @@ export const routes: RouteRecordRaw[] = [
           header: () => import('layouts/headers/MainHeader.vue'),
           leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
           default: () => import('pages/WorkflowPage.vue'),
+        },
+        props: {
+          header: {
+            windowType: WindowType.Main,
+          },
+        },
+      },
+      {
+        path: 'review',
+        components: {
+          header: () => import('layouts/headers/MainHeader.vue'),
+          leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
+          default: () => import('pages/ReviewPage.vue'),
         },
         props: {
           header: {

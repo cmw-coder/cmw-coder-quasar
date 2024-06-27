@@ -19,6 +19,7 @@ import { MainWindow } from 'main/services/WindowService/types/MainWindow';
 import { UpdateWindow } from 'main/services/WindowService/types/UpdateWindow';
 import { BaseWindow } from 'main/services/WindowService/types/BaseWindow';
 import { ConfigService } from 'main/services/ConfigService';
+import { CodeSelectedTipsWindow } from 'main/services/WindowService/types/CodeSelectedTipsWindow';
 
 interface WindowMap {
   [WindowType.Chat]: ChatWindow;
@@ -33,6 +34,7 @@ interface WindowMap {
   [WindowType.Update]: UpdateWindow;
   [WindowType.Welcome]: WelcomeWindow;
   [WindowType.WorkFlow]: MainWindow;
+  [WindowType.CodeSelectedTips]: CodeSelectedTipsWindow;
 }
 
 @injectable()
@@ -56,6 +58,10 @@ export class WindowService implements WindowServiceTrait {
     this.windowMap.set(WindowType.Quake, new MainWindow());
     this.windowMap.set(WindowType.WorkFlow, new MainWindow());
     this.windowMap.set(WindowType.Update, new UpdateWindow());
+    this.windowMap.set(
+      WindowType.CodeSelectedTips,
+      new CodeSelectedTipsWindow(),
+    );
 
     this.trayIcon = new TrayIcon();
 
