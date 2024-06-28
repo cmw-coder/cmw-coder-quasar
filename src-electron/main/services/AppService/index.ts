@@ -128,11 +128,10 @@ export class AppService implements AppServiceTrait {
       this._windowService.getWindow(WindowType.Completions).initReCreateTimer();
 
       // 创建代码选中提示窗口
-      this._windowService.getWindow(WindowType.CodeSelectedTips).create();
-
+      this._windowService.getWindow(WindowType.SelectionTips).create();
       // for dev
       setTimeout(() => {
-        this._windowService.getWindow(WindowType.CodeSelectedTips).show();
+        this._windowService.getWindow(WindowType.SelectionTips).show();
       }, 3000);
 
       // 引导配置基础环境（黄、绿区 | 红区 | 路由红区）

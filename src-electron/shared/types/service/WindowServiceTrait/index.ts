@@ -1,3 +1,4 @@
+import { Selection } from 'shared/types/Selection';
 import { WindowType } from 'shared/types/WindowType';
 
 export interface WindowServiceTrait {
@@ -20,4 +21,5 @@ export interface WindowServiceTrait {
   ): Promise<void>;
   openDevTools(type?: WindowType): Promise<void>;
   mouseMoveInOrOutWindow(type: WindowType): Promise<void>;
+  addSelectionToChat(selection?: Selection): Promise<void>;
 }

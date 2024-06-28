@@ -1,6 +1,7 @@
 import { Completions } from 'main/components/PromptProcessor/types';
 import { CaretPosition, SymbolInfo } from 'shared/types/common';
 import { KeptRatio } from 'main/services/StatisticsService/types';
+import { TriggerPosition } from 'shared/types/Selection';
 
 export enum WsAction {
   ChatInsert = 'ChatInsert',
@@ -16,6 +17,10 @@ export enum WsAction {
   EditorSwitchProject = 'EditorSwitchProject',
   EditorSwitchSvn = 'EditorSwitchSvn',
   HandShake = 'HandShake',
+
+  EditorCreateSelection = 'EditorCreateSelection', // SI选中了代码片段
+  EditorCancelSelection = 'EditorCancelSelection', // SI取消选中代码片段
+  ReviewRequest = 'ReviewRequest', // Electron发起Review操作请求
 }
 
 export interface WsMessage {
@@ -165,6 +170,18 @@ export interface HandShakeClientMessage extends WsMessage {
   data: { pid: number; currentProject: string; version: string };
 }
 
+export interface EditorCreateSelectionClientMessage extends WsMessage {
+  action: WsAction.EditorCreateSelection;
+  data: {
+    position: TriggerPosition;
+  };
+}
+
+export interface EditorCancelSelectionClientMessage extends WsMessage {
+  action: WsAction.EditorCancelSelection;
+  data: undefined;
+}
+
 export interface WsMessageMapping {
   [WsAction.CompletionAccept]: {
     client: CompletionAcceptClientMessage;
@@ -208,6 +225,14 @@ export interface WsMessageMapping {
   };
   [WsAction.EditorSwitchSvn]: {
     client: EditorSwitchSvnClientMessage;
+    server: void;
+  };
+  [WsAction.EditorCreateSelection]: {
+    client: EditorCreateSelectionClientMessage;
+    server: void;
+  };
+  [WsAction.EditorCancelSelection]: {
+    client: EditorCancelSelectionClientMessage;
     server: void;
   };
 }

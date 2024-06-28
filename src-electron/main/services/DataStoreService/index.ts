@@ -44,9 +44,9 @@ export class DataStoreService implements DataStoreServiceTrait {
       '1.2.6': (store) => {
         log.info('Upgrading "appData" store to 1.2.6 ...');
         const appData = store.store;
-        if (!appData.window[WindowType.CodeSelectedTips]) {
-          appData.window[WindowType.CodeSelectedTips] =
-            defaultAppData.window[WindowType.CodeSelectedTips];
+        if (!appData.window[WindowType.SelectionTips]) {
+          appData.window[WindowType.SelectionTips] =
+            defaultAppData.window[WindowType.SelectionTips];
           store.set('window', appData.window);
         }
       },

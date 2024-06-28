@@ -458,6 +458,15 @@ export class WebsocketService implements WebsocketServiceTrait {
         }
       },
     );
+
+    this._registerWsAction(WsAction.EditorCreateSelection, ({ data }) => {
+      console.log('EditorCreateSelection', data);
+    });
+
+    this._registerWsAction(WsAction.EditorCancelSelection, () => {
+      console.log('EditorCancelSelection');
+      this._windowService.getWindow(WindowType.SelectionTips).hide();
+    });
   }
 
   private _registerWsAction<T extends keyof WsMessageMapping>(

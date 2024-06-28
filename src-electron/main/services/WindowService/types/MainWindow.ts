@@ -6,6 +6,7 @@ export class MainWindow extends BaseWindow {
   constructor() {
     super(WindowType.Main, {
       edgeHide: true,
+      storePosition: true,
       width: 600,
       height: 800,
       useContentSize: true,

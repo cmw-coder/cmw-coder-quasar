@@ -11,6 +11,7 @@ import { resolve } from 'path';
 
 export interface windowOptions extends BrowserWindowConstructorOptions {
   edgeHide?: boolean;
+  storePosition?: boolean;
 }
 
 const defaultBrowserWindowConstructorOptions: windowOptions = {
@@ -30,6 +31,7 @@ const defaultBrowserWindowConstructorOptions: windowOptions = {
   show: false,
   frame: false,
   transparent: false,
+  storePosition: false,
   webPreferences: {
     // devTools: false,
     preload: resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD),
@@ -144,7 +146,7 @@ export abstract class BaseWindow {
       this._window.setSize(width, height);
     }
     // 设置窗口位置
-    if (x && y) {
+    if (x && y && this.options?.storePosition) {
       this._window.setPosition(x, y);
     } else {
       this._window.center();
@@ -171,17 +173,20 @@ export abstract class BaseWindow {
     if (!this._window) {
       return;
     }
-    const dataStoreService = container.get<DataStoreService>(
-      ServiceType.DATA_STORE,
-    );
-    const windowData = dataStoreService.getWindowData(this._type);
     const [x, y] = this._window.getPosition();
-    windowData.x = x;
-    windowData.y = y;
-    dataStoreService.saveWindowData(this._type, windowData);
-    if (!this.options?.edgeHide) return;
-    const { y: yBound } = this._window.getBounds();
-    this.isInEdgeState = yBound <= 0;
+    if (this.options?.storePosition) {
+      const dataStoreService = container.get<DataStoreService>(
+        ServiceType.DATA_STORE,
+      );
+      const windowData = dataStoreService.getWindowData(this._type);
+      windowData.x = x;
+      windowData.y = y;
+      dataStoreService.saveWindowData(this._type, windowData);
+    }
+    if (this.options?.edgeHide) {
+      const { y: yBound } = this._window.getBounds();
+      this.isInEdgeState = yBound <= 0;
+    }
   }
 
   mouseIn() {

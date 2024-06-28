@@ -19,7 +19,8 @@ import { MainWindow } from 'main/services/WindowService/types/MainWindow';
 import { UpdateWindow } from 'main/services/WindowService/types/UpdateWindow';
 import { BaseWindow } from 'main/services/WindowService/types/BaseWindow';
 import { ConfigService } from 'main/services/ConfigService';
-import { CodeSelectedTipsWindow } from 'main/services/WindowService/types/CodeSelectedTipsWindow';
+import { SelectionTipsWindow } from 'main/services/WindowService/types/SelectionTipsWindow';
+import { Selection } from 'shared/types/Selection';
 
 interface WindowMap {
   [WindowType.Chat]: ChatWindow;
@@ -34,7 +35,7 @@ interface WindowMap {
   [WindowType.Update]: UpdateWindow;
   [WindowType.Welcome]: WelcomeWindow;
   [WindowType.WorkFlow]: MainWindow;
-  [WindowType.CodeSelectedTips]: CodeSelectedTipsWindow;
+  [WindowType.SelectionTips]: SelectionTipsWindow;
 }
 
 @injectable()
@@ -58,10 +59,7 @@ export class WindowService implements WindowServiceTrait {
     this.windowMap.set(WindowType.Quake, new MainWindow());
     this.windowMap.set(WindowType.WorkFlow, new MainWindow());
     this.windowMap.set(WindowType.Update, new UpdateWindow());
-    this.windowMap.set(
-      WindowType.CodeSelectedTips,
-      new CodeSelectedTipsWindow(),
-    );
+    this.windowMap.set(WindowType.SelectionTips, new SelectionTipsWindow());
 
     this.trayIcon = new TrayIcon();
 
@@ -224,5 +222,20 @@ export class WindowService implements WindowServiceTrait {
         baseWindow.mouseOut();
       }
     }
+  }
+
+  async addSelectionToChat(selection?: Selection) {
+    if (!selection) {
+      selection = this.getWindow(WindowType.SelectionTips).selection;
+    }
+    if (!selection) {
+      return;
+    }
+    console.log('addSelectionToChat', selection);
+    this.getWindow(WindowType.Chat).show();
+  }
+
+  async setChatWindowReady() {
+    this.getWindow(WindowType.Chat).isReady = true;
   }
 }

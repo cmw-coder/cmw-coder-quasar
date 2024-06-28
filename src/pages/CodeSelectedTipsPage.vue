@@ -1,7 +1,53 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+import { useService } from 'utils/common';
+import { ServiceType } from 'shared/types/service';
+import { WindowType } from 'shared/types/WindowType';
+
+const baseName = 'pages.CodeSelectedTipsPage.';
+const windowService = useService(ServiceType.WINDOW);
+
+const { t } = useI18n();
+
+const i18n = (relativePath: string) => {
+  return t(baseName + relativePath);
+};
+
+const addToChatHandle = () => {
+  console.log('addToChatHandle');
+  windowService.addSelectionToChat();
+  windowService.hideWindow(WindowType.SelectionTips);
+};
+
+const reviewHandle = () => {};
+</script>
 
 <template>
-  <div>code selected tips</div>
+  <div class="selection-tips-wrapper">
+    <q-btn
+      flat
+      color="primary"
+      :label="i18n('labels.addToChat')"
+      @click="addToChatHandle"
+    />
+    <q-btn
+      flat
+      color="primary"
+      :label="i18n('labels.review')"
+      @click="reviewHandle"
+    />
+  </div>
 </template>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.selection-tips-wrapper {
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  opacity: 0.8;
+  background-color: #d5d5d5;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+</style>

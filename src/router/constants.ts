@@ -129,13 +129,13 @@ export const routes: RouteRecordRaw[] = [
         },
       },
       {
-        path: 'code-selected-tips',
+        path: 'selection-tips',
         components: {
           default: () => import('pages/CodeSelectedTipsPage.vue'),
         },
         props: {
           header: {
-            windowType: WindowType.CodeSelectedTips,
+            windowType: WindowType.SelectionTips,
           },
         },
       },
