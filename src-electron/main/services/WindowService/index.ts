@@ -224,6 +224,14 @@ export class WindowService implements WindowServiceTrait {
     }
   }
 
+  async setChatWindowReady() {
+    const chatWindow = this.getWindow(WindowType.Chat);
+    chatWindow.isReady = true;
+    if (chatWindow.readyPromiseResolveFn) {
+      chatWindow.readyPromiseResolveFn();
+    }
+  }
+
   async addSelectionToChat(selection?: Selection) {
     if (!selection) {
       selection = this.getWindow(WindowType.SelectionTips).selection;
@@ -232,10 +240,19 @@ export class WindowService implements WindowServiceTrait {
       return;
     }
     console.log('addSelectionToChat', selection);
-    this.getWindow(WindowType.Chat).show();
+    const chatWindow = this.getWindow(WindowType.Chat);
+    chatWindow.show();
+    await chatWindow.checkReady();
+    chatWindow.addSelectionToChat(selection);
   }
 
-  async setChatWindowReady() {
-    this.getWindow(WindowType.Chat).isReady = true;
+  async reviewSelection(selection?: Selection) {
+    if (!selection) {
+      selection = this.getWindow(WindowType.SelectionTips).selection;
+    }
+    if (!selection) {
+      return;
+    }
+    console.log('reviewSelection', selection);
   }
 }

@@ -19,7 +19,11 @@ const addToChatHandle = () => {
   windowService.hideWindow(WindowType.SelectionTips);
 };
 
-const reviewHandle = () => {};
+const reviewHandle = () => {
+  console.log('reviewHandle');
+  windowService.reviewSelection();
+  windowService.hideWindow(WindowType.SelectionTips);
+};
 </script>
 
 <template>

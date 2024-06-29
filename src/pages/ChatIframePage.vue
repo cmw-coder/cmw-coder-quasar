@@ -9,6 +9,7 @@ import { ActionType } from 'shared/types/ActionMessage';
 const baseName = 'pages.ChatIframe';
 const actionApi = new ActionApi(baseName);
 const configService = useService(ServiceType.CONFIG);
+const windowService = useService(ServiceType.WINDOW);
 
 const isShow = ref(true);
 
@@ -37,6 +38,16 @@ onMounted(async () => {
   actionApi.register(ActionType.ToggleDarkMode, () => {
     refreshHandle();
   });
+  actionApi.register(ActionType.CheckChatIsReady, () => {
+    windowService.setChatWindowReady();
+  });
+  actionApi.register(ActionType.AddSelectionToChat, (selection) => {
+    console.log('addSelectionToChat', selection);
+    aiAssistantIframe.customQuestion(selection);
+  });
+  setTimeout(() => {
+    windowService.setChatWindowReady();
+  }, 1000);
 });
 
 onBeforeUnmount(() => {

@@ -21,5 +21,7 @@ export interface WindowServiceTrait {
   ): Promise<void>;
   openDevTools(type?: WindowType): Promise<void>;
   mouseMoveInOrOutWindow(type: WindowType): Promise<void>;
+  setChatWindowReady(): Promise<void>;
   addSelectionToChat(selection?: Selection): Promise<void>;
+  reviewSelection(selection?: Selection): Promise<void>;
 }

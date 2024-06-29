@@ -1,4 +1,5 @@
 import { CompletionCacheClientMessage } from 'shared/types/WsMessage';
+import { Selection } from 'shared/types/Selection';
 
 export enum ActionType {
   CompletionClear = 'CompletionClear',
@@ -9,6 +10,8 @@ export enum ActionType {
   UpdateFinish = 'UpdateFinish',
   UpdateProgress = 'UpdateProgress',
   ToggleDarkMode = 'ToggleDarkMode',
+  CheckChatIsReady = 'CheckChatIsReady',
+  AddSelectionToChat = 'AddSelectionToChat',
 }
 
 export interface ActionMessage {
@@ -97,6 +100,19 @@ export class UpdateDownloadActionMessage implements ActionMessage {
   data: undefined;
 }
 
+export class CheckChatIsReadyActionMessage implements ActionMessage {
+  type = ActionType.CheckChatIsReady;
+  data: undefined;
+}
+
+export class AddSelectionToChatActionMessage implements ActionMessage {
+  type = ActionType.AddSelectionToChat;
+  data: Selection;
+  constructor(data: Selection) {
+    this.data = data;
+  }
+}
+
 export interface ActionMessageMapping {
   [ActionType.CompletionClear]: CompletionClearActionMessage;
   [ActionType.CompletionSet]: CompletionSetActionMessage;
@@ -106,4 +122,6 @@ export interface ActionMessageMapping {
   [ActionType.UpdateFinish]: UpdateFinishActionMessage;
   [ActionType.UpdateProgress]: UpdateProgressActionMessage;
   [ActionType.ToggleDarkMode]: ToggleDarkModeActionMessage;
+  [ActionType.CheckChatIsReady]: CheckChatIsReadyActionMessage;
+  [ActionType.AddSelectionToChat]: AddSelectionToChatActionMessage;
 }

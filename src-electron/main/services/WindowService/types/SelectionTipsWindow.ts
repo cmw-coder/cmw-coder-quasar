@@ -15,7 +15,7 @@ export class SelectionTipsWindow extends BaseWindow {
       .getAppdata();
     super(WindowType.SelectionTips, {
       useContentSize: true,
-      resizable: true,
+      resizable: false,
       movable: false,
       minimizable: false,
       maximizable: false,
