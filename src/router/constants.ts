@@ -139,6 +139,18 @@ export const routes: RouteRecordRaw[] = [
           },
         },
       },
+      {
+        path: 'review',
+        components: {
+          header: () => import('layouts/headers/FloatingHeader.vue'),
+          default: () => import('pages/ReviewPage.vue'),
+        },
+        props: {
+          header: {
+            windowType: WindowType.Review,
+          },
+        },
+      },
     ],
   },
   {

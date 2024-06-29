@@ -125,6 +125,11 @@ export const defaultAppData: AppData = {
       width: 455,
       show: false,
     },
+    [WindowType.Review]: {
+      height: 1300,
+      width: 780,
+      show: false,
+    },
   },
 };
 

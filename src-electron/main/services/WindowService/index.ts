@@ -20,6 +20,7 @@ import { UpdateWindow } from 'main/services/WindowService/types/UpdateWindow';
 import { BaseWindow } from 'main/services/WindowService/types/BaseWindow';
 import { ConfigService } from 'main/services/ConfigService';
 import { SelectionTipsWindow } from 'main/services/WindowService/types/SelectionTipsWindow';
+import { ReviewWindow } from 'main/services/WindowService/types/ReviewWindow';
 import { Selection } from 'shared/types/Selection';
 
 interface WindowMap {
@@ -36,6 +37,7 @@ interface WindowMap {
   [WindowType.Welcome]: WelcomeWindow;
   [WindowType.WorkFlow]: MainWindow;
   [WindowType.SelectionTips]: SelectionTipsWindow;
+  [WindowType.Review]: ReviewWindow;
 }
 
 @injectable()
@@ -60,6 +62,7 @@ export class WindowService implements WindowServiceTrait {
     this.windowMap.set(WindowType.WorkFlow, new MainWindow());
     this.windowMap.set(WindowType.Update, new UpdateWindow());
     this.windowMap.set(WindowType.SelectionTips, new SelectionTipsWindow());
+    this.windowMap.set(WindowType.Review, new ReviewWindow());
 
     this.trayIcon = new TrayIcon();
 
@@ -254,5 +257,7 @@ export class WindowService implements WindowServiceTrait {
       return;
     }
     console.log('reviewSelection', selection);
+    const reviewWindow = this.getWindow(WindowType.Review);
+    reviewWindow.show();
   }
 }

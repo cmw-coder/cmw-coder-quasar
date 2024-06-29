@@ -30,6 +30,7 @@ export const WINDOW_URL_MAPPING: Record<WindowType, string> = {
   [WindowType.Chat]: '/floating/chat',
   [WindowType.Commit]: '/floating/commit',
   [WindowType.SelectionTips]: '/floating/selection-tips',
+  [WindowType.Review]: '/floating/review',
 
   [WindowType.Completions]: '/floating/completions',
   [WindowType.Feedback]: '/floating/feedback',
