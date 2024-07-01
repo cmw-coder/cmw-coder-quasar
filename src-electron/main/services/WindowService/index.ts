@@ -258,6 +258,10 @@ export class WindowService implements WindowServiceTrait {
     }
     console.log('reviewSelection', selection);
     const reviewWindow = this.getWindow(WindowType.Review);
+    reviewWindow.selection = selection;
     reviewWindow.show();
+  }
+  async getReviewSelection() {
+    return this.getWindow(WindowType.Review).selection;
   }
 }

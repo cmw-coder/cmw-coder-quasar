@@ -297,7 +297,7 @@ export default {
     },
     ReviewPage: {
       labels: {
-        title: 'Review',
+        title: 'Review Highlight Code',
       },
     },
     CodeSelectedTipsPage: {

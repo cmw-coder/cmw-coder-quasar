@@ -24,4 +24,5 @@ export interface WindowServiceTrait {
   setChatWindowReady(): Promise<void>;
   addSelectionToChat(selection?: Selection): Promise<void>;
   reviewSelection(selection?: Selection): Promise<void>;
+  getReviewSelection(): Promise<Selection | undefined>;
 }

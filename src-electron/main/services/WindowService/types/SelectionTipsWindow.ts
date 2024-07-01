@@ -33,6 +33,7 @@ export class SelectionTipsWindow extends BaseWindow {
       file: 'D:\\project\\cmw-coder\\cmw-coder-quasar\\src-electron\\main\\services\\WindowService\\types\\SelectionTipsWindow.ts',
       content: "import { WindowType } from 'shared/types/WindowType';",
       range: new Range(1, 53, 2, 1),
+      language: 'typescript',
     };
   }
 
