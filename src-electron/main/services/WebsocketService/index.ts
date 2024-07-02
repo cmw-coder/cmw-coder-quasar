@@ -38,6 +38,9 @@ import {
   getFunctionSuffix,
 } from 'main/components/PromptExtractor/utils';
 import { decode } from 'iconv-lite';
+import { Selection } from 'shared/types/Selection';
+import { timeout } from 'main/utils/common';
+import { Reference } from 'shared/types/review';
 
 interface ClientInfo {
   client: WebSocket;
@@ -477,5 +480,11 @@ export class WebsocketService implements WebsocketServiceTrait {
     ) => WsMessageMapping[T]['server'],
   ) {
     this._handlers.set(wsAction, callback);
+  }
+
+  async getCodeReviewReferences(selection: Selection) {
+    console.log('getCodeReviewReferences', selection);
+    await timeout(3000);
+    return [] as Reference[];
   }
 }

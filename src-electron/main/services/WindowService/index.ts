@@ -22,6 +22,7 @@ import { ConfigService } from 'main/services/ConfigService';
 import { SelectionTipsWindow } from 'main/services/WindowService/types/SelectionTipsWindow';
 import { ReviewWindow } from 'main/services/WindowService/types/ReviewWindow';
 import { Selection } from 'shared/types/Selection';
+import { ReviewInstance } from 'main/components/ReviewInstance';
 
 interface WindowMap {
   [WindowType.Chat]: ChatWindow;
@@ -258,7 +259,7 @@ export class WindowService implements WindowServiceTrait {
     }
     console.log('reviewSelection', selection);
     const reviewWindow = this.getWindow(WindowType.Review);
-    reviewWindow.selection = selection;
+    reviewWindow.activeReview = new ReviewInstance(selection);
     reviewWindow.show();
   }
   async getReviewSelection() {

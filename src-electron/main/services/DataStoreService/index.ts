@@ -24,6 +24,8 @@ import { getRevision } from 'main/utils/svn';
 import { ConfigService } from 'main/services/ConfigService';
 import { ChatFileContent } from 'shared/types/ChatMessage';
 import { LocalChatManager } from 'main/services/DataStoreService/LocalChatManager';
+import { LocalReviewHistoryManager } from 'main/services/DataStoreService/LocalReviewHistoryManager';
+import { ReviewItem } from 'shared/types/review';
 
 const defaultStoreData = extend<AppData>(true, {}, defaultAppData);
 
@@ -65,6 +67,7 @@ export class DataStoreService implements DataStoreServiceTrait {
     defaultModelConfig,
   );
   localChatManager = new LocalChatManager();
+  localReviewHistoryManager = new LocalReviewHistoryManager();
 
   constructor(
     @inject(ServiceType.CONFIG)
@@ -220,5 +223,17 @@ export class DataStoreService implements DataStoreServiceTrait {
 
   async openChatListDir() {
     return this.localChatManager.openChatListDir();
+  }
+
+  async getReviewHistoryFiles() {
+    return this.localReviewHistoryManager.getReviewHistoryFiles();
+  }
+
+  async getReviewFileContent(name: string) {
+    return this.localReviewHistoryManager.getReviewFileContent(name);
+  }
+
+  async saveReviewItem(name: string, item: ReviewItem) {
+    return this.localReviewHistoryManager.saveReviewItem(name, item);
   }
 }

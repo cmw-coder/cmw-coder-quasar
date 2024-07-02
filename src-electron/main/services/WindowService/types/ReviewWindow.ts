@@ -1,9 +1,9 @@
 import { WindowType } from 'shared/types/WindowType';
 import { FloatingBaseWindow } from 'main/services/WindowService/types/FloatingBaseWindow';
-import { Selection } from 'shared/types/Selection';
+import { ReviewInstance } from 'main/components/ReviewInstance';
 
 export class ReviewWindow extends FloatingBaseWindow {
-  selection?: Selection;
+  activeReview?: ReviewInstance;
   constructor() {
     super(WindowType.Review, {
       edgeHide: true,

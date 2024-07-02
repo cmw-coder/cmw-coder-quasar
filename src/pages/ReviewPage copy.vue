@@ -51,88 +51,46 @@ const formatRes = (selection: Selection) => {
 </script>
 
 <template>
-  <div class="review-wrapper">
-    <div class="review-header">
-      <div class="title text-bold text-h6">
+  <q-page class="row items-center justify-evenly q-pa-xl">
+    <div class="column col-grow q-gutter-y-md">
+      <div class="text-center text-h4">
         {{ i18n('labels.title') }}
       </div>
-      <div class="operation">history</div>
-    </div>
-    <div class="review-content">
-      <div class="review-file-wrapper" v-if="selection">
-        <div class="review-file-name-wrapper">
+      <div class="column q-gutter-y-md code-content" v-if="selection">
+        <div class="row items-baseline justify-between">
           <div
-            class="review-file text-bold text-grey text-h8"
+            class="text-bold text-grey text-h6"
             :title="`${selection.file} ${formatRes(selection).rangeStr}`"
           >
             <span class="review-file-name">{{
               formatRes(selection).fileName
             }}</span>
-            <span class="review-file-range">{{
+            <span class="review-range">{{
               formatRes(selection).rangeStr
             }}</span>
           </div>
-          <div class="file-operation">view</div>
         </div>
-        <div class="review-file-content-wrapper">
-          <q-card
-            class="selection-content-card row"
-            style="padding: 0 10px"
-            bordered
-            flat
-          >
-            <div
-              class="review-file-content"
-              v-html="codeToHtml(selection.content, selection.language)"
-            />
-          </q-card>
-        </div>
+        <q-card
+          class="selection-content-card row"
+          style="padding: 0 10px"
+          bordered
+          flat
+        >
+          <div
+            class="review-file-content"
+            v-html="codeToHtml(selection.content, selection.language)"
+          />
+        </q-card>
       </div>
-      <div class="review-state">review...</div>
+      <div class="column q-gutter-y-md"></div>
+      <div class="column q-gutter-y-md"></div>
+      <div class="row q-gutter-x-md"></div>
     </div>
-  </div>
+  </q-page>
 </template>
 
 <style lang="scss" scoped>
-.review-wrapper {
-  height: 100%;
-  width: 100%;
-  position: relative;
-  overflow: hidden;
-  .review-header {
-    height: 50px;
-    display: flex;
-    z-index: 100;
-    width: 100%;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 10px;
-    border-bottom: 1px solid #eee;
-  }
-  .review-content {
-    height: calc(100% - 50px);
-    width: 100%;
-    overflow: auto;
-    padding: 10px;
-    .review-file-wrapper {
-      .review-file-name-wrapper {
-        height: 40px;
-        display: flex;
-        align-items: center;
-        .review-file-range {
-          margin-left: 10px;
-        }
-        .file-operation {
-          padding-left: 10px;
-        }
-      }
-    }
-    .review-file-content-wrapper {
-      .selection-content-card {
-        max-height: 400px;
-        overflow-y: auto;
-      }
-    }
-  }
+.review-range {
+  margin-left: 10px;
 }
 </style>
