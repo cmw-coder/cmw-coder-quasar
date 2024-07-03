@@ -59,21 +59,31 @@ export class ReviewInstance {
       this.selection,
     );
     this.state = ReviewState.References;
-
-    this.reviewId = await api_code_review({
-      productLine: appConfig.activeTemplate,
-      profileModel: appConfig.activeModel,
-      templateName: '',
-      references: this.references,
-      target: {
-        block: '',
-        snippet: this.selection.content,
-      },
-    });
-    this.state = ReviewState.Start;
-    this.timer = setInterval(() => {
-      this.refreshReviewState();
-    }, REFRESH_TIME);
+    try {
+      this.reviewId = await api_code_review({
+        productLine: appConfig.activeTemplate,
+        profileModel: appConfig.activeModel,
+        templateName: '',
+        references: this.references,
+        target: {
+          block: '',
+          snippet: this.selection.content,
+        },
+      });
+      this.state = ReviewState.Start;
+      this.timer = setInterval(() => {
+        this.refreshReviewState();
+      }, REFRESH_TIME);
+    } catch (e) {
+      log.error(e);
+      this.state = ReviewState.Error;
+      this.errorInfo = (e as Error).message;
+      const windowService = container.get<WindowService>(ServiceType.WINDOW);
+      const reviewWindow = windowService.getWindow(WindowType.Review);
+      reviewWindow.sendMessageToRenderer(
+        new ReviewDataUpdateActionMessage(this.getReviewData()),
+      );
+    }
   }
 
   async refreshReviewState() {
