@@ -25,7 +25,7 @@ import { ConfigService } from 'main/services/ConfigService';
 import { ChatFileContent } from 'shared/types/ChatMessage';
 import { LocalChatManager } from 'main/services/DataStoreService/LocalChatManager';
 import { LocalReviewHistoryManager } from 'main/services/DataStoreService/LocalReviewHistoryManager';
-import { ReviewItem } from 'shared/types/review';
+import { ReviewData } from 'shared/types/review';
 
 const defaultStoreData = extend<AppData>(true, {}, defaultAppData);
 
@@ -233,7 +233,7 @@ export class DataStoreService implements DataStoreServiceTrait {
     return this.localReviewHistoryManager.getReviewFileContent(name);
   }
 
-  async saveReviewItem(name: string, item: ReviewItem) {
+  async saveReviewItem(name: string, item: ReviewData) {
     return this.localReviewHistoryManager.saveReviewItem(name, item);
   }
 }

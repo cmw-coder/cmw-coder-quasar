@@ -6,9 +6,20 @@ import {
 import { container } from 'main/services';
 import { ConfigService } from 'main/services/ConfigService';
 import { WebsocketService } from 'main/services/WebsocketService';
+import { WindowService } from 'main/services/WindowService';
+import { ReviewDataUpdateActionMessage } from 'shared/types/ActionMessage';
 import { Selection } from 'shared/types/Selection';
-import { Reference, ReviewState } from 'shared/types/review';
+import { WindowType } from 'shared/types/WindowType';
+import {
+  Feedback,
+  Reference,
+  ReviewData,
+  ReviewState,
+} from 'shared/types/review';
 import { ServiceType } from 'shared/types/service';
+import log from 'electron-log/main';
+import { DataStoreService } from 'main/services/DataStoreService';
+import { DateTime } from 'luxon';
 
 const REFRESH_TIME = 1500;
 
@@ -18,8 +29,23 @@ export class ReviewInstance {
   state: ReviewState = ReviewState.References;
   result = '';
   references: Reference[] = [];
+  feedback = Feedback.None;
+  errorInfo = '';
 
   constructor(private selection: Selection) {
+    this.createReviewRequest();
+  }
+
+  retry() {
+    if (this.timer) {
+      clearInterval(this.timer);
+    }
+
+    this.state = ReviewState.References;
+    this.feedback = Feedback.None;
+    this.references = [];
+    this.result = '';
+    this.errorInfo = '';
     this.createReviewRequest();
   }
 
@@ -29,10 +55,10 @@ export class ReviewInstance {
     );
     const configService = container.get<ConfigService>(ServiceType.CONFIG);
     const appConfig = await configService.getConfigs();
-    this.state = ReviewState.Start;
     this.references = await websocketService.getCodeReviewReferences(
       this.selection,
     );
+    this.state = ReviewState.References;
 
     this.reviewId = await api_code_review({
       productLine: appConfig.activeTemplate,
@@ -44,24 +70,70 @@ export class ReviewInstance {
         snippet: this.selection.content,
       },
     });
-    this.state = ReviewState.First;
-
+    this.state = ReviewState.Start;
     this.timer = setInterval(() => {
       this.refreshReviewState();
     }, REFRESH_TIME);
   }
 
   async refreshReviewState() {
-    this.state = await api_get_code_review_state(this.reviewId);
-    if (this.state === ReviewState.Third || this.state === ReviewState.Error) {
+    const windowService = container.get<WindowService>(ServiceType.WINDOW);
+    const reviewWindow = windowService.getWindow(WindowType.Review);
+    try {
+      this.state = await api_get_code_review_state(this.reviewId);
+      if (this.state === ReviewState.Third) {
+        await this.getReviewResult();
+        this.state = ReviewState.Finished;
+        clearInterval(this.timer);
+        this.saveReviewData();
+      }
+      if (this.state === ReviewState.Error) {
+        this.getReviewResult();
+        this.errorInfo = this.result;
+        clearInterval(this.timer);
+        this.saveReviewData();
+      }
+      reviewWindow.sendMessageToRenderer(
+        new ReviewDataUpdateActionMessage(this.getReviewData()),
+      );
+    } catch (error) {
+      log.error(error);
       clearInterval(this.timer);
-    }
-    if (this.state === ReviewState.Third) {
-      this.getReviewResult();
+      this.state = ReviewState.Error;
+      this.errorInfo = (error as Error).message;
+      reviewWindow.sendMessageToRenderer(
+        new ReviewDataUpdateActionMessage(this.getReviewData()),
+      );
+      this.saveReviewData();
     }
   }
 
   async getReviewResult() {
     this.result = await api_get_code_review_result(this.reviewId);
+  }
+
+  saveReviewData() {
+    const reviewData = this.getReviewData();
+    const dataStoreService = container.get<DataStoreService>(
+      ServiceType.DATA_STORE,
+    );
+    const now = DateTime.now();
+    const nowStr = now.toFormat('yyyy-MM-dd');
+    dataStoreService.localReviewHistoryManager.saveReviewItem(
+      nowStr,
+      reviewData,
+    );
+  }
+
+  getReviewData() {
+    return {
+      reviewId: this.reviewId,
+      state: this.state,
+      result: this.result,
+      references: this.references,
+      selection: this.selection,
+      feedback: this.feedback,
+      errorInfo: this.errorInfo,
+    } as ReviewData;
   }
 }

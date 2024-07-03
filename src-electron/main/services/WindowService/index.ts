@@ -23,6 +23,7 @@ import { SelectionTipsWindow } from 'main/services/WindowService/types/Selection
 import { ReviewWindow } from 'main/services/WindowService/types/ReviewWindow';
 import { Selection } from 'shared/types/Selection';
 import { ReviewInstance } from 'main/components/ReviewInstance';
+import { Feedback } from 'shared/types/review';
 
 interface WindowMap {
   [WindowType.Chat]: ChatWindow;
@@ -262,7 +263,27 @@ export class WindowService implements WindowServiceTrait {
     reviewWindow.activeReview = new ReviewInstance(selection);
     reviewWindow.show();
   }
-  async getReviewSelection() {
-    return this.getWindow(WindowType.Review).selection;
+
+  async getReviewData() {
+    const reviewWindow = this.getWindow(WindowType.Review);
+    const activeReview = reviewWindow.activeReview;
+    if (!activeReview) return undefined;
+    return activeReview.getReviewData();
+  }
+  async setActiveReviewFeedback(feedback: Feedback): Promise<void> {
+    const reviewWindow = this.getWindow(WindowType.Review);
+    const activeReview = reviewWindow.activeReview;
+    if (activeReview) {
+      activeReview.feedback = feedback;
+      activeReview.saveReviewData();
+    }
+  }
+
+  async retryActiveReview() {
+    const reviewWindow = this.getWindow(WindowType.Review);
+    const activeReview = reviewWindow.activeReview;
+    if (activeReview) {
+      activeReview.retry();
+    }
   }
 }

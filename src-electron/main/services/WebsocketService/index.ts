@@ -40,7 +40,7 @@ import {
 import { decode } from 'iconv-lite';
 import { Selection } from 'shared/types/Selection';
 import { timeout } from 'main/utils/common';
-import { Reference } from 'shared/types/review';
+import { Reference, ReferenceType } from 'shared/types/review';
 
 interface ClientInfo {
   client: WebSocket;
@@ -485,6 +485,31 @@ export class WebsocketService implements WebsocketServiceTrait {
   async getCodeReviewReferences(selection: Selection) {
     console.log('getCodeReviewReferences', selection);
     await timeout(3000);
-    return [] as Reference[];
+    return tempReferences;
   }
 }
+
+const tempReferences: Reference[] = [
+  {
+    name: 'VRF_INDEX',
+    type: ReferenceType.Macro,
+    content: '#define VRF_INDEX USHORT',
+    depth: 0,
+    path: 'D:\\project\\cmw-coder\\cmw-coder-quasar\\src-electron\\shared\\types\\Reference.ts',
+    range: {
+      begin: 23,
+      end: 24,
+    },
+  },
+  {
+    name: 'IF_INDEX',
+    type: ReferenceType.Macro,
+    content: '#define IF_INDEX unsigned int',
+    depth: 0,
+    path: 'D:\\project\\cmw-coder\\cmw-coder-quasar\\src-electron\\shared\\types\\Reference.ts',
+    range: {
+      begin: 25,
+      end: 26,
+    },
+  },
+];

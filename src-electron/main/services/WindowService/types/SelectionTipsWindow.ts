@@ -34,6 +34,7 @@ export class SelectionTipsWindow extends BaseWindow {
       content: "import { WindowType } from 'shared/types/WindowType';",
       range: new Range(1, 53, 2, 1),
       language: 'typescript',
+      block: "import { WindowType } from 'shared/types/WindowType';",
     };
   }
 

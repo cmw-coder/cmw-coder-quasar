@@ -1,7 +1,7 @@
 import { app } from 'electron';
 import path from 'path';
 import * as fs from 'fs';
-import { ReviewFileData, ReviewItem } from 'shared/types/review';
+import { ReviewFileData, ReviewData } from 'shared/types/review';
 import log from 'electron-log/main';
 
 export class LocalReviewHistoryManager {
@@ -34,8 +34,8 @@ export class LocalReviewHistoryManager {
     return res;
   }
 
-  getReviewFileContent(name: string): ReviewItem[] {
-    let res: ReviewItem[] = [];
+  getReviewFileContent(name: string): ReviewData[] {
+    let res: ReviewData[] = [];
     const filePath = path.join(
       this.localReviewHistoryDir,
       name + '_review.json',
@@ -53,7 +53,7 @@ export class LocalReviewHistoryManager {
     return res;
   }
 
-  saveReviewItem(name: string, item: ReviewItem) {
+  saveReviewItem(name: string, item: ReviewData) {
     let fileParsedContent: ReviewFileData = {
       date: new Date().valueOf(),
       items: [],
@@ -68,6 +68,13 @@ export class LocalReviewHistoryManager {
       } catch (e) {
         log.error('saveReviewItem error', e);
       }
+    }
+    const existItemIndex = fileParsedContent.items.findIndex(
+      (i) => i.reviewId === item.reviewId,
+    );
+    if (existItemIndex !== -1) {
+      // delete
+      fileParsedContent.items.splice(existItemIndex, 1);
     }
     fileParsedContent.items.push(item);
     fs.writeFileSync(filePath, JSON.stringify(fileParsedContent));

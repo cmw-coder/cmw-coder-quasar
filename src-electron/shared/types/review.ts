@@ -1,8 +1,20 @@
+import { Selection } from 'shared/types/Selection';
+
+export enum ReferenceType {
+  Struct = 'Struct',
+  Macro = 'Macro',
+}
+
 export interface Reference {
-  content: string;
-  depth: number;
   name: string;
-  type: string;
+  type: ReferenceType;
+  content: string;
+  depth: number; // Depth of call hierarchy, start from 0
+  path: string;
+  range: {
+    begin: number;
+    end: number;
+  };
 }
 
 export interface reviewRequestParams {
@@ -22,6 +34,7 @@ export enum ReviewState {
   First = 2,
   Second = 3,
   Third = 4,
+  Finished = 100,
   Error = -1,
 }
 
@@ -31,15 +44,17 @@ export enum Feedback {
   NotHelpful = 'NotHelpful',
 }
 
-export interface ReviewItem {
-  requestParams: reviewRequestParams;
+export interface ReviewData {
+  references: Reference[];
+  selection: Selection;
   reviewId: string;
   state: ReviewState;
   result: string;
   feedback: Feedback;
+  errorInfo: string;
 }
 
 export interface ReviewFileData {
   date: number;
-  items: ReviewItem[];
+  items: ReviewData[];
 }

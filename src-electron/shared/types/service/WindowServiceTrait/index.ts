@@ -1,5 +1,6 @@
 import { Selection } from 'shared/types/Selection';
 import { WindowType } from 'shared/types/WindowType';
+import { Feedback, ReviewData } from 'shared/types/review';
 
 export interface WindowServiceTrait {
   finishLogin(): Promise<void>;
@@ -24,5 +25,7 @@ export interface WindowServiceTrait {
   setChatWindowReady(): Promise<void>;
   addSelectionToChat(selection?: Selection): Promise<void>;
   reviewSelection(selection?: Selection): Promise<void>;
-  getReviewSelection(): Promise<Selection | undefined>;
+  getReviewData(): Promise<ReviewData | undefined>;
+  setActiveReviewFeedback(feedback: Feedback): Promise<void>;
+  retryActiveReview(): Promise<void>;
 }
