@@ -15,6 +15,7 @@ import {
 } from 'shared/types/review';
 import { ActionApi } from 'types/ActionApi';
 import { ActionType } from 'shared/types/ActionMessage';
+import ReviewHistory from 'pages/ReviewPage/components/ReviewHistory.vue';
 
 const props = defineProps({
   windowType: {
@@ -90,7 +91,9 @@ const retryHandle = async () => {
       <div class="title text-bold text-h6">
         {{ i18n('labels.title') }}
       </div>
-      <div class="operation">history</div>
+      <div class="operation">
+        <ReviewHistory />
+      </div>
     </div>
     <div class="review-content" v-if="reviewData">
       <div class="review-file-wrapper">

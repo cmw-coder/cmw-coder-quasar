@@ -69,6 +69,7 @@ export class ReviewInstance {
           block: '',
           snippet: this.selection.content,
         },
+        language: this.selection.language,
       });
       this.state = ReviewState.Start;
       this.timer = setInterval(() => {

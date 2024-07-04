@@ -22,6 +22,7 @@ export interface reviewRequestParams {
   profileModel: string;
   templateName: string;
   references: Reference[];
+  language: string;
   target: {
     block: string;
     snippet: string;

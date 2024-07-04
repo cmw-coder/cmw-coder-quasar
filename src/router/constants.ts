@@ -143,7 +143,7 @@ export const routes: RouteRecordRaw[] = [
         path: 'review',
         components: {
           header: () => import('layouts/headers/FloatingHeader.vue'),
-          default: () => import('pages/ReviewPage.vue'),
+          default: () => import('pages/ReviewPage/ReviewPage.vue'),
         },
         props: {
           header: {
@@ -249,7 +249,7 @@ export const routes: RouteRecordRaw[] = [
         components: {
           header: () => import('layouts/headers/MainHeader.vue'),
           leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
-          default: () => import('pages/ReviewPage.vue'),
+          default: () => import('pages/ReviewPage/ReviewPage.vue'),
         },
         props: {
           header: {
