@@ -464,8 +464,13 @@ export class WebsocketService implements WebsocketServiceTrait {
       },
     );
 
-    this._registerWsAction(WsAction.EditorCreateSelection, ({ data }) => {
-      Logger.log('EditorCreateSelection', data);
+    this._registerWsAction(WsAction.EditorSelection, ({ data }) => {
+      Logger.log('EditorSelection', data);
+      if (!data.content.length) {
+        this._windowService.getWindow(WindowType.SelectionTips).hide();
+        return;
+      }
+
       const selectionTipsWindow = this._windowService.getWindow(
         WindowType.SelectionTips,
       );
@@ -488,11 +493,6 @@ export class WebsocketService implements WebsocketServiceTrait {
         },
         selection,
       );
-    });
-
-    this._registerWsAction(WsAction.EditorCancelSelection, () => {
-      Logger.log('EditorCancelSelection');
-      this._windowService.getWindow(WindowType.SelectionTips).hide();
     });
   }
 

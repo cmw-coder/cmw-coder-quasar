@@ -13,12 +13,10 @@ export enum WsAction {
   EditorCommit = 'EditorCommit',
   EditorFocusState = 'EditorFocusState',
   EditorPaste = 'EditorPaste',
+  EditorSelection = 'EditorSelection',
   EditorSwitchProject = 'EditorSwitchProject',
   EditorSwitchSvn = 'EditorSwitchSvn',
   HandShake = 'HandShake',
-
-  EditorCreateSelection = 'EditorCreateSelection', // SI选中了代码片段
-  EditorCancelSelection = 'EditorCancelSelection', // SI取消选中代码片段
   ReviewRequest = 'ReviewRequest', // Electron发起Review操作请求
 }
 
@@ -169,8 +167,8 @@ export interface HandShakeClientMessage extends WsMessage {
   data: { pid: number; currentProject: string; version: string };
 }
 
-export interface EditorCreateSelectionClientMessage extends WsMessage {
-  action: WsAction.EditorCreateSelection;
+export interface EditorSelectionClientMessage extends WsMessage {
+  action: WsAction.EditorSelection;
   data: {
     path: string;
     content: string;
@@ -189,11 +187,6 @@ export interface EditorCreateSelectionClientMessage extends WsMessage {
       y: number;
     };
   };
-}
-
-export interface EditorCancelSelectionClientMessage extends WsMessage {
-  action: WsAction.EditorCancelSelection;
-  data: undefined;
 }
 
 export interface WsMessageMapping {
@@ -241,12 +234,8 @@ export interface WsMessageMapping {
     client: EditorSwitchSvnClientMessage;
     server: void;
   };
-  [WsAction.EditorCreateSelection]: {
-    client: EditorCreateSelectionClientMessage;
-    server: void;
-  };
-  [WsAction.EditorCancelSelection]: {
-    client: EditorCancelSelectionClientMessage;
+  [WsAction.EditorSelection]: {
+    client: EditorSelectionClientMessage;
     server: void;
   };
 }
