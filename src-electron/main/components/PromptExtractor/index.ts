@@ -85,7 +85,9 @@ export class PromptExtractor {
         elements.currentFilePrefix =
           selfFileSimilarSnippets
             .map((similarSnippet) => similarSnippet.content)
-            .join('\n') + elements.currentFilePrefix;
+            .join('\n') +
+          '\n' +
+          elements.currentFilePrefix;
       }
       if (otherFileSimilarSnippets.length) {
         elements.neighborSnippet = otherFileSimilarSnippets
@@ -136,7 +138,9 @@ export class PromptExtractor {
         elements.currentFilePrefix =
           selfFileRelativeDefinitions
             .map((relativeDefinition) => relativeDefinition.content)
-            .join('\n') + elements.currentFilePrefix;
+            .join('\n') +
+          '\n' +
+          elements.currentFilePrefix;
       }
       if (otherFileRelativeDefinitions.length) {
         elements.neighborSnippet = otherFileRelativeDefinitions
