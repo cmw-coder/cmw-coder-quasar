@@ -30,11 +30,12 @@ export class SelectionTipsWindow extends BaseWindow {
     });
 
     this.selection = {
-      file: 'D:\\project\\cmw-coder\\cmw-coder-quasar\\src-electron\\main\\services\\WindowService\\types\\SelectionTipsWindow.ts',
-      content: "import { WindowType } from 'shared/types/WindowType';",
-      range: new Range(1, 53, 2, 1),
-      language: 'typescript',
-      block: "import { WindowType } from 'shared/types/WindowType';",
+      file: 'D:\\project\\cmw-coder\\cmw-coder-proxy\\components\\ConfigManager.cc',
+      content:
+        'ConfigManager::ConfigManager()\n    : _shortcutCommit({Key::K, {Modifier::Alt, Modifier::Ctrl}}),\n      _shortcutManualCompletion({Key::Enter, {Modifier::Alt}}) {\n    if (const auto [major, minor, build, _] = system::getVersion(); major == 3 && minor == 5) {\n        _siVersion = make_pair(\n            SiVersion::Major::V35,\n            enum_cast<SiVersion::Minor>(build).value_or(SiVersion::Minor::Unknown)\n        );\n        _siVersionString = "_3.50." + format("{:0>{}}", build, 4);\n    } else {\n        _siVersion = make_pair(\n            SiVersion::Major::V40,\n            enum_cast<SiVersion::Minor>(build).value_or(SiVersion::Minor::Unknown)\n        );\n        _siVersionString = "_4.00." + format("{:0>{}}", build, 4);\n    }\n    _threadRetrieveProjectDirectory();\n    _threadRetrieveSvnDirectory();\n    logger::info(format("Configurator is initialized with version: {}", _siVersionString));\n}',
+      range: new Range(20, 1, 40, 2),
+      language: 'c',
+      block: '',
     };
   }
 

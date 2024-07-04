@@ -72,7 +72,7 @@ onMounted(async () => {
   <div class="review-history">
     <q-btn flat @click="() => showHandle()">History</q-btn>
     <Teleport v-if="mounted" to=".review-wrapper">
-      <div class="history-content bg-white" v-if="show">
+      <q-card class="history-content" v-if="show">
         <div class="header">
           <div class="left">
             <q-btn
@@ -112,7 +112,7 @@ onMounted(async () => {
             />
           </div>
         </div>
-      </div>
+      </q-card>
     </Teleport>
   </div>
 </template>
