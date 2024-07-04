@@ -1,31 +1,119 @@
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue';
+import { ReviewData } from 'shared/types/review';
+import { ServiceType } from 'app/src-electron/shared/types/service';
+import { useService } from 'app/src/utils/common';
+import { Ref, computed, onMounted, ref, watch } from 'vue';
+import { Selection } from 'shared/types/Selection';
+import ReviewView from 'pages/ReviewPage/components/ReviewView.vue';
 
 const show = ref(false);
 const mounted = ref(false);
 
-onMounted(() => {
+const selectedFile = ref('');
+const selectedReviewId: Ref<
+  | {
+      value: string;
+      label: string;
+    }
+  | undefined
+> = ref(undefined);
+
+const dataStoreService = useService(ServiceType.DATA_STORE);
+
+const formatSelection = (selection: Selection) => {
+  const filePathArr = selection.file.split('\\');
+  const fileName = filePathArr[filePathArr.length - 1];
+  return {
+    fileName,
+    rangeStr: `${selection.range.start.line} - ${selection.range.end.line}`,
+    ...selection,
+  };
+};
+
+const files = ref([] as string[]);
+const reviewFileContent = ref([] as ReviewData[]);
+const compuReviewFileContentOptions = computed(() => {
+  return reviewFileContent.value.map((item) => ({
+    label: `${formatSelection(item.selection).fileName} ${formatSelection(item.selection).rangeStr}`,
+    value: item.reviewId,
+  }));
+});
+const selectedReviewItem = computed(() => {
+  return reviewFileContent.value.find(
+    (item) => item.reviewId === selectedReviewId.value?.value,
+  );
+});
+
+const showHandle = async () => {
+  show.value = true;
+  selectedFile.value = '';
+  selectedReviewId.value = undefined;
+  files.value = await dataStoreService.getReviewHistoryFiles();
+};
+
+watch(selectedFile, async (newVal) => {
+  if (newVal) {
+    reviewFileContent.value =
+      await dataStoreService.getReviewFileContent(newVal);
+  }
+});
+
+const retryHandle = async () => {
+  if (selectedReviewItem.value) {
+    console.log('retryHandle', selectedReviewItem.value);
+  }
+};
+
+onMounted(async () => {
   mounted.value = true;
 });
 </script>
 <template>
   <div class="review-history">
-    <q-btn
-      flat
-      @click="
-        () => {
-          show = true;
-        }
-      "
-      >History</q-btn
-    >
-    <template v-if="mounted">
-      <Teleport to=".review-wrapper">
-        <div class="history-content" v-if="show">
-          <q-card class="bg-primary text-white">history </q-card>
+    <q-btn flat @click="() => showHandle()">History</q-btn>
+    <Teleport v-if="mounted" to=".review-wrapper">
+      <div class="history-content bg-white" v-if="show">
+        <div class="header">
+          <div class="left">
+            <q-btn
+              flat
+              size="md"
+              label="Back"
+              icon="mdi-keyboard-backspace"
+              @click="
+                () => {
+                  show = false;
+                }
+              "
+            />
+          </div>
+          <div class="right">
+            <div class="title text-bold text-h8">HISTORY</div>
+          </div>
         </div>
-      </Teleport>
-    </template>
+        <div class="content">
+          <div class="q-pa-md">
+            <div class="q-gutter-md">
+              <q-select v-model="selectedFile" :options="files" label="Day" />
+            </div>
+            <div class="q-gutter-md">
+              <q-select
+                v-model="selectedReviewId"
+                :options="compuReviewFileContentOptions"
+                label="ReviewItem"
+              />
+            </div>
+          </div>
+          <div class="review-view">
+            <ReviewView
+              v-if="selectedReviewItem"
+              :review-data="selectedReviewItem"
+              @retry="retryHandle"
+            />
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -37,7 +125,23 @@ onMounted(() => {
   position: absolute;
   height: 100%;
   width: 100%;
-  background-color: pink;
+  top: 0px;
   z-index: 300;
+  .header {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 10px;
+    border-bottom: 1px solid #eee;
+  }
+  .content {
+    height: calc(100% - 50px);
+    width: 100%;
+    overflow-y: auto;
+    .review-view {
+      padding: 10px;
+    }
+  }
 }
 </style>
