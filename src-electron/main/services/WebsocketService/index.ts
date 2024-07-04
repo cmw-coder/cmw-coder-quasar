@@ -17,6 +17,7 @@ import { WindowService } from 'main/services/WindowService';
 import { DataProjectType } from 'main/stores/data/types';
 import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
+import { Range } from 'main/types/vscode/range';
 import {
   CompletionErrorCause,
   getClientVersion,
@@ -41,6 +42,7 @@ import { decode } from 'iconv-lite';
 import { Selection } from 'shared/types/Selection';
 import { timeout } from 'main/utils/common';
 import { Reference, ReferenceType } from 'shared/types/review';
+import Logger from 'electron-log/main';
 
 interface ClientInfo {
   client: WebSocket;
@@ -463,11 +465,33 @@ export class WebsocketService implements WebsocketServiceTrait {
     );
 
     this._registerWsAction(WsAction.EditorCreateSelection, ({ data }) => {
-      console.log('EditorCreateSelection', data);
+      Logger.log('EditorCreateSelection', data);
+      const selectionTipsWindow = this._windowService.getWindow(
+        WindowType.SelectionTips,
+      );
+      const selection: Selection = {
+        block: data.block,
+        file: data.path,
+        content: data.content,
+        range: new Range(
+          data.begin.line,
+          data.begin.character,
+          data.end.line,
+          data.end.character,
+        ),
+        language: 'c',
+      };
+      selectionTipsWindow.trigger(
+        {
+          x: data.dimensions.x,
+          y: data.dimensions.y,
+        },
+        selection,
+      );
     });
 
     this._registerWsAction(WsAction.EditorCancelSelection, () => {
-      console.log('EditorCancelSelection');
+      Logger.log('EditorCancelSelection');
       this._windowService.getWindow(WindowType.SelectionTips).hide();
     });
   }

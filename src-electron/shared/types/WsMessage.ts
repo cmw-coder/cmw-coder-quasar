@@ -1,7 +1,6 @@
 import { Completions } from 'main/components/PromptProcessor/types';
 import { CaretPosition, SymbolInfo } from 'shared/types/common';
 import { KeptRatio } from 'main/services/StatisticsService/types';
-import { TriggerPosition } from 'shared/types/Selection';
 
 export enum WsAction {
   ChatInsert = 'ChatInsert',
@@ -173,7 +172,22 @@ export interface HandShakeClientMessage extends WsMessage {
 export interface EditorCreateSelectionClientMessage extends WsMessage {
   action: WsAction.EditorCreateSelection;
   data: {
-    position: TriggerPosition;
+    path: string;
+    content: string;
+    block: string;
+    begin: {
+      line: number;
+      character: number;
+    };
+    end: {
+      line: number;
+      character: number;
+    };
+    dimensions: {
+      height: number;
+      x: number;
+      y: number;
+    };
   };
 }
 
