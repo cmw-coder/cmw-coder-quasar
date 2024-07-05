@@ -489,7 +489,7 @@ export class WebsocketService implements WebsocketServiceTrait {
       selectionTipsWindow.trigger(
         {
           x: data.dimensions.x,
-          y: data.dimensions.y,
+          y: data.dimensions.y - 30,
         },
         selection,
       );
