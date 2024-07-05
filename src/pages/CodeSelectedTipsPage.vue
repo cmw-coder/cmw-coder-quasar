@@ -27,8 +27,9 @@ const reviewHandle = () => {
 </script>
 
 <template>
-  <div class="selection-tips-wrapper">
+  <div class="selection-tips-wrapper bg-grey-10">
     <q-btn
+      class="text-white"
       flat
       color="primary"
       :label="i18n('labels.addToChat')"
@@ -36,6 +37,7 @@ const reviewHandle = () => {
     />
     <q-btn
       flat
+      class="text-white"
       color="primary"
       :label="i18n('labels.review')"
       @click="reviewHandle"
@@ -48,8 +50,7 @@ const reviewHandle = () => {
   height: 100vh;
   width: 100vw;
   overflow: hidden;
-  opacity: 0.8;
-  background-color: #d5d5d5;
+  opacity: 0.9;
   display: flex;
   align-items: center;
   justify-content: space-around;
