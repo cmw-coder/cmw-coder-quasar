@@ -30,6 +30,7 @@ import { WindowType } from 'shared/types/WindowType';
 import {
   CompletionGenerateServerMessage,
   HandShakeClientMessage,
+  ReviewRequestServerMessage,
   StandardResult,
   WsAction,
   WsMessageMapping,
@@ -40,8 +41,7 @@ import {
 } from 'main/components/PromptExtractor/utils';
 import { decode } from 'iconv-lite';
 import { Selection } from 'shared/types/Selection';
-import { timeout } from 'main/utils/common';
-import { Reference, ReferenceType } from 'shared/types/review';
+import { Reference } from 'shared/types/review';
 import Logger from 'electron-log/main';
 
 interface ClientInfo {
@@ -65,6 +65,7 @@ export class WebsocketService implements WebsocketServiceTrait {
   private _promptProcessor = new PromptProcessor();
   private _promptExtractor = new PromptExtractor();
   private _webSocketServer?: WebSocketServer;
+  private referencesResolveHandle?: (value: Reference[]) => void;
 
   constructor(
     @inject(ServiceType.DATA_STORE)
@@ -465,12 +466,11 @@ export class WebsocketService implements WebsocketServiceTrait {
     );
 
     this._registerWsAction(WsAction.EditorSelection, ({ data }) => {
-      Logger.log('EditorSelection', data);
-      if (!data.content.length) {
+      if (data.dimensions.height === 0 || data.content.length === 0) {
         this._windowService.getWindow(WindowType.SelectionTips).hide();
         return;
       }
-
+      Logger.log('EditorSelection', data);
       const selectionTipsWindow = this._windowService.getWindow(
         WindowType.SelectionTips,
       );
@@ -494,6 +494,19 @@ export class WebsocketService implements WebsocketServiceTrait {
         selection,
       );
     });
+
+    this._registerWsAction(WsAction.EditorCancelSelection, () => {
+      Logger.log(WsAction.EditorCancelSelection);
+      this._windowService.getWindow(WindowType.SelectionTips).hide();
+    });
+
+    this._registerWsAction(WsAction.ReviewRequest, ({ data }) => {
+      Logger.log(WsAction.ReviewRequest, data);
+      if (this.referencesResolveHandle) {
+        this.referencesResolveHandle(data);
+        this.referencesResolveHandle = undefined;
+      }
+    });
   }
 
   private _registerWsAction<T extends keyof WsMessageMapping>(
@@ -506,34 +519,15 @@ export class WebsocketService implements WebsocketServiceTrait {
     this._handlers.set(wsAction, callback);
   }
 
-  async getCodeReviewReferences(selection: Selection) {
-    console.log('getCodeReviewReferences', selection);
-    await timeout(3000);
-    return tempReferences;
+  getCodeReviewReferences(selection: Selection) {
+    return new Promise<Reference[]>((resolve) => {
+      const reviewRequestServerMessage: ReviewRequestServerMessage = {
+        action: WsAction.ReviewRequest,
+        data: selection.block || selection.content,
+        timestamp: new Date().valueOf(),
+      };
+      this.send(JSON.stringify(reviewRequestServerMessage));
+      this.referencesResolveHandle = resolve;
+    });
   }
 }
-
-const tempReferences: Reference[] = [
-  {
-    name: 'VRF_INDEX',
-    type: ReferenceType.Macro,
-    content: '#define VRF_INDEX USHORT',
-    depth: 0,
-    path: 'D:\\project\\cmw-coder\\cmw-coder-quasar\\src-electron\\shared\\types\\Reference.ts',
-    range: {
-      begin: 23,
-      end: 24,
-    },
-  },
-  {
-    name: 'IF_INDEX',
-    type: ReferenceType.Macro,
-    content: '#define IF_INDEX unsigned int',
-    depth: 0,
-    path: 'D:\\project\\cmw-coder\\cmw-coder-quasar\\src-electron\\shared\\types\\Reference.ts',
-    range: {
-      begin: 25,
-      end: 26,
-    },
-  },
-];

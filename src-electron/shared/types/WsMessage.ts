@@ -1,6 +1,7 @@
 import { Completions } from 'main/components/PromptProcessor/types';
 import { CaretPosition, SymbolInfo } from 'shared/types/common';
 import { KeptRatio } from 'main/services/StatisticsService/types';
+import { Reference } from 'shared/types/review';
 
 export enum WsAction {
   ChatInsert = 'ChatInsert',
@@ -13,10 +14,11 @@ export enum WsAction {
   EditorCommit = 'EditorCommit',
   EditorFocusState = 'EditorFocusState',
   EditorPaste = 'EditorPaste',
-  EditorSelection = 'EditorSelection',
   EditorSwitchProject = 'EditorSwitchProject',
   EditorSwitchSvn = 'EditorSwitchSvn',
   HandShake = 'HandShake',
+  EditorSelection = 'EditorSelection',
+  EditorCancelSelection = 'EditorCancelSelection',
   ReviewRequest = 'ReviewRequest', // Electron发起Review操作请求
 }
 
@@ -189,6 +191,21 @@ export interface EditorSelectionClientMessage extends WsMessage {
   };
 }
 
+export interface EditorCancelSelectionClientMessage extends WsMessage {
+  action: WsAction.EditorCancelSelection;
+  data: undefined;
+}
+
+export interface ReviewRequestClientMessage extends WsMessage {
+  action: WsAction.ReviewRequest;
+  data: Reference[];
+}
+
+export interface ReviewRequestServerMessage extends WsMessage {
+  action: WsAction.ReviewRequest;
+  data: string;
+}
+
 export interface WsMessageMapping {
   [WsAction.CompletionAccept]: {
     client: CompletionAcceptClientMessage;
@@ -236,6 +253,14 @@ export interface WsMessageMapping {
   };
   [WsAction.EditorSelection]: {
     client: EditorSelectionClientMessage;
+    server: void;
+  };
+  [WsAction.EditorCancelSelection]: {
+    client: EditorCancelSelectionClientMessage;
+    server: void;
+  };
+  [WsAction.ReviewRequest]: {
+    client: ReviewRequestClientMessage;
     server: void;
   };
 }

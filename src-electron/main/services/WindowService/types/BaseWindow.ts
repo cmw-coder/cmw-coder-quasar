@@ -129,7 +129,12 @@ export abstract class BaseWindow {
     }
   }
 
-  show() {
+  show(_windowData?: {
+    x?: number;
+    y?: number;
+    height?: number;
+    width?: number;
+  }) {
     Logger.log(`Show window: ${this._type} ${this._url}`);
     this.isInEdgeState = false;
     const dataStoreService = container.get<DataStoreService>(
@@ -139,8 +144,11 @@ export abstract class BaseWindow {
       this._window = this.create();
     }
 
-    const { x, y, height, width } = dataStoreService.getWindowData(this._type);
-
+    const storedWindowData = dataStoreService.getWindowData(this._type);
+    const { x, y, height, width } = {
+      ...storedWindowData,
+      ..._windowData,
+    };
     // 设置窗口尺寸
     if (height && width) {
       this._window.setSize(width, height);
@@ -152,6 +160,9 @@ export abstract class BaseWindow {
       this._window.center();
     }
     this._window.show();
+    if (this.isInEdgeState) {
+      this.edgeShow();
+    }
   }
 
   hide() {
