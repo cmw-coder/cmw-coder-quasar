@@ -495,11 +495,6 @@ export class WebsocketService implements WebsocketServiceTrait {
       );
     });
 
-    this._registerWsAction(WsAction.EditorCancelSelection, () => {
-      Logger.log(WsAction.EditorCancelSelection);
-      this._windowService.getWindow(WindowType.SelectionTips).hide();
-    });
-
     this._registerWsAction(WsAction.ReviewRequest, ({ data }) => {
       Logger.log(WsAction.ReviewRequest, data);
       if (this.referencesResolveHandle) {

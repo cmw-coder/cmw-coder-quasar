@@ -18,7 +18,6 @@ export enum WsAction {
   EditorSwitchSvn = 'EditorSwitchSvn',
   HandShake = 'HandShake',
   EditorSelection = 'EditorSelection',
-  EditorCancelSelection = 'EditorCancelSelection',
   ReviewRequest = 'ReviewRequest', // Electron发起Review操作请求
 }
 
@@ -191,11 +190,6 @@ export interface EditorSelectionClientMessage extends WsMessage {
   };
 }
 
-export interface EditorCancelSelectionClientMessage extends WsMessage {
-  action: WsAction.EditorCancelSelection;
-  data: undefined;
-}
-
 export interface ReviewRequestClientMessage extends WsMessage {
   action: WsAction.ReviewRequest;
   data: Reference[];
@@ -253,10 +247,6 @@ export interface WsMessageMapping {
   };
   [WsAction.EditorSelection]: {
     client: EditorSelectionClientMessage;
-    server: void;
-  };
-  [WsAction.EditorCancelSelection]: {
-    client: EditorCancelSelectionClientMessage;
     server: void;
   };
   [WsAction.ReviewRequest]: {
