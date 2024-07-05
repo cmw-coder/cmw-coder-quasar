@@ -53,20 +53,7 @@ export const api_get_code_review_result = async (reviewId: string) => {
   console.log('api_get_code_review_result', reviewId);
   await timeout(150);
   const data = `{
-    "明确问题": [
-        {
-            "问题编号": 2,
-            "问题类型": "内存越界",
-            "问题代码片段": "memcpy(szPktBuf + ulHeadLen, szPktBufTmp, (ULONG)uiContentLen);",
-            "问题描述": "在使用memcpy()函数时，需要确保目标缓冲区szPktBuf有足够的空间来容纳源缓冲区szPktBufTmp的内容，否则可能会导致内存越界。建议增加边界检查。"
-        },
-        {
-            "问题编号": 2,
-            "问题类型": "内存越界",
-            "问题代码片段": "memcpy(szPktBuf + ulHeadLen, szPktBufTmp, (ULONG)uiContentLen);",
-            "问题描述": "在使用memcpy()函数时，需要确保目标缓冲区szPktBuf有足够的空间来容纳源缓冲区szPktBufTmp的内容，否则可能会导致内存越界。建议增加边界检查。"
-        }
-    ]
+    "明确问题": []
 }`;
   return parseReviewResult(data);
 };

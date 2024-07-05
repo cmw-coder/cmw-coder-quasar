@@ -212,7 +212,11 @@ const feedbackHandle = (feedback: Feedback) => {
           </q-card>
           <template v-else>
             <q-card v-if="reviewData.result.data.length === 0">
-              <div class="empty">No Problem</div>
+              <q-card-section style="padding: 4px" class="parsed-error">
+                <q-chip color="blue-6" icon="mdi-check" text-color="white">
+                  <div class="empty">No Problem</div>
+                </q-chip>
+              </q-card-section>
             </q-card>
             <template v-else>
               <q-card
