@@ -204,9 +204,49 @@ const feedbackHandle = (feedback: Feedback) => {
           title="Review Result"
           v-if="reviewData.state === ReviewState.Finished"
         >
-          <q-card style="padding: 10px">
-            {{ reviewData.result }}
+          <q-card v-if="!reviewData.result.parsed">
+            <q-card-section style="padding: 4px" class="parsed-error">
+              <q-chip color="red-8" class="text-white">Parse Failed</q-chip>
+              <div>{{ reviewData.result.originData }}</div>
+            </q-card-section>
           </q-card>
+          <template v-else>
+            <q-card v-if="reviewData.result.data.length === 0">
+              <div class="empty">No Problem</div>
+            </q-card>
+            <template v-else>
+              <q-card
+                bordered
+                flat
+                class="result-item"
+                v-for="(resultItem, index) in reviewData.result.data"
+                :key="index"
+                style="margin-bottom: 10px"
+              >
+                <q-card-section style="padding: 2px">
+                  <q-chip color="red-8" class="text-white">{{
+                    resultItem.type
+                  }}</q-chip>
+                </q-card-section>
+                <q-card-section style="padding: 2px">
+                  <div
+                    class="code"
+                    style="
+                      padding: 10px;
+                      overflow: auto;
+                      border: 1px solid #eee;
+                    "
+                    v-html="
+                      codeToHtml(resultItem.code, reviewData.selection.language)
+                    "
+                  />
+                </q-card-section>
+                <q-card-section style="padding: 2px">{{
+                  resultItem.description
+                }}</q-card-section>
+              </q-card>
+            </template>
+          </template>
           <div class="feed-back-wrapper">
             <q-btn
               flat

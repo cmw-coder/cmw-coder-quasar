@@ -45,12 +45,25 @@ export enum Feedback {
   NotHelpful = 'NotHelpful',
 }
 
+export interface ReviewParsedResult {
+  index: number;
+  type: string;
+  code: string;
+  description: string;
+}
+
+export interface ReviewResult {
+  parsed: boolean;
+  data: ReviewParsedResult[];
+  originData: string;
+}
+
 export interface ReviewData {
   references: Reference[];
   selection: Selection;
   reviewId: string;
   state: ReviewState;
-  result: string;
+  result: ReviewResult;
   feedback: Feedback;
   errorInfo: string;
 }

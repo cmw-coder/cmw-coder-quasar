@@ -14,6 +14,7 @@ import {
   Feedback,
   Reference,
   ReviewData,
+  ReviewResult,
   ReviewState,
 } from 'shared/types/review';
 import { ServiceType } from 'shared/types/service';
@@ -27,7 +28,7 @@ export class ReviewInstance {
   timer?: NodeJS.Timeout;
   reviewId = '----';
   state: ReviewState = ReviewState.References;
-  result = '';
+  result?: ReviewResult;
   references: Reference[] = [];
   feedback = Feedback.None;
   errorInfo = '';
@@ -44,7 +45,7 @@ export class ReviewInstance {
     this.state = ReviewState.References;
     this.feedback = Feedback.None;
     this.references = [];
-    this.result = '';
+    this.result = undefined;
     this.errorInfo = '';
     this.createReviewRequest();
   }
@@ -100,7 +101,7 @@ export class ReviewInstance {
       }
       if (this.state === ReviewState.Error) {
         this.getReviewResult();
-        this.errorInfo = this.result;
+        this.errorInfo = this.result ? this.result.originData : '';
         clearInterval(this.timer);
         this.saveReviewData();
       }

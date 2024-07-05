@@ -514,7 +514,13 @@ export class WebsocketService implements WebsocketServiceTrait {
     this._handlers.set(wsAction, callback);
   }
 
-  getCodeReviewReferences(selection: Selection) {
+  async getCodeReviewReferences(selection: Selection) {
+    setTimeout(() => {
+      if (this.referencesResolveHandle) {
+        this.referencesResolveHandle([]);
+        this.referencesResolveHandle = undefined;
+      }
+    }, 10000);
     return new Promise<Reference[]>((resolve) => {
       const reviewRequestServerMessage: ReviewRequestServerMessage = {
         action: WsAction.ReviewRequest,
