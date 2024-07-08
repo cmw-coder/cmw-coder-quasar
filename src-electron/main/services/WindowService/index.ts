@@ -23,8 +23,9 @@ import { SelectionTipsWindow } from 'main/services/WindowService/types/Selection
 import { ReviewWindow } from 'main/services/WindowService/types/ReviewWindow';
 import { Selection } from 'shared/types/Selection';
 import { ReviewInstance } from 'main/components/ReviewInstance';
-import { Feedback } from 'shared/types/review';
+import { Feedback, ReviewState } from 'shared/types/review';
 import { ReviewDataUpdateActionMessage } from 'shared/types/ActionMessage';
+import { dialog } from 'electron/main';
 
 interface WindowMap {
   [WindowType.Chat]: ChatWindow;
@@ -261,6 +262,22 @@ export class WindowService implements WindowServiceTrait {
     }
     console.log('reviewSelection', selection);
     const reviewWindow = this.getWindow(WindowType.Review);
+    // 上一个 review 尚未结束
+    if (
+      reviewWindow.activeReview &&
+      ![ReviewState.Error, ReviewState.Finished].includes(
+        reviewWindow.activeReview.state,
+      )
+    ) {
+      const mainWindow = this.getWindow(WindowType.Main);
+      if (mainWindow._window) {
+        dialog.showMessageBox(mainWindow._window, {
+          message: '存在进行中的 review 任务',
+        });
+      }
+      return;
+    }
+
     reviewWindow.activeReview = new ReviewInstance(selection);
     reviewWindow.show();
     reviewWindow.sendMessageToRenderer(
