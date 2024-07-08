@@ -24,6 +24,7 @@ import { ReviewWindow } from 'main/services/WindowService/types/ReviewWindow';
 import { Selection } from 'shared/types/Selection';
 import { ReviewInstance } from 'main/components/ReviewInstance';
 import { Feedback } from 'shared/types/review';
+import { ReviewDataUpdateActionMessage } from 'shared/types/ActionMessage';
 
 interface WindowMap {
   [WindowType.Chat]: ChatWindow;
@@ -262,6 +263,11 @@ export class WindowService implements WindowServiceTrait {
     const reviewWindow = this.getWindow(WindowType.Review);
     reviewWindow.activeReview = new ReviewInstance(selection);
     reviewWindow.show();
+    reviewWindow.sendMessageToRenderer(
+      new ReviewDataUpdateActionMessage(
+        reviewWindow.activeReview.getReviewData(),
+      ),
+    );
   }
 
   async getReviewData() {
