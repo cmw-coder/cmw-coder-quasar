@@ -1,13 +1,9 @@
+import { SymbolType } from 'shared/types/common';
 import { Selection } from 'shared/types/Selection';
-
-export enum ReferenceType {
-  Struct = 'Struct',
-  Macro = 'Macro',
-}
 
 export interface Reference {
   name: string;
-  type: ReferenceType;
+  type: SymbolType;
   content: string;
   depth: number; // Depth of call hierarchy, start from 0
   path: string;
@@ -17,7 +13,7 @@ export interface Reference {
   };
 }
 
-export interface reviewRequestParams {
+export interface ReviewRequestParams {
   productLine: string;
   profileModel: string;
   templateName: string;

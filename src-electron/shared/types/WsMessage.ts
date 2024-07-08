@@ -195,9 +195,14 @@ export interface ReviewRequestClientMessage extends WsMessage {
   data: Reference[];
 }
 
-export interface ReviewRequestServerMessage extends WsMessage {
-  action: WsAction.ReviewRequest;
-  data: string;
+export class ReviewRequestServerMessage implements WsMessage {
+  action = WsAction.ReviewRequest;
+  data: StandardResult<{ content: string }>;
+  timestamp = Date.now();
+
+  constructor(data: StandardResult<{ content: string }>) {
+    this.data = data;
+  }
 }
 
 export interface WsMessageMapping {

@@ -522,12 +522,14 @@ export class WebsocketService implements WebsocketServiceTrait {
       }
     }, 10000);
     return new Promise<Reference[]>((resolve) => {
-      const reviewRequestServerMessage: ReviewRequestServerMessage = {
-        action: WsAction.ReviewRequest,
-        data: selection.block || selection.content,
-        timestamp: new Date().valueOf(),
-      };
-      this.send(JSON.stringify(reviewRequestServerMessage));
+      this.send(
+        JSON.stringify(
+          new ReviewRequestServerMessage({
+            result: 'success',
+            content: selection.block || selection.content,
+          }),
+        ),
+      );
       this.referencesResolveHandle = resolve;
     });
   }

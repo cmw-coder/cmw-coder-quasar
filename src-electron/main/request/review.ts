@@ -1,12 +1,12 @@
 import {
   ReviewResult,
   ReviewState,
-  reviewRequestParams,
+  ReviewRequestParams,
 } from 'shared/types/review';
 import request from 'main/request';
 import Logger from 'electron-log/main';
 
-export const api_code_review = async (data: reviewRequestParams) => {
+export const api_code_review = async (data: ReviewRequestParams) => {
   Logger.log('api_code_review', data);
   const result = await request<string>({
     url: '/kong/RdTestAiService/v1/chatgpt/question/review',
