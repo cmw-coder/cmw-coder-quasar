@@ -496,7 +496,6 @@ export class WebsocketService implements WebsocketServiceTrait {
     });
 
     this._registerWsAction(WsAction.ReviewRequest, ({ data }) => {
-      Logger.log(WsAction.ReviewRequest, data);
       if (this.referencesResolveHandle) {
         this.referencesResolveHandle(data);
         this.referencesResolveHandle = undefined;

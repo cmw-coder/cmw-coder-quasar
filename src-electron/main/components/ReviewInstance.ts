@@ -56,9 +56,11 @@ export class ReviewInstance {
     );
     const configService = container.get<ConfigService>(ServiceType.CONFIG);
     const appConfig = await configService.getConfigs();
+    log.info('getCodeReviewReferences start');
     this.references = await websocketService.getCodeReviewReferences(
       this.selection,
     );
+    log.info('getCodeReviewReferences end', this.references);
     this.state = ReviewState.References;
     try {
       this.reviewId = await api_code_review({

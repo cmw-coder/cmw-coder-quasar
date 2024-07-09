@@ -7,18 +7,18 @@ import request from 'main/request';
 import Logger from 'electron-log/main';
 
 export const api_code_review = async (data: ReviewRequestParams) => {
-  Logger.log('api_code_review', data);
+  Logger.log('api_code_review start', data);
   const result = await request<string>({
     url: '/kong/RdTestAiService/v1/chatgpt/question/review',
     method: 'post',
     data,
   });
-  Logger.log('api_code_review', result);
+  Logger.log('api_code_review end', result);
   return result;
 };
 
 export const api_get_code_review_state = async (reviewId: string) => {
-  Logger.log('api_get_code_review_state', reviewId);
+  Logger.log('api_get_code_review_state start', reviewId);
   const result = await request<ReviewState>({
     url: '/kong/RdTestAiService/v1/chatgpt/question/review/status',
     method: 'get',
@@ -26,7 +26,7 @@ export const api_get_code_review_state = async (reviewId: string) => {
       taskId: reviewId,
     },
   });
-  Logger.log('api_get_code_review_state', result);
+  Logger.log('api_get_code_review_state end', result);
   return result;
 };
 
@@ -64,7 +64,7 @@ const parseReviewResult = (data: string): ReviewResult => {
 export const api_get_code_review_result = async (
   reviewId: string,
 ): Promise<ReviewResult> => {
-  Logger.log('api_get_code_review_result', reviewId);
+  Logger.log('api_get_code_review_result start', reviewId);
   const result = await request<string>({
     url: '/kong/RdTestAiService/v1/chatgpt/question/review/result',
     method: 'get',
@@ -72,6 +72,6 @@ export const api_get_code_review_result = async (
       taskId: reviewId,
     },
   });
-  Logger.log('api_get_code_review_result', result);
+  Logger.log('api_get_code_review_result end', result);
   return parseReviewResult(result);
 };
