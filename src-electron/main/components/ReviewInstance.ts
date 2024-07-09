@@ -102,7 +102,7 @@ export class ReviewInstance {
         this.saveReviewData();
       }
       if (this.state === ReviewState.Error) {
-        this.getReviewResult();
+        await this.getReviewResult();
         this.errorInfo = this.result ? this.result.originData : '';
         clearInterval(this.timer);
         this.saveReviewData();
@@ -124,6 +124,7 @@ export class ReviewInstance {
 
   async getReviewResult() {
     this.result = await api_get_code_review_result(this.reviewId);
+    console.log('getReviewResult', this.result);
   }
 
   saveReviewData() {

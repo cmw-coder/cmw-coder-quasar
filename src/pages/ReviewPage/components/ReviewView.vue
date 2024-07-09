@@ -179,7 +179,7 @@ const viewReferenceHandle = (reference: Reference) => {
                     class="q-ma-md"
                   />
                 </q-item-section>
-                <q-item-section>1/3 Review</q-item-section>
+                <q-item-section>1/3 AI 正在review</q-item-section>
               </q-item>
               <q-item v-if="reviewData.state === ReviewState.First">
                 <q-item-section avatar>
@@ -193,7 +193,9 @@ const viewReferenceHandle = (reference: Reference) => {
                     class="q-ma-md"
                   />
                 </q-item-section>
-                <q-item-section>2/3 Review</q-item-section>
+                <q-item-section
+                  >2/3 Reviewer 和 Coder 正在激烈交锋</q-item-section
+                >
               </q-item>
               <q-item v-if="reviewData.state === ReviewState.Second">
                 <q-item-section avatar>
@@ -207,7 +209,7 @@ const viewReferenceHandle = (reference: Reference) => {
                     class="q-ma-md"
                   />
                 </q-item-section>
-                <q-item-section>3/3 Review</q-item-section>
+                <q-item-section>3/3 AI 正在总结</q-item-section>
               </q-item>
             </q-list>
           </q-card>
