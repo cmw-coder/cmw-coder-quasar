@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { PropType } from 'vue';
+import { PropType, ref } from 'vue';
 import { Selection } from 'shared/types/Selection';
 import { useHighlighter } from 'stores/highlighter';
 import {
@@ -49,6 +49,13 @@ const retryHandle = async () => {
 
 const feedbackHandle = (feedback: Feedback) => {
   emit('feedback', feedback);
+};
+
+const activeReference = ref<Reference | undefined>(undefined);
+const viewReferenceDialogFlag = ref(false);
+const viewReferenceHandle = (reference: Reference) => {
+  activeReference.value = reference;
+  viewReferenceDialogFlag.value = true;
 };
 </script>
 
@@ -127,8 +134,13 @@ const feedbackHandle = (feedback: Feedback) => {
                     </q-item-section>
                     <q-item-section side top>
                       <q-item-label caption>
-                        <q-btn flat size="sm">view</q-btn>
-                        <q-btn flat size="sm">locate</q-btn>
+                        <q-btn
+                          flat
+                          size="sm"
+                          @click="() => viewReferenceHandle(reference)"
+                          >view</q-btn
+                        >
+                        <!-- <q-btn flat size="sm">locate</q-btn> -->
                       </q-item-label>
                     </q-item-section>
                   </q-item>
@@ -307,6 +319,24 @@ const feedbackHandle = (feedback: Feedback) => {
         </q-card-actions>
       </q-card>
     </div>
+    <q-dialog v-model="viewReferenceDialogFlag">
+      <q-card>
+        <q-card-section>
+          <div class="text-h6">Reference Code</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          <div
+            v-if="activeReference"
+            class="code"
+            style="padding: 10px; overflow: auto; border: 1px solid #eee"
+            v-html="
+              codeToHtml(activeReference.content, reviewData.selection.language)
+            "
+          />
+        </q-card-section>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
