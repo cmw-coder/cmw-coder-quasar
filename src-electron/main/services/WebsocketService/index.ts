@@ -50,6 +50,8 @@ interface ClientInfo {
   version: string;
 }
 
+const MAX_REFERENCES_REQUEST_TIME = 30000;
+
 @injectable()
 export class WebsocketService implements WebsocketServiceTrait {
   private _clientInfoMap = new Map<number, ClientInfo>();
@@ -519,7 +521,7 @@ export class WebsocketService implements WebsocketServiceTrait {
         this.referencesResolveHandle([]);
         this.referencesResolveHandle = undefined;
       }
-    }, 10000);
+    }, MAX_REFERENCES_REQUEST_TIME);
     return new Promise<Reference[]>((resolve) => {
       this.send(
         JSON.stringify(
