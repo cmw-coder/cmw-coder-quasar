@@ -5,7 +5,7 @@ import { WindowType } from 'shared/types/WindowType';
 export class MainWindow extends BaseWindow {
   constructor() {
     super(WindowType.Main, {
-      edgeHide: true,
+      useEdgeHide: true,
       storePosition: true,
       width: 600,
       height: 800,

@@ -4,7 +4,6 @@ import { container } from 'main/services';
 import { DataStoreService } from 'main/services/DataStoreService';
 import { ServiceType } from 'shared/types/service';
 import { Selection, TriggerPosition } from 'shared/types/Selection';
-// import { Range } from 'main/types/vscode/range';
 
 export class SelectionTipsWindow extends BaseWindow {
   selection?: Selection;
@@ -20,7 +19,7 @@ export class SelectionTipsWindow extends BaseWindow {
       minimizable: false,
       maximizable: false,
       closable: false,
-      focusable: true,
+      focusable: false,
       alwaysOnTop: true,
       fullscreenable: false,
       skipTaskbar: true,
@@ -29,15 +28,6 @@ export class SelectionTipsWindow extends BaseWindow {
       transparent: !compatibility.transparentFallback,
       storePosition: true,
     });
-
-    // this.selection = {
-    //   file: 'D:\\project\\cmw-coder\\cmw-coder-proxy\\components\\ConfigManager.cc',
-    //   content:
-    //     'ConfigManager::ConfigManager()\n    : _shortcutCommit({Key::K, {Modifier::Alt, Modifier::Ctrl}}),\n      _shortcutManualCompletion({Key::Enter, {Modifier::Alt}}) {\n    if (const auto [major, minor, build, _] = system::getVersion(); major == 3 && minor == 5) {\n        _siVersion = make_pair(\n            SiVersion::Major::V35,\n            enum_cast<SiVersion::Minor>(build).value_or(SiVersion::Minor::Unknown)\n        );\n        _siVersionString = "_3.50." + format("{:0>{}}", build, 4);\n    } else {\n        _siVersion = make_pair(\n            SiVersion::Major::V40,\n            enum_cast<SiVersion::Minor>(build).value_or(SiVersion::Minor::Unknown)\n        );\n        _siVersionString = "_4.00." + format("{:0>{}}", build, 4);\n    }\n    _threadRetrieveProjectDirectory();\n    _threadRetrieveSvnDirectory();\n    logger::info(format("Configurator is initialized with version: {}", _siVersionString));\n}',
-    //   range: new Range(20, 1, 40, 2),
-    //   language: 'c',
-    //   block: '',
-    // };
   }
 
   trigger(position: TriggerPosition, selection: Selection) {

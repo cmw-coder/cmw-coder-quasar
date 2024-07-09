@@ -10,12 +10,12 @@ import log from 'electron-log/main';
 import { resolve } from 'path';
 
 export interface windowOptions extends BrowserWindowConstructorOptions {
-  edgeHide?: boolean;
+  useEdgeHide?: boolean;
   storePosition?: boolean;
 }
 
 const defaultBrowserWindowConstructorOptions: windowOptions = {
-  edgeHide: false,
+  useEdgeHide: false,
   width: 800,
   height: 600,
   useContentSize: true,
@@ -42,6 +42,7 @@ export abstract class BaseWindow {
   readonly _type: WindowType;
   _window: BrowserWindow | undefined;
   _url: string;
+  isEdgeHide = false;
   private isInEdgeState = false;
 
   protected constructor(
@@ -54,6 +55,7 @@ export abstract class BaseWindow {
 
   create() {
     Logger.log(`Create window: ${this._type} ${this._url}`);
+    this.isEdgeHide = false;
 
     this._window = new BrowserWindow({
       ...defaultBrowserWindowConstructorOptions,
@@ -136,33 +138,37 @@ export abstract class BaseWindow {
     width?: number;
   }) {
     Logger.log(`Show window: ${this._type} ${this._url}`);
-    this.isInEdgeState = false;
-    const dataStoreService = container.get<DataStoreService>(
-      ServiceType.DATA_STORE,
-    );
+
     if (!this._window) {
       this._window = this.create();
     }
+    // if (this.isEdgeHide) {
+    //   this.edgeShow();
+    // }
+
+    const dataStoreService = container.get<DataStoreService>(
+      ServiceType.DATA_STORE,
+    );
 
     const storedWindowData = dataStoreService.getWindowData(this._type);
     const { x, y, height, width } = {
       ...storedWindowData,
       ..._windowData,
     };
+    const _y = (y || 0) <= 0 ? 0 : y || 0;
+    const _x = (x || 0) <= 0 ? 0 : x || 0;
     // 设置窗口尺寸
     if (height && width) {
       this._window.setSize(width, height);
     }
     // 设置窗口位置
-    if (x && y && this.options?.storePosition) {
-      this._window.setPosition(x, y);
+    if (this.options?.storePosition) {
+      this._window.setPosition(_x, _y);
     } else {
       this._window.center();
     }
     this._window.show();
-    if (this.isInEdgeState) {
-      this.edgeShow();
-    }
+    this.moveHandler();
   }
 
   hide() {
@@ -194,7 +200,7 @@ export abstract class BaseWindow {
       windowData.y = y;
       dataStoreService.saveWindowData(this._type, windowData);
     }
-    if (this.options?.edgeHide) {
+    if (this.options?.useEdgeHide) {
       const { y: yBound } = this._window.getBounds();
       this.isInEdgeState = yBound <= 0;
     }
@@ -225,6 +231,8 @@ export abstract class BaseWindow {
         true,
       );
     }
+    this.moveHandler();
+    this.isEdgeHide = true;
   }
 
   edgeShow() {
@@ -236,5 +244,7 @@ export abstract class BaseWindow {
       y = 0;
     }
     this._window.setBounds({ x: x, y: y, width: width, height: height }, true);
+    this.moveHandler();
+    this.isEdgeHide = false;
   }
 }

@@ -6,7 +6,7 @@ export class ReviewWindow extends FloatingBaseWindow {
   activeReview?: ReviewInstance;
   constructor() {
     super(WindowType.Review, {
-      edgeHide: true,
+      useEdgeHide: true,
       storePosition: true,
     });
   }

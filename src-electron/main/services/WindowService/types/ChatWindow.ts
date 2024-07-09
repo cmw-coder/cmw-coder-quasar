@@ -11,7 +11,7 @@ export class ChatWindow extends FloatingBaseWindow {
   readyPromiseResolveFn?: () => void;
   constructor() {
     super(WindowType.Chat, {
-      edgeHide: true,
+      useEdgeHide: true,
       storePosition: true,
     });
   }
