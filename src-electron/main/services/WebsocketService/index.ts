@@ -517,25 +517,25 @@ export class WebsocketService implements WebsocketServiceTrait {
   }
 
   async getCodeReviewReferences(selection: Selection) {
-    return Promise.race([
-      new Promise<Reference[]>((resolve) => {
-        this.send(
-          JSON.stringify(
-            new ReviewRequestServerMessage({
-              result: 'success',
-              content: selection.block || selection.content,
-            }),
-          ),
-        );
-        this.referencesResolveHandle = resolve;
-        // resolve(defaultReferences);
-      }),
-      new Promise<Reference[]>((resolve) => {
-        setTimeout(() => {
-          resolve([]);
-        }, MAX_REFERENCES_REQUEST_TIME);
-      }),
-    ]);
+    const successPromise = new Promise<Reference[]>((resolve) => {
+      this.send(
+        JSON.stringify(
+          new ReviewRequestServerMessage({
+            result: 'success',
+            content: selection.block || selection.content,
+          }),
+        ),
+      );
+      this.referencesResolveHandle = resolve;
+    });
+
+    const timeoutPromise = new Promise<Reference[]>((resolve) => {
+      setTimeout(() => {
+        resolve([]);
+      }, MAX_REFERENCES_REQUEST_TIME);
+    });
+
+    return Promise.race([successPromise, timeoutPromise]);
   }
 }
 
