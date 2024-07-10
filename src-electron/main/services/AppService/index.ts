@@ -1,4 +1,4 @@
-import { app, globalShortcut, ipcMain } from 'electron';
+import { app, ipcMain, Menu } from 'electron';
 import log from 'electron-log/main';
 import { inject, injectable } from 'inversify';
 import { DateTime } from 'luxon';
@@ -60,6 +60,7 @@ export class AppService implements AppServiceTrait {
 
   initApplication() {
     log.info(`OS version: ${version()} (${release()})`);
+    Menu.setApplicationMenu(null);
     if (!app.requestSingleInstanceLock()) {
       app.quit();
       process.exit(-1);
@@ -209,22 +210,22 @@ export class AppService implements AppServiceTrait {
   }
 
   initShortcutHandler() {
-    app.on('browser-window-blur', () => {
-      globalShortcut.unregisterAll();
-    });
-    app.on('browser-window-focus', () => {
-      globalShortcut.register('CommandOrControl+R', () => {
-        log.debug('CommandOrControl+R is pressed: Shortcut Disabled');
-      });
-      globalShortcut.register('CommandOrControl+Shift+R', () => {
-        log.debug('CommandOrControl+Shift+R is pressed: Shortcut Disabled');
-      });
-      globalShortcut.register('F5', () => {
-        log.debug('F5 is pressed: Shortcut Disabled');
-      });
-      globalShortcut.register('Shift+F5', () => {
-        log.debug('Shift+F5 is pressed: Shortcut Disabled');
-      });
-    });
+    // app.on('browser-window-blur', () => {
+    //   globalShortcut.unregisterAll();
+    // });
+    // app.on('browser-window-focus', () => {
+    //   globalShortcut.register('CommandOrControl+R', () => {
+    //     log.debug('CommandOrControl+R is pressed: Shortcut Disabled');
+    //   });
+    //   globalShortcut.register('CommandOrControl+Shift+R', () => {
+    //     log.debug('CommandOrControl+Shift+R is pressed: Shortcut Disabled');
+    //   });
+    //   globalShortcut.register('F5', () => {
+    //     log.debug('F5 is pressed: Shortcut Disabled');
+    //   });
+    //   globalShortcut.register('Shift+F5', () => {
+    //     log.debug('Shift+F5 is pressed: Shortcut Disabled');
+    //   });
+    // });
   }
 }
