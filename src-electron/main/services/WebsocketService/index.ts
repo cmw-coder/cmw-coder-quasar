@@ -527,6 +527,7 @@ export class WebsocketService implements WebsocketServiceTrait {
           }),
         ),
       );
+      log.info('getCodeReviewReferences', selection);
       this.referencesResolveHandle = resolve;
     });
 
