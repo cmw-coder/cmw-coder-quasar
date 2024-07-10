@@ -8,8 +8,8 @@ export interface Reference {
   depth: number; // Depth of call hierarchy, start from 0
   path: string;
   range: {
-    begin: number;
-    end: number;
+    startLine: number;
+    endLine: number;
   };
 }
 

@@ -43,6 +43,7 @@ import { decode } from 'iconv-lite';
 import { Selection } from 'shared/types/Selection';
 import { Reference } from 'shared/types/review';
 import Logger from 'electron-log/main';
+// import { SymbolType } from 'shared/types/common';
 
 interface ClientInfo {
   client: WebSocket;
@@ -516,22 +517,115 @@ export class WebsocketService implements WebsocketServiceTrait {
   }
 
   async getCodeReviewReferences(selection: Selection) {
-    setTimeout(() => {
-      if (this.referencesResolveHandle) {
-        this.referencesResolveHandle([]);
-        this.referencesResolveHandle = undefined;
-      }
-    }, MAX_REFERENCES_REQUEST_TIME);
-    return new Promise<Reference[]>((resolve) => {
-      this.send(
-        JSON.stringify(
-          new ReviewRequestServerMessage({
-            result: 'success',
-            content: selection.block || selection.content,
-          }),
-        ),
-      );
-      this.referencesResolveHandle = resolve;
-    });
+    return Promise.race([
+      new Promise<Reference[]>((resolve) => {
+        this.send(
+          JSON.stringify(
+            new ReviewRequestServerMessage({
+              result: 'success',
+              content: selection.block || selection.content,
+            }),
+          ),
+        );
+        this.referencesResolveHandle = resolve;
+        // resolve(defaultReferences);
+      }),
+      new Promise<Reference[]>((resolve) => {
+        setTimeout(() => {
+          resolve([]);
+        }, MAX_REFERENCES_REQUEST_TIME);
+      }),
+    ]);
   }
 }
+
+// const defaultReferences: Reference[] = [
+//   {
+//     content: 'aaaaaa',
+//     depth: 0,
+//     name: 'IF_INDEX',
+//     path: 'D:\\project\\cmw-coder\\cmw-cider-quasar\\src-electron\\shared\\types\\Selection.ts',
+//     range: {
+//       endLine: 73,
+//       startLine: 73,
+//     },
+//     type: SymbolType.Macro,
+//   },
+//   {
+//     content: 'aaaaaa',
+//     depth: 0,
+//     name: 'IF_INDEX',
+//     path: 'D:\\project\\cmw-coder\\cmw-cider-quasar\\src-electron\\shared\\types\\Selection.ts',
+//     range: {
+//       endLine: 73,
+//       startLine: 73,
+//     },
+//     type: SymbolType.Macro,
+//   },
+//   {
+//     content: 'aaaaaa',
+//     depth: 0,
+//     name: 'IF_INDEX',
+//     path: 'D:\\project\\cmw-coder\\cmw-cider-quasar\\src-electron\\shared\\types\\Selection.ts',
+//     range: {
+//       endLine: 73,
+//       startLine: 73,
+//     },
+//     type: SymbolType.Macro,
+//   },
+//   {
+//     content: 'aaaaaa',
+//     depth: 0,
+//     name: 'IF_INDEX',
+//     path: 'D:\\project\\cmw-coder\\cmw-cider-quasar\\src-electron\\shared\\types\\Selection.ts',
+//     range: {
+//       endLine: 73,
+//       startLine: 73,
+//     },
+//     type: SymbolType.Macro,
+//   },
+//   {
+//     content: 'aaaaaa',
+//     depth: 0,
+//     name: 'IF_INDEX',
+//     path: 'D:\\project\\cmw-coder\\cmw-cider-quasar\\src-electron\\shared\\types\\Selection.ts',
+//     range: {
+//       endLine: 73,
+//       startLine: 73,
+//     },
+//     type: SymbolType.Macro,
+//   },
+//   {
+//     content: 'aaaaaa',
+//     depth: 0,
+//     name: 'IF_INDEX',
+//     path: 'D:\\project\\cmw-coder\\cmw-cider-quasar\\src-electron\\shared\\types\\Selection.ts',
+//     range: {
+//       endLine: 73,
+//       startLine: 73,
+//     },
+//     type: SymbolType.Macro,
+//   },
+//   {
+//     content: 'aaaaaa',
+//     depth: 0,
+//     name: 'IF_INDEX',
+//     path: 'D:\\project\\cmw-coder\\cmw-cider-quasar\\src-electron\\shared\\types\\Selection.ts',
+//     range: {
+//       endLine: 73,
+//       startLine: 73,
+//     },
+//     type: SymbolType.Macro,
+//   },
+//   {
+//     content: 'aaaaaa',
+//     depth: 0,
+//     name: 'IF_INDEX',
+//     path: 'D:\\project\\cmw-coder\\cmw-cider-quasar\\src-electron\\shared\\types\\Selection.ts',
+//     range: {
+//       endLine: 73,
+//       startLine: 73,
+//     },
+//     type: SymbolType.Macro,
+//   },
+// ];

@@ -38,7 +38,7 @@ const formatReference = (reference: Reference) => {
   const fileName = filePathArr[filePathArr.length - 1];
   return {
     fileName,
-    rangeStr: `${reference.range.begin} - ${reference.range.end}`,
+    rangeStr: `${reference.range.startLine} - ${reference.range.endLine}`,
     ...reference,
   };
 };
@@ -100,7 +100,7 @@ const viewReferenceHandle = (reference: Reference) => {
         <q-timeline-entry title="Find References">
           <q-card
             class="relative-position"
-            style="min-height: 80px; max-height: 200px"
+            style="min-height: 80px; max-height: 200px; overflow-y: auto"
           >
             <q-card-section>
               <transition
