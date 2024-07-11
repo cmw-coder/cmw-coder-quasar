@@ -31,7 +31,7 @@ const defaultBrowserWindowConstructorOptions: windowOptions = {
   focusable: true,
   alwaysOnTop: true,
   fullscreenable: false,
-  skipTaskbar: true,
+  skipTaskbar: false,
   show: false,
   frame: false,
   transparent: false,
@@ -54,7 +54,7 @@ export abstract class BaseWindow {
     private options?: windowOptions,
   ) {
     this._type = type;
-    this._url = `${process.env.APP_URL}#${WINDOW_URL_MAPPING[type]}`;
+    this._url = `${process.env.APP_URL}/#${WINDOW_URL_MAPPING[type]}`;
   }
 
   create() {
