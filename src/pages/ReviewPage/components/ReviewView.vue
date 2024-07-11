@@ -118,9 +118,19 @@ const viewReferenceHandle = (reference: Reference) => {
                     :key="index"
                   >
                     <q-item-section>
-                      <q-item-label :title="reference.content">
-                        <q-chip>{{ reference.type }}</q-chip>
-                        <span>{{ reference.name }}</span>
+                      <q-item-label>
+                        <q-chip
+                          color="blue-6"
+                          text-color="white"
+                          :title="`深度: ${reference.depth}`"
+                          >{{ reference.depth }}</q-chip
+                        >
+                        <q-chip :title="`类型: ${reference.type}`">{{
+                          reference.type
+                        }}</q-chip>
+                        <span :title="reference.name">{{
+                          reference.name
+                        }}</span>
                       </q-item-label>
                       <q-item-label
                         caption
