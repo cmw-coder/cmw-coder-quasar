@@ -19,6 +19,13 @@ import { MainWindow } from 'main/services/WindowService/types/MainWindow';
 import { UpdateWindow } from 'main/services/WindowService/types/UpdateWindow';
 import { BaseWindow } from 'main/services/WindowService/types/BaseWindow';
 import { ConfigService } from 'main/services/ConfigService';
+import { SelectionTipsWindow } from 'main/services/WindowService/types/SelectionTipsWindow';
+import { ReviewWindow } from 'main/services/WindowService/types/ReviewWindow';
+import { Selection } from 'shared/types/Selection';
+import { ReviewInstance } from 'main/components/ReviewInstance';
+import { Feedback, ReviewState } from 'shared/types/review';
+import { ReviewDataUpdateActionMessage } from 'shared/types/ActionMessage';
+import { dialog } from 'electron/main';
 
 interface WindowMap {
   [WindowType.Chat]: ChatWindow;
@@ -33,6 +40,8 @@ interface WindowMap {
   [WindowType.Update]: UpdateWindow;
   [WindowType.Welcome]: WelcomeWindow;
   [WindowType.WorkFlow]: MainWindow;
+  [WindowType.SelectionTips]: SelectionTipsWindow;
+  [WindowType.Review]: ReviewWindow;
 }
 
 @injectable()
@@ -56,6 +65,8 @@ export class WindowService implements WindowServiceTrait {
     this.windowMap.set(WindowType.Quake, new MainWindow());
     this.windowMap.set(WindowType.WorkFlow, new MainWindow());
     this.windowMap.set(WindowType.Update, new UpdateWindow());
+    this.windowMap.set(WindowType.SelectionTips, new SelectionTipsWindow());
+    this.windowMap.set(WindowType.Review, new ReviewWindow());
 
     this.trayIcon = new TrayIcon();
 
@@ -217,6 +228,85 @@ export class WindowService implements WindowServiceTrait {
       } else {
         baseWindow.mouseOut();
       }
+    }
+  }
+
+  async setChatWindowReady() {
+    const chatWindow = this.getWindow(WindowType.Chat);
+    chatWindow.isReady = true;
+    if (chatWindow.readyPromiseResolveFn) {
+      chatWindow.readyPromiseResolveFn();
+    }
+  }
+
+  async addSelectionToChat(selection?: Selection) {
+    if (!selection) {
+      selection = this.getWindow(WindowType.SelectionTips).selection;
+    }
+    if (!selection) {
+      return;
+    }
+    console.log('addSelectionToChat', selection);
+    const chatWindow = this.getWindow(WindowType.Chat);
+    chatWindow.show();
+    await chatWindow.checkReady();
+    chatWindow.addSelectionToChat(selection);
+  }
+
+  async reviewSelection(selection?: Selection) {
+    if (!selection) {
+      selection = this.getWindow(WindowType.SelectionTips).selection;
+    }
+    if (!selection) {
+      return;
+    }
+    console.log('reviewSelection', selection);
+    const reviewWindow = this.getWindow(WindowType.Review);
+    // 上一个 review 尚未结束
+    if (
+      reviewWindow.activeReview &&
+      ![ReviewState.Error, ReviewState.Finished].includes(
+        reviewWindow.activeReview.state,
+      )
+    ) {
+      const mainWindow = this.getWindow(WindowType.Main);
+      if (mainWindow._window) {
+        dialog.showMessageBox(mainWindow._window, {
+          message: '存在进行中的 review 任务',
+        });
+      }
+      return;
+    }
+
+    reviewWindow.activeReview = new ReviewInstance(selection);
+    reviewWindow.show();
+    reviewWindow.sendMessageToRenderer(
+      new ReviewDataUpdateActionMessage(
+        reviewWindow.activeReview.getReviewData(),
+      ),
+    );
+  }
+
+  async getReviewData() {
+    const reviewWindow = this.getWindow(WindowType.Review);
+    const activeReview = reviewWindow.activeReview;
+    if (!activeReview) return undefined;
+    return activeReview.getReviewData();
+  }
+  async setActiveReviewFeedback(feedback: Feedback): Promise<void> {
+    const reviewWindow = this.getWindow(WindowType.Review);
+    const activeReview = reviewWindow.activeReview;
+    if (activeReview) {
+      activeReview.feedback = feedback;
+      activeReview.saveReviewData();
+    }
+  }
+
+  async retryActiveReview() {
+    const reviewWindow = this.getWindow(WindowType.Review);
+    const activeReview = reviewWindow.activeReview;
+    if (activeReview) {
+      activeReview.retry();
     }
   }
 }

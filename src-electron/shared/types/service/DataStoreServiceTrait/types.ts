@@ -120,6 +120,16 @@ export const defaultAppData: AppData = {
       width: 800,
       show: false,
     },
+    [WindowType.SelectionTips]: {
+      height: 34,
+      width: 455,
+      show: false,
+    },
+    [WindowType.Review]: {
+      height: 1300,
+      width: 780,
+      show: false,
+    },
   },
 };
 

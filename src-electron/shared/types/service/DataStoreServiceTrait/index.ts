@@ -1,4 +1,5 @@
 import { ChatFileContent, ChatItem } from 'shared/types/ChatMessage';
+import { ReviewData } from 'shared/types/review';
 import {
   AppData,
   ModelConfig,
@@ -25,4 +26,7 @@ export interface DataStoreServiceTrait {
   saveChat(name: string, content: ChatFileContent): Promise<string>;
   deleteChat(name: string): Promise<void>;
   openChatListDir(): Promise<void>;
+  getReviewHistoryFiles(): Promise<string[]>;
+  getReviewFileContent(name: string): Promise<ReviewData[]>;
+  saveReviewItem(name: string, item: ReviewData): Promise<void>;
 }

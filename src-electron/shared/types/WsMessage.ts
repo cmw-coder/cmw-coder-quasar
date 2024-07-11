@@ -1,6 +1,7 @@
 import { Completions } from 'main/components/PromptProcessor/types';
 import { CaretPosition, SymbolInfo } from 'shared/types/common';
 import { KeptRatio } from 'main/services/StatisticsService/types';
+import { Reference } from 'shared/types/review';
 
 export enum WsAction {
   ChatInsert = 'ChatInsert',
@@ -16,6 +17,8 @@ export enum WsAction {
   EditorSwitchProject = 'EditorSwitchProject',
   EditorSwitchSvn = 'EditorSwitchSvn',
   HandShake = 'HandShake',
+  EditorSelection = 'EditorSelection',
+  ReviewRequest = 'ReviewRequest', // Electron发起Review操作请求
 }
 
 export interface WsMessage {
@@ -165,6 +168,43 @@ export interface HandShakeClientMessage extends WsMessage {
   data: { pid: number; currentProject: string; version: string };
 }
 
+export interface EditorSelectionClientMessage extends WsMessage {
+  action: WsAction.EditorSelection;
+  data: {
+    path: string;
+    content: string;
+    block: string;
+    begin: {
+      line: number;
+      character: number;
+    };
+    end: {
+      line: number;
+      character: number;
+    };
+    dimensions: {
+      height: number;
+      x: number;
+      y: number;
+    };
+  };
+}
+
+export interface ReviewRequestClientMessage extends WsMessage {
+  action: WsAction.ReviewRequest;
+  data: Reference[];
+}
+
+export class ReviewRequestServerMessage implements WsMessage {
+  action = WsAction.ReviewRequest;
+  data: StandardResult<{ content: string }>;
+  timestamp = Date.now();
+
+  constructor(data: StandardResult<{ content: string }>) {
+    this.data = data;
+  }
+}
+
 export interface WsMessageMapping {
   [WsAction.CompletionAccept]: {
     client: CompletionAcceptClientMessage;
@@ -208,6 +248,14 @@ export interface WsMessageMapping {
   };
   [WsAction.EditorSwitchSvn]: {
     client: EditorSwitchSvnClientMessage;
+    server: void;
+  };
+  [WsAction.EditorSelection]: {
+    client: EditorSelectionClientMessage;
+    server: void;
+  };
+  [WsAction.ReviewRequest]: {
+    client: ReviewRequestClientMessage;
     server: void;
   };
 }

@@ -1,6 +1,6 @@
 import { ExtensionConfig } from 'shared/types/ExtensionMessageDetails';
-import { QuestionTemplateModelContent } from 'shared/types/QuestionTemplate';
 import { ChatFileContent, ChatItem } from 'shared/types/ChatMessage';
+import { type ModelConfig } from 'shared/types/service/DataStoreServiceTrait/types';
 
 export enum UiToExtensionCommand {
   GET_CONFIG = 'GET_CONFIG',
@@ -55,7 +55,7 @@ export interface UiToExtensionCommandExecResultMap {
     refresh_token: string;
     token_type: 'bearer';
   };
-  [UiToExtensionCommand.GET_QUESTION_TEMPLATE]: QuestionTemplateModelContent;
+  [UiToExtensionCommand.GET_QUESTION_TEMPLATE]: ModelConfig;
   [UiToExtensionCommand.GET_CHAT_LIST]: ChatItem[];
   [UiToExtensionCommand.GET_CHAT]: ChatFileContent;
   [UiToExtensionCommand.NEW_CHAT]: string;
@@ -85,14 +85,22 @@ export interface UiToExtensionCommandExecResultMessage<
 
 export enum ExtensionToUiCommand {
   QUESTION = 'QUESTION',
+  CUSTOM_QUESTION = 'CUSTOM_QUESTION',
 }
 
 export interface ExtensionToUiCommandExecMap {
   [ExtensionToUiCommand.QUESTION]: string;
+  [ExtensionToUiCommand.CUSTOM_QUESTION]: {
+    code: string;
+    language: string;
+    file: string;
+    position: number[];
+  };
 }
 
 export interface ExtensionToUiCommandExecResultMap {
   [ExtensionToUiCommand.QUESTION]: string;
+  [ExtensionToUiCommand.CUSTOM_QUESTION]: undefined;
 }
 
 export interface ExtensionToUiCommandExecMessage<
@@ -111,12 +119,16 @@ export interface ExtensionToUiCommandExecResultMessage<
   content: ExtensionToUiCommandExecResultMap[T];
 }
 
-export type Commands = UiToExtensionCommand & ExtensionToUiCommand;
+export type Commands = ExtensionToUiCommand | UiToExtensionCommand;
 
 export type SendMessage<T extends Commands> = T extends ExtensionToUiCommand
   ? ExtensionToUiCommandExecMessage<T>
-  : UiToExtensionCommandExecResultMessage<T>;
+  : T extends UiToExtensionCommand
+    ? UiToExtensionCommandExecResultMessage<T>
+    : never;
 
 export type ReceiveMessage<T extends Commands> = T extends UiToExtensionCommand
   ? UiToExtensionCommandExecMessage<T>
-  : ExtensionToUiCommandExecResultMessage<T>;
+  : T extends ExtensionToUiCommand
+    ? ExtensionToUiCommandExecResultMessage<T>
+    : never;

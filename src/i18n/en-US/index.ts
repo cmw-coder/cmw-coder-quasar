@@ -156,6 +156,7 @@ export default {
           feedback: 'Feedback',
           settings: 'Settings',
           workflow: 'Workflow',
+          review: 'Review',
         },
       },
       RightMainDrawer: {},
@@ -292,6 +293,17 @@ export default {
       notifications: {
         copyFailure: 'Failed to copy the workflow ID',
         copySuccess: 'This workflow ID has been copied to the clipboard',
+      },
+    },
+    ReviewPage: {
+      labels: {
+        title: 'Review Highlight Code',
+      },
+    },
+    CodeSelectedTipsPage: {
+      labels: {
+        addToChat: 'Add to chat (Ctrl + L)',
+        review: 'Review highlight code (Ctrl + I)',
       },
     },
   },

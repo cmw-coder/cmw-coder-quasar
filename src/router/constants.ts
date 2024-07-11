@@ -128,6 +128,29 @@ export const routes: RouteRecordRaw[] = [
           },
         },
       },
+      {
+        path: 'selection-tips',
+        components: {
+          default: () => import('pages/CodeSelectedTipsPage.vue'),
+        },
+        props: {
+          header: {
+            windowType: WindowType.SelectionTips,
+          },
+        },
+      },
+      {
+        path: 'review',
+        components: {
+          header: () => import('layouts/headers/FloatingHeader.vue'),
+          default: () => import('pages/ReviewPage/ReviewPage.vue'),
+        },
+        props: {
+          header: {
+            windowType: WindowType.Review,
+          },
+        },
+      },
     ],
   },
   {
@@ -214,6 +237,19 @@ export const routes: RouteRecordRaw[] = [
           header: () => import('layouts/headers/MainHeader.vue'),
           leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
           default: () => import('pages/WorkflowPage.vue'),
+        },
+        props: {
+          header: {
+            windowType: WindowType.Main,
+          },
+        },
+      },
+      {
+        path: 'review',
+        components: {
+          header: () => import('layouts/headers/MainHeader.vue'),
+          leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
+          default: () => import('pages/ReviewPage/ReviewPage.vue'),
         },
         props: {
           header: {

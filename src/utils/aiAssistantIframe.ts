@@ -6,6 +6,8 @@ import { NEW_LINE_REGEX } from 'shared/constants/common';
 import { ServiceType } from 'shared/types/service';
 import {
   Commands,
+  ExtensionToUiCommand,
+  ExtensionToUiCommandExecMessage,
   ReceiveMessage,
   SendMessage,
   UiToExtensionCommand,
@@ -14,6 +16,7 @@ import {
 } from 'shared/types/ExtensionMessage';
 import { ExtensionConfig } from 'shared/types/ExtensionMessageDetails';
 import { ChatInsertServerMessage } from 'shared/types/WsMessage';
+import { Selection } from 'shared/types/Selection';
 
 export class AiAssistantIframe {
   private promiseMap = new Map<
@@ -77,6 +80,8 @@ export class AiAssistantIframe {
       this.promiseMap.delete(message.id);
     } else {
       // promiseMap 不存在值 ===> 插件执行消息
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
       const data = await this.execCommand(message.command, message.content);
       const sendMessage = extend({}, message) as unknown as SendMessage<T>;
       sendMessage.content = data;
@@ -223,6 +228,19 @@ export class AiAssistantIframe {
         break;
     }
     throw new Error('Unknown command');
+  }
+
+  async customQuestion(selection: Selection) {
+    const message = {
+      command: ExtensionToUiCommand.CUSTOM_QUESTION,
+      content: {
+        code: selection.content,
+        language: 'c',
+        file: selection.file,
+        position: [selection.range.start.line, selection.range.end.line, 0, 0],
+      },
+    } as ExtensionToUiCommandExecMessage<ExtensionToUiCommand.CUSTOM_QUESTION>;
+    await this.sendMessage(message);
   }
 }
 

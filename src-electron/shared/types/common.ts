@@ -20,5 +20,15 @@ export interface SymbolInfo {
   name: string;
   path: string;
   startLine: number;
-  type: string;
+  type: SymbolType;
+}
+
+export enum SymbolType {
+  Enum = 'Enum',
+  Function = 'Function',
+  Macro = 'Macro',
+  Reference = 'Reference',
+  Struct = 'Struct',
+  Unknown = 'Unknown',
+  Variable = 'Variable',
 }

@@ -17,6 +17,7 @@ import { WindowService } from 'main/services/WindowService';
 import { DataProjectType } from 'main/stores/data/types';
 import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
+import { Range } from 'main/types/vscode/range';
 import {
   CompletionErrorCause,
   getClientVersion,
@@ -29,6 +30,7 @@ import { WindowType } from 'shared/types/WindowType';
 import {
   CompletionGenerateServerMessage,
   HandShakeClientMessage,
+  ReviewRequestServerMessage,
   StandardResult,
   WsAction,
   WsMessageMapping,
@@ -38,12 +40,18 @@ import {
   getFunctionSuffix,
 } from 'main/components/PromptExtractor/utils';
 import { decode } from 'iconv-lite';
+import { Selection } from 'shared/types/Selection';
+import { Reference } from 'shared/types/review';
+import Logger from 'electron-log/main';
+// import { SymbolType } from 'shared/types/common';
 
 interface ClientInfo {
   client: WebSocket;
   currentProject: string;
   version: string;
 }
+
+const MAX_REFERENCES_REQUEST_TIME = 30000;
 
 @injectable()
 export class WebsocketService implements WebsocketServiceTrait {
@@ -60,6 +68,7 @@ export class WebsocketService implements WebsocketServiceTrait {
   private _promptProcessor = new PromptProcessor();
   private _promptExtractor = new PromptExtractor();
   private _webSocketServer?: WebSocketServer;
+  private referencesResolveHandle?: (value: Reference[]) => void;
 
   constructor(
     @inject(ServiceType.DATA_STORE)
@@ -458,6 +467,44 @@ export class WebsocketService implements WebsocketServiceTrait {
         }
       },
     );
+
+    this._registerWsAction(WsAction.EditorSelection, ({ data }) => {
+      if (data.dimensions.height === 0 || data.content.length === 0) {
+        this._windowService.getWindow(WindowType.SelectionTips).hide();
+        return;
+      }
+      Logger.log('EditorSelection', data);
+      const selectionTipsWindow = this._windowService.getWindow(
+        WindowType.SelectionTips,
+      );
+      const selection: Selection = {
+        block: data.block,
+        file: data.path,
+        content: data.content,
+        range: new Range(
+          data.begin.line,
+          data.begin.character,
+          data.end.line,
+          data.end.character,
+        ),
+        language: 'c',
+      };
+      selectionTipsWindow.trigger(
+        {
+          x: data.dimensions.x,
+          y: data.dimensions.y - 30,
+        },
+        selection,
+      );
+    });
+
+    this._registerWsAction(WsAction.ReviewRequest, ({ data }) => {
+      log.info('ReviewRequest Response', data);
+      if (this.referencesResolveHandle) {
+        this.referencesResolveHandle(data || []);
+        this.referencesResolveHandle = undefined;
+      }
+    });
   }
 
   private _registerWsAction<T extends keyof WsMessageMapping>(
@@ -469,4 +516,118 @@ export class WebsocketService implements WebsocketServiceTrait {
   ) {
     this._handlers.set(wsAction, callback);
   }
+
+  async getCodeReviewReferences(selection: Selection) {
+    const successPromise = new Promise<Reference[]>((resolve) => {
+      this.send(
+        JSON.stringify(
+          new ReviewRequestServerMessage({
+            result: 'success',
+            content: selection.block || selection.content,
+          }),
+        ),
+      );
+      log.info('getCodeReviewReferences', selection);
+      this.referencesResolveHandle = resolve;
+    });
+
+    const timeoutPromise = new Promise<Reference[]>((resolve) => {
+      setTimeout(() => {
+        resolve([]);
+      }, MAX_REFERENCES_REQUEST_TIME);
+    });
+
+    return Promise.race([successPromise, timeoutPromise]);
+  }
 }
+
+// const defaultReferences: Reference[] = [
+//   {
+//     content: 'aaaaaa',
+//     depth: 0,
+//     name: 'IF_INDEX',
+//     path: 'D:\\project\\cmw-coder\\cmw-cider-quasar\\src-electron\\shared\\types\\Selection.ts',
+//     range: {
+//       endLine: 73,
+//       startLine: 73,
+//     },
+//     type: SymbolType.Macro,
+//   },
+//   {
+//     content: 'aaaaaa',
+//     depth: 0,
+//     name: 'IF_INDEX',
+//     path: 'D:\\project\\cmw-coder\\cmw-cider-quasar\\src-electron\\shared\\types\\Selection.ts',
+//     range: {
+//       endLine: 73,
+//       startLine: 73,
+//     },
+//     type: SymbolType.Macro,
+//   },
+//   {
+//     content: 'aaaaaa',
+//     depth: 0,
+//     name: 'IF_INDEX',
+//     path: 'D:\\project\\cmw-coder\\cmw-cider-quasar\\src-electron\\shared\\types\\Selection.ts',
+//     range: {
+//       endLine: 73,
+//       startLine: 73,
+//     },
+//     type: SymbolType.Macro,
+//   },
+//   {
+//     content: 'aaaaaa',
+//     depth: 0,
+//     name: 'IF_INDEX',
+//     path: 'D:\\project\\cmw-coder\\cmw-cider-quasar\\src-electron\\shared\\types\\Selection.ts',
+//     range: {
+//       endLine: 73,
+//       startLine: 73,
+//     },
+//     type: SymbolType.Macro,
+//   },
+//   {
+//     content: 'aaaaaa',
+//     depth: 0,
+//     name: 'IF_INDEX',
+//     path: 'D:\\project\\cmw-coder\\cmw-cider-quasar\\src-electron\\shared\\types\\Selection.ts',
+//     range: {
+//       endLine: 73,
+//       startLine: 73,
+//     },
+//     type: SymbolType.Macro,
+//   },
+//   {
+//     content: 'aaaaaa',
+//     depth: 0,
+//     name: 'IF_INDEX',
+//     path: 'D:\\project\\cmw-coder\\cmw-cider-quasar\\src-electron\\shared\\types\\Selection.ts',
+//     range: {
+//       endLine: 73,
+//       startLine: 73,
+//     },
+//     type: SymbolType.Macro,
+//   },
+//   {
+//     content: 'aaaaaa',
+//     depth: 0,
+//     name: 'IF_INDEX',
+//     path: 'D:\\project\\cmw-coder\\cmw-cider-quasar\\src-electron\\shared\\types\\Selection.ts',
+//     range: {
+//       endLine: 73,
+//       startLine: 73,
+//     },
+//     type: SymbolType.Macro,
+//   },
+//   {
+//     content: 'aaaaaa',
+//     depth: 0,
+//     name: 'IF_INDEX',
+//     path: 'D:\\project\\cmw-coder\\cmw-cider-quasar\\src-electron\\shared\\types\\Selection.ts',
+//     range: {
+//       endLine: 73,
+//       startLine: 73,
+//     },
+//     type: SymbolType.Macro,
+//   },
+// ];

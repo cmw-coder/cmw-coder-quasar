@@ -9,12 +9,11 @@ import {
   removeFunctionHeader,
 } from 'main/components/PromptExtractor/utils';
 import { getService } from 'main/services';
-import { SymbolInfo } from 'main/types/SymbolInfo';
 import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
 import { timer } from 'main/utils/timer';
 import { NEW_LINE_REGEX } from 'shared/constants/common';
-import { CompletionType } from 'shared/types/common';
+import { CompletionType, SymbolInfo } from 'shared/types/common';
 import { CompletionGenerateClientMessage } from 'shared/types/WsMessage';
 import { ServiceType } from 'shared/types/service';
 

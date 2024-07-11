@@ -5,6 +5,9 @@ export enum WindowType {
   // @new
   Chat = 'Chat',
   Commit = 'Commit',
+  SelectionTips = 'SelectionTips',
+  Review = 'Review',
+
   Completions = 'Completions',
   Feedback = 'Feedback',
   Login = 'Login',

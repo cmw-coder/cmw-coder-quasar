@@ -19,13 +19,13 @@ const i18n = (relativePath: string) => {
 const navigations: Navigation[] = [
   {
     label: 'chat',
-    icon: 'mdi-source-commit',
+    icon: 'mdi-message-bulleted',
     available: true,
     route: 'chat',
   },
   {
     label: 'commit',
-    icon: 'mdi-message-bulleted',
+    icon: 'mdi-source-commit',
     available: true,
     route: 'commit',
   },
@@ -34,6 +34,12 @@ const navigations: Navigation[] = [
     icon: 'mdi-ray-start-arrow',
     available: false,
     route: 'workflow',
+  },
+  {
+    label: 'review',
+    icon: 'mdi-message-draw',
+    available: true,
+    route: 'review',
   },
   {
     label: 'feedback',
