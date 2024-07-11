@@ -8,6 +8,8 @@ import {
   ReviewState,
   Feedback,
 } from 'shared/types/review';
+import { useService } from 'app/src/utils/common';
+import { ServiceType } from 'app/src-electron/shared/types/service';
 
 defineProps({
   reviewData: {
@@ -21,6 +23,7 @@ const emit = defineEmits<{
   (e: 'feedback', feedback: Feedback): void;
 }>();
 
+const appService = useService(ServiceType.App);
 const { codeToHtml } = useHighlighter();
 
 const formatSelection = (selection: Selection) => {
@@ -57,6 +60,11 @@ const viewReferenceHandle = (reference: Reference) => {
   activeReference.value = reference;
   viewReferenceDialogFlag.value = true;
 };
+
+const locateFileHandle = (file: string) => {
+  console.log('locate file: ', file);
+  appService.locateFileInFolder(file);
+};
 </script>
 
 <template>
@@ -74,7 +82,15 @@ const viewReferenceHandle = (reference: Reference) => {
             formatSelection(reviewData.selection).rangeStr
           }}</span>
         </div>
-        <div class="file-operation">view</div>
+        <div class="file-operation">
+          <q-btn
+            flat
+            size="sm"
+            title="Locate File"
+            @click="() => locateFileHandle(reviewData.selection.file)"
+            >locate</q-btn
+          >
+        </div>
       </div>
       <div class="review-file-content-wrapper">
         <q-card

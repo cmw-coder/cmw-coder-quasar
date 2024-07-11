@@ -1,4 +1,4 @@
-import { app, ipcMain, Menu } from 'electron';
+import { app, ipcMain, Menu, shell } from 'electron';
 import log from 'electron-log/main';
 import { inject, injectable } from 'inversify';
 import { DateTime } from 'luxon';
@@ -227,5 +227,10 @@ export class AppService implements AppServiceTrait {
     //     log.debug('Shift+F5 is pressed: Shortcut Disabled');
     //   });
     // });
+  }
+
+  async locateFileInFolder(filePath: string) {
+    console.log('locateFileInFolder', filePath);
+    shell.showItemInFolder(filePath.replaceAll('/', '\\'));
   }
 }
