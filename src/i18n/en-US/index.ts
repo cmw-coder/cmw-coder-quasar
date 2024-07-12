@@ -300,6 +300,38 @@ export default {
       labels: {
         title: 'Review Highlight Code',
       },
+      components: {
+        reviewHistory: {
+          labels: {
+            title: 'History',
+            daySelect: 'Day',
+            itemSelect: 'Item',
+          },
+        },
+        reviewView: {
+          labels: {
+            locate: 'Locate',
+            locateTitle: 'Locate File In Directory',
+            depthTitle: 'Depth: ${depth}',
+            typeTitle: 'Type: ${type}',
+            viewReferenceCode: 'View',
+            viewReferenceCodeTitle: 'View Reference Code',
+            empty: 'Empty',
+            referenceLoading: 'Finding References...',
+            reviewProgressTitle: 'Review Progress',
+            reviewStepOne: '1/3 AI Is Reviewing Your Code',
+            reviewStepTwo: '2/3 Reviewer And Coder Are In A Heated Battle',
+            reviewStepThree: '3/3 AI IS Summarizing',
+            parsedFailed: 'Parse Failed',
+            noProblem: 'No Problem',
+            error: 'Error',
+            retry: 'Retry',
+            useless: 'Useless',
+            helpful: 'Helpful',
+            referenceViewDialogTitle: 'Reference Code',
+          },
+        },
+      },
     },
     CodeSelectedTipsPage: {
       labels: {

@@ -296,6 +296,38 @@ export default {
       labels: {
         title: '评审高亮代码',
       },
+      components: {
+        reviewHistory: {
+          labels: {
+            title: '历史记录',
+            daySelect: '日期',
+            itemSelect: '评审项',
+          },
+        },
+        reviewView: {
+          labels: {
+            locate: '定位',
+            locateTitle: '在目录中定位文件',
+            depthTitle: '深度: ${depth}',
+            typeTitle: '类型: ${type}',
+            viewReferenceCode: '查看',
+            viewReferenceCodeTitle: '查看参考代码',
+            empty: '空',
+            referenceLoading: '查找参考文献中...',
+            reviewProgressTitle: '审查进度',
+            reviewStepOne: '1/3 AI 正在审查您的代码',
+            reviewStepTwo: '2/3 评审者和编码者正在激烈交锋',
+            reviewStepThree: '3/3 AI 正在总结',
+            parsedFailed: '解析失败',
+            noProblem: '没有问题',
+            error: '错误',
+            retry: '重试',
+            useless: '无用',
+            helpful: '有帮助',
+            referenceViewDialogTitle: '引用代码',
+          },
+        },
+      },
     },
     CodeSelectedTipsPage: {
       labels: {

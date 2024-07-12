@@ -5,9 +5,15 @@ import { useService } from 'app/src/utils/common';
 import { Ref, computed, onMounted, ref, watch } from 'vue';
 import { Selection } from 'shared/types/Selection';
 import ReviewView from 'pages/ReviewPage/components/ReviewView.vue';
+import { useI18n } from 'vue-i18n';
 
 const show = ref(false);
 const mounted = ref(false);
+const { t } = useI18n();
+const baseName = 'pages.ReviewPage.components.reviewHistory.';
+const i18n = (relativePath: string) => {
+  return t(baseName + relativePath);
+};
 
 const selectedFile = ref('');
 const selectedReviewId: Ref<
@@ -70,7 +76,7 @@ onMounted(async () => {
 </script>
 <template>
   <div class="review-history">
-    <q-btn flat @click="() => showHandle()">History</q-btn>
+    <q-btn flat @click="() => showHandle()">{{ i18n('labels.title') }}</q-btn>
     <Teleport v-if="mounted" to=".review-wrapper">
       <q-card class="history-content" v-if="show">
         <div class="header">
@@ -88,19 +94,25 @@ onMounted(async () => {
             />
           </div>
           <div class="right">
-            <div class="title text-bold text-h8">HISTORY</div>
+            <div class="title text-bold text-h8">
+              {{ i18n('labels.title') }}
+            </div>
           </div>
         </div>
         <div class="content">
           <div class="q-pa-md">
             <div class="q-gutter-md">
-              <q-select v-model="selectedFile" :options="files" label="Day" />
+              <q-select
+                v-model="selectedFile"
+                :options="files"
+                :label="i18n('labels.daySelect')"
+              />
             </div>
             <div class="q-gutter-md">
               <q-select
                 v-model="selectedReviewId"
                 :options="compuReviewFileContentOptions"
-                label="ReviewItem"
+                :label="i18n('labels.itemSelect')"
               />
             </div>
           </div>

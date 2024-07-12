@@ -10,6 +10,7 @@ import {
 } from 'shared/types/review';
 import { useService } from 'app/src/utils/common';
 import { ServiceType } from 'app/src-electron/shared/types/service';
+import { useI18n } from 'vue-i18n';
 
 defineProps({
   reviewData: {
@@ -23,6 +24,11 @@ const emit = defineEmits<{
   (e: 'feedback', feedback: Feedback): void;
 }>();
 
+const { t } = useI18n();
+const baseName = 'pages.ReviewPage.components.reviewView.';
+const i18n = (relativePath: string, data?: Record<string, unknown>) => {
+  return data ? t(baseName + relativePath, data) : t(baseName + relativePath);
+};
 const appService = useService(ServiceType.App);
 const { codeToHtml } = useHighlighter();
 
@@ -86,9 +92,9 @@ const locateFileHandle = (file: string) => {
           <q-btn
             flat
             size="sm"
-            title="Locate File"
+            :title="i18n('labels.locateTitle')"
             @click="() => locateFileHandle(reviewData.selection.file)"
-            >locate</q-btn
+            >{{ i18n('labels.locate') }}</q-btn
           >
         </div>
       </div>
@@ -138,12 +144,21 @@ const locateFileHandle = (file: string) => {
                         <q-chip
                           color="blue-6"
                           text-color="white"
-                          :title="`深度: ${reference.depth}`"
+                          :title="
+                            i18n('labels.depthTitle', {
+                              depth: reference.depth,
+                            })
+                          "
                           >{{ reference.depth }}</q-chip
                         >
-                        <q-chip :title="`类型: ${reference.type}`">{{
-                          reference.type
-                        }}</q-chip>
+                        <q-chip
+                          :title="
+                            i18n('labels.typeTitle', {
+                              type: reference.type,
+                            })
+                          "
+                          >{{ reference.type }}</q-chip
+                        >
                         <span :title="reference.name">{{
                           reference.name
                         }}</span>
@@ -164,19 +179,19 @@ const locateFileHandle = (file: string) => {
                           flat
                           size="sm"
                           @click="() => viewReferenceHandle(reference)"
-                          >view</q-btn
+                          :title="i18n('labels.viewReferenceCodeTitle')"
+                          >{{ i18n('labels.viewReferenceCode') }}</q-btn
                         >
-                        <!-- <q-btn flat size="sm">locate</q-btn> -->
                       </q-item-label>
                     </q-item-section>
                   </q-item>
                 </q-list>
-                <div class="empty" v-else>Empty</div>
+                <div class="empty" v-else>{{ i18n('labels.empty') }}</div>
               </transition>
             </q-card-section>
             <q-inner-loading
               :showing="reviewData.state === ReviewState.References"
-              label="Finding References..."
+              :label="i18n('labels.referenceLoading')"
               label-class="text-teal"
               label-style="font-size: 1.1em"
             />
@@ -184,7 +199,7 @@ const locateFileHandle = (file: string) => {
         </q-timeline-entry>
 
         <q-timeline-entry
-          title="Review Progress"
+          :title="i18n('labels.reviewProgressTitle')"
           v-if="
             [ReviewState.Start, ReviewState.First, ReviewState.Second].includes(
               reviewData.state,
@@ -205,7 +220,10 @@ const locateFileHandle = (file: string) => {
                     class="q-ma-md"
                   />
                 </q-item-section>
-                <q-item-section>1/3 AI 正在review</q-item-section>
+                <!-- <q-item-section>1/3 AI 正在review</q-item-section> -->
+                <q-item-section>{{
+                  i18n('labels.reviewStepOne')
+                }}</q-item-section>
               </q-item>
               <q-item v-if="reviewData.state === ReviewState.First">
                 <q-item-section avatar>
@@ -219,9 +237,12 @@ const locateFileHandle = (file: string) => {
                     class="q-ma-md"
                   />
                 </q-item-section>
-                <q-item-section
+                <!-- <q-item-section
                   >2/3 Reviewer 和 Coder 正在激烈交锋</q-item-section
-                >
+                > -->
+                <q-item-section>{{
+                  i18n('labels.reviewStepTwo')
+                }}</q-item-section>
               </q-item>
               <q-item v-if="reviewData.state === ReviewState.Second">
                 <q-item-section avatar>
@@ -235,7 +256,10 @@ const locateFileHandle = (file: string) => {
                     class="q-ma-md"
                   />
                 </q-item-section>
-                <q-item-section>3/3 AI 正在总结</q-item-section>
+                <!-- <q-item-section>3/3 AI 正在总结</q-item-section> -->
+                <q-item-section>{{
+                  i18n('labels.reviewStepThree')
+                }}</q-item-section>
               </q-item>
             </q-list>
           </q-card>
@@ -246,7 +270,9 @@ const locateFileHandle = (file: string) => {
         >
           <q-card v-if="!reviewData.result.parsed">
             <q-card-section style="padding: 4px" class="parsed-error">
-              <q-chip color="red-8" class="text-white">Parse Failed</q-chip>
+              <q-chip color="red-8" class="text-white">{{
+                i18n('labels.parsedFailed')
+              }}</q-chip>
               <div>{{ reviewData.result.originData }}</div>
             </q-card-section>
           </q-card>
@@ -254,7 +280,7 @@ const locateFileHandle = (file: string) => {
             <q-card v-if="reviewData.result.data.length === 0">
               <q-card-section style="padding: 4px" class="parsed-error">
                 <q-chip color="blue-6" icon="mdi-check" text-color="white">
-                  <div class="empty">No Problem</div>
+                  <div class="empty">{{ i18n('labels.noProblem') }}</div>
                 </q-chip>
               </q-card-section>
             </q-card>
@@ -295,7 +321,7 @@ const locateFileHandle = (file: string) => {
             <q-btn
               flat
               align="between"
-              label="retry"
+              :label="i18n('labels.retry')"
               size="md"
               icon="mdi-refresh"
               color="blue-6"
@@ -305,7 +331,7 @@ const locateFileHandle = (file: string) => {
               <q-btn
                 flat
                 align="between"
-                label="useless"
+                :label="i18n('labels.useless')"
                 size="md"
                 icon="mdi-thumb-down"
                 color="grey-6"
@@ -315,7 +341,7 @@ const locateFileHandle = (file: string) => {
               <q-btn
                 flat
                 align="between"
-                label="helpful"
+                :label="i18n('labels.helpful')"
                 size="md"
                 icon="mdi-thumb-up"
                 color="blue-8"
@@ -337,20 +363,24 @@ const locateFileHandle = (file: string) => {
       </q-timeline>
       <q-card style="margin-top: 10px" class="bg-red-8 text-white" v-else>
         <q-card-section>
-          <div class="text-h6">Error</div>
+          <div class="text-h6">{{ i18n('labels.error') }}</div>
           <div class="text-subtitle2">{{ reviewData.errorInfo }}</div>
         </q-card-section>
         <q-separator dark />
 
         <q-card-actions>
-          <q-btn flat @click="() => retryHandle()">Retry</q-btn>
+          <q-btn flat @click="() => retryHandle()">{{
+            i18n('labels.retry')
+          }}</q-btn>
         </q-card-actions>
       </q-card>
     </div>
     <q-dialog v-model="viewReferenceDialogFlag">
       <q-card>
         <q-card-section>
-          <div class="text-h6">Reference Code</div>
+          <div class="text-h6">
+            {{ i18n('labels.referenceViewDialogTitle') }}
+          </div>
         </q-card-section>
 
         <q-card-section class="q-pt-none">
