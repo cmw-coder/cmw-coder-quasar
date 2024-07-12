@@ -197,14 +197,19 @@ export interface ReviewRequestClientMessage extends WsMessage {
 
 export class ReviewRequestServerMessage implements WsMessage {
   action = WsAction.ReviewRequest;
-  data: StandardResult<{ content: string }>;
+  data: StandardResult<{
+    content: string;
+    path: string;
+    beginLine: number;
+    endLine: number;
+  }>;
   timestamp = Date.now();
 
   constructor(
     data: StandardResult<{
       content: string;
       path: string;
-      startLine: number;
+      beginLine: number;
       endLine: number;
     }>,
   ) {
