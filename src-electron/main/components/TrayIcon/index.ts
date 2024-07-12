@@ -49,6 +49,7 @@ export class TrayIcon {
       this._createNormalItem(MenuEntry.Feedback, 'Feedback'),
       this._createNormalItem(MenuEntry.Settings, 'Settings'),
       this._createNormalItem(MenuEntry.Chat, 'Chat'),
+      this._createNormalItem(MenuEntry.Review, 'Review'),
       { type: 'separator' },
       this._createNormalItem(MenuEntry.Quit, 'Quit'),
     ]);

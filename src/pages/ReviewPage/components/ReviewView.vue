@@ -119,7 +119,7 @@ const locateFileHandle = (file: string) => {
     </div>
     <div class="review-step-wrapper">
       <q-timeline v-if="reviewData.state !== ReviewState.Error">
-        <q-timeline-entry title="Find References">
+        <q-timeline-entry :title="i18n('labels.referencesTitle')">
           <q-card
             class="relative-position"
             style="min-height: 80px; max-height: 200px; overflow-y: auto"
@@ -265,7 +265,7 @@ const locateFileHandle = (file: string) => {
           </q-card>
         </q-timeline-entry>
         <q-timeline-entry
-          title="Review Result"
+          :title="i18n('labels.reviewResultTitle')"
           v-if="reviewData.state === ReviewState.Finished"
         >
           <q-card v-if="!reviewData.result.parsed">

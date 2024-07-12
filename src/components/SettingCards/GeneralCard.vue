@@ -68,7 +68,7 @@ const zoomFixUpdating = ref(false);
 
 const updateLocale = async (value: Locale) => {
   locale.value = value.isoName;
-  await configService.setConfig('locale', value.isoName);
+  await configService.setLocale(value.isoName);
 };
 
 const updateTransparentFallback = async (value: boolean) => {
@@ -141,7 +141,7 @@ onMounted(async () => {
             </q-item-section>
             <q-item-section side>
               <q-item-label class="text-grey text-italic">
-                {{item.isoName}}
+                {{ item.isoName }}
               </q-item-label>
             </q-item-section>
           </q-item>
