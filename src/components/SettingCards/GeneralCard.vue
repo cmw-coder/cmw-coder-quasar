@@ -1,10 +1,19 @@
 <script setup lang="ts">
+import { useQuasar } from 'quasar';
+import allLanguages from 'quasar/lang/index.json';
 import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+
 import { WindowType } from 'shared/types/WindowType';
-import { useService } from 'utils/common';
 import { ServiceType } from 'shared/types/service';
+import messages from 'src/i18n';
+import { useService } from 'utils/common';
+
+interface Locale {
+  isoName: string;
+  nativeName: string;
+}
 
 interface Theme {
   color: string;
@@ -13,6 +22,9 @@ interface Theme {
   name: string;
 }
 
+const locales: Locale[] = allLanguages.filter((lang) =>
+  Object.keys(messages).includes(lang.isoName),
+);
 const themes: Theme[] = [
   {
     color: 'yellow',
@@ -30,14 +42,15 @@ const themes: Theme[] = [
 
 const baseName = 'components.SettingCards.GeneralCard.';
 
-const theme = ref(themes[1]);
+const theme = ref(themes[0]);
 const developerMode = ref(false);
 
 const dataStoreService = useService(ServiceType.DATA_STORE);
 const windowService = useService(ServiceType.WINDOW);
 const configService = useService(ServiceType.CONFIG);
 
-const { t } = useI18n();
+const { locale, t } = useI18n({ useScope: 'global' });
+const { lang } = useQuasar();
 const { push } = useRouter();
 
 const i18n = (relativePath: string, data?: Record<string, unknown>) => {
@@ -52,6 +65,11 @@ const transparentFallback = ref<boolean>();
 const transparentFallbackUpdating = ref(false);
 const zoomFix = ref<boolean>();
 const zoomFixUpdating = ref(false);
+
+const updateLocale = async (value: Locale) => {
+  locale.value = value.isoName;
+  await configService.setConfig('locale', value.isoName);
+};
 
 const updateTransparentFallback = async (value: boolean) => {
   transparentFallbackUpdating.value = true;
@@ -75,19 +93,19 @@ const updateZoomFix = async (value: boolean) => {
 
 const updateTheme = async (value: Theme) => {
   theme.value = value;
-  configService.setDarkMode(value.darkMode);
+  await configService.setDarkMode(value.darkMode);
 };
 
 onMounted(async () => {
   const { compatibility } = await dataStoreService.getAppDataAsync();
-  developerMode.value = await configService.getConfig('developerMode');
+  developerMode.value =
+    (await configService.getConfig('developerMode')) ?? false;
   transparentFallback.value = compatibility.transparentFallback;
   zoomFix.value = compatibility.zoomFix;
   const darkMode = await configService.getConfig('darkMode');
-  const _theme = themes.find((t) => t.darkMode === darkMode);
-  if (_theme) {
-    theme.value = _theme;
-  }
+  locale.value =
+    (await configService.getConfig('locale')) ?? lang.getLocale() ?? 'en-US';
+  theme.value = themes.find((t) => t.darkMode === darkMode) ?? theme.value;
 });
 </script>
 
@@ -97,7 +115,39 @@ onMounted(async () => {
       {{ i18n('labels.title') }}
     </q-card-section>
     <q-list bordered separator>
-      <q-expansion-item clickable group="settingGroup">
+      <q-expansion-item clickable group="generalSettingGroup">
+        <template v-slot:header>
+          <q-item-section>
+            {{ i18n('labels.locale') }}
+          </q-item-section>
+          <q-item-section side>
+            <q-item-label>
+              {{
+                locales.find(({ isoName }) => isoName == locale)?.nativeName ??
+                locale
+              }}
+            </q-item-label>
+          </q-item-section>
+        </template>
+        <q-list>
+          <q-item
+            v-for="(item, index) in locales"
+            :key="index"
+            clickable
+            @click="updateLocale(item)"
+          >
+            <q-item-section class="q-pl-md">
+              {{ item.nativeName }}
+            </q-item-section>
+            <q-item-section side>
+              <q-item-label class="text-grey text-italic">
+                {{item.isoName}}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-expansion-item>
+      <q-expansion-item clickable group="generalSettingGroup">
         <template v-slot:header>
           <q-item-section>
             {{ i18n('labels.displayTheme') }}
@@ -118,7 +168,7 @@ onMounted(async () => {
             clickable
             @click="updateTheme(item)"
           >
-            <q-item-section>
+            <q-item-section class="q-pl-md">
               {{ i18n(`labels.displayThemeOptions.${item.name}`) }}
             </q-item-section>
             <q-item-section side>

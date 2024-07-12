@@ -18,6 +18,7 @@ export interface AppConfig {
   activeModel: string;
   activeModelKey: string;
   activeChat: string;
+  locale: string;
   useMultipleChat: boolean;
   useEnterSend: boolean;
   darkMode: boolean;

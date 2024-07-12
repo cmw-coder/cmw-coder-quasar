@@ -2,57 +2,57 @@ export default {
   components: {
     AccountInput: {
       errors: {
-        account: '帐户无效（太短）',
+        account: '域账号无效（输入字符过短）',
       },
       hints: {
-        account: '请输入您的 H3C 帐户（工号）',
+        account: '请输入您的 H3C 域账号（工号）',
       },
       labels: {
-        account: '帐户',
+        account: '账号',
       },
     },
     CodeBlock: {
       tooltips: {
         copy: '复制到剪贴板',
-        insert: '插入到编辑器',
+        insert: '插入到 IDE',
       },
     },
     DarkModeButton: {
       labels: {
-        toggleDarkMode: '切换暗模式',
+        toggleDarkMode: '切换暗色模式',
       },
     },
     LoginPanels: {
       AccountPanel: {
         errors: {
-          account: '帐户无效（太短）',
+          account: '域账号无效（输入字符太短）',
         },
         labels: {
-          account: '帐户',
+          account: '账号',
           continue: '继续',
           description: '您需要登录才能使用此应用程序。',
           intro: '欢迎使用 Comware Coder',
         },
         hints: {
-          account: '请输入您的 H3C 帐户（工号）',
+          account: '请输入您的 H3C 域账号（工号）',
         },
         notifications: {
           codeFailed: '发送验证码失败',
-          networkCaption: '请检查您的网络',
+          networkCaption: '请检查您的网络是否通畅',
         },
       },
       CodePanel: {
         errors: {
-          code: '验证码无效（太短）',
+          code: '验证码无效（输入字符过短）',
         },
         labels: {
           goBack: '返回',
           code: '验证码',
-          description: '我们已将验证码发送到您的邮箱和企业微信。',
-          resend: '重新发送验证码',
+          description: '我们已将验证码发送到您的工作邮箱和企业微信。',
+          resend: '重新发送',
           resending: '重新发送中',
-          resendAfter: '后重新发送。',
-          resendBefore: '没有收到验证码？检查您的垃圾邮件或 ',
+          resendAfter: '。',
+          resendBefore: '没有收到验证码？检查您的垃圾邮件或',
           signIn: '登录',
         },
         notifications: {
@@ -60,7 +60,7 @@ export default {
           codeSent: '验证码已发送',
           loginFailed: '登录失败',
           loginSuccess: '登录成功',
-          networkCaption: '请检查您的网络',
+          networkCaption: '请检查您的网络是否通畅',
         },
       },
     },
@@ -69,7 +69,7 @@ export default {
         projectId: '项目 ID 无效',
       },
       hints: {
-        projectId: '请输入项目 ID（NV 号码或 TB 号码）',
+        projectId: '请输入项目 ID（NV 项目流水号或 TB 问题单号）',
       },
       labels: {
         projectId: '项目 ID',
@@ -80,21 +80,22 @@ export default {
         labels: {
           title: '代码补全',
           productLine: '产品线',
-          model: '型号',
+          model: 'AI 模型',
         },
       },
       GeneralCard: {
         labels: {
           developerOptions: '开发者选项',
-          displayTheme: '显示主题',
+          displayTheme: '界面主题',
           displayThemeOptions: {
             auto: '自动',
-            dark: '暗',
-            light: '亮',
+            dark: '暗色',
+            light: '亮色',
           },
-          title: '常规',
-          transparentFallback: '透明回退（Windows 7）',
-          zoomFix: '修复窗口缩放',
+          locale: '界面语言',
+          title: '通用',
+          transparentFallback: '透明窗口兼容模式（Windows 7）',
+          zoomFix: '窗口缩放修复',
         },
       },
       UpdateCard: {
@@ -112,34 +113,34 @@ export default {
     WelcomePanels: {
       AutoPanel: {
         labels: {
-          title: '检测网络区域...',
+          title: '检测当前网络区域...',
         },
       },
       FinishPanel: {
         labels: {
           confirm: '确认',
-          title: '您已完成设置！',
+          title: '您已完成初始化设置！',
           tip: '您可以在这里更改常用设置，或直接开始使用 Comware Coder。',
         },
       },
       ManualPanel: {
         labels: {
-          normalArea: '红色',
-          publicArea: '黄色/绿色',
-          secureArea: '红色路由',
-          title: '自动检测网络区域失败，请手动设置',
+          normalArea: '红区',
+          publicArea: '黄区/绿区',
+          secureArea: '路由红区',
+          title: '自动检测当前网络区域失败，请手动设置',
         },
         notifications: {
-          pingError: 'ping 服务器失败，请检查您的网络连接。',
-          pingSuccess: '成功 ping 服务器',
+          pingError: '服务器连通性测试失败，请检查您的网络连接。',
+          pingSuccess: '成功通过服务器连通性测试',
         },
         steps: [
           {
-            title: '选择网络区域',
+            title: '选择当前网络区域',
             next: '继续',
             previous: '重新检测',
           },
-          { title: '设置基本服务器 URL', next: '完成', previous: '返回' },
+          { title: '设置服务器根 URL', next: '完成', previous: '返回' },
         ],
       },
     },
@@ -148,12 +149,12 @@ export default {
     drawers: {
       LeftMainDrawer: {
         navigations: {
-          chat: '聊天',
-          commit: '提交',
-          feedback: '反馈',
-          settings: '设置',
-          workflow: '工作流',
-          review: '评审',
+          chat: 'AI 对话',
+          commit: '代码提交',
+          feedback: '问题反馈',
+          settings: '应用设置',
+          workflow: '工作流程',
+          review: '代码评审',
         },
       },
       RightMainDrawer: {},
@@ -164,7 +165,7 @@ export default {
           thinking: '思考中...',
         },
         tooltips: {
-          newTopic: '开始新话题',
+          newTopic: '开始新一轮对话',
         },
       },
     },
@@ -197,7 +198,7 @@ export default {
     CommitPage: {
       labels: {
         cancel: '取消',
-        changes: '更改的文件',
+        changes: '文件更改',
         commit: '提交',
         generate: '生成',
         message: '提交信息',
@@ -226,18 +227,18 @@ export default {
     FeedbackPage: {
       labels: {
         title: '问题反馈',
-        account: '帐户',
+        account: '账号',
         description: '问题描述',
-        images: '相关图片',
+        images: '问题相关截图',
         cancel: '取消',
         submit: '提交',
       },
       hints: {
-        account: '请输入您的 H3C 帐户（工号）',
+        account: '请输入您的 H3C 域账号（工号）',
       },
       notifications: {
         feedbackSuccess: '反馈已提交',
-        feedbackFailed: '反馈失败',
+        feedbackFailed: '反馈提交失败',
       },
     },
     LoginPage: {
@@ -251,7 +252,7 @@ export default {
         description: '当前项目文件夹：{project}',
         intro: '您需要提供项目 ID 以统计您的编码行为。',
         temporary: '这是一个临时项目',
-        title: '设置新项目',
+        title: '配置新项目',
       },
     },
     SettingsPage: {
@@ -262,7 +263,7 @@ export default {
     UpdatePage: {
       labels: {
         cancel: '暂不升级',
-        confirm: '升级',
+        confirm: '立刻升级',
         title: '有新版本可用',
         currentVersion: '当前版本：',
         newVersion: '新版本：',
@@ -283,7 +284,7 @@ export default {
         compileCode: '编译代码中...',
         copyWorkflowId: '复制工作流 ID',
         deleteWorkflow: '删除工作流',
-        deployArtifact: '部署工件中...',
+        deployArtifact: '部署二进制文件中...',
         staticCheck: '执行静态检查中...',
       },
       notifications: {
@@ -293,13 +294,13 @@ export default {
     },
     ReviewPage: {
       labels: {
-        title: '查看高亮代码',
+        title: '评审高亮代码',
       },
     },
     CodeSelectedTipsPage: {
       labels: {
         addToChat: '添加到聊天中（Ctrl + L）',
-        review: '查看高亮代码（Ctrl + I）',
+        review: '评审高亮代码（Ctrl + I）',
       },
     },
   },

@@ -23,7 +23,7 @@ const refreshHandle = async () => {
 };
 
 const init = async () => {
-  const baseUrl = await configService.getConfig('baseServerUrl');
+  const baseUrl = await configService.getConfig('baseServerUrl') ?? '';
   const iframeDom = document.getElementById(
     'iframeAiAssistant',
   ) as HTMLIFrameElement;

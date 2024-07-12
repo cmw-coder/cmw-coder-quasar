@@ -93,6 +93,7 @@ export default {
             dark: 'Dark',
             light: 'Light',
           },
+          locale: 'Language',
           title: 'General',
           transparentFallback: 'Transparent fallback (Windows 7)',
           zoomFix: 'Fix window zoom',
