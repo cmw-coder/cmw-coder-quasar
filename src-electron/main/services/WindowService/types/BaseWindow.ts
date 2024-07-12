@@ -1,4 +1,8 @@
-import { BrowserWindow, BrowserWindowConstructorOptions } from 'electron';
+import {
+  BrowserWindow,
+  BrowserWindowConstructorOptions,
+  screen,
+} from 'electron';
 import Logger from 'electron-log';
 import { ACTION_API_KEY, WINDOW_URL_MAPPING } from 'shared/constants/common';
 import { ServiceType } from 'shared/types/service';
@@ -27,7 +31,7 @@ const defaultBrowserWindowConstructorOptions: windowOptions = {
   focusable: true,
   alwaysOnTop: true,
   fullscreenable: false,
-  skipTaskbar: true,
+  skipTaskbar: false,
   show: false,
   frame: false,
   transparent: false,
@@ -50,7 +54,7 @@ export abstract class BaseWindow {
     private options?: windowOptions,
   ) {
     this._type = type;
-    this._url = `${process.env.APP_URL}#${WINDOW_URL_MAPPING[type]}`;
+    this._url = `${process.env.APP_URL}/#${WINDOW_URL_MAPPING[type]}`;
   }
 
   create() {
@@ -163,7 +167,14 @@ export abstract class BaseWindow {
     }
     // 设置窗口位置
     if (this.options?.storePosition) {
-      this._window.setPosition(_x, _y);
+      // 检查窗口是否超出屏幕
+      const { width: windowWidth, height: windowHeight } =
+        screen.getPrimaryDisplay().workAreaSize;
+      if (_x >= windowWidth || _y >= windowHeight) {
+        this._window.center();
+      } else {
+        this._window.setPosition(_x, _y);
+      }
     } else {
       this._window.center();
     }

@@ -200,7 +200,14 @@ export class ReviewRequestServerMessage implements WsMessage {
   data: StandardResult<{ content: string }>;
   timestamp = Date.now();
 
-  constructor(data: StandardResult<{ content: string }>) {
+  constructor(
+    data: StandardResult<{
+      content: string;
+      path: string;
+      startLine: number;
+      endLine: number;
+    }>,
+  ) {
     this.data = data;
   }
 }

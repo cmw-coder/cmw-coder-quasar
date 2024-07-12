@@ -524,6 +524,9 @@ export class WebsocketService implements WebsocketServiceTrait {
           new ReviewRequestServerMessage({
             result: 'success',
             content: selection.block || selection.content,
+            path: selection.file,
+            startLine: selection.range.start.line,
+            endLine: selection.range.end.line,
           }),
         ),
       );
