@@ -54,7 +54,7 @@ export abstract class BaseWindow {
     private options?: windowOptions,
   ) {
     this._type = type;
-    this._url = `${process.env.APP_URL}/#${WINDOW_URL_MAPPING[type]}`;
+    this._url = `${process.env.APP_URL}#${WINDOW_URL_MAPPING[type]}`;
   }
 
   create() {
