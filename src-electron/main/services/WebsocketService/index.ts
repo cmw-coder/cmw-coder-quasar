@@ -525,7 +525,7 @@ export class WebsocketService implements WebsocketServiceTrait {
             result: 'success',
             content: selection.block || selection.content,
             path: selection.file,
-            startLine: selection.range.start.line,
+            beginLine: selection.range.start.line,
             endLine: selection.range.end.line,
           }),
         ),
