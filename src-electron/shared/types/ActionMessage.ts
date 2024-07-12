@@ -14,6 +14,7 @@ export enum ActionType {
   CheckChatIsReady = 'CheckChatIsReady',
   AddSelectionToChat = 'AddSelectionToChat',
   ReviewDataUpdate = 'ReviewDataUpdate',
+  SwitchLocale = 'SwitchLocale',
 }
 
 export interface ActionMessage {
@@ -124,6 +125,15 @@ export class ReviewDataUpdateActionMessage implements ActionMessage {
   }
 }
 
+export class SwitchLocaleActionMessage implements ActionMessage {
+  type = ActionType.SwitchLocale;
+  data: string;
+
+  constructor(data: string) {
+    this.data = data;
+  }
+}
+
 export interface ActionMessageMapping {
   [ActionType.CompletionClear]: CompletionClearActionMessage;
   [ActionType.CompletionSet]: CompletionSetActionMessage;
@@ -136,4 +146,5 @@ export interface ActionMessageMapping {
   [ActionType.CheckChatIsReady]: CheckChatIsReadyActionMessage;
   [ActionType.AddSelectionToChat]: AddSelectionToChatActionMessage;
   [ActionType.ReviewDataUpdate]: ReviewDataUpdateActionMessage;
+  [ActionType.SwitchLocale]: SwitchLocaleActionMessage;
 }

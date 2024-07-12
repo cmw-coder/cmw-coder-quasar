@@ -93,6 +93,7 @@ export default {
             dark: 'Dark',
             light: 'Light',
           },
+          locale: 'Language',
           title: 'General',
           transparentFallback: 'Transparent fallback (Windows 7)',
           zoomFix: 'Fix window zoom',
@@ -298,6 +299,40 @@ export default {
     ReviewPage: {
       labels: {
         title: 'Review Highlight Code',
+      },
+      components: {
+        reviewHistory: {
+          labels: {
+            title: 'History',
+            daySelect: 'Day',
+            itemSelect: 'Item',
+          },
+        },
+        reviewView: {
+          labels: {
+            locate: 'Locate',
+            locateTitle: 'Locate File In Directory',
+            depthTitle: 'Depth: ${depth}',
+            typeTitle: 'Type: ${type}',
+            referencesTitle: 'Find References',
+            viewReferenceCode: 'View',
+            viewReferenceCodeTitle: 'View Reference Code',
+            empty: 'Empty',
+            referenceLoading: 'Finding References...',
+            reviewProgressTitle: 'Review Progress',
+            reviewResultTitle: 'Review Result',
+            reviewStepOne: '1/3 AI Is Reviewing Your Code',
+            reviewStepTwo: '2/3 Reviewer And Coder Are In A Heated Battle',
+            reviewStepThree: '3/3 AI IS Summarizing',
+            parsedFailed: 'Parse Failed',
+            noProblem: 'No Problem',
+            error: 'Error',
+            retry: 'Retry',
+            useless: 'Useless',
+            helpful: 'Helpful',
+            referenceViewDialogTitle: 'Reference Code',
+          },
+        },
       },
     },
     CodeSelectedTipsPage: {

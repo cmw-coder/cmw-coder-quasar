@@ -80,6 +80,9 @@ export class WindowService implements WindowServiceTrait {
     this.trayIcon.registerMenuEntry(MenuEntry.Chat, () => {
       this.getWindow(WindowType.Chat).show();
     });
+    this.trayIcon.registerMenuEntry(MenuEntry.Review, () => {
+      this.getWindow(WindowType.Review).show();
+    });
     this.trayIcon.registerMenuEntry(MenuEntry.Quit, () => app.exit());
   }
 
