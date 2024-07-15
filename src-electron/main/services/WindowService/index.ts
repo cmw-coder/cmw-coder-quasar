@@ -257,13 +257,17 @@ export class WindowService implements WindowServiceTrait {
   }
 
   async reviewSelection(selection?: Selection) {
+    const selectionTipsWindow = this.getWindow(WindowType.SelectionTips);
+    const extraData = selectionTipsWindow.extraData;
+    if (!extraData) {
+      return;
+    }
     if (!selection) {
-      selection = this.getWindow(WindowType.SelectionTips).selection;
+      selection = selectionTipsWindow.selection;
     }
     if (!selection) {
       return;
     }
-    console.log('reviewSelection', selection);
     const reviewWindow = this.getWindow(WindowType.Review);
     // 上一个 review 尚未结束
     if (
@@ -281,7 +285,7 @@ export class WindowService implements WindowServiceTrait {
       return;
     }
 
-    reviewWindow.activeReview = new ReviewInstance(selection);
+    reviewWindow.activeReview = new ReviewInstance(selection, extraData);
     reviewWindow.show();
     reviewWindow.sendMessageToRenderer(
       new ReviewDataUpdateActionMessage(
@@ -302,6 +306,14 @@ export class WindowService implements WindowServiceTrait {
     if (activeReview) {
       activeReview.feedback = feedback;
       activeReview.saveReviewData();
+      reviewWindow.sendMessageToRenderer(
+        new ReviewDataUpdateActionMessage(activeReview.getReviewData()),
+      );
+      if (feedback === Feedback.Helpful) {
+        activeReview.reportHelpful();
+      } else if (feedback === Feedback.NotHelpful) {
+        activeReview.reportUnHelpful();
+      }
     }
   }
 

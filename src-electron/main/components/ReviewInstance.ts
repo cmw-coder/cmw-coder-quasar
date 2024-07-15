@@ -8,7 +8,7 @@ import { ConfigService } from 'main/services/ConfigService';
 import { WebsocketService } from 'main/services/WebsocketService';
 import { WindowService } from 'main/services/WindowService';
 import { ReviewDataUpdateActionMessage } from 'shared/types/ActionMessage';
-import { Selection } from 'shared/types/Selection';
+import { ExtraData, Selection } from 'shared/types/Selection';
 import { WindowType } from 'shared/types/WindowType';
 import {
   Feedback,
@@ -21,6 +21,8 @@ import { ServiceType } from 'shared/types/service';
 import log from 'electron-log/main';
 import { DataStoreService } from 'main/services/DataStoreService';
 import { DateTime } from 'luxon';
+import { constructData } from 'main/services/StatisticsService/utils';
+import { api_reportSKU } from 'main/request/sku';
 
 const REFRESH_TIME = 1500;
 
@@ -33,8 +35,67 @@ export class ReviewInstance {
   feedback = Feedback.None;
   errorInfo = '';
 
-  constructor(private selection: Selection) {
+  constructor(
+    private selection: Selection,
+    private extraData: ExtraData,
+  ) {
     this.createReviewRequest();
+    // 上报一次 review 使用
+    this.reportReviewUsage();
+  }
+
+  async reportReviewUsage() {
+    try {
+      await api_reportSKU(
+        await constructData(
+          1,
+          Date.now(),
+          Date.now(),
+          this.extraData.projectId,
+          this.extraData.version,
+          'CODE_REVIEW',
+          'USE',
+        ),
+      );
+    } catch (e) {
+      log.error('reportReviewUsage.failed', e);
+    }
+  }
+
+  async reportHelpful() {
+    try {
+      await api_reportSKU(
+        await constructData(
+          1,
+          Date.now(),
+          Date.now(),
+          this.extraData.projectId,
+          this.extraData.version,
+          'CODE_REVIEW',
+          'LIKE',
+        ),
+      );
+    } catch (e) {
+      log.error('reportReviewUsage.failed', e);
+    }
+  }
+
+  async reportUnHelpful() {
+    try {
+      await api_reportSKU(
+        await constructData(
+          1,
+          Date.now(),
+          Date.now(),
+          this.extraData.projectId,
+          this.extraData.version,
+          'CODE_REVIEW',
+          'UNLIKE',
+        ),
+      );
+    } catch (e) {
+      log.error('reportReviewUsage.failed', e);
+    }
   }
 
   retry() {

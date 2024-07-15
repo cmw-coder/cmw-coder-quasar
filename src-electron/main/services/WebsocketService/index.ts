@@ -489,13 +489,20 @@ export class WebsocketService implements WebsocketServiceTrait {
         ),
         language: 'c',
       };
-      selectionTipsWindow.trigger(
-        {
-          x: data.dimensions.x,
-          y: data.dimensions.y - 30,
-        },
-        selection,
-      );
+      const projectId = this.getClientInfo(this._lastActivePid)?.currentProject;
+      if (projectId) {
+        selectionTipsWindow.trigger(
+          {
+            x: data.dimensions.x,
+            y: data.dimensions.y - 30,
+          },
+          selection,
+          {
+            projectId: projectId,
+            version: getClientVersion(this._lastActivePid),
+          },
+        );
+      }
     });
 
     this._registerWsAction(WsAction.ReviewRequest, ({ data }) => {
