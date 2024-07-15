@@ -3,7 +3,7 @@ import {
   api_get_code_review_result,
   api_get_code_review_state,
 } from 'main/request/review';
-import { container } from 'main/services';
+import { container, getService } from 'main/services';
 import { ConfigService } from 'main/services/ConfigService';
 import { WebsocketService } from 'main/services/WebsocketService';
 import { WindowService } from 'main/services/WindowService';
@@ -21,7 +21,6 @@ import { ServiceType } from 'shared/types/service';
 import log from 'electron-log/main';
 import { DataStoreService } from 'main/services/DataStoreService';
 import { DateTime } from 'luxon';
-import { constructData } from 'main/services/StatisticsService/utils';
 import { api_reportSKU } from 'main/request/sku';
 
 const REFRESH_TIME = 1500;
@@ -45,54 +44,72 @@ export class ReviewInstance {
   }
 
   async reportReviewUsage() {
+    const appConfig = await getService(ServiceType.CONFIG).getConfigs();
     try {
-      await api_reportSKU(
-        await constructData(
-          1,
-          Date.now(),
-          Date.now(),
-          this.extraData.projectId,
-          this.extraData.version,
-          'CODE_REVIEW',
-          'USE',
-        ),
-      );
+      await api_reportSKU([
+        {
+          begin: Date.now(),
+          end: Date.now(),
+          count: 1,
+          type: 'AIGC',
+          product: 'SI',
+          firstClass: 'CODE_REVIEW',
+          secondClass: 'USE',
+          skuName: '*',
+          user: appConfig.username,
+          userType: 'USER',
+          subType: this.extraData.projectId,
+          extra: this.extraData.version,
+        },
+      ]);
     } catch (e) {
       log.error('reportReviewUsage.failed', e);
     }
   }
 
   async reportHelpful() {
+    const appConfig = await getService(ServiceType.CONFIG).getConfigs();
     try {
-      await api_reportSKU(
-        await constructData(
-          1,
-          Date.now(),
-          Date.now(),
-          this.extraData.projectId,
-          this.extraData.version,
-          'CODE_REVIEW',
-          'LIKE',
-        ),
-      );
+      await api_reportSKU([
+        {
+          begin: Date.now(),
+          end: Date.now(),
+          count: 1,
+          type: 'AIGC',
+          product: 'SI',
+          firstClass: 'CODE_REVIEW',
+          secondClass: 'LIKE',
+          skuName: '*',
+          user: appConfig.username,
+          userType: 'USER',
+          subType: this.extraData.projectId,
+          extra: this.extraData.version,
+        },
+      ]);
     } catch (e) {
       log.error('reportReviewUsage.failed', e);
     }
   }
 
   async reportUnHelpful() {
+    const appConfig = await getService(ServiceType.CONFIG).getConfigs();
     try {
-      await api_reportSKU(
-        await constructData(
-          1,
-          Date.now(),
-          Date.now(),
-          this.extraData.projectId,
-          this.extraData.version,
-          'CODE_REVIEW',
-          'UNLIKE',
-        ),
-      );
+      await api_reportSKU([
+        {
+          begin: Date.now(),
+          end: Date.now(),
+          count: 1,
+          type: 'AIGC',
+          product: 'SI',
+          firstClass: 'CODE_REVIEW',
+          secondClass: 'UNLIKE',
+          skuName: '*',
+          user: appConfig.username,
+          userType: 'USER',
+          subType: this.extraData.projectId,
+          extra: this.extraData.version,
+        },
+      ]);
     } catch (e) {
       log.error('reportReviewUsage.failed', e);
     }

@@ -489,8 +489,9 @@ export class WebsocketService implements WebsocketServiceTrait {
         ),
         language: 'c',
       };
-      const projectId = this.getClientInfo(this._lastActivePid)?.currentProject;
-      if (projectId) {
+      const project = this.getClientInfo(this._lastActivePid)?.currentProject;
+      if (project) {
+        const { id: projectId } = getProjectData(project);
         selectionTipsWindow.trigger(
           {
             x: data.dimensions.x,
