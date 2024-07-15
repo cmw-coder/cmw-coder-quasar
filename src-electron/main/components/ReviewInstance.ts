@@ -66,7 +66,7 @@ export class ReviewInstance {
       this.reviewId = await api_code_review({
         productLine: appConfig.activeTemplate,
         profileModel: appConfig.activeModel,
-        templateName: '',
+        templateName: 'CodeReviewV1',
         references: this.references,
         target: {
           block: '',
