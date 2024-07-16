@@ -3,6 +3,7 @@ import { readFile } from 'fs/promises';
 import { decode } from 'iconv-lite';
 import { basename, dirname } from 'path';
 
+import { MODULE_PATH } from 'main/components/PromptExtractor/constants';
 import {
   getBoundingPrefix,
   getBoundingSuffix,
@@ -24,10 +25,9 @@ export class PromptElements {
   suffix: string;
   // Language
   language?: string;
-  // FilePath
   file?: string;
-  // RepoName
   folder?: string;
+  repo?: string;
   // SimilarSnippet
   similarSnippet?: string;
   // RelativeDefinition
@@ -120,13 +120,18 @@ export class RawInputs {
     );
     this.symbols = symbols;
 
-    const relativePath = this.document.fileName.substring(this.project.length);
     this.elements.language = this.document.languageId;
     this.elements.file = basename(this.document.fileName);
-    this.elements.folder = dirname(relativePath);
+    this.elements.folder = dirname(this.document.fileName);
+    for (const [key, value] of Object.entries(MODULE_PATH)) {
+      if (this.document.fileName.includes(value)) {
+        this.elements.repo = key;
+        break;
+      }
+    }
   }
 
-  get relativeDefinitions() {
+  async getRelativeDefinitions() {
     const result = Promise.all(
       this.symbols.map(async ({ path, startLine, endLine }) => {
         try {

@@ -1,4 +1,5 @@
 import log from 'electron-log/main';
+import { basename } from 'path';
 
 import {
   IGNORE_COMMON_WORD,
@@ -19,11 +20,12 @@ import {
   tokenize,
   getFunctionSuffix,
 } from 'main/components/PromptExtractor/utils';
+import { getService } from 'main/services';
 import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
 import { timer } from 'main/utils/timer';
-import path from 'path';
 import { SimilarSnippet } from 'shared/types/common';
+import { ServiceType } from 'shared/types/service';
 
 export class PromptExtractor {
   private _similarSnippetConfig: SimilarSnippetConfig = {
@@ -37,21 +39,33 @@ export class PromptExtractor {
   }
 
   async getPromptComponents(
+    actionId: string,
     inputs: RawInputs,
     similarSnippetCount: number = 1,
   ): Promise<PromptElements> {
     const { elements, document, position, recentFiles } = inputs;
-    timer.add('CompletionGenerate', 'CalculatedFileFolder');
 
     const [similarSnippets, relativeDefinitions] = await Promise.all([
-      this.getSimilarSnippets(
-        document,
-        position,
-        getFunctionPrefix(elements.prefix) ?? elements.prefix,
-        getFunctionSuffix(elements.suffix) ?? elements.suffix,
-        recentFiles,
-      ),
-      inputs.relativeDefinitions,
+      (async () => {
+        const result = await this.getSimilarSnippets(
+          document,
+          position,
+          getFunctionPrefix(elements.prefix) ?? elements.prefix,
+          getFunctionSuffix(elements.suffix) ?? elements.suffix,
+          recentFiles,
+        );
+        getService(ServiceType.STATISTICS).completionUpdateSimilarSnippetsTime(
+          actionId,
+        );
+        return result;
+      })(),
+      (async () => {
+        const relativeDefinitions = await inputs.getRelativeDefinitions();
+        getService(ServiceType.STATISTICS).completionUpdateRelativeDefinitionsTime(
+          actionId,
+        );
+        return relativeDefinitions;
+      })(),
     ]);
 
     const similarSnippetsSliced = similarSnippets
@@ -93,7 +107,7 @@ export class PromptExtractor {
         elements.neighborSnippet = otherFileSimilarSnippets
           .map(
             (similarSnippet) =>
-              `<file_sep>${path.basename(similarSnippet.path)}\n${similarSnippet.content}`,
+              `<file_sep>${basename(similarSnippet.path)}\n${similarSnippet.content}`,
           )
           .join('\n');
       }
@@ -146,7 +160,7 @@ export class PromptExtractor {
         elements.neighborSnippet = otherFileRelativeDefinitions
           .map(
             (relativeDefinition) =>
-              `<file_sep>${path.basename(relativeDefinition.path)}\n${relativeDefinition.content}`,
+              `<file_sep>${basename(relativeDefinition.path)}\n${relativeDefinition.content}`,
           )
           .join('\n');
       }

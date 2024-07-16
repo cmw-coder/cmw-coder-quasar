@@ -149,3 +149,33 @@ export const IGNORE_COMWARE_INTERNAL = new Set([
   'S', //? Struct
   'T', //? Typedef
 ]);
+
+export const MODULE_PATH = {
+  ACCESS: 'ACCESS/src/sbin',
+  CRYPTO: 'CRYPTO/src/sbin',
+  DC: 'DC/src/sbin',
+  DEV: 'DEV/src/sbin',
+  DLP: 'DLP/src/sbin',
+  DPI: 'DPI/src/sbin',
+  DRV_SIMSWITCH: 'DRV_SIMSWITCH/src/sbin',
+  DRV_SIMWARE9: 'DRV_SIMWARE9/src/sbin',
+  FE: 'FE/src/sbin',
+  FW: 'FW/src/sbin',
+  IP: 'IP/src/sbin',
+  L2VPN: 'L2VPN/src/sbin',
+  LAN: 'LAN/src/sbin',
+  LB: 'LB/src/sbin',
+  LINK: 'LINK/src/sbin',
+  LSM: 'LSM/src/sbin',
+  MCAST: 'MCAST/src/sbin',
+  NETFWD: 'NETFWD/src/sbin',
+  OFP: 'OFP/src/sbin',
+  PSEC: 'PSEC/src/sbin',
+  PUBLIC: 'PUBLIC/include/comware',
+  QACL: 'QACL/src/sbin',
+  TEST: 'TEST/src/sbin',
+  VOICE: 'VOICE/src/sbin',
+  VPN: 'VPN/src/sbin',
+  WLAN: 'WLAN/src/sbin',
+  X86PLAT: 'X86PLAT/src/sbin',
+} as const;

@@ -43,7 +43,6 @@ import { decode } from 'iconv-lite';
 import { Selection } from 'shared/types/Selection';
 import { Reference } from 'shared/types/review';
 import Logger from 'electron-log/main';
-// import { SymbolType } from 'shared/types/common';
 
 interface ClientInfo {
   client: WebSocket;
@@ -295,8 +294,13 @@ export class WebsocketService implements WebsocketServiceTrait {
     this._registerWsAction(
       WsAction.CompletionGenerate,
       async ({ data }, pid) => {
-        const { caret } = data;
-        const actionId = this._statisticsReporterService.completionBegin(caret);
+        const { caret, times } = data;
+        const actionId = this._statisticsReporterService.completionBegin(
+          caret,
+          times.start,
+          times.symbol,
+          times.end,
+        );
         const project = this.getClientInfo(pid)?.currentProject;
         if (!project || !project.length) {
           return new CompletionGenerateServerMessage({
@@ -316,6 +320,7 @@ export class WebsocketService implements WebsocketServiceTrait {
 
           const promptElements =
             await this._promptExtractor.getPromptComponents(
+              actionId,
               new RawInputs(data, project),
             );
           this._statisticsReporterService.completionUpdatePromptElements(
@@ -324,6 +329,7 @@ export class WebsocketService implements WebsocketServiceTrait {
           );
 
           const completions = await this._promptProcessor.process(
+            actionId,
             promptElements,
             projectId,
           );

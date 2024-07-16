@@ -31,9 +31,9 @@ export class StatisticsService implements StatisticsServiceTrait {
   constructor() {
     setInterval(() => {
       for (const [actionId, data] of this._recentCompletion) {
-        if (data.timelines.startGenerate.isValid) {
+        if (data.timelines.proxyEndEditorInfo.isValid) {
           const now = DateTime.now();
-          if (now.diff(data.timelines.startGenerate).as('minutes') > 30) {
+          if (now.diff(data.timelines.proxyEndEditorInfo).as('minutes') > 30) {
             this.completionAbort(actionId);
           }
         }
@@ -57,13 +57,13 @@ export class StatisticsService implements StatisticsServiceTrait {
       position: data.position,
       projectId: data.projectId,
       timelines: {
-        startGenerate: data.timelines.startGenerate.toFormat(
+        startGenerate: data.timelines.proxyEndEditorInfo.toFormat(
           'yyyy-MM-dd HH:mm:ss:SSS',
         ),
-        endGenerate: data.timelines.endGenerate.toFormat(
+        endGenerate: data.timelines.coderEndPostProcess.toFormat(
           'yyyy-MM-dd HH:mm:ss:SSS',
         ),
-        startAccept: data.timelines.startAccept.toFormat(
+        startAccept: data.timelines.coderStartAccept.toFormat(
           'yyyy-MM-dd HH:mm:ss:SSS',
         ),
       },
@@ -78,7 +78,7 @@ export class StatisticsService implements StatisticsServiceTrait {
       await api_reportSKU(
         await constructData(
           lineLength,
-          data.timelines.startAccept.toMillis(),
+          data.timelines.coderStartAccept.toMillis(),
           DateTime.now().toMillis(),
           data.projectId,
           version,
@@ -91,10 +91,18 @@ export class StatisticsService implements StatisticsServiceTrait {
     }
   }
 
-  completionBegin(caretPosition: CaretPosition) {
+  completionBegin(
+    caretPosition: CaretPosition,
+    start: number,
+    symbol: number,
+    end: number,
+  ) {
     timer.add('CompletionGenerate', 'generationStart');
     const actionId = uid();
-    this._recentCompletion.set(actionId, new CompletionData(caretPosition));
+    this._recentCompletion.set(
+      actionId,
+      new CompletionData(caretPosition, start, symbol, end),
+    );
     return actionId;
   }
 
@@ -115,13 +123,13 @@ export class StatisticsService implements StatisticsServiceTrait {
         position: data.position,
         projectId: data.projectId,
         timelines: {
-          startGenerate: data.timelines.startGenerate.toFormat(
+          startGenerate: data.timelines.proxyEndEditorInfo.toFormat(
             'yyyy-MM-dd HH:mm:ss:SSS',
           ),
-          endGenerate: data.timelines.endGenerate.toFormat(
+          endGenerate: data.timelines.coderEndPostProcess.toFormat(
             'yyyy-MM-dd HH:mm:ss:SSS',
           ),
-          startAccept: data.timelines.startAccept.toFormat(
+          startAccept: data.timelines.coderStartAccept.toFormat(
             'yyyy-MM-dd HH:mm:ss:SSS',
           ),
         },
@@ -149,24 +157,55 @@ export class StatisticsService implements StatisticsServiceTrait {
     }
 
     const requestData: CollectionData = {
-      createTime: data.timelines.startGenerate.toFormat('yyyy-MM-dd HH:mm:ss'),
+      createTime: data.timelines.proxyEndEditorInfo.toFormat(
+        'yyyy-MM-dd HH:mm:ss',
+      ),
       prefix: data.elements.prefix,
       suffix: data.elements.suffix,
+      repo: data.elements.repo ?? '',
       path: join(data.elements.folder ?? '', data.elements.file ?? ''),
+      fileSuffix: data.elements.file
+        ? extname(basename(data.elements.file))
+        : '',
       similarSnippet: data.elements.similarSnippet ?? '',
       symbolList: data.elements.symbols ? [data.elements.symbols] : [],
+      model: data.model ?? '',
+      templateName: data.templateName ?? '',
       answer: data.completions.candidates,
       acceptAnswerIndex: data.lastChecked,
       accept: ratio === KeptRatio.None ? 0 : 1,
       afterCode: editedContent,
       plugin: 'SI',
       projectId: data.projectId,
-      fileSuffix: data.elements.file
-        ? extname(basename(data.elements.file))
-        : '',
+      latency: {
+        editorInfo: data.timelines.proxyStartEditorInfo.diff(
+          data.timelines.proxyStartSymbolInfo,
+        ).milliseconds,
+        symbolLocation: data.timelines.proxyStartSymbolInfo.diff(
+          data.timelines.proxyEndEditorInfo,
+        ).milliseconds,
+        similarSnippets: data.timelines.coderEndSimilarSnippets.diff(
+          data.timelines.proxyEndEditorInfo,
+        ).milliseconds,
+        symbolData: data.timelines.coderEndRelativeDefinitions.diff(
+          data.timelines.proxyEndEditorInfo,
+        ).milliseconds,
+        prompt: data.timelines.coderEndConstructPrompt.diff(
+          data.timelines.proxyEndEditorInfo,
+        ).milliseconds,
+        request: data.timelines.coderEndRequest.diff(
+          data.timelines.coderEndConstructPrompt,
+        ).milliseconds,
+        postProcess: data.timelines.coderEndPostProcess.diff(
+          data.timelines.coderEndRequest,
+        ).milliseconds,
+        total: data.timelines.coderStartAccept.diff(
+          data.timelines.proxyStartEditorInfo,
+        ).milliseconds,
+      },
     };
 
-    log.debug('StatisticsReporter.completionKept', [requestData]);
+    log.debug('StatisticsReporter.completionKept', { requestData });
 
     try {
       await Promise.all([
@@ -176,7 +215,7 @@ export class StatisticsService implements StatisticsServiceTrait {
           : api_reportSKU(
               await constructData(
                 count,
-                data.timelines.startAccept.toMillis(),
+                data.timelines.coderStartAccept.toMillis(),
                 DateTime.now().toMillis(),
                 data.projectId,
                 version,
@@ -199,7 +238,7 @@ export class StatisticsService implements StatisticsServiceTrait {
     }
     data.completions = completions;
     if (data.timelines) {
-      data.timelines.endGenerate = DateTime.now();
+      data.timelines.coderEndPostProcess = DateTime.now();
     }
   }
 
@@ -225,13 +264,13 @@ export class StatisticsService implements StatisticsServiceTrait {
         position: data.position,
         projectId: data.projectId,
         timelines: {
-          startGenerate: data.timelines.startGenerate.toFormat(
+          startGenerate: data.timelines.proxyEndEditorInfo.toFormat(
             'yyyy-MM-dd HH:mm:ss:SSS',
           ),
-          endGenerate: data.timelines.endGenerate.toFormat(
+          endGenerate: data.timelines.coderEndPostProcess.toFormat(
             'yyyy-MM-dd HH:mm:ss:SSS',
           ),
-          startAccept: data.timelines.startAccept.toFormat(
+          startAccept: data.timelines.coderStartAccept.toFormat(
             'yyyy-MM-dd HH:mm:ss:SSS',
           ),
         },
@@ -240,8 +279,8 @@ export class StatisticsService implements StatisticsServiceTrait {
       const lineLength = candidate.split(NEW_LINE_REGEX).length;
       constructData(
         lineLength,
-        data.timelines.startGenerate.toMillis(),
-        data.timelines.endGenerate.toMillis(),
+        data.timelines.proxyEndEditorInfo.toMillis(),
+        data.timelines.coderEndPostProcess.toMillis(),
         data.projectId,
         version,
         'CODE',
@@ -261,11 +300,45 @@ export class StatisticsService implements StatisticsServiceTrait {
     }
   }
 
+  completionUpdatePromptConstructTime(
+    actionId: string,
+    model: string,
+    templateName: string,
+  ) {
+    const data = this._recentCompletion.get(actionId);
+    if (data) {
+      data.model = model;
+      data.templateName = templateName;
+      data.timelines.coderEndConstructPrompt = DateTime.now();
+    }
+  }
+
   completionUpdatePromptElements(actionId: string, elements: PromptElements) {
     timer.add('CompletionGenerate', 'generationUpdatePromptElements');
     const data = this._recentCompletion.get(actionId);
     if (data) {
       data.elements = elements;
+    }
+  }
+
+  completionUpdateRelativeDefinitionsTime(actionId: string) {
+    const data = this._recentCompletion.get(actionId);
+    if (data) {
+      data.timelines.coderEndRelativeDefinitions = DateTime.now();
+    }
+  }
+
+  completionUpdateRequestEndTime(actionId: string) {
+    const data = this._recentCompletion.get(actionId);
+    if (data) {
+      data.timelines.coderEndRequest = DateTime.now();
+    }
+  }
+
+  completionUpdateSimilarSnippetsTime(actionId: string) {
+    const data = this._recentCompletion.get(actionId);
+    if (data) {
+      data.timelines.coderEndSimilarSnippets = DateTime.now();
     }
   }
 

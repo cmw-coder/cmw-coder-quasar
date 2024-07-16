@@ -7,16 +7,29 @@ export interface CollectionData {
   createTime: string;
   prefix: string;
   suffix: string;
+  repo: string;
   path: string;
+  fileSuffix: string;
   similarSnippet: string;
   symbolList: string[];
+  model: string;
+  templateName: string;
   answer: string[];
   acceptAnswerIndex: number;
   accept: 0 | 1;
   afterCode: string;
   plugin: 'SI';
   projectId: string;
-  fileSuffix: string;
+  latency: {
+    editorInfo: number;
+    symbolLocation: number;
+    similarSnippets: number;
+    symbolData: number;
+    prompt: number;
+    request: number;
+    postProcess: number;
+    total: number;
+  };
 }
 
 export class CompletionData {
@@ -25,26 +38,45 @@ export class CompletionData {
 
   completions?: Completions;
   elements?: PromptElements;
+  model?: string;
+  templateName?: string;
   position: CaretPosition;
   projectId?: string;
   timelines: {
-    startGenerate: DateTime;
-    endGenerate: DateTime;
-    startAccept: DateTime;
+    proxyStartEditorInfo: DateTime;
+    proxyStartSymbolInfo: DateTime;
+    proxyEndEditorInfo: DateTime;
+    coderEndSimilarSnippets: DateTime;
+    coderEndRelativeDefinitions: DateTime;
+    coderEndConstructPrompt: DateTime;
+    coderEndRequest: DateTime;
+    coderEndPostProcess: DateTime;
+    coderStartAccept: DateTime;
   };
 
-  constructor(caretPosition: CaretPosition) {
+  constructor(
+    caretPosition: CaretPosition,
+    start: number,
+    symbol: number,
+    end: number,
+  ) {
     this.position = caretPosition;
     this.timelines = {
-      startGenerate: DateTime.now(),
-      endGenerate: DateTime.invalid('Uninitialized'),
-      startAccept: DateTime.invalid('Uninitialized'),
+      proxyStartEditorInfo: DateTime.fromMillis(start),
+      proxyStartSymbolInfo: DateTime.fromMillis(symbol),
+      proxyEndEditorInfo: DateTime.fromMillis(end),
+      coderEndSimilarSnippets: DateTime.invalid('Uninitialized'),
+      coderEndRelativeDefinitions: DateTime.invalid('Uninitialized'),
+      coderEndConstructPrompt: DateTime.invalid('Uninitialized'),
+      coderEndRequest: DateTime.invalid('Uninitialized'),
+      coderEndPostProcess: DateTime.invalid('Uninitialized'),
+      coderStartAccept: DateTime.invalid('Uninitialized'),
     };
   }
 
   select(index: number): string | undefined {
-    if (!this.timelines.startAccept.isValid) {
-      this.timelines.startAccept = DateTime.now();
+    if (!this.timelines.coderStartAccept.isValid) {
+      this.timelines.coderStartAccept = DateTime.now();
     }
 
     const candidate = this.completions?.candidates[index];

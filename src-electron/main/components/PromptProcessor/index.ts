@@ -18,6 +18,7 @@ export class PromptProcessor {
   private _cache = new LRUCache<Completions>(100);
 
   async process(
+    actionId: string,
     promptElements: PromptElements,
     projectId: string,
   ): Promise<Completions | undefined> {
@@ -62,9 +63,17 @@ export class PromptProcessor {
           completionType === CompletionType.Line ? 'ShortLineCode' : 'LineCode',
       };
       log.debug('PromptProcessor.process.questionParams', questionParams);
+      getService(ServiceType.STATISTICS).completionUpdatePromptConstructTime(
+        actionId,
+        appConfig.activeModel,
+        completionType === CompletionType.Line ? 'ShortLineCode' : 'LineCode',
+      );
       const answers = await api_question(
         questionParams,
         this._abortController.signal,
+      );
+      getService(ServiceType.STATISTICS).completionUpdateRequestEndTime(
+        actionId,
       );
       let candidates = answers.map((answer) => answer.text);
       candidates = processGeneratedSuggestions(
