@@ -1,5 +1,6 @@
 import {
   api_code_review,
+  api_feedback_review,
   api_get_code_review_result,
   api_get_code_review_state,
 } from 'main/request/review';
@@ -87,7 +88,16 @@ export class ReviewInstance {
         },
       ]);
     } catch (e) {
-      log.error('reportReviewUsage.failed', e);
+      log.error('reportReviewHelpful.api_reportSKU.failed', e);
+    }
+    try {
+      await api_feedback_review(
+        this.reviewId,
+        appConfig.username,
+        Feedback.Helpful,
+      );
+    } catch (e) {
+      log.error('reportReviewHelpful.api_feedback_review.failed', e);
     }
   }
 
@@ -111,7 +121,16 @@ export class ReviewInstance {
         },
       ]);
     } catch (e) {
-      log.error('reportReviewUsage.failed', e);
+      log.error('reportReviewUsage.api_reportSKU.failed', e);
+    }
+    try {
+      await api_feedback_review(
+        this.reviewId,
+        appConfig.username,
+        Feedback.Helpful,
+      );
+    } catch (e) {
+      log.error('reportReviewHelpful.api_feedback_review.failed', e);
     }
   }
 

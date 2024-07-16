@@ -2,6 +2,7 @@ import {
   ReviewResult,
   ReviewState,
   ReviewRequestParams,
+  Feedback,
 } from 'shared/types/review';
 import request from 'main/request';
 import Logger from 'electron-log/main';
@@ -74,6 +75,22 @@ export const api_get_code_review_result = async (
   });
   Logger.log('api_get_code_review_result end', result);
   return parseReviewResult(result);
+};
+
+export const api_feedback_review = async (
+  reviewId: string,
+  userId: string,
+  feedback: Feedback,
+) => {
+  return request({
+    url: '/kong/RdTestAiService/v1/chatgpt/question/review/feedback',
+    method: 'post',
+    data: {
+      id: reviewId,
+      userId,
+      feedback: feedback === Feedback.Helpful ? 1 : 0,
+    },
+  });
 };
 
 // import {
