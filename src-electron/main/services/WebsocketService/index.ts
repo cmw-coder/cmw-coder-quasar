@@ -23,7 +23,6 @@ import {
   getClientVersion,
   getProjectData,
 } from 'main/utils/completion';
-import { timer } from 'main/utils/timer';
 import { ServiceType } from 'shared/types/service';
 import { WebsocketServiceTrait } from 'shared/types/service/WebsocketServiceTrait';
 import { WindowType } from 'shared/types/WindowType';
@@ -286,8 +285,9 @@ export class WebsocketService implements WebsocketServiceTrait {
             ratio,
             getClientVersion(pid),
           )
-          .catch();
-      } catch {
+          .catch((e) => log.warn('WsAction.CompletionEdit', e));
+      } catch (e) {
+        log.warn('WsAction.CompletionEdit', e);
         this._statisticsReporterService.completionAbort(actionId);
       }
     });
@@ -339,8 +339,6 @@ export class WebsocketService implements WebsocketServiceTrait {
               completions,
             );
 
-            log.log(timer.parse('CompletionGenerate'));
-            timer.remove('CompletionGenerate');
             return new CompletionGenerateServerMessage({
               actionId,
               completions,
@@ -349,7 +347,6 @@ export class WebsocketService implements WebsocketServiceTrait {
           }
 
           this._statisticsReporterService.completionAbort(actionId);
-          timer.remove('CompletionGenerate');
         } catch (e) {
           const error = <Error>e;
           let result: StandardResult['result'] = 'error';
@@ -374,7 +371,6 @@ export class WebsocketService implements WebsocketServiceTrait {
           }
 
           this._statisticsReporterService.completionAbort(actionId);
-          timer.remove('CompletionGenerate');
           return new CompletionGenerateServerMessage({
             result,
             message: error.message,

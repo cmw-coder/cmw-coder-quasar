@@ -18,7 +18,6 @@ import {
   KeptRatio,
 } from 'main/services/StatisticsService/types';
 import { constructData } from 'main/services/StatisticsService/utils';
-import { timer } from 'main/utils/timer';
 import { NEW_LINE_REGEX } from 'shared/constants/common';
 import { CaretPosition } from 'shared/types/common';
 import { StatisticsServiceTrait } from 'shared/types/service/StatisticsServiceTrait';
@@ -97,7 +96,6 @@ export class StatisticsService implements StatisticsServiceTrait {
     symbol: number,
     end: number,
   ) {
-    timer.add('CompletionGenerate', 'generationStart');
     const actionId = uid();
     this._recentCompletion.set(
       actionId,
@@ -156,6 +154,8 @@ export class StatisticsService implements StatisticsServiceTrait {
       return;
     }
 
+    log.debug({ timelines: data.timelines });
+
     const requestData: CollectionData = {
       createTime: data.timelines.proxyEndEditorInfo.toFormat(
         'yyyy-MM-dd HH:mm:ss',
@@ -178,18 +178,22 @@ export class StatisticsService implements StatisticsServiceTrait {
       plugin: 'SI',
       projectId: data.projectId,
       latency: {
-        editorInfo: data.timelines.proxyStartEditorInfo.diff(
+        editorInfo: data.timelines.proxyStartSymbolInfo.diff(
+          data.timelines.proxyStartEditorInfo,
+        ).milliseconds,
+        symbolLocation: data.timelines.proxyEndEditorInfo.diff(
           data.timelines.proxyStartSymbolInfo,
         ).milliseconds,
-        symbolLocation: data.timelines.proxyStartSymbolInfo.diff(
-          data.timelines.proxyEndEditorInfo,
-        ).milliseconds,
-        similarSnippets: data.timelines.coderEndSimilarSnippets.diff(
-          data.timelines.proxyEndEditorInfo,
-        ).milliseconds,
-        symbolData: data.timelines.coderEndRelativeDefinitions.diff(
-          data.timelines.proxyEndEditorInfo,
-        ).milliseconds,
+        similarSnippets: data.timelines.coderEndSimilarSnippets.isValid
+          ? data.timelines.coderEndSimilarSnippets.diff(
+              data.timelines.proxyEndEditorInfo,
+            ).milliseconds
+          : 0,
+        symbolData: data.timelines.coderEndRelativeDefinitions.isValid
+          ? data.timelines.coderEndRelativeDefinitions.diff(
+              data.timelines.proxyEndEditorInfo,
+            ).milliseconds
+          : 0,
         prompt: data.timelines.coderEndConstructPrompt.diff(
           data.timelines.proxyEndEditorInfo,
         ).milliseconds,
@@ -231,7 +235,6 @@ export class StatisticsService implements StatisticsServiceTrait {
   }
 
   completionGenerated(actionId: string, completions: Completions) {
-    timer.add('CompletionGenerate', 'generationEnd');
     const data = this._recentCompletion.get(actionId);
     if (!data) {
       return;
@@ -293,7 +296,6 @@ export class StatisticsService implements StatisticsServiceTrait {
   }
 
   completionUpdateProjectId(actionId: string, projectId: string) {
-    timer.add('CompletionGenerate', 'generationUpdateProjectId');
     const data = this._recentCompletion.get(actionId);
     if (data) {
       data.projectId = projectId;
@@ -314,7 +316,6 @@ export class StatisticsService implements StatisticsServiceTrait {
   }
 
   completionUpdatePromptElements(actionId: string, elements: PromptElements) {
-    timer.add('CompletionGenerate', 'generationUpdatePromptElements');
     const data = this._recentCompletion.get(actionId);
     if (data) {
       data.elements = elements;

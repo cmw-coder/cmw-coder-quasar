@@ -7,7 +7,6 @@ import {
   getCompletionType,
   processGeneratedSuggestions,
 } from 'main/components/PromptProcessor/utils';
-import { timer } from 'main/utils/timer';
 import { ServiceType } from 'shared/types/service';
 import { api_question } from 'main/request/api';
 import { CompletionType } from 'shared/types/common';
@@ -32,7 +31,6 @@ export class PromptProcessor {
       log.debug('PromptProcessor.process.cacheHit', completionCached);
       return completionCached;
     }
-    timer.add('CompletionGenerate', 'generationCheckedCache');
 
     this._abortController?.abort();
 
@@ -81,7 +79,6 @@ export class PromptProcessor {
         completionType,
         promptElements.prefix,
       );
-      timer.add('CompletionGenerate', 'generationProcessed');
       if (candidates.length) {
         log.info('PromptProcessor.process.cacheMiss', candidates);
         this._cache.put(cacheKey, { candidates, type: completionType });

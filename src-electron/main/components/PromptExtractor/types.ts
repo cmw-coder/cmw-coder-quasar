@@ -12,7 +12,6 @@ import {
 import { getService } from 'main/services';
 import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
-import { timer } from 'main/utils/timer';
 import { NEW_LINE_REGEX } from 'shared/constants/common';
 import { CompletionType, SymbolInfo } from 'shared/types/common';
 import { CompletionGenerateClientMessage } from 'shared/types/WsMessage';
@@ -156,8 +155,6 @@ export class RawInputs {
         }
       }),
     );
-
-    timer.add('CompletionGenerate', 'GotRelativeDefinitions');
 
     return result;
   }

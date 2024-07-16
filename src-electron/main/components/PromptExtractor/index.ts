@@ -23,7 +23,6 @@ import {
 import { getService } from 'main/services';
 import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
-import { timer } from 'main/utils/timer';
 import { SimilarSnippet } from 'shared/types/common';
 import { ServiceType } from 'shared/types/service';
 
@@ -186,7 +185,6 @@ export class PromptExtractor {
           (slowFile) => !recentFiles.includes(slowFile),
         )
       ) {
-        timer.add('CompletionGenerate', 'GotSimilarSnippets');
         return [];
       }
       this.enableSimilarSnippet();
@@ -259,8 +257,6 @@ export class PromptExtractor {
       );
       this._slowRecentFiles = recentFiles;
     }
-
-    timer.add('CompletionGenerate', 'GotSimilarSnippets');
 
     return similarSnippets
       .filter((mostSimilarSnippet) => mostSimilarSnippet.score > 0)
