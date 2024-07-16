@@ -34,6 +34,7 @@ export class ReviewInstance {
   references: Reference[] = [];
   feedback = Feedback.None;
   errorInfo = '';
+  createTime = DateTime.now().valueOf() / 1000;
 
   constructor(
     private selection: Selection,
@@ -95,6 +96,7 @@ export class ReviewInstance {
         this.reviewId,
         appConfig.username,
         Feedback.Helpful,
+        this.createTime,
       );
     } catch (e) {
       log.error('reportReviewHelpful.api_feedback_review.failed', e);
@@ -128,6 +130,7 @@ export class ReviewInstance {
         this.reviewId,
         appConfig.username,
         Feedback.Helpful,
+        this.createTime,
       );
     } catch (e) {
       log.error('reportReviewHelpful.api_feedback_review.failed', e);
@@ -171,6 +174,7 @@ export class ReviewInstance {
         },
         language: this.selection.language,
       });
+      this.createTime = DateTime.now().valueOf() / 1000;
       this.state = ReviewState.Start;
       this.timer = setInterval(() => {
         this.refreshReviewState();

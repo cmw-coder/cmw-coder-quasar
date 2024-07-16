@@ -81,6 +81,7 @@ export const api_feedback_review = async (
   reviewId: string,
   userId: string,
   feedback: Feedback,
+  timestamp: number,
 ) => {
   return request({
     url: '/kong/RdTestAiService/v1/chatgpt/question/review/feedback',
@@ -89,6 +90,7 @@ export const api_feedback_review = async (
       id: reviewId,
       userId,
       feedback: feedback === Feedback.Helpful ? 1 : 0,
+      timestamp,
     },
   });
 };
