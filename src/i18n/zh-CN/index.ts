@@ -294,7 +294,7 @@ export default {
     },
     ReviewPage: {
       labels: {
-        title: '评审高亮代码',
+        title: '评审代码',
       },
       components: {
         reviewHistory: {
