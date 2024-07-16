@@ -337,8 +337,8 @@ export default {
     },
     CodeSelectedTipsPage: {
       labels: {
-        addToChat: 'Add to chat (Ctrl + L)',
-        review: 'Review highlight code (Ctrl + I)',
+        addToChat: 'Add to chat',
+        review: 'Review highlight code',
       },
     },
   },
