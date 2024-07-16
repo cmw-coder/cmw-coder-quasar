@@ -60,16 +60,6 @@ export const defaultAppData: AppData = {
   },
   project: {},
   window: {
-    [WindowType.Chat]: {
-      height: 1300,
-      width: 780,
-      show: false,
-    },
-    [WindowType.Commit]: {
-      height: 1300,
-      width: 780,
-      show: false,
-    },
     [WindowType.Completions]: {
       height: 0,
       width: 0,
@@ -90,19 +80,9 @@ export const defaultAppData: AppData = {
       width: 800,
       show: false,
     },
-    [WindowType.Setting]: {
-      height: 600,
-      width: 800,
-      show: false,
-    },
     [WindowType.Welcome]: {
       height: 600,
       width: 800,
-      show: false,
-    },
-    [WindowType.WorkFlow]: {
-      height: 1300,
-      width: 780,
       show: false,
     },
     [WindowType.ProjectId]: {
@@ -123,11 +103,6 @@ export const defaultAppData: AppData = {
     [WindowType.SelectionTips]: {
       height: 34,
       width: 455,
-      show: false,
-    },
-    [WindowType.Review]: {
-      height: 1300,
-      width: 780,
       show: false,
     },
   },
