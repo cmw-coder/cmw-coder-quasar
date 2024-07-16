@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 // import { useQuasar } from 'quasar';
-import { PropType, onMounted, ref } from 'vue';
+import { PropType, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ServiceType } from 'shared/types/service';
 import { WindowType } from 'shared/types/WindowType';
@@ -10,11 +10,12 @@ import { ActionApi } from 'types/ActionApi';
 import { ActionType } from 'shared/types/ActionMessage';
 import ReviewHistory from 'pages/ReviewPage/components/ReviewHistory.vue';
 import ReviewView from 'pages/ReviewPage/components/ReviewView.vue';
+import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 
 const props = defineProps({
   windowType: {
     type: String as PropType<WindowType>,
-    default: WindowType.Review,
+    default: WindowType.Main,
   },
 });
 
@@ -43,6 +44,12 @@ onMounted(async () => {
   actionApi.register(ActionType.ReviewDataUpdate, (data) => {
     reviewData.value = data;
   });
+
+  actionApi.register(ActionType.MainWindowCheckPageReady, (type) => {
+    if (type === MainWindowPageType.Review) {
+      windowService.setMainWindowPageReady(MainWindowPageType.Review);
+    }
+  });
 });
 
 const feedbackHandle = (feedback: Feedback) => {
@@ -56,6 +63,10 @@ const retryHandle = async () => {
   windowService.retryActiveReview();
   reviewData.value = await windowService.getReviewData();
 };
+
+onBeforeUnmount(() => {
+  actionApi.unregister();
+});
 </script>
 
 <template>

@@ -43,6 +43,7 @@ import { decode } from 'iconv-lite';
 import { Selection } from 'shared/types/Selection';
 import { Reference } from 'shared/types/review';
 import Logger from 'electron-log/main';
+import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 // import { SymbolType } from 'shared/types/common';
 
 interface ClientInfo {
@@ -408,10 +409,11 @@ export class WebsocketService implements WebsocketServiceTrait {
       }
     });
     this._registerWsAction(WsAction.EditorCommit, ({ data: currentFile }) => {
-      this._windowService
-        .getWindow(WindowType.Commit)
-        .setCurrentFile(currentFile);
-      this._windowService.getWindow(WindowType.Commit).show();
+      const mainWindow = this._windowService.getWindow(WindowType.Main);
+      mainWindow.show();
+      const mainWindowPage = mainWindow.getPage(MainWindowPageType.Commit);
+      mainWindowPage.setCurrentFile(currentFile);
+      mainWindowPage.active();
     });
     this._registerWsAction(WsAction.EditorFocusState, ({ data: isFocused }) => {
       if (!isFocused) {

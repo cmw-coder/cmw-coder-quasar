@@ -1,3 +1,4 @@
+import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import { Selection } from 'shared/types/Selection';
 import { WindowType } from 'shared/types/WindowType';
 import { Feedback, ReviewData } from 'shared/types/review';
@@ -22,7 +23,7 @@ export interface WindowServiceTrait {
   ): Promise<void>;
   openDevTools(type?: WindowType): Promise<void>;
   mouseMoveInOrOutWindow(type: WindowType): Promise<void>;
-  setChatWindowReady(): Promise<void>;
+  setMainWindowPageReady(type: MainWindowPageType): Promise<void>;
   addSelectionToChat(selection?: Selection): Promise<void>;
   reviewSelection(selection?: Selection): Promise<void>;
   getReviewData(): Promise<ReviewData | undefined>;

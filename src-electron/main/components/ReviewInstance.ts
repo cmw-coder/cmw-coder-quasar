@@ -184,8 +184,8 @@ export class ReviewInstance {
       this.state = ReviewState.Error;
       this.errorInfo = (e as Error).message;
       const windowService = container.get<WindowService>(ServiceType.WINDOW);
-      const reviewWindow = windowService.getWindow(WindowType.Review);
-      reviewWindow.sendMessageToRenderer(
+      const mainWindow = windowService.getWindow(WindowType.Main);
+      mainWindow.sendMessageToRenderer(
         new ReviewDataUpdateActionMessage(this.getReviewData()),
       );
     }
@@ -193,7 +193,7 @@ export class ReviewInstance {
 
   async refreshReviewState() {
     const windowService = container.get<WindowService>(ServiceType.WINDOW);
-    const reviewWindow = windowService.getWindow(WindowType.Review);
+    const mainWindow = windowService.getWindow(WindowType.Main);
     try {
       this.state = await api_get_code_review_state(this.reviewId);
       if (this.state === ReviewState.Third) {
@@ -208,7 +208,7 @@ export class ReviewInstance {
         clearInterval(this.timer);
         this.saveReviewData();
       }
-      reviewWindow.sendMessageToRenderer(
+      mainWindow.sendMessageToRenderer(
         new ReviewDataUpdateActionMessage(this.getReviewData()),
       );
     } catch (error) {
@@ -216,7 +216,7 @@ export class ReviewInstance {
       clearInterval(this.timer);
       this.state = ReviewState.Error;
       this.errorInfo = (error as Error).message;
-      reviewWindow.sendMessageToRenderer(
+      mainWindow.sendMessageToRenderer(
         new ReviewDataUpdateActionMessage(this.getReviewData()),
       );
       this.saveReviewData();

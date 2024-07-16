@@ -1,11 +1,19 @@
 <script setup lang="ts">
 import { useQuasar } from 'quasar';
-import { ref } from 'vue';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { bus } from 'boot/bus';
+import { ActionApi } from 'types/ActionApi';
+import { ActionType } from 'shared/types/ActionMessage';
+import { useRouter } from 'vue-router';
+import { MAIN_WINDOW_PAGE_URL_MAPPING } from 'app/src-electron/shared/constants/common';
 
 const { screen } = useQuasar();
 const leftDrawerOpen = ref(false);
 const rightDrawerOpen = ref(false);
+
+const actionApi = new ActionApi('web.app.main.layout');
+
+const router = useRouter();
 
 bus.on('drawer', (action, position) => {
   const targetDrawer = position === 'left' ? leftDrawerOpen : rightDrawerOpen;
@@ -20,6 +28,16 @@ bus.on('drawer', (action, position) => {
       targetDrawer.value = !targetDrawer.value;
       break;
   }
+});
+
+onMounted(() => {
+  actionApi.register(ActionType.MainWindowActivePage, (type) => {
+    router.push(MAIN_WINDOW_PAGE_URL_MAPPING[type]);
+  });
+});
+
+onBeforeUnmount(() => {
+  actionApi.unregister();
 });
 </script>
 
