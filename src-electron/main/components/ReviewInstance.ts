@@ -1,14 +1,15 @@
 import {
   api_code_review,
+  api_feedback_review,
   api_get_code_review_result,
   api_get_code_review_state,
 } from 'main/request/review';
-import { container } from 'main/services';
+import { container, getService } from 'main/services';
 import { ConfigService } from 'main/services/ConfigService';
 import { WebsocketService } from 'main/services/WebsocketService';
 import { WindowService } from 'main/services/WindowService';
 import { ReviewDataUpdateActionMessage } from 'shared/types/ActionMessage';
-import { Selection } from 'shared/types/Selection';
+import { ExtraData, Selection } from 'shared/types/Selection';
 import { WindowType } from 'shared/types/WindowType';
 import {
   Feedback,
@@ -21,6 +22,7 @@ import { ServiceType } from 'shared/types/service';
 import log from 'electron-log/main';
 import { DataStoreService } from 'main/services/DataStoreService';
 import { DateTime } from 'luxon';
+import { api_reportSKU } from 'main/request/sku';
 
 const REFRESH_TIME = 1500;
 
@@ -32,9 +34,107 @@ export class ReviewInstance {
   references: Reference[] = [];
   feedback = Feedback.None;
   errorInfo = '';
+  createTime = DateTime.now().valueOf() / 1000;
 
-  constructor(private selection: Selection) {
+  constructor(
+    private selection: Selection,
+    private extraData: ExtraData,
+  ) {
     this.createReviewRequest();
+    // 上报一次 review 使用
+    this.reportReviewUsage();
+  }
+
+  async reportReviewUsage() {
+    const appConfig = await getService(ServiceType.CONFIG).getConfigs();
+    try {
+      await api_reportSKU([
+        {
+          begin: Date.now(),
+          end: Date.now(),
+          count: 1,
+          type: 'AIGC',
+          product: 'SI',
+          firstClass: 'CODE_REVIEW',
+          secondClass: 'USE',
+          skuName: '*',
+          user: appConfig.username,
+          userType: 'USER',
+          subType: this.extraData.projectId,
+          extra: this.extraData.version,
+        },
+      ]);
+    } catch (e) {
+      log.error('reportReviewUsage.failed', e);
+    }
+  }
+
+  async reportHelpful() {
+    const appConfig = await getService(ServiceType.CONFIG).getConfigs();
+    try {
+      await api_reportSKU([
+        {
+          begin: Date.now(),
+          end: Date.now(),
+          count: 1,
+          type: 'AIGC',
+          product: 'SI',
+          firstClass: 'CODE_REVIEW',
+          secondClass: 'LIKE',
+          skuName: '*',
+          user: appConfig.username,
+          userType: 'USER',
+          subType: this.extraData.projectId,
+          extra: this.extraData.version,
+        },
+      ]);
+    } catch (e) {
+      log.error('reportReviewHelpful.api_reportSKU.failed', e);
+    }
+    try {
+      await api_feedback_review(
+        this.reviewId,
+        appConfig.username,
+        Feedback.Helpful,
+        this.createTime,
+      );
+    } catch (e) {
+      log.error('reportReviewHelpful.api_feedback_review.failed', e);
+    }
+  }
+
+  async reportUnHelpful() {
+    const appConfig = await getService(ServiceType.CONFIG).getConfigs();
+    try {
+      await api_reportSKU([
+        {
+          begin: Date.now(),
+          end: Date.now(),
+          count: 1,
+          type: 'AIGC',
+          product: 'SI',
+          firstClass: 'CODE_REVIEW',
+          secondClass: 'UNLIKE',
+          skuName: '*',
+          user: appConfig.username,
+          userType: 'USER',
+          subType: this.extraData.projectId,
+          extra: this.extraData.version,
+        },
+      ]);
+    } catch (e) {
+      log.error('reportReviewUsage.api_reportSKU.failed', e);
+    }
+    try {
+      await api_feedback_review(
+        this.reviewId,
+        appConfig.username,
+        Feedback.Helpful,
+        this.createTime,
+      );
+    } catch (e) {
+      log.error('reportReviewHelpful.api_feedback_review.failed', e);
+    }
   }
 
   retry() {
@@ -74,6 +174,7 @@ export class ReviewInstance {
         },
         language: this.selection.language,
       });
+      this.createTime = DateTime.now().valueOf() / 1000;
       this.state = ReviewState.Start;
       this.timer = setInterval(() => {
         this.refreshReviewState();

@@ -13,3 +13,8 @@ export interface TriggerPosition {
   x: number;
   y: number;
 }
+
+export interface ExtraData {
+  projectId: string;
+  version: string;
+}
