@@ -5,6 +5,7 @@ import aiAssistantIframe from 'utils/aiAssistantIframe';
 import { ServiceType } from 'shared/types/service';
 import { ActionApi } from 'types/ActionApi';
 import { ActionType } from 'shared/types/ActionMessage';
+import { MainWindowPageType } from 'app/src-electron/shared/types/MainWindowPageType';
 
 const baseName = 'pages.ChatIframe';
 const actionApi = new ActionApi(baseName);
@@ -23,7 +24,7 @@ const refreshHandle = async () => {
 };
 
 const init = async () => {
-  const baseUrl = await configService.getConfig('baseServerUrl') ?? '';
+  const baseUrl = (await configService.getConfig('baseServerUrl')) ?? '';
   const iframeDom = document.getElementById(
     'iframeAiAssistant',
   ) as HTMLIFrameElement;
@@ -38,15 +39,17 @@ onMounted(async () => {
   actionApi.register(ActionType.ToggleDarkMode, () => {
     refreshHandle();
   });
-  actionApi.register(ActionType.CheckChatIsReady, () => {
-    windowService.setChatWindowReady();
+  actionApi.register(ActionType.MainWindowCheckPageReady, (type) => {
+    if (type === MainWindowPageType.Chat) {
+      windowService.setMainWindowPageReady(MainWindowPageType.Chat);
+    }
   });
   actionApi.register(ActionType.AddSelectionToChat, (selection) => {
     console.log('addSelectionToChat', selection);
     aiAssistantIframe.customQuestion(selection);
   });
   setTimeout(() => {
-    windowService.setChatWindowReady();
+    windowService.setMainWindowPageReady(MainWindowPageType.Chat);
   }, 1000);
 });
 

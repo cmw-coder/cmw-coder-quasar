@@ -3,12 +3,17 @@ import { sync } from 'fast-glob';
 import { existsSync } from 'fs';
 import { lstat, readFile } from 'fs/promises';
 import { createServer } from 'http';
+import { decode } from 'iconv-lite';
 import { inject, injectable } from 'inversify';
 import { posix, sep } from 'path';
 import { type WebSocket, WebSocketServer } from 'ws';
 
 import { PromptExtractor } from 'main/components/PromptExtractor';
 import { RawInputs } from 'main/components/PromptExtractor/types';
+import {
+  getFunctionPrefix,
+  getFunctionSuffix,
+} from 'main/components/PromptExtractor/utils';
 import { PromptProcessor } from 'main/components/PromptProcessor';
 import { DataStoreService } from 'main/services/DataStoreService';
 import { StatisticsService } from 'main/services/StatisticsService';
@@ -34,14 +39,10 @@ import {
   WsAction,
   WsMessageMapping,
 } from 'shared/types/WsMessage';
-import {
-  getFunctionPrefix,
-  getFunctionSuffix,
-} from 'main/components/PromptExtractor/utils';
-import { decode } from 'iconv-lite';
+import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import { Selection } from 'shared/types/Selection';
 import { Reference } from 'shared/types/review';
-import Logger from 'electron-log/main';
+
 
 interface ClientInfo {
   client: WebSocket;
@@ -410,10 +411,11 @@ export class WebsocketService implements WebsocketServiceTrait {
       }
     });
     this._registerWsAction(WsAction.EditorCommit, ({ data: currentFile }) => {
-      this._windowService
-        .getWindow(WindowType.Commit)
-        .setCurrentFile(currentFile);
-      this._windowService.getWindow(WindowType.Commit).show();
+      const mainWindow = this._windowService.getWindow(WindowType.Main);
+      mainWindow.show();
+      const mainWindowPage = mainWindow.getPage(MainWindowPageType.Commit);
+      mainWindowPage.setCurrentFile(currentFile);
+      mainWindowPage.active();
     });
     this._registerWsAction(WsAction.EditorFocusState, ({ data: isFocused }) => {
       if (!isFocused) {
@@ -475,7 +477,6 @@ export class WebsocketService implements WebsocketServiceTrait {
         this._windowService.getWindow(WindowType.SelectionTips).hide();
         return;
       }
-      Logger.log('EditorSelection', data);
       const selectionTipsWindow = this._windowService.getWindow(
         WindowType.SelectionTips,
       );
@@ -553,94 +554,3 @@ export class WebsocketService implements WebsocketServiceTrait {
     return Promise.race([successPromise, timeoutPromise]);
   }
 }
-
-// const defaultReferences: Reference[] = [
-//   {
-//     content: 'aaaaaa',
-//     depth: 0,
-//     name: 'IF_INDEX',
-//     path: 'D:\\project\\cmw-coder\\cmw-cider-quasar\\src-electron\\shared\\types\\Selection.ts',
-//     range: {
-//       endLine: 73,
-//       startLine: 73,
-//     },
-//     type: SymbolType.Macro,
-//   },
-//   {
-//     content: 'aaaaaa',
-//     depth: 0,
-//     name: 'IF_INDEX',
-//     path: 'D:\\project\\cmw-coder\\cmw-cider-quasar\\src-electron\\shared\\types\\Selection.ts',
-//     range: {
-//       endLine: 73,
-//       startLine: 73,
-//     },
-//     type: SymbolType.Macro,
-//   },
-//   {
-//     content: 'aaaaaa',
-//     depth: 0,
-//     name: 'IF_INDEX',
-//     path: 'D:\\project\\cmw-coder\\cmw-cider-quasar\\src-electron\\shared\\types\\Selection.ts',
-//     range: {
-//       endLine: 73,
-//       startLine: 73,
-//     },
-//     type: SymbolType.Macro,
-//   },
-//   {
-//     content: 'aaaaaa',
-//     depth: 0,
-//     name: 'IF_INDEX',
-//     path: 'D:\\project\\cmw-coder\\cmw-cider-quasar\\src-electron\\shared\\types\\Selection.ts',
-//     range: {
-//       endLine: 73,
-//       startLine: 73,
-//     },
-//     type: SymbolType.Macro,
-//   },
-//   {
-//     content: 'aaaaaa',
-//     depth: 0,
-//     name: 'IF_INDEX',
-//     path: 'D:\\project\\cmw-coder\\cmw-cider-quasar\\src-electron\\shared\\types\\Selection.ts',
-//     range: {
-//       endLine: 73,
-//       startLine: 73,
-//     },
-//     type: SymbolType.Macro,
-//   },
-//   {
-//     content: 'aaaaaa',
-//     depth: 0,
-//     name: 'IF_INDEX',
-//     path: 'D:\\project\\cmw-coder\\cmw-cider-quasar\\src-electron\\shared\\types\\Selection.ts',
-//     range: {
-//       endLine: 73,
-//       startLine: 73,
-//     },
-//     type: SymbolType.Macro,
-//   },
-//   {
-//     content: 'aaaaaa',
-//     depth: 0,
-//     name: 'IF_INDEX',
-//     path: 'D:\\project\\cmw-coder\\cmw-cider-quasar\\src-electron\\shared\\types\\Selection.ts',
-//     range: {
-//       endLine: 73,
-//       startLine: 73,
-//     },
-//     type: SymbolType.Macro,
-//   },
-//   {
-//     content: 'aaaaaa',
-//     depth: 0,
-//     name: 'IF_INDEX',
-//     path: 'D:\\project\\cmw-coder\\cmw-cider-quasar\\src-electron\\shared\\types\\Selection.ts',
-//     range: {
-//       endLine: 73,
-//       startLine: 73,
-//     },
-//     type: SymbolType.Macro,
-//   },
-// ];

@@ -4,6 +4,16 @@ import { useI18n } from 'vue-i18n';
 import CompletionCard from 'components/SettingCards/CompletionCard.vue';
 import GeneralCard from 'components/SettingCards/GeneralCard.vue';
 import UpdateCard from 'components/SettingCards/UpdateCard.vue';
+import { onBeforeUnmount, onMounted } from 'vue';
+import { ActionApi } from 'types/ActionApi';
+import { ActionType } from 'shared/types/ActionMessage';
+import { MainWindowPageType } from 'shared/types/MainWindowPageType';
+import { ServiceType } from 'shared/types/service';
+import { useService } from 'utils/common';
+
+const baseName = 'pages.SettingPage.';
+const actionApi = new ActionApi(baseName);
+const windowService = useService(ServiceType.WINDOW);
 
 const { t } = useI18n();
 
@@ -14,6 +24,18 @@ const i18n = (relativePath: string, data?: Record<string, unknown>) => {
     return t('pages.SettingsPage.' + relativePath);
   }
 };
+
+onMounted(() => {
+  actionApi.register(ActionType.MainWindowCheckPageReady, (type) => {
+    if (type === MainWindowPageType.Setting) {
+      windowService.setMainWindowPageReady(MainWindowPageType.Setting);
+    }
+  });
+});
+
+onBeforeUnmount(() => {
+  actionApi.unregister();
+});
 </script>
 
 <template>

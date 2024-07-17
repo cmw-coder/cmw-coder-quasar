@@ -15,33 +15,6 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('layouts/MainLayout.vue'),
     children: [
       {
-        path: 'chat',
-        components: {
-          header: () => import('layouts/headers/FloatingHeader.vue'),
-          default: () => import('pages/ChatIframePage.vue'),
-        },
-        props: {
-          header: {
-            windowType: WindowType.Chat,
-          },
-        },
-      },
-      {
-        path: 'commit',
-        components: {
-          header: () => import('layouts/headers/FloatingHeader.vue'),
-          default: () => import('pages/CommitPage.vue'),
-        },
-        props: {
-          header: {
-            windowType: WindowType.Commit,
-          },
-          default: {
-            windowType: WindowType.Commit,
-          },
-        },
-      },
-      {
         path: 'completions',
         components: {
           default: () => import('pages/CompletionImmersivePage.vue'),
@@ -104,18 +77,6 @@ export const routes: RouteRecordRaw[] = [
         },
       },
       {
-        path: 'settings',
-        components: {
-          header: () => import('layouts/headers/FloatingHeader.vue'),
-          default: () => import('pages/SettingsPage.vue'),
-        },
-        props: {
-          header: {
-            windowType: WindowType.Setting,
-          },
-        },
-      },
-      {
         path: 'welcome',
         components: {
           header: () => import('layouts/headers/FloatingHeader.vue'),
@@ -136,18 +97,6 @@ export const routes: RouteRecordRaw[] = [
         props: {
           header: {
             windowType: WindowType.SelectionTips,
-          },
-        },
-      },
-      {
-        path: 'review',
-        components: {
-          header: () => import('layouts/headers/FloatingHeader.vue'),
-          default: () => import('pages/ReviewPage/ReviewPage.vue'),
-        },
-        props: {
-          header: {
-            windowType: WindowType.Review,
           },
         },
       },
@@ -237,6 +186,19 @@ export const routes: RouteRecordRaw[] = [
           header: () => import('layouts/headers/MainHeader.vue'),
           leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
           default: () => import('pages/WorkflowPage.vue'),
+        },
+        props: {
+          header: {
+            windowType: WindowType.Main,
+          },
+        },
+      },
+      {
+        path: 'commit',
+        components: {
+          header: () => import('layouts/headers/MainHeader.vue'),
+          leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
+          default: () => import('pages/CommitPage.vue'),
         },
         props: {
           header: {

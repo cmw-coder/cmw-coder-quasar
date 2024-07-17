@@ -1,8 +1,7 @@
 <script lang="ts" setup>
 import { useQuasar } from 'quasar';
-import { PropType, computed, onMounted, ref } from 'vue';
+import { PropType, computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-
 import ChangeList from 'components/DiffPanels/ChangeList.vue';
 import DiffDisplay from 'components/DiffPanels/DiffDisplay.vue';
 import { ServiceType } from 'shared/types/service';
@@ -11,11 +10,14 @@ import { WindowType } from 'shared/types/WindowType';
 import { generateCommitPrompt } from 'utils/commitPrompt';
 import { getLastDirName, useService } from 'utils/common';
 import { api_questionStream } from '../request/api';
+import { ActionApi } from 'types/ActionApi';
+import { ActionType } from 'shared/types/ActionMessage';
+import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 
 const props = defineProps({
   windowType: {
     type: String as PropType<WindowType>,
-    default: WindowType.Commit,
+    default: WindowType.Main,
   },
 });
 
@@ -30,7 +32,7 @@ const baseName = 'pages.CommitPage.';
 const i18n = (relativePath: string) => {
   return t(baseName + relativePath);
 };
-
+const actionApi = new ActionApi(baseName);
 const currentFile = ref<string>('');
 const loadingCommit = ref(false);
 const loadingDiff = ref(false);
@@ -50,9 +52,10 @@ const selectedSvn = computed(() => {
   return svnList.value[selectedSvnIndex.value];
 });
 
-const closeWindow = () => {
-  windowService.closeWindow(WindowType.Commit);
-};
+// const closeWindow = () => {
+//   windowService.closeWindow(WindowType.Commit);
+// };
+
 const generateCommitMessageHandle = async () => {
   const appConfig = await configService.getConfigs();
   const changedFileList = selectedSvn.value.changedFileList;
@@ -120,9 +123,6 @@ const sendSvnCommitAction = async () => {
     //   activeProject.value.commitMessage,
     //   'administrator',
     // ).catch();
-    if (props.windowType === WindowType.Commit) {
-      setTimeout(() => closeWindow(), 2000);
-    }
   } catch (e) {
     notify({
       type: 'negative',
@@ -135,6 +135,16 @@ const sendSvnCommitAction = async () => {
 
 onMounted(() => {
   refreshProjectList();
+
+  actionApi.register(ActionType.MainWindowCheckPageReady, (type) => {
+    if (type === MainWindowPageType.Commit) {
+      windowService.setMainWindowPageReady(MainWindowPageType.Commit);
+    }
+  });
+});
+
+onBeforeUnmount(() => {
+  actionApi.unregister();
 });
 </script>
 
@@ -257,14 +267,14 @@ onMounted(() => {
         <q-skeleton v-else type="QInput" />
       </div>
       <div class="row q-gutter-x-md">
-        <q-btn
+        <!-- <q-btn
           v-if="windowType === WindowType.Commit"
           class="col-grow"
           flat
           :label="i18n('labels.cancel')"
           :loading="loadingCommit"
           @click="closeWindow"
-        />
+        /> -->
         <q-btn
           class="col-grow"
           color="primary"
