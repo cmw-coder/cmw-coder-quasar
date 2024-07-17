@@ -13,7 +13,7 @@ export class TextDocument {
 
   constructor(filePath: string) {
     this._content = decode(readFileSync(filePath), 'gb2312');
-    this.fileName = filePath;
+    this.fileName = filePath.replaceAll('\\', '/');
     this.lineCount = this._content.split(NEW_LINE_REGEX).length;
   }
 

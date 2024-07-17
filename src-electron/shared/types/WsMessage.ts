@@ -74,6 +74,11 @@ export interface CompletionGenerateClientMessage extends WsMessage {
     recentFiles: string[];
     suffix: string;
     symbols: SymbolInfo[];
+    times: {
+      start: number;
+      symbol: number;
+      end: number;
+    };
   };
 }
 

@@ -7,7 +7,6 @@ import {
   getCompletionType,
   processGeneratedSuggestions,
 } from 'main/components/PromptProcessor/utils';
-import { timer } from 'main/utils/timer';
 import { ServiceType } from 'shared/types/service';
 import { api_question } from 'main/request/api';
 import { CompletionType } from 'shared/types/common';
@@ -18,6 +17,7 @@ export class PromptProcessor {
   private _cache = new LRUCache<Completions>(100);
 
   async process(
+    actionId: string,
     promptElements: PromptElements,
     projectId: string,
   ): Promise<Completions | undefined> {
@@ -31,7 +31,6 @@ export class PromptProcessor {
       log.debug('PromptProcessor.process.cacheHit', completionCached);
       return completionCached;
     }
-    timer.add('CompletionGenerate', 'generationCheckedCache');
 
     this._abortController?.abort();
 
@@ -62,9 +61,17 @@ export class PromptProcessor {
           completionType === CompletionType.Line ? 'ShortLineCode' : 'LineCode',
       };
       log.debug('PromptProcessor.process.questionParams', questionParams);
+      getService(ServiceType.STATISTICS).completionUpdatePromptConstructTime(
+        actionId,
+        appConfig.activeModel,
+        completionType === CompletionType.Line ? 'ShortLineCode' : 'LineCode',
+      );
       const answers = await api_question(
         questionParams,
         this._abortController.signal,
+      );
+      getService(ServiceType.STATISTICS).completionUpdateRequestEndTime(
+        actionId,
       );
       let candidates = answers.map((answer) => answer.text);
       candidates = processGeneratedSuggestions(
@@ -72,7 +79,6 @@ export class PromptProcessor {
         completionType,
         promptElements.prefix,
       );
-      timer.add('CompletionGenerate', 'generationProcessed');
       if (candidates.length) {
         log.info('PromptProcessor.process.cacheMiss', candidates);
         this._cache.put(cacheKey, { candidates, type: completionType });
