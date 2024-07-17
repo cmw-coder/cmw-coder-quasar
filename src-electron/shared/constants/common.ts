@@ -1,3 +1,4 @@
+import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import { WindowType } from 'shared/types/WindowType';
 
 export const ACTION_API_KEY = 'actionApi' as const;
@@ -27,17 +28,21 @@ export const WINDOW_URL_MAPPING: Record<WindowType, string> = {
   [WindowType.Main]: '/main',
   [WindowType.Quake]: '/floating/quake',
 
-  [WindowType.Chat]: '/floating/chat',
-  [WindowType.Commit]: '/floating/commit',
   [WindowType.SelectionTips]: '/floating/selection-tips',
-  [WindowType.Review]: '/floating/review',
 
   [WindowType.Completions]: '/floating/completions',
   [WindowType.Feedback]: '/floating/feedback',
   [WindowType.Login]: '/floating/login',
   [WindowType.ProjectId]: '/floating/project-id',
-  [WindowType.Setting]: '/floating/settings',
   [WindowType.Update]: '/floating/update',
   [WindowType.Welcome]: '/floating/welcome',
-  [WindowType.WorkFlow]: '/floating/workflow',
 };
+
+export const MAIN_WINDOW_PAGE_URL_MAPPING: Record<MainWindowPageType, string> =
+  {
+    [MainWindowPageType.Chat]: '/main/chat',
+    [MainWindowPageType.Commit]: '/main/commit',
+    [MainWindowPageType.Review]: '/main/review',
+    [MainWindowPageType.Setting]: '/main/settings',
+    [MainWindowPageType.WorkFlow]: '/main/workflow',
+  };

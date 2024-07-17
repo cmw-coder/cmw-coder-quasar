@@ -8,10 +8,7 @@ import { ServiceType } from 'shared/types/service';
 import { WindowType } from 'shared/types/WindowType';
 import { defaultAppData } from 'shared/types/service/DataStoreServiceTrait/types';
 import { FeedbackWindow } from 'main/services/WindowService/types/FeedbackWindow';
-import { ChatWindow } from 'main/services/WindowService/types/ChatWindow';
-import { CommitWindow } from 'main/services/WindowService/types/CommitWindow';
 import { ProjectIdWindow } from 'main/services/WindowService/types/ProjectIdWindow';
-import { SettingWindow } from 'main/services/WindowService/types/SettingWindow';
 import { WelcomeWindow } from 'main/services/WindowService/types/WelcomeWindow';
 import { LoginWindow } from 'main/services/WindowService/types/LoginWindow';
 import { CompletionsWindow } from 'main/services/WindowService/types/CompletionsWindow';
@@ -20,28 +17,23 @@ import { UpdateWindow } from 'main/services/WindowService/types/UpdateWindow';
 import { BaseWindow } from 'main/services/WindowService/types/BaseWindow';
 import { ConfigService } from 'main/services/ConfigService';
 import { SelectionTipsWindow } from 'main/services/WindowService/types/SelectionTipsWindow';
-import { ReviewWindow } from 'main/services/WindowService/types/ReviewWindow';
 import { Selection } from 'shared/types/Selection';
 import { ReviewInstance } from 'main/components/ReviewInstance';
 import { Feedback, ReviewState } from 'shared/types/review';
 import { ReviewDataUpdateActionMessage } from 'shared/types/ActionMessage';
 import { dialog } from 'electron/main';
+import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 
 interface WindowMap {
-  [WindowType.Chat]: ChatWindow;
-  [WindowType.Commit]: CommitWindow;
   [WindowType.Completions]: CompletionsWindow;
   [WindowType.Feedback]: FeedbackWindow;
   [WindowType.Login]: LoginWindow;
   [WindowType.Main]: MainWindow;
   [WindowType.ProjectId]: ProjectIdWindow;
   [WindowType.Quake]: MainWindow;
-  [WindowType.Setting]: SettingWindow;
   [WindowType.Update]: UpdateWindow;
   [WindowType.Welcome]: WelcomeWindow;
-  [WindowType.WorkFlow]: MainWindow;
   [WindowType.SelectionTips]: SelectionTipsWindow;
-  [WindowType.Review]: ReviewWindow;
 }
 
 @injectable()
@@ -53,20 +45,15 @@ export class WindowService implements WindowServiceTrait {
     @inject(ServiceType.CONFIG)
     private _configService: ConfigService,
   ) {
-    this.windowMap.set(WindowType.Chat, new ChatWindow());
-    this.windowMap.set(WindowType.Commit, new CommitWindow());
     this.windowMap.set(WindowType.Feedback, new FeedbackWindow());
     this.windowMap.set(WindowType.ProjectId, new ProjectIdWindow());
-    this.windowMap.set(WindowType.Setting, new SettingWindow());
     this.windowMap.set(WindowType.Welcome, new WelcomeWindow());
     this.windowMap.set(WindowType.Login, new LoginWindow());
     this.windowMap.set(WindowType.Completions, new CompletionsWindow());
     this.windowMap.set(WindowType.Main, new MainWindow());
     this.windowMap.set(WindowType.Quake, new MainWindow());
-    this.windowMap.set(WindowType.WorkFlow, new MainWindow());
     this.windowMap.set(WindowType.Update, new UpdateWindow());
     this.windowMap.set(WindowType.SelectionTips, new SelectionTipsWindow());
-    this.windowMap.set(WindowType.Review, new ReviewWindow());
 
     this.trayIcon = new TrayIcon();
 
@@ -74,15 +61,6 @@ export class WindowService implements WindowServiceTrait {
     this.trayIcon.registerMenuEntry(MenuEntry.Feedback, () =>
       this.getWindow(WindowType.Feedback).show(),
     );
-    this.trayIcon.registerMenuEntry(MenuEntry.Settings, () => {
-      this.getWindow(WindowType.Setting).show();
-    });
-    this.trayIcon.registerMenuEntry(MenuEntry.Chat, () => {
-      this.getWindow(WindowType.Chat).show();
-    });
-    this.trayIcon.registerMenuEntry(MenuEntry.Review, () => {
-      this.getWindow(WindowType.Review).show();
-    });
     this.trayIcon.registerMenuEntry(MenuEntry.Quit, () => app.exit());
   }
 
@@ -195,7 +173,9 @@ export class WindowService implements WindowServiceTrait {
   }
 
   async getCommitWindowCurrentFile(): Promise<string | undefined> {
-    return this.getWindow(WindowType.Commit).currentFile;
+    const mainWindow = this.getWindow(WindowType.Main);
+    const commitPage = mainWindow.getPage(MainWindowPageType.Commit);
+    return commitPage.currentFile;
   }
 
   async activeWindow(type: WindowType): Promise<void> {
@@ -234,12 +214,10 @@ export class WindowService implements WindowServiceTrait {
     }
   }
 
-  async setChatWindowReady() {
-    const chatWindow = this.getWindow(WindowType.Chat);
-    chatWindow.isReady = true;
-    if (chatWindow.readyPromiseResolveFn) {
-      chatWindow.readyPromiseResolveFn();
-    }
+  async setMainWindowPageReady(type: MainWindowPageType) {
+    const mainWindow = this.getWindow(WindowType.Main);
+    const page = mainWindow.getPage(type);
+    page._readyResolveHandler();
   }
 
   async addSelectionToChat(selection?: Selection) {
@@ -250,10 +228,10 @@ export class WindowService implements WindowServiceTrait {
       return;
     }
     console.log('addSelectionToChat', selection);
-    const chatWindow = this.getWindow(WindowType.Chat);
-    chatWindow.show();
-    await chatWindow.checkReady();
-    chatWindow.addSelectionToChat(selection);
+    const mainWindow = this.getWindow(WindowType.Main);
+    const chatPage = mainWindow.getPage(MainWindowPageType.Chat);
+    await chatPage.active();
+    chatPage.addSelectionToChat(selection);
   }
 
   async reviewSelection(selection?: Selection) {
@@ -268,12 +246,13 @@ export class WindowService implements WindowServiceTrait {
     if (!selection) {
       return;
     }
-    const reviewWindow = this.getWindow(WindowType.Review);
+    const mainWindow = this.getWindow(WindowType.Main);
+    const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
     // 上一个 review 尚未结束
     if (
-      reviewWindow.activeReview &&
+      reviewPage.activeReview &&
       ![ReviewState.Error, ReviewState.Finished].includes(
-        reviewWindow.activeReview.state,
+        reviewPage.activeReview.state,
       )
     ) {
       const mainWindow = this.getWindow(WindowType.Main);
@@ -285,28 +264,31 @@ export class WindowService implements WindowServiceTrait {
       return;
     }
 
-    reviewWindow.activeReview = new ReviewInstance(selection, extraData);
-    reviewWindow.show();
-    reviewWindow.sendMessageToRenderer(
+    reviewPage.activeReview = new ReviewInstance(selection, extraData);
+    await reviewPage.active();
+    mainWindow.sendMessageToRenderer(
       new ReviewDataUpdateActionMessage(
-        reviewWindow.activeReview.getReviewData(),
+        reviewPage.activeReview.getReviewData(),
       ),
     );
   }
 
   async getReviewData() {
-    const reviewWindow = this.getWindow(WindowType.Review);
-    const activeReview = reviewWindow.activeReview;
+    const reviewPage = this.getWindow(WindowType.Main).getPage(
+      MainWindowPageType.Review,
+    );
+    const activeReview = reviewPage.activeReview;
     if (!activeReview) return undefined;
     return activeReview.getReviewData();
   }
   async setActiveReviewFeedback(feedback: Feedback): Promise<void> {
-    const reviewWindow = this.getWindow(WindowType.Review);
-    const activeReview = reviewWindow.activeReview;
+    const mainWindow = this.getWindow(WindowType.Main);
+    const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
+    const activeReview = reviewPage.activeReview;
     if (activeReview) {
       activeReview.feedback = feedback;
       activeReview.saveReviewData();
-      reviewWindow.sendMessageToRenderer(
+      mainWindow.sendMessageToRenderer(
         new ReviewDataUpdateActionMessage(activeReview.getReviewData()),
       );
       if (feedback === Feedback.Helpful) {
@@ -318,8 +300,9 @@ export class WindowService implements WindowServiceTrait {
   }
 
   async retryActiveReview() {
-    const reviewWindow = this.getWindow(WindowType.Review);
-    const activeReview = reviewWindow.activeReview;
+    const mainWindow = this.getWindow(WindowType.Main);
+    const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
+    const activeReview = reviewPage.activeReview;
     if (activeReview) {
       activeReview.retry();
     }

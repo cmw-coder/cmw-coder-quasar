@@ -1,20 +1,26 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { copyToClipboard, useQuasar } from 'quasar';
-import { computed, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { useWorkflowStore } from 'stores/workflow';
 import WorkflowStatus from 'components/WorkflowItems/WorkflowStatus.vue';
 import StepStatus from 'components/WorkflowItems/StepStatus.vue';
+import { ServiceType } from 'shared/types/service';
+import { useService } from 'utils/common';
+import { ActionApi } from 'types/ActionApi';
+import { ActionType } from 'shared/types/ActionMessage';
+import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 
 const { notify } = useQuasar();
 const { t } = useI18n();
 const { deleteWorkflow } = useWorkflowStore();
 const { workflows } = storeToRefs(useWorkflowStore());
+const windowService = useService(ServiceType.WINDOW);
 
 const baseName = 'pages.WorkflowPage.';
-
+const actionApi = new ActionApi(baseName);
 const i18n = (relativePath: string) => {
   return t(baseName + relativePath);
 };
@@ -43,6 +49,18 @@ const selectWorkflow = (index: number) => {
   selectedIndex.value = index;
   console.log(workflows.value[index]);
 };
+
+onMounted(() => {
+  actionApi.register(ActionType.MainWindowCheckPageReady, (type) => {
+    if (type === MainWindowPageType.WorkFlow) {
+      windowService.setMainWindowPageReady(MainWindowPageType.WorkFlow);
+    }
+  });
+});
+
+onBeforeUnmount(() => {
+  actionApi.unregister();
+});
 </script>
 
 <template>

@@ -179,6 +179,8 @@ export abstract class BaseWindow {
       this._window.center();
     }
     this._window.show();
+    this._window.moveTop();
+    this._window.focus();
     this.moveHandler();
   }
 

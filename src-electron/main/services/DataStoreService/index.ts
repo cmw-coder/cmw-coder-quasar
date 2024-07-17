@@ -50,10 +50,6 @@ export class DataStoreService implements DataStoreServiceTrait {
           appData.window[WindowType.SelectionTips] =
             defaultAppData.window[WindowType.SelectionTips];
         }
-        if (!appData.window[WindowType.Review]) {
-          appData.window[WindowType.Review] =
-            defaultAppData.window[WindowType.Review];
-        }
         store.set('window', appData.window);
       },
     },
