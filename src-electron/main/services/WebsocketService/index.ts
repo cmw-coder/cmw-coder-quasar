@@ -43,7 +43,6 @@ import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import { Selection } from 'shared/types/Selection';
 import { Reference } from 'shared/types/review';
 
-
 interface ClientInfo {
   client: WebSocket;
   currentProject: string;

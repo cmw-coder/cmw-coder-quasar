@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 import CompletionCard from 'components/SettingCards/CompletionCard.vue';
 import GeneralCard from 'components/SettingCards/GeneralCard.vue';
 import UpdateCard from 'components/SettingCards/UpdateCard.vue';
+import ProjectIdCard from 'components/SettingCards/ProjectIdCard.vue';
 import { onBeforeUnmount, onMounted } from 'vue';
 import { ActionApi } from 'types/ActionApi';
 import { ActionType } from 'shared/types/ActionMessage';
@@ -47,6 +48,7 @@ onBeforeUnmount(() => {
       <GeneralCard />
       <CompletionCard />
       <UpdateCard />
+      <ProjectIdCard />
     </div>
   </q-page>
 </template>

@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { useQuasar } from 'quasar';
 import allLanguages from 'quasar/lang/index.json';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-
 import { WindowType } from 'shared/types/WindowType';
 import { ServiceType } from 'shared/types/service';
 import messages from 'src/i18n';
@@ -65,6 +64,7 @@ const transparentFallback = ref<boolean>();
 const transparentFallbackUpdating = ref(false);
 const zoomFix = ref<boolean>();
 const zoomFixUpdating = ref(false);
+const baseServerUrl = ref('');
 
 const updateLocale = async (value: Locale) => {
   locale.value = value.isoName;
@@ -96,6 +96,13 @@ const updateTheme = async (value: Theme) => {
   await configService.setDarkMode(value.darkMode);
 };
 
+watch(
+  () => baseServerUrl.value,
+  async (url) => {
+    await configService.setConfig('baseServerUrl', url);
+  },
+);
+
 onMounted(async () => {
   const { compatibility } = await dataStoreService.getAppDataAsync();
   developerMode.value =
@@ -106,6 +113,7 @@ onMounted(async () => {
   locale.value =
     (await configService.getConfig('locale')) ?? lang.getLocale() ?? 'en-US';
   theme.value = themes.find((t) => t.darkMode === darkMode) ?? theme.value;
+  baseServerUrl.value = (await configService.getConfig('baseServerUrl')) || '';
 });
 </script>
 
@@ -115,6 +123,16 @@ onMounted(async () => {
       {{ i18n('labels.title') }}
     </q-card-section>
     <q-list bordered separator>
+      <q-item tag="label">
+        <q-item-section>
+          {{ i18n('labels.baseServerUrl') }}
+        </q-item-section>
+        <q-item-section side>
+          <div class="row items-center">
+            <q-input v-model="baseServerUrl" />
+          </div>
+        </q-item-section>
+      </q-item>
       <q-expansion-item clickable group="generalSettingGroup">
         <template v-slot:header>
           <q-item-section>
