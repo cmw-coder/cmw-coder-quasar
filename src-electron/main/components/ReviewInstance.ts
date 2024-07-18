@@ -50,8 +50,8 @@ export class ReviewInstance {
     try {
       await api_reportSKU([
         {
-          begin: Date.now(),
-          end: Date.now(),
+          begin: DateTime.now().toMillis(),
+          end: DateTime.now().toMillis(),
           count: 1,
           type: 'AIGC',
           product: 'SI',
@@ -74,8 +74,8 @@ export class ReviewInstance {
     try {
       await api_reportSKU([
         {
-          begin: Date.now(),
-          end: Date.now(),
+          begin: DateTime.now().toMillis(),
+          end: DateTime.now().toMillis(),
           count: 1,
           type: 'AIGC',
           product: 'SI',
@@ -108,8 +108,8 @@ export class ReviewInstance {
     try {
       await api_reportSKU([
         {
-          begin: Date.now(),
-          end: Date.now(),
+          begin: DateTime.now().toMillis(),
+          end: DateTime.now().toMillis(),
           count: 1,
           type: 'AIGC',
           product: 'SI',
