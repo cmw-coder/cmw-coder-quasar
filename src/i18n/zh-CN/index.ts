@@ -96,6 +96,7 @@ export default {
           title: '通用',
           transparentFallback: '透明窗口兼容模式（Windows 7）',
           zoomFix: '窗口缩放修复',
+          baseServerUrl: '服务地址',
         },
       },
       UpdateCard: {
@@ -107,6 +108,19 @@ export default {
         notifications: {
           developerModeOngoing: '点击 {times} 次以启用开发者模式',
           developerModeEnabled: '开发者模式已启用',
+        },
+      },
+      ProjectIdCard: {
+        labels: {
+          title: '项目编码',
+          btnEdit: '编辑',
+          btnDel: '删除',
+          delDialogTitle: '删除项目',
+          delDialogMessage: '您确定要删除此项目吗？',
+          delDialogCancel: '取消',
+          delDialogConfirm: '确定',
+          editDialogCancel: '取消',
+          editDialogConfirm: '确定',
         },
       },
     },

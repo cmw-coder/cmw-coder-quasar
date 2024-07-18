@@ -97,6 +97,7 @@ export default {
           title: 'General',
           transparentFallback: 'Transparent fallback (Windows 7)',
           zoomFix: 'Fix window zoom',
+          baseServerUrl: 'Base Server Address',
         },
       },
       UpdateCard: {
@@ -109,6 +110,19 @@ export default {
           developerModeOngoing:
             'Click {times} more times to enable developer mode',
           developerModeEnabled: 'Developer mode enabled',
+        },
+      },
+      ProjectIdCard: {
+        labels: {
+          title: 'Project Code',
+          btnEdit: 'Edit',
+          btnDel: 'Delete',
+          delDialogTitle: 'Delete Project',
+          delDialogMessage: 'Are you sure you want to delete this project?',
+          delDialogCancel: 'Cancel',
+          delDialogConfirm: 'Confirm',
+          editDialogCancel: 'Cancel',
+          editDialogConfirm: 'Confirm',
         },
       },
     },
