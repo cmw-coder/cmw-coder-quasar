@@ -21,7 +21,7 @@ defineProps({
 
 const emit = defineEmits<{
   (e: 'retry'): void;
-  (e: 'feedback', feedback: Feedback): void;
+  (e: 'feedback', feedback: Feedback, comment?: string): void;
 }>();
 
 const { t } = useI18n();
@@ -58,8 +58,11 @@ const retryHandle = async () => {
 };
 
 const feedbackHandle = (feedback: Feedback) => {
-  emit('feedback', feedback);
+  emit('feedback', feedback, feedBackComment.value);
 };
+
+const feedBackDialogFlag = ref(false);
+const feedBackComment = ref('');
 
 const activeReference = ref<Reference | undefined>(undefined);
 const viewReferenceDialogFlag = ref(false);
@@ -347,7 +350,11 @@ const stopReviewHandle = () => {
                 size="md"
                 icon="mdi-thumb-down"
                 color="grey-6"
-                @click="() => feedbackHandle(Feedback.NotHelpful)"
+                @click="
+                  () => {
+                    feedBackDialogFlag = true;
+                  }
+                "
               />
 
               <q-btn
@@ -409,6 +416,31 @@ const stopReviewHandle = () => {
             "
           />
         </q-card-section>
+      </q-card>
+    </q-dialog>
+    <q-dialog v-model="feedBackDialogFlag" persistent>
+      <q-card style="min-width: 350px">
+        <q-card-section>
+          <div class="text-h6">{{ i18n('labels.rejectDialogTitle') }}</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          <q-input filled autogrow v-model="feedBackComment" autofocus />
+        </q-card-section>
+
+        <q-card-actions align="right" class="text-primary">
+          <q-btn
+            flat
+            :label="i18n('labels.rejectDialogCancel')"
+            v-close-popup
+          />
+          <q-btn
+            flat
+            :label="i18n('labels.rejectDialogConfirm')"
+            v-close-popup
+            @click="() => feedbackHandle(Feedback.NotHelpful)"
+          />
+        </q-card-actions>
       </q-card>
     </q-dialog>
   </div>

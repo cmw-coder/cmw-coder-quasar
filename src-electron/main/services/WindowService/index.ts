@@ -281,7 +281,10 @@ export class WindowService implements WindowServiceTrait {
     if (!activeReview) return undefined;
     return activeReview.getReviewData();
   }
-  async setActiveReviewFeedback(feedback: Feedback): Promise<void> {
+  async setActiveReviewFeedback(
+    feedback: Feedback,
+    comment?: string,
+  ): Promise<void> {
     const mainWindow = this.getWindow(WindowType.Main);
     const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
     const activeReview = reviewPage.activeReview;
@@ -294,7 +297,7 @@ export class WindowService implements WindowServiceTrait {
       if (feedback === Feedback.Helpful) {
         activeReview.reportHelpful();
       } else if (feedback === Feedback.NotHelpful) {
-        activeReview.reportUnHelpful();
+        activeReview.reportUnHelpful(comment);
       }
     }
   }
