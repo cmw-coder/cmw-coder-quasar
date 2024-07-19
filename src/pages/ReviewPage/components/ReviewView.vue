@@ -30,6 +30,7 @@ const i18n = (relativePath: string, data?: Record<string, unknown>) => {
   return data ? t(baseName + relativePath, data) : t(baseName + relativePath);
 };
 const appService = useService(ServiceType.App);
+const windowService = useService(ServiceType.WINDOW);
 const { codeToHtml } = useHighlighter();
 
 const formatSelection = (selection: Selection) => {
@@ -70,6 +71,10 @@ const viewReferenceHandle = (reference: Reference) => {
 const locateFileHandle = (file: string) => {
   console.log('locate file: ', file);
   appService.locateFileInFolder(file);
+};
+
+const stopReviewHandle = () => {
+  windowService.stopActiveReview();
 };
 </script>
 
@@ -260,6 +265,13 @@ const locateFileHandle = (file: string) => {
                 <q-item-section>{{
                   i18n('labels.reviewStepThree')
                 }}</q-item-section>
+                <q-item-section avatar>
+                  <q-btn
+                    :label="i18n('labels.stop')"
+                    color="red"
+                    @click="() => stopReviewHandle()"
+                  />
+                </q-item-section>
               </q-item>
             </q-list>
           </q-card>

@@ -342,6 +342,7 @@ export default {
             noProblem: 'No Problem',
             error: 'Error',
             retry: 'Retry',
+            stop: 'Stop',
             useless: 'Useless',
             helpful: 'Helpful',
             referenceViewDialogTitle: 'Reference Code',

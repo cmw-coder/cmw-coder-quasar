@@ -29,4 +29,5 @@ export interface WindowServiceTrait {
   getReviewData(): Promise<ReviewData | undefined>;
   setActiveReviewFeedback(feedback: Feedback): Promise<void>;
   retryActiveReview(): Promise<void>;
+  stopActiveReview(): Promise<void>;
 }

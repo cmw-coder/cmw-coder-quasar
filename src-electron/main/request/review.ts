@@ -82,6 +82,7 @@ export const api_feedback_review = async (
   userId: string,
   feedback: Feedback,
   timestamp: number,
+  comment: string,
 ) => {
   return request({
     url: '/kong/RdTestAiService/v1/chatgpt/question/review/feedback',
@@ -91,6 +92,17 @@ export const api_feedback_review = async (
       userId,
       feedback: feedback === Feedback.Helpful ? 1 : 0,
       timestamp,
+      comment,
+    },
+  });
+};
+
+export const api_stop_review = async (reviewId: string) => {
+  return request({
+    url: '/kong/RdTestAiService/v1/chatgpt/question/review/stop',
+    method: 'post',
+    params: {
+      taskId: reviewId,
     },
   });
 };
@@ -98,6 +110,7 @@ export const api_feedback_review = async (
 // import {
 //   ReviewRequestParams,
 //   ReviewResult,
+//   Feedback,
 //   ReviewState,
 // } from 'shared/types/review';
 // import Logger from 'electron-log/main';
@@ -112,7 +125,7 @@ export const api_feedback_review = async (
 // export const api_get_code_review_state = async (reviewId: string) => {
 //   console.log('api_get_code_review_state', reviewId);
 //   await timeout(150);
-//   return ReviewState.Third;
+//   return ReviewState.Second;
 // };
 
 // const parseReviewResult = (data: string): ReviewResult => {
@@ -166,4 +179,29 @@ export const api_feedback_review = async (
 //     ]
 // }`;
 //   return parseReviewResult(data);
+// };
+
+// export const api_feedback_review = async (
+//   reviewId: string,
+//   userId: string,
+//   feedback: Feedback,
+//   timestamp: number,
+//   comment: string,
+// ) => {
+//   console.log(
+//     'api_get_code_review_result',
+//     reviewId,
+//     userId,
+//     feedback,
+//     timestamp,
+//     comment,
+//   );
+//   await timeout(150);
+//   return '1111-2222-3333-4444';
+// };
+
+// export const api_stop_review = async (reviewId: string) => {
+//   console.log('api_get_code_review_result', reviewId);
+//   await timeout(150);
+//   return '1111-2222-3333-4444';
 // };

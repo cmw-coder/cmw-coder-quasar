@@ -307,4 +307,13 @@ export class WindowService implements WindowServiceTrait {
       activeReview.retry();
     }
   }
+
+  async stopActiveReview() {
+    const mainWindow = this.getWindow(WindowType.Main);
+    const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
+    const activeReview = reviewPage.activeReview;
+    if (activeReview) {
+      activeReview.stop();
+    }
+  }
 }

@@ -338,6 +338,7 @@ export default {
             noProblem: '没有问题',
             error: '错误',
             retry: '重试',
+            stop: '停止',
             useless: '无用',
             helpful: '有帮助',
             referenceViewDialogTitle: '引用代码',
