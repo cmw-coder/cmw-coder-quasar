@@ -232,6 +232,13 @@ const stopReviewHandle = () => {
                 <q-item-section>{{
                   i18n('labels.reviewStepOne')
                 }}</q-item-section>
+                <q-item-section avatar>
+                  <q-btn
+                    :label="i18n('labels.stop')"
+                    color="red"
+                    @click="() => stopReviewHandle()"
+                  />
+                </q-item-section>
               </q-item>
               <q-item v-if="reviewData.state === ReviewState.First">
                 <q-item-section avatar>
@@ -251,6 +258,13 @@ const stopReviewHandle = () => {
                 <q-item-section>{{
                   i18n('labels.reviewStepTwo')
                 }}</q-item-section>
+                <q-item-section avatar>
+                  <q-btn
+                    :label="i18n('labels.stop')"
+                    color="red"
+                    @click="() => stopReviewHandle()"
+                  />
+                </q-item-section>
               </q-item>
               <q-item v-if="reviewData.state === ReviewState.Second">
                 <q-item-section avatar>
