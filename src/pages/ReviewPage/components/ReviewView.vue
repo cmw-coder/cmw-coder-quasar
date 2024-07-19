@@ -367,7 +367,11 @@ const stopReviewHandle = () => {
                 "
                 class="text-white"
               >
-                {{ reviewData.feedback }}
+                {{
+                  reviewData.feedback === Feedback.Helpful
+                    ? i18n('labels.helpful')
+                    : i18n('labels.useless')
+                }}
               </q-chip>
             </div>
           </div>
