@@ -97,6 +97,9 @@ export default {
           title: 'General',
           transparentFallback: 'Transparent fallback (Windows 7)',
           zoomFix: 'Fix window zoom',
+          hideSelectedTipsWindow: 'Hide Selected Tips Window',
+          hideSelectedTipsWindowNotice:
+            'After hiding the window, the selected prompt window will no longer appear after selecting the code, and subsequent operations can be triggered directly by pressing CTRL + I/L.',
           baseServerUrl: 'Base Server Address',
         },
       },
@@ -357,8 +360,8 @@ export default {
     },
     CodeSelectedTipsPage: {
       labels: {
-        addToChat: 'Add to chat',
-        review: 'Review highlight code',
+        addToChat: 'Add to chat (Ctrl + Alt + I)',
+        review: 'Review highlight code (Ctrl + Alt + L)',
       },
     },
   },

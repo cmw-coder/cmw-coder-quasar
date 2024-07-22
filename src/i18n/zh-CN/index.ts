@@ -96,6 +96,9 @@ export default {
           title: '通用',
           transparentFallback: '透明窗口兼容模式（Windows 7）',
           zoomFix: '窗口缩放修复',
+          hideSelectedTipsWindow: '隐藏选中提示窗口',
+          hideSelectedTipsWindowNotice:
+            '隐藏窗口后，选中提示窗口将不在选中代码后出现，后续操作可直接通过 CTRL + I/L 触发。',
           baseServerUrl: '服务地址',
         },
       },
@@ -353,8 +356,8 @@ export default {
     },
     CodeSelectedTipsPage: {
       labels: {
-        addToChat: '添加到聊天中',
-        review: '评审选中代码',
+        addToChat: '添加到聊天中 (Ctrl + Alt + I)',
+        review: '评审选中代码 (Ctrl + Alt + L)',
       },
     },
   },

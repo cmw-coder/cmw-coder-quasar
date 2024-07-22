@@ -65,6 +65,15 @@ const transparentFallbackUpdating = ref(false);
 const zoomFix = ref<boolean>();
 const zoomFixUpdating = ref(false);
 const baseServerUrl = ref('');
+const showSelectedTipsWindow = ref(true);
+const showSelectedTipsWindowUpdating = ref(false);
+
+const updateShowSelectedTipsWindow = async (value: boolean) => {
+  showSelectedTipsWindowUpdating.value = true;
+  await configService.setConfig('showSelectedTipsWindow', value);
+  showSelectedTipsWindow.value = value;
+  showSelectedTipsWindowUpdating.value = false;
+};
 
 const updateLocale = async (value: Locale) => {
   locale.value = value.isoName;
@@ -221,6 +230,25 @@ onMounted(async () => {
               :disable="zoomFixUpdating"
               :model-value="zoomFix"
               @update:model-value="updateZoomFix($event)"
+            />
+          </div>
+        </q-item-section>
+      </q-item>
+      <q-item
+        :disable="zoomFixUpdating"
+        tag="label"
+        :title="i18n('labels.hideSelectedTipsWindowNotice')"
+      >
+        <q-item-section>
+          {{ i18n('labels.hideSelectedTipsWindow') }}
+        </q-item-section>
+        <q-item-section side>
+          <div class="row items-center">
+            <q-spinner v-show="showSelectedTipsWindowUpdating" size="sm" />
+            <q-toggle
+              :disable="showSelectedTipsWindowUpdating"
+              :model-value="!showSelectedTipsWindow"
+              @update:model-value="updateShowSelectedTipsWindow(!$event)"
             />
           </div>
         </q-item-section>

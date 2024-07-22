@@ -23,6 +23,7 @@ export interface AppConfig {
   useEnterSend: boolean;
   darkMode: boolean;
   developerMode: boolean;
+  showSelectedTipsWindow: boolean;
   completionConfigs: {
     function: CompletionConfigType;
     line: CompletionConfigType;
