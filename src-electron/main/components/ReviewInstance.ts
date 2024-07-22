@@ -25,7 +25,7 @@ import { DataStoreService } from 'main/services/DataStoreService';
 import { DateTime } from 'luxon';
 import { api_reportSKU } from 'main/request/sku';
 
-const REFRESH_TIME = 1500;
+const REFRESH_TIME = 3000;
 
 export class ReviewInstance {
   timer?: NodeJS.Timeout;
@@ -200,15 +200,15 @@ export class ReviewInstance {
     try {
       this.state = await api_get_code_review_state(this.reviewId);
       if (this.state === ReviewState.Third) {
+        clearInterval(this.timer);
         await this.getReviewResult();
         this.state = ReviewState.Finished;
-        clearInterval(this.timer);
         this.saveReviewData();
       }
       if (this.state === ReviewState.Error) {
+        clearInterval(this.timer);
         await this.getReviewResult();
         this.errorInfo = this.result ? this.result.originData : '';
-        clearInterval(this.timer);
         this.saveReviewData();
       }
       mainWindow.sendMessageToRenderer(
@@ -228,7 +228,6 @@ export class ReviewInstance {
 
   async getReviewResult() {
     this.result = await api_get_code_review_result(this.reviewId);
-    console.log('getReviewResult', this.result);
   }
 
   saveReviewData() {
