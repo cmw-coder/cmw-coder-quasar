@@ -204,6 +204,8 @@ export default {
           defaultSize: '恢复默认大小',
           minimize: '最小化',
           toggleMaximize: '切换最大化',
+          fix: '窗口置顶中',
+          unfix: '窗口未置顶',
         },
       },
     },

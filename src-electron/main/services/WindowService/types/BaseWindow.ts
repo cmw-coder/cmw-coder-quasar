@@ -48,6 +48,7 @@ export abstract class BaseWindow {
   _url: string;
   isEdgeHide = false;
   private isInEdgeState = false;
+  private browserWindowOptions: windowOptions = {};
 
   protected constructor(
     type: WindowType,
@@ -60,11 +61,12 @@ export abstract class BaseWindow {
   create() {
     Logger.log(`Create window: ${this._type} ${this._url}`);
     this.isEdgeHide = false;
-
-    this._window = new BrowserWindow({
+    this.browserWindowOptions = {
       ...defaultBrowserWindowConstructorOptions,
       ...this.options,
-    });
+    };
+
+    this._window = new BrowserWindow(this.browserWindowOptions);
 
     // 配置跨域
     this._window.webContents.session.webRequest.onHeadersReceived(
@@ -92,6 +94,11 @@ export abstract class BaseWindow {
     const dataStoreService = container.get<DataStoreService>(
       ServiceType.DATA_STORE,
     );
+    const windowData = dataStoreService.getWindowData(this._type);
+    dataStoreService.saveWindowData(this._type, {
+      ...windowData,
+      fixed: !!this.browserWindowOptions.alwaysOnTop,
+    });
     this._window.once('ready-to-show', () => {
       if (this._window) {
         if (process.env.NODE_ENV === 'development') {
@@ -259,5 +266,20 @@ export abstract class BaseWindow {
     this._window.setBounds({ x: x, y: y, width: width, height: height }, true);
     this.moveHandler();
     this.isEdgeHide = false;
+  }
+
+  toggleFixed() {
+    if (!this._window) return;
+    const dataStoreService = container.get<DataStoreService>(
+      ServiceType.DATA_STORE,
+    );
+    const windowData = dataStoreService.getWindowData(this._type);
+    windowData.fixed = !windowData.fixed;
+    if (windowData.fixed) {
+      this._window.setAlwaysOnTop(true);
+    } else {
+      this._window.setAlwaysOnTop(false);
+    }
+    dataStoreService.saveWindowData(this._type, windowData);
   }
 }

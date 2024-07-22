@@ -16,6 +16,7 @@ import { MainWindow } from 'main/services/WindowService/types/MainWindow';
 import { UpdateWindow } from 'main/services/WindowService/types/UpdateWindow';
 import { BaseWindow } from 'main/services/WindowService/types/BaseWindow';
 import { ConfigService } from 'main/services/ConfigService';
+import { DataStoreService } from 'main/services/DataStoreService';
 import { SelectionTipsWindow } from 'main/services/WindowService/types/SelectionTipsWindow';
 import { Selection } from 'shared/types/Selection';
 import { ReviewInstance } from 'main/components/ReviewInstance';
@@ -44,6 +45,8 @@ export class WindowService implements WindowServiceTrait {
   constructor(
     @inject(ServiceType.CONFIG)
     private _configService: ConfigService,
+    @inject(ServiceType.DATA_STORE)
+    private _dataStoreService: DataStoreService,
   ) {
     this.windowMap.set(WindowType.Feedback, new FeedbackWindow());
     this.windowMap.set(WindowType.ProjectId, new ProjectIdWindow());
@@ -318,5 +321,15 @@ export class WindowService implements WindowServiceTrait {
     if (activeReview) {
       activeReview.stop();
     }
+  }
+
+  async getWindowIsFixed(windowType: WindowType) {
+    const { fixed } = this._dataStoreService.getWindowData(windowType);
+    return !!fixed;
+  }
+
+  async toggleWindowFixed(windowType: WindowType) {
+    const window = this.getWindow(windowType);
+    window.toggleFixed();
   }
 }

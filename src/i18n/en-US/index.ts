@@ -207,6 +207,8 @@ export default {
           defaultSize: 'Restore default size',
           minimize: 'Minimize',
           toggleMaximize: 'Toggle maximize',
+          fix: 'Window is Fixed',
+          unfix: 'Window is Unfixed',
         },
       },
     },

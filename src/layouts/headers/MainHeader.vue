@@ -4,7 +4,7 @@ import { bus } from 'boot/bus';
 import { WindowType } from 'shared/types/WindowType';
 import { useService } from 'utils/common';
 import { ServiceType } from 'shared/types/service';
-import { PropType, onBeforeUnmount, onMounted } from 'vue';
+import { PropType, onBeforeUnmount, onMounted, ref } from 'vue';
 
 const props = defineProps({
   windowType: {
@@ -18,6 +18,8 @@ const { t } = useI18n();
 const i18n = (relativePath: string) => {
   return t('layouts.headers.MainHeader.' + relativePath);
 };
+
+const isFixed = ref(false);
 
 const windowService = useService(ServiceType.WINDOW);
 
@@ -49,10 +51,16 @@ const bodyMouseOutHandler = () => {
   windowService.mouseMoveInOrOutWindow(props.windowType);
 };
 
-onMounted(() => {
-  console.log('FloatingHeader mounted', props.windowType);
+const toggleFixed = async () => {
+  windowService.toggleWindowFixed(props.windowType);
+  isFixed.value = await windowService.getWindowIsFixed(props.windowType);
+};
+
+onMounted(async () => {
+  console.log('MainHeader mounted', props.windowType);
   document.body.addEventListener('mouseenter', bodyMouseInHandler);
   document.body.addEventListener('mouseleave', bodyMouseOutHandler);
+  isFixed.value = await windowService.getWindowIsFixed(props.windowType);
 });
 
 onBeforeUnmount(() => {
@@ -72,6 +80,18 @@ onBeforeUnmount(() => {
           {{ i18n('tooltips.defaultSize') }}
         </q-tooltip>
       </q-btn>
+
+      <q-btn
+        flat
+        :icon="isFixed ? 'mdi-pin' : 'mdi-pin-off'"
+        stretch
+        @click="() => toggleFixed()"
+      >
+        <q-tooltip :delay="1000">
+          {{ isFixed ? i18n('tooltips.fix') : i18n('tooltips.unfix') }}
+        </q-tooltip>
+      </q-btn>
+
       <q-btn flat icon="mdi-minus" stretch @click="minimize">
         <q-tooltip :delay="1000">
           {{ i18n('tooltips.minimize') }}

@@ -30,4 +30,6 @@ export interface WindowServiceTrait {
   setActiveReviewFeedback(feedback: Feedback, comment?: string): Promise<void>;
   retryActiveReview(): Promise<void>;
   stopActiveReview(): Promise<void>;
+  getWindowIsFixed(windowType: WindowType): Promise<boolean>;
+  toggleWindowFixed(windowType: WindowType): Promise<void>;
 }
