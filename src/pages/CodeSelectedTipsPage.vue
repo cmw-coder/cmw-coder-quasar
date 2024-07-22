@@ -50,7 +50,7 @@ const reviewHandle = () => {
   height: 100vh;
   width: 100vw;
   overflow: hidden;
-  opacity: 0.9;
+  opacity: 0.5;
   display: flex;
   align-items: center;
   justify-content: space-around;

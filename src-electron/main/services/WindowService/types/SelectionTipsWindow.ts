@@ -5,6 +5,10 @@ import { DataStoreService } from 'main/services/DataStoreService';
 import { ServiceType } from 'shared/types/service';
 import { ExtraData, Selection, TriggerPosition } from 'shared/types/Selection';
 
+const WINDOW_HEIGHT = 34;
+// const WINDOW_WIDTH = 380;
+const WINDOW_WIDTH = 240;
+
 export class SelectionTipsWindow extends BaseWindow {
   selection?: Selection;
   extraData?: ExtraData;
@@ -41,6 +45,8 @@ export class SelectionTipsWindow extends BaseWindow {
     this.show({
       x: position.x,
       y: position.y,
+      height: WINDOW_HEIGHT,
+      width: WINDOW_WIDTH,
     });
   }
 }
