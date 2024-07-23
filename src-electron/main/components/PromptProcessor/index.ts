@@ -35,6 +35,7 @@ export class PromptProcessor {
     this._abortController?.abort();
 
     const completionType = getCompletionType(promptElements);
+    log.debug('PromptProcessor.process.completionType', completionType);
 
     this._abortController = new AbortController();
 
