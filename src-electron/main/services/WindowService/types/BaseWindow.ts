@@ -67,6 +67,11 @@ export abstract class BaseWindow {
     };
 
     this._window = new BrowserWindow(this.browserWindowOptions);
+    if (this.browserWindowOptions.alwaysOnTop) {
+      this._window.setAlwaysOnTop(true, 'pop-up-menu');
+    } else {
+      this._window.setAlwaysOnTop(false);
+    }
 
     // 配置跨域
     this._window.webContents.session.webRequest.onHeadersReceived(
@@ -276,7 +281,7 @@ export abstract class BaseWindow {
     const windowData = dataStoreService.getWindowData(this._type);
     windowData.fixed = !windowData.fixed;
     if (windowData.fixed) {
-      this._window.setAlwaysOnTop(true);
+      this._window.setAlwaysOnTop(true, 'pop-up-menu');
     } else {
       this._window.setAlwaysOnTop(false);
     }

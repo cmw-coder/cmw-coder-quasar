@@ -64,7 +64,6 @@ export class CompletionsWindow extends BaseWindow {
     const { compatibility } = container
       .get<DataStoreService>(ServiceType.DATA_STORE)
       .getAppdata();
-    this._window.setAlwaysOnTop(true, 'pop-up-menu');
     this._window.setIgnoreMouseEvents(!compatibility.transparentFallback);
   }
 
