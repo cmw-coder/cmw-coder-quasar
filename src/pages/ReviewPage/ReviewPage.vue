@@ -52,10 +52,10 @@ onMounted(async () => {
   });
 });
 
-const feedbackHandle = (feedback: Feedback) => {
+const feedbackHandle = (feedback: Feedback, comment?: string) => {
   if (reviewData.value) {
     reviewData.value.feedback = feedback;
-    windowService.setActiveReviewFeedback(feedback);
+    windowService.setActiveReviewFeedback(feedback, comment);
   }
 };
 

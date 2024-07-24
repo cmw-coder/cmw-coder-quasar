@@ -22,6 +22,7 @@ import { ActionMessage, ActionType } from 'shared/types/ActionMessage';
 import { NetworkZone } from 'shared/config';
 import { WindowType } from 'shared/types/WindowType';
 import { AppServiceTrait } from 'shared/types/service/AppServiceTrait';
+import { globalShortcut } from 'electron/main';
 
 interface AbstractServicePort {
   [key: string]: ((...args: unknown[]) => Promise<unknown>) | undefined;
@@ -55,7 +56,6 @@ export class AppService implements AppServiceTrait {
     this.initApplication();
     this.initAdditionReport();
     this.initIpcMain();
-    this.initShortcutHandler();
   }
 
   initApplication() {
@@ -74,6 +74,8 @@ export class AppService implements AppServiceTrait {
       this._windowService.getWindow(WindowType.Main).show();
     });
     app.whenReady().then(async () => {
+      this.initShortcutHandler();
+
       log.info('Comware Coder is ready');
       // ========================
       log.info('Migrate data from old data store (< 1.2.0)');
@@ -227,6 +229,14 @@ export class AppService implements AppServiceTrait {
     //     log.debug('Shift+F5 is pressed: Shortcut Disabled');
     //   });
     // });
+
+    // 注册选中代码快捷键
+    globalShortcut.register('CommandOrControl+Alt+I', () => {
+      this._windowService.addSelectionToChat();
+    });
+    globalShortcut.register('CommandOrControl+Alt+L', () => {
+      this._windowService.reviewSelection();
+    });
   }
 
   async locateFileInFolder(filePath: string) {

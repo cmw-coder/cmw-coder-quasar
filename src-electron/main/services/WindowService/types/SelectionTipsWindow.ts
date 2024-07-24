@@ -4,6 +4,10 @@ import { container } from 'main/services';
 import { DataStoreService } from 'main/services/DataStoreService';
 import { ServiceType } from 'shared/types/service';
 import { ExtraData, Selection, TriggerPosition } from 'shared/types/Selection';
+import { ConfigService } from 'main/services/ConfigService';
+
+const WINDOW_HEIGHT = 34;
+const WINDOW_WIDTH = 460;
 
 export class SelectionTipsWindow extends BaseWindow {
   selection?: Selection;
@@ -31,16 +35,28 @@ export class SelectionTipsWindow extends BaseWindow {
     });
   }
 
-  trigger(
+  async trigger(
     position: TriggerPosition,
     selection: Selection,
     extraData: ExtraData,
   ) {
     this.selection = selection;
     this.extraData = extraData;
-    this.show({
-      x: position.x,
-      y: position.y,
-    });
+    const configService = container.get<ConfigService>(ServiceType.CONFIG);
+    let showSelectedTipsWindow = await configService.getConfig(
+      'showSelectedTipsWindow',
+    );
+    if (showSelectedTipsWindow === undefined) {
+      await configService.setConfig('showSelectedTipsWindow', true);
+      showSelectedTipsWindow = true;
+    }
+    if (showSelectedTipsWindow) {
+      this.show({
+        x: position.x,
+        y: position.y,
+        height: WINDOW_HEIGHT,
+        width: WINDOW_WIDTH,
+      });
+    }
   }
 }

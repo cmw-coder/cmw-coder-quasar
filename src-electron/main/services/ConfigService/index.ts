@@ -38,6 +38,10 @@ export class ConfigService implements ConfigServiceTrait {
           store.set('activeModelKey', 'CMW');
         }
       },
+      '1.2.6': (store) => {
+        log.info('Upgrading "appConfig" store to 1.2.6 ...');
+        store.set('showSelectedTipsWindow', true);
+      },
     },
   });
 

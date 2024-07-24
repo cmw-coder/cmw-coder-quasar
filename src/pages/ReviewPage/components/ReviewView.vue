@@ -21,7 +21,7 @@ defineProps({
 
 const emit = defineEmits<{
   (e: 'retry'): void;
-  (e: 'feedback', feedback: Feedback): void;
+  (e: 'feedback', feedback: Feedback, comment?: string): void;
 }>();
 
 const { t } = useI18n();
@@ -30,6 +30,7 @@ const i18n = (relativePath: string, data?: Record<string, unknown>) => {
   return data ? t(baseName + relativePath, data) : t(baseName + relativePath);
 };
 const appService = useService(ServiceType.App);
+const windowService = useService(ServiceType.WINDOW);
 const { codeToHtml } = useHighlighter();
 
 const formatSelection = (selection: Selection) => {
@@ -57,8 +58,11 @@ const retryHandle = async () => {
 };
 
 const feedbackHandle = (feedback: Feedback) => {
-  emit('feedback', feedback);
+  emit('feedback', feedback, feedBackComment.value);
 };
+
+const feedBackDialogFlag = ref(false);
+const feedBackComment = ref('');
 
 const activeReference = ref<Reference | undefined>(undefined);
 const viewReferenceDialogFlag = ref(false);
@@ -70,6 +74,10 @@ const viewReferenceHandle = (reference: Reference) => {
 const locateFileHandle = (file: string) => {
   console.log('locate file: ', file);
   appService.locateFileInFolder(file);
+};
+
+const stopReviewHandle = () => {
+  windowService.stopActiveReview();
 };
 </script>
 
@@ -224,6 +232,13 @@ const locateFileHandle = (file: string) => {
                 <q-item-section>{{
                   i18n('labels.reviewStepOne')
                 }}</q-item-section>
+                <q-item-section avatar>
+                  <q-btn
+                    :label="i18n('labels.stop')"
+                    color="red"
+                    @click="() => stopReviewHandle()"
+                  />
+                </q-item-section>
               </q-item>
               <q-item v-if="reviewData.state === ReviewState.First">
                 <q-item-section avatar>
@@ -243,6 +258,13 @@ const locateFileHandle = (file: string) => {
                 <q-item-section>{{
                   i18n('labels.reviewStepTwo')
                 }}</q-item-section>
+                <q-item-section avatar>
+                  <q-btn
+                    :label="i18n('labels.stop')"
+                    color="red"
+                    @click="() => stopReviewHandle()"
+                  />
+                </q-item-section>
               </q-item>
               <q-item v-if="reviewData.state === ReviewState.Second">
                 <q-item-section avatar>
@@ -260,6 +282,13 @@ const locateFileHandle = (file: string) => {
                 <q-item-section>{{
                   i18n('labels.reviewStepThree')
                 }}</q-item-section>
+                <q-item-section avatar>
+                  <q-btn
+                    :label="i18n('labels.stop')"
+                    color="red"
+                    @click="() => stopReviewHandle()"
+                  />
+                </q-item-section>
               </q-item>
             </q-list>
           </q-card>
@@ -335,7 +364,11 @@ const locateFileHandle = (file: string) => {
                 size="md"
                 icon="mdi-thumb-down"
                 color="grey-6"
-                @click="() => feedbackHandle(Feedback.NotHelpful)"
+                @click="
+                  () => {
+                    feedBackDialogFlag = true;
+                  }
+                "
               />
 
               <q-btn
@@ -355,7 +388,11 @@ const locateFileHandle = (file: string) => {
                 "
                 class="text-white"
               >
-                {{ reviewData.feedback }}
+                {{
+                  reviewData.feedback === Feedback.Helpful
+                    ? i18n('labels.helpful')
+                    : i18n('labels.useless')
+                }}
               </q-chip>
             </div>
           </div>
@@ -393,6 +430,31 @@ const locateFileHandle = (file: string) => {
             "
           />
         </q-card-section>
+      </q-card>
+    </q-dialog>
+    <q-dialog v-model="feedBackDialogFlag" persistent>
+      <q-card style="min-width: 350px">
+        <q-card-section>
+          <div class="text-h6">{{ i18n('labels.rejectDialogTitle') }}</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          <q-input filled autogrow v-model="feedBackComment" autofocus />
+        </q-card-section>
+
+        <q-card-actions align="right" class="text-primary">
+          <q-btn
+            flat
+            :label="i18n('labels.rejectDialogCancel')"
+            v-close-popup
+          />
+          <q-btn
+            flat
+            :label="i18n('labels.rejectDialogConfirm')"
+            v-close-popup
+            @click="() => feedbackHandle(Feedback.NotHelpful)"
+          />
+        </q-card-actions>
       </q-card>
     </q-dialog>
   </div>

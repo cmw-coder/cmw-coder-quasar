@@ -27,7 +27,7 @@ const reviewHandle = () => {
 </script>
 
 <template>
-  <div class="selection-tips-wrapper bg-grey-10">
+  <div class="selection-tips-wrapper">
     <q-btn
       class="text-white"
       flat
@@ -50,9 +50,15 @@ const reviewHandle = () => {
   height: 100vh;
   width: 100vw;
   overflow: hidden;
-  opacity: 0.9;
   display: flex;
   align-items: center;
   justify-content: space-around;
+  background-color: hsla(0, 0%, 0%, 0.4);
+}
+</style>
+
+<style lang="scss">
+body.body--dark {
+  background-color: transparent;
 }
 </style>

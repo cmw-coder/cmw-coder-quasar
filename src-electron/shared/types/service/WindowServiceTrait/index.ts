@@ -27,6 +27,9 @@ export interface WindowServiceTrait {
   addSelectionToChat(selection?: Selection): Promise<void>;
   reviewSelection(selection?: Selection): Promise<void>;
   getReviewData(): Promise<ReviewData | undefined>;
-  setActiveReviewFeedback(feedback: Feedback): Promise<void>;
+  setActiveReviewFeedback(feedback: Feedback, comment?: string): Promise<void>;
   retryActiveReview(): Promise<void>;
+  stopActiveReview(): Promise<void>;
+  getWindowIsFixed(windowType: WindowType): Promise<boolean>;
+  toggleWindowFixed(windowType: WindowType): Promise<void>;
 }

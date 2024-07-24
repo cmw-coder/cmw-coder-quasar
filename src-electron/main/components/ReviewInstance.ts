@@ -3,6 +3,7 @@ import {
   api_feedback_review,
   api_get_code_review_result,
   api_get_code_review_state,
+  api_stop_review,
 } from 'main/request/review';
 import { container, getService } from 'main/services';
 import { ConfigService } from 'main/services/ConfigService';
@@ -24,7 +25,7 @@ import { DataStoreService } from 'main/services/DataStoreService';
 import { DateTime } from 'luxon';
 import { api_reportSKU } from 'main/request/sku';
 
-const REFRESH_TIME = 1500;
+const REFRESH_TIME = 3000;
 
 export class ReviewInstance {
   timer?: NodeJS.Timeout;
@@ -97,13 +98,14 @@ export class ReviewInstance {
         appConfig.username,
         Feedback.Helpful,
         this.createTime,
+        '',
       );
     } catch (e) {
       log.error('reportReviewHelpful.api_feedback_review.failed', e);
     }
   }
 
-  async reportUnHelpful() {
+  async reportUnHelpful(comment?: string) {
     const appConfig = await getService(ServiceType.CONFIG).getConfigs();
     try {
       await api_reportSKU([
@@ -131,6 +133,7 @@ export class ReviewInstance {
         appConfig.username,
         Feedback.Helpful,
         this.createTime,
+        comment || '',
       );
     } catch (e) {
       log.error('reportReviewHelpful.api_feedback_review.failed', e);
@@ -197,15 +200,15 @@ export class ReviewInstance {
     try {
       this.state = await api_get_code_review_state(this.reviewId);
       if (this.state === ReviewState.Third) {
+        clearInterval(this.timer);
         await this.getReviewResult();
         this.state = ReviewState.Finished;
-        clearInterval(this.timer);
         this.saveReviewData();
       }
       if (this.state === ReviewState.Error) {
+        clearInterval(this.timer);
         await this.getReviewResult();
         this.errorInfo = this.result ? this.result.originData : '';
-        clearInterval(this.timer);
         this.saveReviewData();
       }
       mainWindow.sendMessageToRenderer(
@@ -225,7 +228,6 @@ export class ReviewInstance {
 
   async getReviewResult() {
     this.result = await api_get_code_review_result(this.reviewId);
-    console.log('getReviewResult', this.result);
   }
 
   saveReviewData() {
@@ -251,5 +253,21 @@ export class ReviewInstance {
       feedback: this.feedback,
       errorInfo: this.errorInfo,
     } as ReviewData;
+  }
+
+  async stop() {
+    clearInterval(this.timer);
+    try {
+      await api_stop_review(this.reviewId);
+    } catch (e) {
+      log.error('stopReview.failed', e);
+    }
+    this.state = ReviewState.Error;
+    this.errorInfo = 'USER STOPPED REVIEW TASK';
+    const windowService = container.get<WindowService>(ServiceType.WINDOW);
+    const mainWindow = windowService.getWindow(WindowType.Main);
+    mainWindow.sendMessageToRenderer(
+      new ReviewDataUpdateActionMessage(this.getReviewData()),
+    );
   }
 }

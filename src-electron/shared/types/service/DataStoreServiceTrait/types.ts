@@ -43,6 +43,7 @@ export interface WindowData {
   height?: number;
   width?: number;
   show: boolean;
+  fixed?: boolean;
 }
 
 export type WindowDataMap = Record<WindowType, WindowData>;
