@@ -1,5 +1,6 @@
 import { BrowserWindow, app, screen } from 'electron';
 import { dialog } from 'electron/main';
+import log from 'electron-log/main';
 import { readFile } from 'fs/promises';
 import { decode } from 'iconv-lite';
 import { inject, injectable } from 'inversify';
@@ -35,6 +36,7 @@ import { ReviewDataUpdateActionMessage } from 'shared/types/ActionMessage';
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import { Range } from 'main/types/vscode/range';
 import { getService } from 'main/services';
+import { treeSitterFolder } from 'main/services/WindowService/constants';
 
 interface WindowMap {
   [WindowType.Completions]: CompletionsWindow;
@@ -252,10 +254,12 @@ export class WindowService implements WindowServiceTrait {
   }
 
   async reviewFile(path: string) {
+    log.debug('WindowService.reviewFile', { path });
     if (!this._parserInitialized) {
       return;
     }
     const clientInfo = getService(ServiceType.WEBSOCKET).getClientInfo();
+    log.debug('WindowService.reviewFile', { clientInfo });
     if (!clientInfo || !clientInfo.currentProject || !clientInfo.version) {
       return;
     }
@@ -263,6 +267,9 @@ export class WindowService implements WindowServiceTrait {
     const mainWindow = this.getWindow(WindowType.Main);
     const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
     // 上一个 review 尚未结束
+    log.debug('WindowService.reviewFile', {
+      activeFileReview: reviewPage.activeFileReview,
+    });
     if (
       reviewPage.activeFileReview &&
       !reviewPage.activeFileReview
@@ -280,11 +287,13 @@ export class WindowService implements WindowServiceTrait {
     }
 
     const content = decode(await readFile(path), 'gbk');
+    log.debug('WindowService.reviewFile', { content });
     const parser = new Parser();
     parser.setLanguage(
-      await Parser.Language.load('src-electron/assets/tree-sitter-c.wasm'),
+      await Parser.Language.load(`${treeSitterFolder}/tree-sitter-c.wasm`),
     );
     const tree = parser.parse(content);
+    log.debug('WindowService.reviewFile', { tree });
     const functionDefinitions = tree.rootNode.children
       .filter((node) => node.type === 'function_definition')
       .map(
@@ -301,8 +310,7 @@ export class WindowService implements WindowServiceTrait {
           language: 'c',
         }),
       );
-
-    console.log(functionDefinitions);
+    log.debug('WindowService.reviewFile', { functionDefinitions });
     reviewPage.activeFileReview = functionDefinitions.map(
       (functionDefinition, index) =>
         new ReviewInstance(
@@ -315,7 +323,9 @@ export class WindowService implements WindowServiceTrait {
           index,
         ),
     );
-    await reviewPage.active();
+    log.debug('WindowService.reviewFile', {
+      activeFileReview: reviewPage.activeFileReview,
+    });
   }
 
   async reviewSelection(selection?: Selection) {
@@ -379,6 +389,7 @@ export class WindowService implements WindowServiceTrait {
       );
     }
   }
+
   async setActiveReviewFeedback(
     feedback: Feedback,
     comment?: string,
