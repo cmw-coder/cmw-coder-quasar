@@ -354,7 +354,7 @@ export default {
         },
       },
     },
-    CodeSelectedTipsPage: {
+    SelectionTipsPage: {
       labels: {
         addToChat: '添加到聊天中 (Ctrl + Alt + I)',
         review: '评审选中代码 (Ctrl + Alt + L)',

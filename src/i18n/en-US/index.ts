@@ -358,7 +358,7 @@ export default {
         },
       },
     },
-    CodeSelectedTipsPage: {
+    SelectionTipsPage: {
       labels: {
         addToChat: 'Add to chat (Ctrl + Alt + I)',
         review: 'Review highlight code (Ctrl + Alt + L)',

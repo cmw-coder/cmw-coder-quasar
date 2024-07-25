@@ -4,7 +4,7 @@ import { useService } from 'utils/common';
 import { ServiceType } from 'shared/types/service';
 import { WindowType } from 'shared/types/WindowType';
 
-const baseName = 'pages.CodeSelectedTipsPage.';
+const baseName = 'pages.SelectionTipsPage.';
 const windowService = useService(ServiceType.WINDOW);
 
 const { t } = useI18n();

@@ -92,7 +92,7 @@ export const routes: RouteRecordRaw[] = [
       {
         path: 'selection-tips',
         components: {
-          default: () => import('pages/CodeSelectedTipsPage.vue'),
+          default: () => import('pages/SelectionTipsPage.vue'),
         },
         props: {
           header: {
