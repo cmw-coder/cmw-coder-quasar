@@ -42,7 +42,7 @@ export enum ReviewType {
 
 export interface ReviewTypeMapping {
   [ReviewType.File]: ReviewData[];
-  [ReviewType.Function]: ReviewData;
+  [ReviewType.Function]: ReviewData | undefined;
 }
 
 export enum Feedback {

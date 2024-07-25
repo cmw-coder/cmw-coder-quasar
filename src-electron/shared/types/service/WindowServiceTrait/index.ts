@@ -29,7 +29,7 @@ export interface WindowServiceTrait {
   reviewSelection(selection?: Selection): Promise<void>;
   getReviewData<T extends ReviewType>(
     reviewType: T,
-  ): Promise<ReviewTypeMapping[T] | undefined>;
+  ): Promise<ReviewTypeMapping[T]>;
   setActiveReviewFeedback(feedback: Feedback, comment?: string): Promise<void>;
   retryActiveReview(): Promise<void>;
   stopActiveReview(): Promise<void>;

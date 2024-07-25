@@ -304,21 +304,18 @@ export class WindowService implements WindowServiceTrait {
 
     console.log(functionDefinitions);
     reviewPage.activeFileReview = functionDefinitions.map(
-      (functionDefinition) =>
-        new ReviewInstance(functionDefinition, {
-          projectId: clientInfo.currentProject,
-          version: clientInfo.version,
-        }),
+      (functionDefinition, index) =>
+        new ReviewInstance(
+          functionDefinition,
+          {
+            projectId: clientInfo.currentProject,
+            version: clientInfo.version,
+          },
+          ReviewType.File,
+          index,
+        ),
     );
     await reviewPage.active();
-    mainWindow.sendMessageToRenderer(
-      new ReviewDataUpdateActionMessage({
-        type: ReviewType.File,
-        data: reviewPage.activeFileReview.map((instance) =>
-          instance.getReviewData(),
-        ),
-      }),
-    );
   }
 
   async reviewSelection(selection?: Selection) {
@@ -351,19 +348,24 @@ export class WindowService implements WindowServiceTrait {
       return;
     }
 
-    reviewPage.activeFunctionReview = new ReviewInstance(selection, extraData);
+    reviewPage.activeFunctionReview = new ReviewInstance(
+      selection,
+      extraData,
+      ReviewType.Function,
+    );
     await reviewPage.active();
     mainWindow.sendMessageToRenderer(
       new ReviewDataUpdateActionMessage({
-        type: ReviewType.Function,
+        type: reviewPage.activeFunctionReview.reviewType,
         data: reviewPage.activeFunctionReview.getReviewData(),
+        index: reviewPage.activeFunctionReview.reviewIndex,
       }),
     );
   }
 
   async getReviewData<T extends ReviewType>(
     reviewType: T,
-  ): Promise<ReviewTypeMapping[T] | undefined> {
+  ): Promise<ReviewTypeMapping[T]> {
     const reviewPage = this.getWindow(WindowType.Main).getPage(
       MainWindowPageType.Review,
     );
@@ -389,8 +391,9 @@ export class WindowService implements WindowServiceTrait {
       activeReview.saveReviewData();
       mainWindow.sendMessageToRenderer(
         new ReviewDataUpdateActionMessage({
-          type: ReviewType.Function,
+          type: activeReview.reviewType,
           data: activeReview.getReviewData(),
+          index: activeReview.reviewIndex,
         }),
       );
       if (feedback === Feedback.Helpful) {

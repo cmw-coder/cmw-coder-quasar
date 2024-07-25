@@ -65,6 +65,16 @@ bus.on('review', (data) => {
   functionReviewData.value = data;
 });
 
+const startFileReview = async () => {
+  if (currentFilePath.value) {
+    currentReviewType.value = ReviewType.File;
+    await windowService.reviewFile(currentFilePath.value);
+    fileReviewData.value = await windowService.getReviewData(
+      currentReviewType.value,
+    );
+  }
+};
+
 const feedbackHandle = (feedback: Feedback, comment?: string) => {
   if (functionReviewData.value) {
     functionReviewData.value.feedback = feedback;
@@ -88,17 +98,22 @@ onMounted(async () => {
     functionReviewData.value = await windowService.getReviewData(
       currentReviewType.value,
     );
+  } else {
+    fileReviewData.value = await windowService.getReviewData(
+      currentReviewType.value,
+    );
   }
+
   currentFilePath.value = await websocketService.getCurrentFile();
   getCurrentPathInterval.value = window.setInterval(async () => {
     currentFilePath.value = await websocketService.getCurrentFile();
   }, 100);
 
-  actionApi.register(ActionType.ReviewDataUpdate, ({ type, data }) => {
+  actionApi.register(ActionType.ReviewDataUpdate, ({ type, data, index }) => {
     if (type === ReviewType.Function) {
       functionReviewData.value = data;
     } else {
-      fileReviewData.value = data;
+      fileReviewData.value[index] = data;
     }
   });
 
@@ -138,17 +153,25 @@ onBeforeUnmount(() => {
                 unelevated
                 :disable="!currentFilePath"
                 :label="i18n('labels.reviewFile')"
-                @click="windowService.reviewFile(currentFilePath!)"
+                @click="startFileReview"
               />
             </q-item-section>
           </q-item>
         </q-list>
-        <div v-if="currentReviewType === ReviewType.File && fileReviewData">
+        <div
+          v-if="currentReviewType === ReviewType.File && fileReviewData"
+          class="column"
+        >
+          <q-item>
+            <q-item-section>
+              <q-item-label class="text-h6"> 正在进行文件评审： </q-item-label>
+            </q-item-section>
+          </q-item>
           <q-expansion-item>
             <template v-slot:header>
               <q-item-section>
                 <q-linear-progress
-                  size="25px"
+                  size="30px"
                   color="primary"
                   rounded
                   :buffer="
@@ -168,6 +191,70 @@ onBeforeUnmount(() => {
                 </q-linear-progress>
               </q-item-section>
             </template>
+            <q-list bordered separator>
+              <q-item v-for="(task, index) in fileReviewData" :key="index">
+                <q-item-section avatar>
+                  <q-avatar
+                    v-if="task.state === ReviewState.References"
+                    color="grey"
+                    icon="schedule"
+                    size="md"
+                    text-color="white"
+                  />
+                  <q-avatar
+                    v-else-if="task.state === ReviewState.Error"
+                    color="negative"
+                    icon="close"
+                    size="md"
+                    text-color="white"
+                  />
+                  <q-avatar
+                    v-else-if="task.state === ReviewState.Finished"
+                    color="positive"
+                    icon="done"
+                    size="md"
+                    text-color="white"
+                  />
+                  <q-avatar v-else color="amber" size="md">
+                    <q-spinner color="white" />
+                  </q-avatar>
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>
+                    {{
+                      task.selection.content.match(/\b([a-zA-z0-9]*)\b\(/)?.[1]
+                    }}
+                  </q-item-label>
+                  <q-item-label caption>
+                    Line {{ task.selection.range.start.line }} -
+                    {{ task.selection.range.end.line }}
+                  </q-item-label>
+                </q-item-section>
+                <!--                <q-item-section side>-->
+                <!--                  <q-btn-->
+                <!--                    v-if="task.state === ReviewState.References"-->
+                <!--                    color="primary"-->
+                <!--                    unelevated-->
+                <!--                    :label="i18n('labels.review')"-->
+                <!--                    @click="windowService.reviewFile(currentFilePath, index)"-->
+                <!--                  />-->
+                <!--                  <q-btn-->
+                <!--                    v-else-if="task.state === ReviewState.Error"-->
+                <!--                    color="negative"-->
+                <!--                    unelevated-->
+                <!--                    :label="i18n('labels.retry')"-->
+                <!--                    @click="windowService.retryFileReview(index)"-->
+                <!--                  />-->
+                <!--                  <q-btn-->
+                <!--                    v-else-if="task.state === ReviewState.Finished"-->
+                <!--                    color="positive"-->
+                <!--                    unelevated-->
+                <!--                    :label="i18n('labels.feedback')"-->
+                <!--                    @click="windowService.setActiveReviewFeedback(task)"-->
+                <!--                  />-->
+                <!--                </q-item-section>-->
+              </q-item>
+            </q-list>
           </q-expansion-item>
         </div>
         <FunctionPanel

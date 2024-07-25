@@ -41,6 +41,8 @@ export class ReviewInstance {
   constructor(
     private selection: Selection,
     private extraData: ExtraData,
+    public reviewType: ReviewType,
+    public reviewIndex: number = -1,
   ) {
     this.createReviewRequest();
     // 上报一次 review 使用
@@ -190,7 +192,11 @@ export class ReviewInstance {
       const windowService = container.get<WindowService>(ServiceType.WINDOW);
       const mainWindow = windowService.getWindow(WindowType.Main);
       mainWindow.sendMessageToRenderer(
-        new ReviewDataUpdateActionMessage(this.getReviewData()),
+        new ReviewDataUpdateActionMessage({
+          type: this.reviewType,
+          data: this.getReviewData(),
+          index: this.reviewIndex,
+        }),
       );
     }
   }
@@ -213,7 +219,11 @@ export class ReviewInstance {
         this.saveReviewData();
       }
       mainWindow.sendMessageToRenderer(
-        new ReviewDataUpdateActionMessage(this.getReviewData()),
+        new ReviewDataUpdateActionMessage({
+          type: this.reviewType,
+          data: this.getReviewData(),
+          index: this.reviewIndex,
+        }),
       );
     } catch (error) {
       log.error(error);
@@ -221,7 +231,11 @@ export class ReviewInstance {
       this.state = ReviewState.Error;
       this.errorInfo = (error as Error).message;
       mainWindow.sendMessageToRenderer(
-        new ReviewDataUpdateActionMessage(this.getReviewData()),
+        new ReviewDataUpdateActionMessage({
+          type: this.reviewType,
+          data: this.getReviewData(),
+          index: this.reviewIndex,
+        }),
       );
       this.saveReviewData();
     }
@@ -269,8 +283,9 @@ export class ReviewInstance {
     const mainWindow = windowService.getWindow(WindowType.Main);
     mainWindow.sendMessageToRenderer(
       new ReviewDataUpdateActionMessage({
-        type: ReviewType.Function,
+        type: this.reviewType,
         data: this.getReviewData(),
+        index: this.reviewIndex,
       }),
     );
   }

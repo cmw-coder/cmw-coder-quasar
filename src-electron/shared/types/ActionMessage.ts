@@ -115,21 +115,9 @@ export class AddSelectionToChatActionMessage implements ActionMessage {
 
 export class ReviewDataUpdateActionMessage implements ActionMessage {
   type = ActionType.ReviewDataUpdate;
-  data:
-    | { type: ReviewType.Function; data: ReviewData }
-    | {
-        type: ReviewType.File;
-        data: ReviewData[];
-      };
+  data: { type: ReviewType; data: ReviewData; index: number };
 
-  constructor(
-    data:
-      | { type: ReviewType.Function; data: ReviewData }
-      | {
-          type: ReviewType.File;
-          data: ReviewData[];
-        },
-  ) {
+  constructor(data: { type: ReviewType; data: ReviewData; index: number }) {
     this.data = data;
   }
 }
