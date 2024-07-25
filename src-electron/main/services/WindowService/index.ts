@@ -1,5 +1,10 @@
 import { BrowserWindow, app, screen } from 'electron';
+import { dialog } from 'electron/main';
+import { readFile } from 'fs/promises';
+import { decode } from 'iconv-lite';
 import { inject, injectable } from 'inversify';
+import Parser from 'web-tree-sitter';
+
 import { TrayIcon } from 'main/components/TrayIcon';
 import { MenuEntry } from 'main/components/TrayIcon/types';
 import { WindowServiceTrait } from 'shared/types/service/WindowServiceTrait';
@@ -20,10 +25,16 @@ import { DataStoreService } from 'main/services/DataStoreService';
 import { SelectionTipsWindow } from 'main/services/WindowService/types/SelectionTipsWindow';
 import { Selection } from 'shared/types/Selection';
 import { ReviewInstance } from 'main/components/ReviewInstance';
-import { Feedback, ReviewState } from 'shared/types/review';
+import {
+  Feedback,
+  ReviewState,
+  ReviewType,
+  ReviewTypeMapping,
+} from 'shared/types/review';
 import { ReviewDataUpdateActionMessage } from 'shared/types/ActionMessage';
-import { dialog } from 'electron/main';
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
+import { Range } from 'main/types/vscode/range';
+import { getService } from 'main/services';
 
 interface WindowMap {
   [WindowType.Completions]: CompletionsWindow;
@@ -42,12 +53,15 @@ export class WindowService implements WindowServiceTrait {
   trayIcon: TrayIcon;
   windowMap = new Map<WindowType, BaseWindow>();
 
+  private _parserInitialized = false;
+
   constructor(
     @inject(ServiceType.CONFIG)
     private _configService: ConfigService,
     @inject(ServiceType.DATA_STORE)
     private _dataStoreService: DataStoreService,
   ) {
+    Parser.init().then(() => (this._parserInitialized = true));
     this.windowMap.set(WindowType.Feedback, new FeedbackWindow());
     this.windowMap.set(WindowType.ProjectId, new ProjectIdWindow());
     this.windowMap.set(WindowType.Welcome, new WelcomeWindow());
@@ -237,6 +251,76 @@ export class WindowService implements WindowServiceTrait {
     chatPage.addSelectionToChat(selection);
   }
 
+  async reviewFile(path: string) {
+    if (!this._parserInitialized) {
+      return;
+    }
+    const clientInfo = getService(ServiceType.WEBSOCKET).getClientInfo();
+    if (!clientInfo || !clientInfo.currentProject || !clientInfo.version) {
+      return;
+    }
+
+    const mainWindow = this.getWindow(WindowType.Main);
+    const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
+    // 上一个 review 尚未结束
+    if (
+      reviewPage.activeFileReview &&
+      !reviewPage.activeFileReview
+        .map((review) => review.state)
+        .every((state) =>
+          [ReviewState.Error, ReviewState.Finished].includes(state),
+        )
+    ) {
+      if (mainWindow._window) {
+        dialog.showMessageBox(mainWindow._window, {
+          message: '存在进行中的 文件评审 任务',
+        });
+      }
+      return;
+    }
+
+    const content = decode(await readFile(path), 'gbk');
+    const parser = new Parser();
+    parser.setLanguage(
+      await Parser.Language.load('src-electron/assets/tree-sitter-c.wasm'),
+    );
+    const tree = parser.parse(content);
+    const functionDefinitions = tree.rootNode.children
+      .filter((node) => node.type === 'function_definition')
+      .map(
+        (node): Selection => ({
+          block: content.slice(node.startIndex, node.endIndex),
+          file: path,
+          content: content.slice(node.startIndex, node.endIndex),
+          range: new Range(
+            node.startPosition.row,
+            node.startPosition.column,
+            node.endPosition.row,
+            node.endPosition.column,
+          ),
+          language: 'c',
+        }),
+      );
+
+    console.log(functionDefinitions);
+    reviewPage.activeFileReview = functionDefinitions.map(
+      (functionDefinition) =>
+        new ReviewInstance(functionDefinition, {
+          projectId: clientInfo.currentProject,
+          version: clientInfo.version,
+        }),
+    );
+    await reviewPage.active();
+    mainWindow.sendMessageToRenderer(
+      new ReviewDataUpdateActionMessage({
+        type: ReviewType.File,
+        data: reviewPage.activeFileReview.map((instance) =>
+          instance.getReviewData(),
+        ),
+      }),
+    );
+  }
+
   async reviewSelection(selection?: Selection) {
     const selectionTipsWindow = this.getWindow(WindowType.SelectionTips);
     const extraData = selectionTipsWindow.extraData;
@@ -253,36 +337,45 @@ export class WindowService implements WindowServiceTrait {
     const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
     // 上一个 review 尚未结束
     if (
-      reviewPage.activeReview &&
+      reviewPage.activeFunctionReview &&
       ![ReviewState.Error, ReviewState.Finished].includes(
-        reviewPage.activeReview.state,
+        reviewPage.activeFunctionReview.state,
       )
     ) {
       const mainWindow = this.getWindow(WindowType.Main);
       if (mainWindow._window) {
         dialog.showMessageBox(mainWindow._window, {
-          message: '存在进行中的 review 任务',
+          message: '存在进行中的 函数评审 任务',
         });
       }
       return;
     }
 
-    reviewPage.activeReview = new ReviewInstance(selection, extraData);
+    reviewPage.activeFunctionReview = new ReviewInstance(selection, extraData);
     await reviewPage.active();
     mainWindow.sendMessageToRenderer(
-      new ReviewDataUpdateActionMessage(
-        reviewPage.activeReview.getReviewData(),
-      ),
+      new ReviewDataUpdateActionMessage({
+        type: ReviewType.Function,
+        data: reviewPage.activeFunctionReview.getReviewData(),
+      }),
     );
   }
 
-  async getReviewData() {
+  async getReviewData<T extends ReviewType>(
+    reviewType: T,
+  ): Promise<ReviewTypeMapping[T] | undefined> {
     const reviewPage = this.getWindow(WindowType.Main).getPage(
       MainWindowPageType.Review,
     );
-    const activeReview = reviewPage.activeReview;
-    if (!activeReview) return undefined;
-    return activeReview.getReviewData();
+    if (reviewType === ReviewType.Function) {
+      return <ReviewTypeMapping[T]>(
+        reviewPage.activeFunctionReview?.getReviewData()
+      );
+    } else {
+      return <ReviewTypeMapping[T]>(
+        reviewPage.activeFileReview?.map((review) => review.getReviewData())
+      );
+    }
   }
   async setActiveReviewFeedback(
     feedback: Feedback,
@@ -290,12 +383,15 @@ export class WindowService implements WindowServiceTrait {
   ): Promise<void> {
     const mainWindow = this.getWindow(WindowType.Main);
     const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
-    const activeReview = reviewPage.activeReview;
+    const activeReview = reviewPage.activeFunctionReview;
     if (activeReview) {
       activeReview.feedback = feedback;
       activeReview.saveReviewData();
       mainWindow.sendMessageToRenderer(
-        new ReviewDataUpdateActionMessage(activeReview.getReviewData()),
+        new ReviewDataUpdateActionMessage({
+          type: ReviewType.Function,
+          data: activeReview.getReviewData(),
+        }),
       );
       if (feedback === Feedback.Helpful) {
         activeReview.reportHelpful();
@@ -308,7 +404,7 @@ export class WindowService implements WindowServiceTrait {
   async retryActiveReview() {
     const mainWindow = this.getWindow(WindowType.Main);
     const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
-    const activeReview = reviewPage.activeReview;
+    const activeReview = reviewPage.activeFunctionReview;
     if (activeReview) {
       activeReview.retry();
     }
@@ -317,7 +413,7 @@ export class WindowService implements WindowServiceTrait {
   async stopActiveReview() {
     const mainWindow = this.getWindow(WindowType.Main);
     const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
-    const activeReview = reviewPage.activeReview;
+    const activeReview = reviewPage.activeFunctionReview;
     if (activeReview) {
       activeReview.stop();
     }

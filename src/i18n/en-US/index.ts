@@ -48,8 +48,7 @@ export default {
         labels: {
           goBack: 'Go back',
           code: 'Verification Code',
-          description:
-            'We have sent a verification code to your mailbox and WeCom.',
+          description: 'We have sent code to your mailbox and WeCom.',
           resend: 'resend the code',
           resending: 'resending',
           resendAfter: '.',
@@ -74,6 +73,37 @@ export default {
       },
       labels: {
         projectId: 'Project ID',
+      },
+    },
+    ReviewPanels: {
+      FunctionPanel: {
+        labels: {
+          locate: 'Locate',
+          locateTitle: 'Locate File In Directory',
+          depthTitle: 'Depth: ${depth}',
+          typeTitle: 'Type: ${type}',
+          referencesTitle: 'Find References',
+          viewReferenceCode: 'View',
+          viewReferenceCodeTitle: 'View Reference Code',
+          empty: 'Empty',
+          referenceLoading: 'Finding References...',
+          reviewProgressTitle: 'Review Progress',
+          reviewResultTitle: 'Review Result',
+          reviewStepOne: '1/3 AI Is Reviewing Your Code',
+          reviewStepTwo: '2/3 Reviewer And Coder Are In A Heated Battle',
+          reviewStepThree: '3/3 AI IS Summarizing',
+          parsedFailed: 'Parse Failed',
+          noProblem: 'No Problem',
+          error: 'Error',
+          retry: 'Retry',
+          stop: 'Stop',
+          useless: 'Useless',
+          rejectDialogTitle: 'Reject',
+          rejectDialogConfirm: 'Submit',
+          rejectDialogCancel: 'Cancel',
+          helpful: 'Helpful',
+          referenceViewDialogTitle: 'Reference Code',
+        },
       },
     },
     SettingCards: {
@@ -172,12 +202,17 @@ export default {
           chat: 'Chat',
           commit: 'Commit',
           feedback: 'Feedback',
+          review: 'Review',
           settings: 'Settings',
           workflow: 'Workflow',
-          review: 'Review',
         },
       },
-      RightMainDrawer: {},
+      RightReviewHistoryDrawer: {
+        labels: {
+          title: 'Pick Review History',
+        },
+        tooltips: {},
+      },
     },
     footers: {
       QuestionFooter: {
@@ -204,6 +239,19 @@ export default {
       MainHeader: {
         labels: {
           title: 'Comware Coder',
+        },
+        toolbar: {
+          rightDrawer: {
+            reviewHistory: 'Review History',
+          },
+          title: {
+            chat: 'Chat',
+            commit: 'Commit',
+            feedback: 'Feedback',
+            review: 'Review',
+            settings: 'Settings',
+            workflow: 'Workflow',
+          },
         },
         tooltips: {
           close: 'Close',
@@ -278,6 +326,13 @@ export default {
         title: 'Setup New Project',
       },
     },
+    ReviewPage: {
+      labels: {
+        currentFile: 'Current File: {file}',
+        noFile: 'No file selected, please open a file in your editor',
+        reviewFile: 'Review Current File',
+      },
+    },
     SettingsPage: {
       labels: {
         title: 'Settings',
@@ -313,49 +368,6 @@ export default {
       notifications: {
         copyFailure: 'Failed to copy the workflow ID',
         copySuccess: 'This workflow ID has been copied to the clipboard',
-      },
-    },
-    ReviewPage: {
-      labels: {
-        title: 'Review Highlight Code',
-      },
-      components: {
-        reviewHistory: {
-          labels: {
-            title: 'History',
-            daySelect: 'Day',
-            itemSelect: 'Item',
-          },
-        },
-        reviewView: {
-          labels: {
-            locate: 'Locate',
-            locateTitle: 'Locate File In Directory',
-            depthTitle: 'Depth: ${depth}',
-            typeTitle: 'Type: ${type}',
-            referencesTitle: 'Find References',
-            viewReferenceCode: 'View',
-            viewReferenceCodeTitle: 'View Reference Code',
-            empty: 'Empty',
-            referenceLoading: 'Finding References...',
-            reviewProgressTitle: 'Review Progress',
-            reviewResultTitle: 'Review Result',
-            reviewStepOne: '1/3 AI Is Reviewing Your Code',
-            reviewStepTwo: '2/3 Reviewer And Coder Are In A Heated Battle',
-            reviewStepThree: '3/3 AI IS Summarizing',
-            parsedFailed: 'Parse Failed',
-            noProblem: 'No Problem',
-            error: 'Error',
-            retry: 'Retry',
-            stop: 'Stop',
-            useless: 'Useless',
-            rejectDialogTitle: 'Reject',
-            rejectDialogConfirm: 'Submit',
-            rejectDialogCancel: 'Cancel',
-            helpful: 'Helpful',
-            referenceViewDialogTitle: 'Reference Code',
-          },
-        },
       },
     },
     SelectionTipsPage: {

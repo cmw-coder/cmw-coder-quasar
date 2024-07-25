@@ -1,9 +1,6 @@
 import log from 'electron-log/main';
 import { sync } from 'fast-glob';
-import { existsSync } from 'fs';
-import { lstat, readFile } from 'fs/promises';
 import { createServer } from 'http';
-import { decode } from 'iconv-lite';
 import { inject, injectable } from 'inversify';
 import { posix, sep } from 'path';
 import { WebSocketServer } from 'ws';
@@ -118,17 +115,8 @@ export class WebsocketService implements WebsocketServiceTrait {
     );
   }
 
-  async checkFolderExist(path: string): Promise<boolean> {
-    return existsSync(path) && (await lstat(path)).isDirectory();
-  }
-
-  async getFileContent(path: string): Promise<string | undefined> {
-    try {
-      return decode(await readFile(path), 'gbk');
-    } catch (e) {
-      log.error('getFileContent', e);
-      return undefined;
-    }
+  async getCurrentFile(): Promise<string | undefined> {
+    return this.getClientInfo(this._lastActivePid)?.currentFile;
   }
 
   async getProjectData() {

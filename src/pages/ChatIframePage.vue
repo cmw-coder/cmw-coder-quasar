@@ -59,27 +59,14 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="ai-assistant">
+  <q-page class="full-height full-width overflow-hidden">
     <iframe
       v-if="isShow"
+      class="full-height full-width"
       aria-description="AI Assistant for Source Insight"
       id="iframeAiAssistant"
       name="SI_AI_ASSISTANT"
       sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-downloads"
     />
-  </div>
+  </q-page>
 </template>
-
-<style lang="scss" scoped>
-.ai-assistant {
-  height: 100%;
-  width: 100vw;
-  position: relative;
-  overflow: hidden;
-  iframe {
-    height: 100%;
-    width: 100%;
-    border: none;
-  }
-}
-</style>

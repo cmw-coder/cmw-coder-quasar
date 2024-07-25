@@ -75,6 +75,37 @@ export default {
         projectId: '项目 ID',
       },
     },
+    ReviewPanels: {
+      FunctionPanel: {
+        labels: {
+          locate: '定位',
+          locateTitle: '在目录中定位文件',
+          depthTitle: '深度: ${depth}',
+          typeTitle: '类型: ${type}',
+          referencesTitle: '查找引用代码',
+          viewReferenceCode: '查看',
+          viewReferenceCodeTitle: '查看引用代码',
+          empty: '空',
+          referenceLoading: '查找引用代码中...',
+          reviewProgressTitle: '评审进度',
+          reviewResultTitle: '评审结果',
+          reviewStepOne: '1/3 AI 正在评审您的代码',
+          reviewStepTwo: '2/3 评审者和编码者正在激烈交锋',
+          reviewStepThree: '3/3 AI 正在总结',
+          parsedFailed: '解析失败',
+          noProblem: '没有问题',
+          error: '错误',
+          retry: '重试',
+          stop: '停止',
+          useless: '无用',
+          rejectDialogTitle: '拒绝原因',
+          rejectDialogConfirm: '提交',
+          rejectDialogCancel: '取消',
+          helpful: '有帮助',
+          referenceViewDialogTitle: '引用代码',
+        },
+      },
+    },
     SettingCards: {
       CompletionCard: {
         labels: {
@@ -169,12 +200,17 @@ export default {
           chat: 'AI 对话',
           commit: '代码提交',
           feedback: '问题反馈',
+          review: '代码评审',
           settings: '应用设置',
           workflow: '工作流程',
-          review: '代码评审',
         },
       },
-      RightMainDrawer: {},
+      RightReviewHistoryDrawer: {
+        labels: {
+          title: '选择历史记录',
+        },
+        tooltips: {},
+      },
     },
     footers: {
       QuestionFooter: {
@@ -201,6 +237,19 @@ export default {
       MainHeader: {
         labels: {
           title: 'Comware Coder',
+        },
+        toolbar: {
+          rightDrawer: {
+            reviewHistory: 'Review History',
+          },
+          title: {
+            chat: 'AI 对话',
+            commit: '代码提交',
+            feedback: '问题反馈',
+            review: '代码评审',
+            settings: '应用设置',
+            workflow: '工作流程',
+          },
         },
         tooltips: {
           close: '关闭',
@@ -265,6 +314,13 @@ export default {
         title: '欢迎',
       },
     },
+    ReviewPage: {
+      labels: {
+        currentFile: '当前文件：{file}',
+        noFile: '未选择文件，请在您的编辑器中打开一个文件',
+        reviewFile: '评审当前文件',
+      },
+    },
     ProjectIdPage: {
       labels: {
         confirm: '确认',
@@ -309,49 +365,6 @@ export default {
       notifications: {
         copyFailure: '复制工作流 ID 失败',
         copySuccess: '工作流 ID 已复制到剪贴板',
-      },
-    },
-    ReviewPage: {
-      labels: {
-        title: '评审代码',
-      },
-      components: {
-        reviewHistory: {
-          labels: {
-            title: '历史记录',
-            daySelect: '日期',
-            itemSelect: '评审项',
-          },
-        },
-        reviewView: {
-          labels: {
-            locate: '定位',
-            locateTitle: '在目录中定位文件',
-            depthTitle: '深度: ${depth}',
-            typeTitle: '类型: ${type}',
-            referencesTitle: '查找引用代码',
-            viewReferenceCode: '查看',
-            viewReferenceCodeTitle: '查看引用代码',
-            empty: '空',
-            referenceLoading: '查找引用代码中...',
-            reviewProgressTitle: '评审进度',
-            reviewResultTitle: '评审结果',
-            reviewStepOne: '1/3 AI 正在评审您的代码',
-            reviewStepTwo: '2/3 评审者和编码者正在激烈交锋',
-            reviewStepThree: '3/3 AI 正在总结',
-            parsedFailed: '解析失败',
-            noProblem: '没有问题',
-            error: '错误',
-            retry: '重试',
-            stop: '停止',
-            useless: '无用',
-            rejectDialogTitle: '拒绝原因',
-            rejectDialogConfirm: '提交',
-            rejectDialogCancel: '取消',
-            helpful: '有帮助',
-            referenceViewDialogTitle: '引用代码',
-          },
-        },
       },
     },
     SelectionTipsPage: {

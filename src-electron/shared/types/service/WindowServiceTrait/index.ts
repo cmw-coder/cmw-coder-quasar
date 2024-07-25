@@ -1,7 +1,7 @@
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import { Selection } from 'shared/types/Selection';
 import { WindowType } from 'shared/types/WindowType';
-import { Feedback, ReviewData } from 'shared/types/review';
+import { Feedback, ReviewType, ReviewTypeMapping } from 'shared/types/review';
 
 export interface WindowServiceTrait {
   finishLogin(): Promise<void>;
@@ -25,8 +25,11 @@ export interface WindowServiceTrait {
   mouseMoveInOrOutWindow(type: WindowType): Promise<void>;
   setMainWindowPageReady(type: MainWindowPageType): Promise<void>;
   addSelectionToChat(selection?: Selection): Promise<void>;
+  reviewFile(path: string): Promise<void>;
   reviewSelection(selection?: Selection): Promise<void>;
-  getReviewData(): Promise<ReviewData | undefined>;
+  getReviewData<T extends ReviewType>(
+    reviewType: T,
+  ): Promise<ReviewTypeMapping[T] | undefined>;
   setActiveReviewFeedback(feedback: Feedback, comment?: string): Promise<void>;
   retryActiveReview(): Promise<void>;
   stopActiveReview(): Promise<void>;

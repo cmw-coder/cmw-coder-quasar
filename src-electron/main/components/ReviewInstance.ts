@@ -18,6 +18,7 @@ import {
   ReviewData,
   ReviewResult,
   ReviewState,
+  ReviewType,
 } from 'shared/types/review';
 import { ServiceType } from 'shared/types/service';
 import log from 'electron-log/main';
@@ -267,7 +268,10 @@ export class ReviewInstance {
     const windowService = container.get<WindowService>(ServiceType.WINDOW);
     const mainWindow = windowService.getWindow(WindowType.Main);
     mainWindow.sendMessageToRenderer(
-      new ReviewDataUpdateActionMessage(this.getReviewData()),
+      new ReviewDataUpdateActionMessage({
+        type: ReviewType.Function,
+        data: this.getReviewData(),
+      }),
     );
   }
 }

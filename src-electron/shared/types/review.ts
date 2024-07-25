@@ -35,6 +35,16 @@ export enum ReviewState {
   Error = -1,
 }
 
+export enum ReviewType {
+  File = 'File',
+  Function = 'Function',
+}
+
+export interface ReviewTypeMapping {
+  [ReviewType.File]: ReviewData[];
+  [ReviewType.Function]: ReviewData;
+}
+
 export enum Feedback {
   None = 'None',
   Helpful = 'Helpful',

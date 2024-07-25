@@ -8,8 +8,8 @@ import {
   ReviewState,
   Feedback,
 } from 'shared/types/review';
-import { useService } from 'app/src/utils/common';
-import { ServiceType } from 'app/src-electron/shared/types/service';
+import { useService } from 'utils/common';
+import { ServiceType } from 'shared/types/service';
 import { useI18n } from 'vue-i18n';
 
 defineProps({
@@ -25,7 +25,7 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-const baseName = 'pages.ReviewPage.components.reviewView.';
+const baseName = 'components.ReviewPanels.FunctionPanel.';
 const i18n = (relativePath: string, data?: Record<string, unknown>) => {
   return data ? t(baseName + relativePath, data) : t(baseName + relativePath);
 };

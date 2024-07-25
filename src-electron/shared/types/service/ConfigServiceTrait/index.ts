@@ -3,7 +3,9 @@ import { AppConfig } from 'shared/types/service/ConfigServiceTrait/types';
 export interface ConfigServiceTrait {
   getConfigs(): Promise<AppConfig>;
 
-  getConfig<T extends keyof AppConfig>(key: T): Promise<AppConfig[T] | undefined>;
+  getConfig<T extends keyof AppConfig>(
+    key: T,
+  ): Promise<AppConfig[T] | undefined>;
 
   setConfig<T extends keyof AppConfig>(
     key: T,
