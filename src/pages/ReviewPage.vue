@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 // import { useQuasar } from 'quasar';
 import { PropType, onBeforeUnmount, onMounted, ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import { bus } from 'boot/bus';
 import FunctionPanel from 'components/ReviewPanels/FunctionPanel.vue';
@@ -16,7 +17,7 @@ import { ActionType } from 'shared/types/ActionMessage';
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import { ActionApi } from 'types/ActionApi';
 import { useService } from 'utils/common';
-import { useI18n } from 'vue-i18n';
+import { useHighlighter } from 'stores/highlighter';
 
 const props = defineProps({
   windowType: {
@@ -26,6 +27,7 @@ const props = defineProps({
 });
 
 const baseName = 'pages.ReviewPage.';
+const { codeToHtml } = useHighlighter();
 const { t } = useI18n();
 const windowService = useService(ServiceType.WINDOW);
 const websocketService = useService(ServiceType.WEBSOCKET);
@@ -256,6 +258,70 @@ onBeforeUnmount(() => {
               </q-item>
             </q-list>
           </q-expansion-item>
+          <q-list
+            v-if="
+              fileReviewData.every((task) =>
+                [ReviewState.Error, ReviewState.Finished].includes(task.state),
+              )
+            "
+            bordered
+            separator
+          >
+            <div v-for="(reviewData, index) in fileReviewData" :key="index">
+              <q-card v-if="!reviewData.result.parsed">
+                <q-card-section style="padding: 4px" class="parsed-error">
+                  <q-chip color="red-8" class="text-white">{{
+                    i18n('labels.parsedFailed')
+                  }}</q-chip>
+                  <div>{{ reviewData.result.originData }}</div>
+                </q-card-section>
+              </q-card>
+              <template v-else>
+                <q-card v-if="reviewData.result.data.length === 0">
+                  <q-card-section style="padding: 4px" class="parsed-error">
+                    <q-chip color="blue-6" icon="mdi-check" text-color="white">
+                      <div class="empty">{{ i18n('labels.noProblem') }}</div>
+                    </q-chip>
+                  </q-card-section>
+                </q-card>
+                <template v-else>
+                  <q-card
+                    bordered
+                    flat
+                    class="result-item"
+                    v-for="(resultItem, index) in reviewData.result.data"
+                    :key="index"
+                    style="margin-bottom: 10px"
+                  >
+                    <q-card-section style="padding: 2px">
+                      <q-chip color="red-8" class="text-white">{{
+                        resultItem.type
+                      }}</q-chip>
+                    </q-card-section>
+                    <q-card-section style="padding: 2px">
+                      <div
+                        class="code"
+                        style="
+                          padding: 10px;
+                          overflow: auto;
+                          border: 1px solid #eee;
+                        "
+                        v-html="
+                          codeToHtml(
+                            resultItem.code,
+                            reviewData.selection.language,
+                          )
+                        "
+                      />
+                    </q-card-section>
+                    <q-card-section style="padding: 2px">{{
+                      resultItem.description
+                    }}</q-card-section>
+                  </q-card>
+                </template>
+              </template>
+            </div>
+          </q-list>
         </div>
         <FunctionPanel
           v-else-if="
