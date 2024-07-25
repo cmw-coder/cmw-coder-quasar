@@ -11,7 +11,7 @@ export const findSvnPath = (filePath: string): string | undefined => {
     if (lstatSync(currentPath).isDirectory()) {
       const svnPath = resolve(currentPath, '.svn');
       if (existsSync(svnPath) && lstatSync(svnPath).isDirectory()) {
-        return svnPath;
+        return currentPath;
       }
     }
     const parentPath = resolve(currentPath, '..');
