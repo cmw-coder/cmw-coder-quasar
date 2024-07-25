@@ -284,27 +284,36 @@ export class WindowService implements WindowServiceTrait {
     const content = decode(await readFile(path), 'gbk');
     try {
       const parser = new Parser();
-      parser.setLanguage(
-        await Parser.Language.load(`${treeSitterFolder}/tree-sitter-c.wasm`),
+      const language = await Parser.Language.load(
+        `${treeSitterFolder}/tree-sitter-c.wasm`,
+      );
+      parser.setLanguage(language);
+      const functionDefinitionQuery = language.query(
+        '(function_definition) @definition',
       );
       const tree = parser.parse(content);
-      log.debug('WindowService.reviewFile', { tree });
-      const functionDefinitions = tree.rootNode.children
-        .filter((node) => node.type === 'function_definition')
-        .map(
-          (node): Selection => ({
-            block: content.slice(node.startIndex, node.endIndex),
-            file: path,
-            content: content.slice(node.startIndex, node.endIndex),
-            range: new Range(
-              node.startPosition.row,
-              node.startPosition.column,
-              node.endPosition.row,
-              node.endPosition.column,
-            ),
-            language: 'c',
-          }),
-        );
+      const matches = functionDefinitionQuery.matches(tree.rootNode);
+      log.debug('WindowService.reviewFile', { matches });
+      const functionDefinitions = matches.map(
+        ({ captures }): Selection => ({
+          block: content.slice(
+            captures[0].node.startIndex,
+            captures[0].node.endIndex,
+          ),
+          file: path,
+          content: content.slice(
+            captures[0].node.startIndex,
+            captures[0].node.endIndex,
+          ),
+          range: new Range(
+            captures[0].node.startPosition.row,
+            captures[0].node.startPosition.column,
+            captures[0].node.endPosition.row,
+            captures[0].node.endPosition.column,
+          ),
+          language: 'c',
+        }),
+      );
       log.debug('WindowService.reviewFile', { functionDefinitions });
       reviewPage.activeFileReview = functionDefinitions.map(
         (functionDefinition, index) =>
