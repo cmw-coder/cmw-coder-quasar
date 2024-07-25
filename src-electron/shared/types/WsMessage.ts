@@ -14,11 +14,11 @@ export enum WsAction {
   EditorCommit = 'EditorCommit',
   EditorFocusState = 'EditorFocusState',
   EditorPaste = 'EditorPaste',
-  EditorSwitchProject = 'EditorSwitchProject',
-  EditorSwitchSvn = 'EditorSwitchSvn',
-  HandShake = 'HandShake',
   EditorSelection = 'EditorSelection',
-  ReviewRequest = 'ReviewRequest', // Electron发起Review操作请求
+  EditorSwitchFile = 'EditorSwitchFile',
+  EditorSwitchProject = 'EditorSwitchProject',
+  HandShake = 'HandShake',
+  ReviewRequest = 'ReviewRequest',
 }
 
 export interface WsMessage {
@@ -158,21 +158,6 @@ export interface EditorPasteClientMessage extends WsMessage {
   };
 }
 
-export interface EditorSwitchProjectClientMessage extends WsMessage {
-  action: WsAction.EditorSwitchProject;
-  data: string;
-}
-
-export interface EditorSwitchSvnClientMessage extends WsMessage {
-  action: WsAction.EditorSwitchSvn;
-  data: string;
-}
-
-export interface HandShakeClientMessage extends WsMessage {
-  action: WsAction.HandShake;
-  data: { pid: number; currentProject: string; version: string };
-}
-
 export interface EditorSelectionClientMessage extends WsMessage {
   action: WsAction.EditorSelection;
   data: {
@@ -193,6 +178,21 @@ export interface EditorSelectionClientMessage extends WsMessage {
       y: number;
     };
   };
+}
+
+export interface EditorSwitchFileClientMessage extends WsMessage {
+  action: WsAction.EditorSwitchFile;
+  data: string;
+}
+
+export interface EditorSwitchProjectClientMessage extends WsMessage {
+  action: WsAction.EditorSwitchProject;
+  data: string;
+}
+
+export interface HandShakeClientMessage extends WsMessage {
+  action: WsAction.HandShake;
+  data: { pid: number; currentProject: string; version: string };
 }
 
 export interface ReviewRequestClientMessage extends WsMessage {
@@ -259,16 +259,16 @@ export interface WsMessageMapping {
     client: EditorPasteClientMessage;
     server: void;
   };
-  [WsAction.EditorSwitchProject]: {
-    client: EditorSwitchProjectClientMessage;
-    server: void;
-  };
-  [WsAction.EditorSwitchSvn]: {
-    client: EditorSwitchSvnClientMessage;
-    server: void;
-  };
   [WsAction.EditorSelection]: {
     client: EditorSelectionClientMessage;
+    server: void;
+  };
+  [WsAction.EditorSwitchFile]: {
+    client: EditorSwitchFileClientMessage;
+    server: void;
+  };
+  [WsAction.EditorSwitchProject]: {
+    client: EditorSwitchProjectClientMessage;
     server: void;
   };
   [WsAction.ReviewRequest]: {
