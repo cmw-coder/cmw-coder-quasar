@@ -254,12 +254,10 @@ export class WindowService implements WindowServiceTrait {
   }
 
   async reviewFile(path: string) {
-    log.debug('WindowService.reviewFile', { path });
     if (!this._parserInitialized) {
       return;
     }
     const clientInfo = getService(ServiceType.WEBSOCKET).getClientInfo();
-    log.debug('WindowService.reviewFile', { clientInfo });
     if (!clientInfo || !clientInfo.currentProject || !clientInfo.version) {
       return;
     }
@@ -267,9 +265,6 @@ export class WindowService implements WindowServiceTrait {
     const mainWindow = this.getWindow(WindowType.Main);
     const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
     // 上一个 review 尚未结束
-    log.debug('WindowService.reviewFile', {
-      activeFileReview: reviewPage.activeFileReview,
-    });
     if (
       reviewPage.activeFileReview &&
       !reviewPage.activeFileReview
@@ -287,45 +282,49 @@ export class WindowService implements WindowServiceTrait {
     }
 
     const content = decode(await readFile(path), 'gbk');
-    log.debug('WindowService.reviewFile', { content });
-    const parser = new Parser();
-    parser.setLanguage(
-      await Parser.Language.load(`${treeSitterFolder}/tree-sitter-c.wasm`),
-    );
-    const tree = parser.parse(content);
-    log.debug('WindowService.reviewFile', { tree });
-    const functionDefinitions = tree.rootNode.children
-      .filter((node) => node.type === 'function_definition')
-      .map(
-        (node): Selection => ({
-          block: content.slice(node.startIndex, node.endIndex),
-          file: path,
-          content: content.slice(node.startIndex, node.endIndex),
-          range: new Range(
-            node.startPosition.row,
-            node.startPosition.column,
-            node.endPosition.row,
-            node.endPosition.column,
-          ),
-          language: 'c',
-        }),
+    try {
+      const parser = new Parser();
+      parser.setLanguage(
+        await Parser.Language.load(`${treeSitterFolder}/tree-sitter-c.wasm`),
       );
-    log.debug('WindowService.reviewFile', { functionDefinitions });
-    reviewPage.activeFileReview = functionDefinitions.map(
-      (functionDefinition, index) =>
-        new ReviewInstance(
-          functionDefinition,
-          {
-            projectId: clientInfo.currentProject,
-            version: clientInfo.version,
-          },
-          ReviewType.File,
-          index,
-        ),
-    );
-    log.debug('WindowService.reviewFile', {
-      activeFileReview: reviewPage.activeFileReview,
-    });
+      const tree = parser.parse(content);
+      log.debug('WindowService.reviewFile', { tree });
+      const functionDefinitions = tree.rootNode.children
+        .filter((node) => node.type === 'function_definition')
+        .map(
+          (node): Selection => ({
+            block: content.slice(node.startIndex, node.endIndex),
+            file: path,
+            content: content.slice(node.startIndex, node.endIndex),
+            range: new Range(
+              node.startPosition.row,
+              node.startPosition.column,
+              node.endPosition.row,
+              node.endPosition.column,
+            ),
+            language: 'c',
+          }),
+        );
+      log.debug('WindowService.reviewFile', { functionDefinitions });
+      reviewPage.activeFileReview = functionDefinitions.map(
+        (functionDefinition, index) =>
+          new ReviewInstance(
+            functionDefinition,
+            {
+              projectId: clientInfo.currentProject,
+              version: clientInfo.version,
+            },
+            ReviewType.File,
+            index,
+          ),
+      );
+      log.debug('WindowService.reviewFile', {
+        activeFileReview: reviewPage.activeFileReview,
+      });
+    } catch (error) {
+      log.error(error);
+      return;
+    }
   }
 
   async reviewSelection(selection?: Selection) {
