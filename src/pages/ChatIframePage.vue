@@ -67,6 +67,7 @@ onBeforeUnmount(() => {
       id="iframeAiAssistant"
       name="SI_AI_ASSISTANT"
       sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-downloads"
+      style="border: none"
     />
   </q-page>
 </template>

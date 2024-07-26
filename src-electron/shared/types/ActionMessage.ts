@@ -1,6 +1,6 @@
 import { CompletionCacheClientMessage } from 'shared/types/WsMessage';
 import { Selection } from 'shared/types/Selection';
-import { ReviewData, ReviewType } from 'shared/types/review';
+import { ReviewData } from 'shared/types/review';
 import { MainWindowPageType } from './MainWindowPageType';
 
 export enum ActionType {
@@ -13,6 +13,7 @@ export enum ActionType {
   UpdateProgress = 'UpdateProgress',
   ToggleDarkMode = 'ToggleDarkMode',
   AddSelectionToChat = 'AddSelectionToChat',
+  ReviewDataListUpdate = 'ReviewDataListUpdate',
   ReviewDataUpdate = 'ReviewDataUpdate',
   SwitchLocale = 'SwitchLocale',
   MainWindowActivePage = 'MainWindowActivePage',
@@ -115,9 +116,17 @@ export class AddSelectionToChatActionMessage implements ActionMessage {
 
 export class ReviewDataUpdateActionMessage implements ActionMessage {
   type = ActionType.ReviewDataUpdate;
-  data: { type: ReviewType; data: ReviewData; index: number };
+  data: ReviewData;
 
-  constructor(data: { type: ReviewType; data: ReviewData; index: number }) {
+  constructor(data: ReviewData) {
+    this.data = data;
+  }
+}
+
+export class ReviewDataListUpdateActionMessage implements ActionMessage {
+  type = ActionType.ReviewDataListUpdate;
+  data: ReviewData[];
+  constructor(data: ReviewData[]) {
     this.data = data;
   }
 }
@@ -158,6 +167,7 @@ export interface ActionMessageMapping {
   [ActionType.ToggleDarkMode]: ToggleDarkModeActionMessage;
   [ActionType.AddSelectionToChat]: AddSelectionToChatActionMessage;
   [ActionType.ReviewDataUpdate]: ReviewDataUpdateActionMessage;
+  [ActionType.ReviewDataListUpdate]: ReviewDataListUpdateActionMessage;
   [ActionType.SwitchLocale]: SwitchLocaleActionMessage;
   [ActionType.MainWindowActivePage]: MainWindowActivePageActionMessage;
   [ActionType.MainWindowCheckPageReady]: MainWindowCheckPageReadyActionMessage;

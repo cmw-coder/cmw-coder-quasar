@@ -89,7 +89,7 @@ export default {
           referenceLoading: '查找引用代码中...',
           reviewProgressTitle: '评审进度',
           reviewResultTitle: '评审结果',
-          reviewStepOne: '1/3 AI 正在评审您的代码',
+          reviewStepOne: 'AI 正在评审您的代码',
           reviewStepTwo: '2/3 评审者和编码者正在激烈交锋',
           reviewStepThree: '3/3 AI 正在总结',
           parsedFailed: '解析失败',
@@ -240,7 +240,7 @@ export default {
         },
         toolbar: {
           rightDrawer: {
-            reviewHistory: 'Review History',
+            reviewHistory: '历史记录',
           },
           title: {
             chat: 'AI 对话',

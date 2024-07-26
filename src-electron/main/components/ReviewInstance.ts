@@ -1,6 +1,5 @@
 import {
   api_code_review,
-  api_feedback_review,
   api_get_code_review_result,
   api_get_code_review_state,
   api_stop_review,
@@ -37,16 +36,23 @@ export class ReviewInstance {
   feedback = Feedback.None;
   errorInfo = '';
   createTime = DateTime.now().valueOf() / 1000;
+  reviewType: ReviewType;
+  createdCallback = () => {};
 
   constructor(
     private selection: Selection,
     private extraData: ExtraData,
-    public reviewType: ReviewType,
-    public reviewIndex: number = -1,
+    reviewType: ReviewType,
+    createdCallback?: () => void,
   ) {
+    this.reviewType = reviewType;
     this.createReviewRequest();
+    if (createdCallback) {
+      this.createdCallback = createdCallback;
+    }
     // 上报一次 review 使用
-    this.reportReviewUsage();
+    // 不在此处上报
+    // this.reportReviewUsage();
   }
 
   async reportReviewUsage() {
@@ -71,89 +77,6 @@ export class ReviewInstance {
     } catch (e) {
       log.error('reportReviewUsage.failed', e);
     }
-  }
-
-  async reportHelpful() {
-    const appConfig = await getService(ServiceType.CONFIG).getConfigs();
-    try {
-      await api_reportSKU([
-        {
-          begin: DateTime.now().toMillis(),
-          end: DateTime.now().toMillis(),
-          count: 1,
-          type: 'AIGC',
-          product: 'SI',
-          firstClass: 'CODE_REVIEW',
-          secondClass: 'LIKE',
-          skuName: '*',
-          user: appConfig.username,
-          userType: 'USER',
-          subType: this.extraData.projectId,
-          extra: this.extraData.version,
-        },
-      ]);
-    } catch (e) {
-      log.error('reportReviewHelpful.api_reportSKU.failed', e);
-    }
-    try {
-      await api_feedback_review(
-        this.reviewId,
-        appConfig.username,
-        Feedback.Helpful,
-        this.createTime,
-        '',
-      );
-    } catch (e) {
-      log.error('reportReviewHelpful.api_feedback_review.failed', e);
-    }
-  }
-
-  async reportUnHelpful(comment?: string) {
-    const appConfig = await getService(ServiceType.CONFIG).getConfigs();
-    try {
-      await api_reportSKU([
-        {
-          begin: DateTime.now().toMillis(),
-          end: DateTime.now().toMillis(),
-          count: 1,
-          type: 'AIGC',
-          product: 'SI',
-          firstClass: 'CODE_REVIEW',
-          secondClass: 'UNLIKE',
-          skuName: '*',
-          user: appConfig.username,
-          userType: 'USER',
-          subType: this.extraData.projectId,
-          extra: this.extraData.version,
-        },
-      ]);
-    } catch (e) {
-      log.error('reportReviewUsage.api_reportSKU.failed', e);
-    }
-    try {
-      await api_feedback_review(
-        this.reviewId,
-        appConfig.username,
-        Feedback.Helpful,
-        this.createTime,
-        comment || '',
-      );
-    } catch (e) {
-      log.error('reportReviewHelpful.api_feedback_review.failed', e);
-    }
-  }
-
-  retry() {
-    if (this.timer) {
-      clearInterval(this.timer);
-    }
-
-    this.state = ReviewState.References;
-    this.feedback = Feedback.None;
-    this.references = [];
-    this.result = undefined;
-    this.errorInfo = '';
-    this.createReviewRequest();
   }
 
   async createReviewRequest() {
@@ -192,13 +115,10 @@ export class ReviewInstance {
       const windowService = container.get<WindowService>(ServiceType.WINDOW);
       const mainWindow = windowService.getWindow(WindowType.Main);
       mainWindow.sendMessageToRenderer(
-        new ReviewDataUpdateActionMessage({
-          type: this.reviewType,
-          data: this.getReviewData(),
-          index: this.reviewIndex,
-        }),
+        new ReviewDataUpdateActionMessage(this.getReviewData()),
       );
     }
+    this.createdCallback();
   }
 
   async refreshReviewState() {
@@ -206,7 +126,10 @@ export class ReviewInstance {
     const mainWindow = windowService.getWindow(WindowType.Main);
     try {
       this.state = await api_get_code_review_state(this.reviewId);
-      if (this.state === ReviewState.Third) {
+      if (
+        this.state === ReviewState.Third ||
+        this.state === ReviewState.Finished
+      ) {
         clearInterval(this.timer);
         await this.getReviewResult();
         this.state = ReviewState.Finished;
@@ -219,11 +142,7 @@ export class ReviewInstance {
         this.saveReviewData();
       }
       mainWindow.sendMessageToRenderer(
-        new ReviewDataUpdateActionMessage({
-          type: this.reviewType,
-          data: this.getReviewData(),
-          index: this.reviewIndex,
-        }),
+        new ReviewDataUpdateActionMessage(this.getReviewData()),
       );
     } catch (error) {
       log.error(error);
@@ -231,11 +150,7 @@ export class ReviewInstance {
       this.state = ReviewState.Error;
       this.errorInfo = (error as Error).message;
       mainWindow.sendMessageToRenderer(
-        new ReviewDataUpdateActionMessage({
-          type: this.reviewType,
-          data: this.getReviewData(),
-          index: this.reviewIndex,
-        }),
+        new ReviewDataUpdateActionMessage(this.getReviewData()),
       );
       this.saveReviewData();
     }
@@ -267,6 +182,7 @@ export class ReviewInstance {
       selection: this.selection,
       feedback: this.feedback,
       errorInfo: this.errorInfo,
+      extraData: this.extraData,
     } as ReviewData;
   }
 
@@ -282,11 +198,7 @@ export class ReviewInstance {
     const windowService = container.get<WindowService>(ServiceType.WINDOW);
     const mainWindow = windowService.getWindow(WindowType.Main);
     mainWindow.sendMessageToRenderer(
-      new ReviewDataUpdateActionMessage({
-        type: this.reviewType,
-        data: this.getReviewData(),
-        index: this.reviewIndex,
-      }),
+      new ReviewDataUpdateActionMessage(this.getReviewData()),
     );
   }
 }

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { PropType, ref } from 'vue';
-import { Selection } from 'shared/types/Selection';
+// import { Selection } from 'shared/types/Selection';
 import { useHighlighter } from 'stores/highlighter';
 import {
   Reference,
@@ -12,7 +12,7 @@ import { useService } from 'utils/common';
 import { ServiceType } from 'shared/types/service';
 import { useI18n } from 'vue-i18n';
 
-defineProps({
+const props = defineProps({
   reviewData: {
     type: Object as PropType<ReviewData>,
     required: true,
@@ -29,19 +29,19 @@ const baseName = 'components.ReviewPanels.FunctionPanel.';
 const i18n = (relativePath: string, data?: Record<string, unknown>) => {
   return data ? t(baseName + relativePath, data) : t(baseName + relativePath);
 };
-const appService = useService(ServiceType.App);
+// const appService = useService(ServiceType.App);
 const windowService = useService(ServiceType.WINDOW);
 const { codeToHtml } = useHighlighter();
 
-const formatSelection = (selection: Selection) => {
-  const filePathArr = selection.file.split('\\');
-  const fileName = filePathArr[filePathArr.length - 1];
-  return {
-    fileName,
-    rangeStr: `${selection.range.start.line} - ${selection.range.end.line}`,
-    ...selection,
-  };
-};
+// const formatSelection = (selection: Selection) => {
+//   const filePathArr = selection.file.split('\\');
+//   const fileName = filePathArr[filePathArr.length - 1];
+//   return {
+//     fileName,
+//     rangeStr: `${selection.range.start.line} - ${selection.range.end.line}`,
+//     ...selection,
+//   };
+// };
 
 const formatReference = (reference: Reference) => {
   const filePathArr = reference.path.split('\\');
@@ -71,20 +71,20 @@ const viewReferenceHandle = (reference: Reference) => {
   viewReferenceDialogFlag.value = true;
 };
 
-const locateFileHandle = (file: string) => {
-  console.log('locate file: ', file);
-  appService.locateFileInFolder(file);
-};
+// const locateFileHandle = (file: string) => {
+//   console.log('locate file: ', file);
+//   appService.locateFileInFolder(file);
+// };
 
 const stopReviewHandle = () => {
-  windowService.stopActiveReview();
+  windowService.stopReview(props.reviewData.reviewId);
 };
 </script>
 
 <template>
-  <div class="review-content" v-if="reviewData">
+  <div class="review-content bg-grey-10" v-if="reviewData">
     <div class="review-file-wrapper">
-      <div class="review-file-name-wrapper">
+      <!-- <div class="review-file-name-wrapper">
         <div
           class="review-file text-bold text-grey text-h8"
           :title="`${reviewData.selection.file} ${formatSelection(reviewData.selection).rangeStr}`"
@@ -105,7 +105,7 @@ const stopReviewHandle = () => {
             >{{ i18n('labels.locate') }}</q-btn
           >
         </div>
-      </div>
+      </div> -->
       <div class="review-file-content-wrapper">
         <q-card
           class="selection-content-card row"
@@ -462,7 +462,6 @@ const stopReviewHandle = () => {
 
 <style scoped lang="scss">
 .review-content {
-  height: calc(100% - 50px);
   width: 100%;
   overflow: auto;
   padding: 10px;

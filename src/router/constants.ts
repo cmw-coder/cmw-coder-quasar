@@ -191,7 +191,7 @@ export const routes: RouteRecordRaw[] = [
         props: {
           header: {
             rightDrawer: {
-              icon: 'menu',
+              icon: 'history',
               label: 'reviewHistory',
             },
             title: {

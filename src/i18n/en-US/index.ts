@@ -89,7 +89,7 @@ export default {
           referenceLoading: 'Finding References...',
           reviewProgressTitle: 'Review Progress',
           reviewResultTitle: 'Review Result',
-          reviewStepOne: '1/3 AI Is Reviewing Your Code',
+          reviewStepOne: 'AI Is Reviewing Your Code',
           reviewStepTwo: '2/3 Reviewer And Coder Are In A Heated Battle',
           reviewStepThree: '3/3 AI IS Summarizing',
           parsedFailed: 'Parse Failed',

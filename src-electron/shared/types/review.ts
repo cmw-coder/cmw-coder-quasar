@@ -1,5 +1,5 @@
 import { SymbolType } from 'shared/types/common';
-import { Selection } from 'shared/types/Selection';
+import { ExtraData, Selection } from 'shared/types/Selection';
 
 export interface Reference {
   name: string;
@@ -28,8 +28,17 @@ export interface ReviewRequestParams {
 export enum ReviewState {
   References = 0,
   Start = 1,
+  /**
+   * @deprecated
+   */
   First = 2,
+  /**
+   * @deprecated
+   */
   Second = 3,
+  /**
+   * @deprecated
+   */
   Third = 4,
   Finished = 100,
   Error = -1,
@@ -72,6 +81,8 @@ export interface ReviewData {
   result: ReviewResult;
   feedback: Feedback;
   errorInfo: string;
+  extraData: ExtraData;
+  reviewType: ReviewType;
 }
 
 export interface ReviewFileData {

@@ -1,7 +1,7 @@
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
-import { Selection } from 'shared/types/Selection';
+import { ExtraData, Selection } from 'shared/types/Selection';
 import { WindowType } from 'shared/types/WindowType';
-import { Feedback, ReviewType, ReviewTypeMapping } from 'shared/types/review';
+import { Feedback, ReviewData } from 'shared/types/review';
 
 export interface WindowServiceTrait {
   finishLogin(): Promise<void>;
@@ -27,12 +27,16 @@ export interface WindowServiceTrait {
   addSelectionToChat(selection?: Selection): Promise<void>;
   reviewFile(path: string): Promise<void>;
   reviewSelection(selection?: Selection): Promise<void>;
-  getReviewData<T extends ReviewType>(
-    reviewType: T,
-  ): Promise<ReviewTypeMapping[T]>;
-  setActiveReviewFeedback(feedback: Feedback, comment?: string): Promise<void>;
-  retryActiveReview(): Promise<void>;
-  stopActiveReview(): Promise<void>;
+  getReviewData(): Promise<ReviewData[]>;
+  setReviewFeedback(data: {
+    reviewId: string;
+    feedback: Feedback;
+    extraData: ExtraData;
+    createTime: number;
+    comment?: string;
+  }): Promise<void>;
+  retryReview(reviewData: ReviewData): Promise<void>;
+  stopReview(reviewId: string): Promise<void>;
   getWindowIsFixed(windowType: WindowType): Promise<boolean>;
   toggleWindowFixed(windowType: WindowType): Promise<void>;
 }
