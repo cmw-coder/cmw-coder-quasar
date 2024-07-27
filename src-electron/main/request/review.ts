@@ -3,6 +3,7 @@ import {
   ReviewState,
   ReviewRequestParams,
   Feedback,
+  ReviewParsedResult,
 } from 'shared/types/review';
 import request from 'main/request';
 import Logger from 'electron-log/main';
@@ -27,30 +28,21 @@ export const api_get_code_review_state = async (reviewId: string) =>
     },
   });
 
-const parseReviewResult = (data: string): ReviewResult => {
+const parseReviewResult = (data: string[]): ReviewResult => {
   const result: ReviewResult = {
     parsed: false,
-    originData: data,
+    originData: data.join('\n'),
     data: [],
   };
   try {
-    const object = JSON.parse(data);
-    if (
-      object['明确问题'] &&
-      Object.prototype.toString.call(object['明确问题']) === '[object Array]'
-    ) {
-      const problems = object['明确问题'];
-      result.data = problems.map((problem: never) => {
-        return {
-          index: problem['问题编号'],
-          type: problem['问题类型'],
-          code: problem['问题代码片段'],
-          description: problem['问题描述'],
-        };
-      });
-      result.parsed = true;
-    } else {
-      throw new Error('解析失败');
+    for (let i = 0; i < data.length; i++) {
+      const item = data[i];
+      const object = JSON.parse(item) as ReviewParsedResult;
+      if (object.Description && object.ProblemCodeSnippet && object.Type) {
+        result.data.push(object);
+      } else {
+        throw new Error('解析失败');
+      }
     }
   } catch (error) {
     Logger.error('parseReviewResult error', error);
@@ -62,7 +54,7 @@ export const api_get_code_review_result = async (
   reviewId: string,
 ): Promise<ReviewResult> => {
   Logger.log('api_get_code_review_result start', reviewId);
-  const result = await request<string>({
+  const result = await request<string[]>({
     url: '/kong/RdTestAiService/v1/chatgpt/question/review/result',
     method: 'get',
     params: {
