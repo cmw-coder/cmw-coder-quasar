@@ -10,6 +10,7 @@ import { ServiceType } from 'shared/types/service';
 const windowService = useService(ServiceType.WINDOW);
 
 const activeTransplantProject = ref<undefined | TransplantProjectData>();
+const step = ref(1);
 
 const refreshActiveData = async () => {
   activeTransplantProject.value =
@@ -39,6 +40,8 @@ const onSubmit = async () => {
   refreshActiveData();
 };
 const onReset = async () => {};
+
+const runCompile = () => {};
 </script>
 
 <template>
@@ -73,25 +76,19 @@ const onReset = async () => {};
     <div v-else>
       <div class="q-pa-md">
         <q-stepper v-model="step" vertical color="primary" animated>
-          <q-step
-            :name="1"
-            title="Select campaign settings"
-            icon="settings"
-            :done="step > 1"
-          >
-            For each ad campaign that you create, you can control how much
-            you're willing to spend on clicks and conversions, which networks
-            and geographical locations you want your ads to show on, and more.
-
+          <q-step :name="1" title="自动合并" icon="settings" :done="step > 1">
             <q-stepper-navigation>
-              <q-btn @click="step = 2" color="primary" label="Continue" />
+              <q-btn
+                @click="() => runCompile()"
+                color="primary"
+                label="下一步"
+              />
             </q-stepper-navigation>
           </q-step>
 
           <q-step
             :name="2"
-            title="Create an ad group"
-            caption="Optional"
+            title="编译"
             icon="create_new_folder"
             :done="step > 2"
           >
@@ -110,26 +107,8 @@ const onReset = async () => {};
             </q-stepper-navigation>
           </q-step>
 
-          <q-step :name="3" title="Ad template" icon="assignment" disable>
+          <q-step :name="3" title="测试" icon="assignment" disable>
             This step won't show up because it is disabled.
-          </q-step>
-
-          <q-step :name="4" title="Create an ad" icon="add_comment">
-            Try out different ad text to see what brings in the most customers,
-            and learn how to enhance your ads using features like ad extensions.
-            If you run into any problems with your ads, find out how to tell if
-            they're running and how to resolve approval issues.
-
-            <q-stepper-navigation>
-              <q-btn color="primary" label="Finish" />
-              <q-btn
-                flat
-                @click="step = 2"
-                color="primary"
-                label="Back"
-                class="q-ml-sm"
-              />
-            </q-stepper-navigation>
           </q-step>
         </q-stepper>
       </div>
