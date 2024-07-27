@@ -9,6 +9,10 @@ import { ActionType } from 'shared/types/ActionMessage';
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import FunctionPanel from 'components/ReviewPanels/FunctionPanel.vue';
 import { Selection } from 'shared/types/Selection';
+import { useQuasar } from 'quasar';
+
+const { dialog } = useQuasar();
+
 const formatSelection = (selection: Selection) => {
   const filePathArr = selection.file.split(/\\|\//);
   const fileName = filePathArr[filePathArr.length - 1];
@@ -104,6 +108,11 @@ onMounted(async () => {
   });
 });
 
+const getFileName = (filePath: string) => {
+  const filePathArr = filePath.split(/\\|\//);
+  return filePathArr[filePathArr.length - 1];
+};
+
 onBeforeUnmount(() => {
   if (getCurrentPathInterval) {
     clearInterval(getCurrentPathInterval);
@@ -111,6 +120,62 @@ onBeforeUnmount(() => {
   }
   actionApi.unregister();
 });
+
+const delFile = async (filePath: string) => {
+  const includedFileReviewList = reviewList.value.filter(
+    (item) => item.selection.file === filePath,
+  );
+
+  const unfinishedReviewList = includedFileReviewList.filter(
+    (item) =>
+      item.state !== ReviewState.Finished && item.state !== ReviewState.Error,
+  );
+  if (unfinishedReviewList.length > 0) {
+    dialog({
+      title: '提示',
+      message: '当前文件下还存在 review 未结束',
+      persistent: true,
+      ok: '全部停止并删除',
+      cancel: '取消',
+    }).onOk(async () => {
+      await Promise.all(
+        includedFileReviewList.map((item) =>
+          windowService.delReview(item.reviewId),
+        ),
+      );
+      getReviewDataList();
+    });
+  } else {
+    await Promise.all(
+      includedFileReviewList.map((item) =>
+        windowService.delReview(item.reviewId),
+      ),
+    );
+    getReviewDataList();
+  }
+};
+
+const delReviewItem = async (review: ReviewData) => {
+  console.log('delReviewItem', review);
+  if (
+    review.state !== ReviewState.Finished &&
+    review.state !== ReviewState.Error
+  ) {
+    dialog({
+      title: '提示',
+      message: '当前 review 还未结束',
+      persistent: true,
+      ok: '停止并删除',
+      cancel: '取消',
+    }).onOk(async () => {
+      await windowService.delReview(review.reviewId);
+      getReviewDataList();
+    });
+  } else {
+    await windowService.delReview(review.reviewId);
+    getReviewDataList();
+  }
+};
 </script>
 
 <template>
@@ -145,7 +210,12 @@ onBeforeUnmount(() => {
     <div class="rest-content">
       <q-splitter v-model="splitterModel" style="height: 100%">
         <template v-slot:before>
-          <q-list padding separator class="text-primary full-height">
+          <q-list
+            padding
+            separator
+            class="text-primary full-height"
+            style="padding-top: 0px"
+          >
             <q-item
               v-for="file in fileList"
               clickable
@@ -157,21 +227,42 @@ onBeforeUnmount(() => {
                 }
               "
               :key="file"
+              style="padding-left: 6px; padding-right: 0px"
             >
-              <q-item-section :title="file" style="overflow: hidden">{{
-                file
-              }}</q-item-section>
+              <q-item-section>
+                <div class="file-wrapper">
+                  <span class="file-name">
+                    {{ getFileName(file) }}
+                  </span>
+                  <q-tooltip>
+                    {{ file }}
+                  </q-tooltip>
+                  <div class="del-btn-wrapper">
+                    <q-btn
+                      title="删除文件"
+                      icon="close"
+                      size="xs"
+                      flat
+                      @click.stop="() => delFile(file)"
+                    />
+                  </div>
+                </div>
+              </q-item-section>
             </q-item>
           </q-list>
         </template>
 
         <template v-slot:after>
-          <q-list padding separator class="text-primary full-height">
+          <q-list
+            padding
+            separator
+            class="text-primary full-height"
+            style="padding-top: 0px"
+          >
             <q-expansion-item
               v-for="review in activeFileReviewList"
               :key="review.reviewId"
               expand-separator
-              default-opened
             >
               <template v-slot:header>
                 <q-item-section avatar>
@@ -195,6 +286,14 @@ onBeforeUnmount(() => {
                     `${formatSelection(review.selection).fileName}  ${formatSelection(review.selection).rangeStr}`
                   }}</q-item-section
                 >
+                <q-item-section side>
+                  <q-btn
+                    icon="close"
+                    size="sm"
+                    flat
+                    @click.stop="() => delReviewItem(review)"
+                  ></q-btn>
+                </q-item-section>
               </template>
               <FunctionPanel :review-data="review" />
             </q-expansion-item>
@@ -211,5 +310,31 @@ onBeforeUnmount(() => {
   overflow-y: hidden;
   border: 1px solid rgba(255, 255, 255, 0.28);
   border-top: none;
+}
+
+.file-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  .file-name {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    width: 100%;
+    overflow: hidden;
+  }
+  .del-btn-wrapper {
+    display: none;
+    position: absolute;
+    right: 0px;
+    top: -8px;
+    height: 100%;
+  }
+  &:hover {
+    .del-btn-wrapper {
+      display: block;
+    }
+  }
 }
 </style>

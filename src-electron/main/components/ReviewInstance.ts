@@ -188,10 +188,12 @@ export class ReviewInstance {
 
   async stop() {
     clearInterval(this.timer);
-    try {
-      await api_stop_review(this.reviewId);
-    } catch (e) {
-      log.error('stopReview.failed', e);
+    if (this.state === ReviewState.Start) {
+      try {
+        await api_stop_review(this.reviewId);
+      } catch (e) {
+        log.error('stopReview.failed', e);
+      }
     }
     this.state = ReviewState.Error;
     this.errorInfo = 'USER STOPPED REVIEW TASK';

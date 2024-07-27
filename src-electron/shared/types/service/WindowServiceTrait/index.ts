@@ -37,6 +37,7 @@ export interface WindowServiceTrait {
   }): Promise<void>;
   retryReview(reviewData: ReviewData): Promise<void>;
   stopReview(reviewId: string): Promise<void>;
+  delReview(reviewId: string): Promise<void>;
   getWindowIsFixed(windowType: WindowType): Promise<boolean>;
   toggleWindowFixed(windowType: WindowType): Promise<void>;
 }

@@ -368,6 +368,12 @@ export class WindowService implements WindowServiceTrait {
     return reviewPage.activeReviewList.map((review) => review.getReviewData());
   }
 
+  async delReview(reviewId: string) {
+    const mainWindow = this.getWindow(WindowType.Main);
+    const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
+    reviewPage.delReview(reviewId);
+  }
+
   async setReviewFeedback(data: {
     reviewId: string;
     feedback: Feedback;

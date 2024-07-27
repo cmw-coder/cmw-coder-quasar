@@ -131,4 +131,16 @@ export class ReviewPage extends BasePage {
       review.stop();
     }
   }
+
+  delReview(reviewId: string) {
+    const review = this.activeReviewList.find(
+      (review) => review.reviewId === reviewId,
+    );
+    if (review) {
+      review.stop();
+    }
+    this.activeReviewList = this.activeReviewList.filter(
+      (review) => review.reviewId !== reviewId,
+    );
+  }
 }
