@@ -61,10 +61,11 @@ export enum Feedback {
 }
 
 export interface ReviewParsedResult {
-  index: number;
-  type: string;
-  code: string;
-  description: string;
+  Type: string;
+  IsProblem: string;
+  Number: number;
+  ProblemCodeSnippet: string;
+  Description: string;
 }
 
 export interface ReviewResult {

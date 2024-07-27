@@ -319,12 +319,13 @@ const stopReviewHandle = () => {
                 flat
                 class="result-item"
                 v-for="(resultItem, index) in reviewData.result.data"
+                v-show="resultItem.IsProblem"
                 :key="index"
                 style="margin-bottom: 10px"
               >
                 <q-card-section style="padding: 2px">
                   <q-chip color="red-8" class="text-white">{{
-                    resultItem.type
+                    resultItem.Type
                   }}</q-chip>
                 </q-card-section>
                 <q-card-section style="padding: 2px">
@@ -336,12 +337,15 @@ const stopReviewHandle = () => {
                       border: 1px solid #eee;
                     "
                     v-html="
-                      codeToHtml(resultItem.code, reviewData.selection.language)
+                      codeToHtml(
+                        resultItem.ProblemCodeSnippet,
+                        reviewData.selection.language,
+                      )
                     "
                   />
                 </q-card-section>
                 <q-card-section style="padding: 2px">{{
-                  resultItem.description
+                  resultItem.Description
                 }}</q-card-section>
               </q-card>
             </template>
