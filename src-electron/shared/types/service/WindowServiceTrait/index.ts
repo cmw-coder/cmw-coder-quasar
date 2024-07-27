@@ -2,6 +2,10 @@ import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import { ExtraData, Selection } from 'shared/types/Selection';
 import { WindowType } from 'shared/types/WindowType';
 import { Feedback, ReviewData } from 'shared/types/review';
+import {
+  TransplantProjectData,
+  TransplantProjectOptions,
+} from 'shared/types/transplantProject';
 
 export interface WindowServiceTrait {
   finishLogin(): Promise<void>;
@@ -39,4 +43,8 @@ export interface WindowServiceTrait {
   stopReview(reviewId: string): Promise<void>;
   getWindowIsFixed(windowType: WindowType): Promise<boolean>;
   toggleWindowFixed(windowType: WindowType): Promise<void>;
+  createTransplantProject(
+    options: TransplantProjectOptions,
+  ): Promise<TransplantProjectData | undefined>;
+  getTransplantProjectData(): Promise<TransplantProjectData | undefined>;
 }

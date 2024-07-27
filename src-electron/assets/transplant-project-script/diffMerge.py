@@ -9,9 +9,9 @@ result = {
     "mergeSuccess": "False",
     "ErrorList": [
         {
-            "codeSnippet": "",
-            "suggest": "",
-            "fixCode": ""
+            "codeSnippet": "bbbbbbb",
+            "suggest": "bbbbbbbbbbbb",
+            "fixCode": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
         },
     ]
 }

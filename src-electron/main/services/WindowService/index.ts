@@ -30,6 +30,7 @@ import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import { Range } from 'main/types/vscode/range';
 import { getService } from 'main/services';
 import { treeSitterFolder } from 'main/services/WindowService/constants';
+import { TransplantProjectOptions } from 'shared/types/transplantProject';
 
 interface WindowMap {
   [WindowType.Completions]: CompletionsWindow;
@@ -232,6 +233,16 @@ export class WindowService implements WindowServiceTrait {
     page._readyResolveHandler();
   }
 
+  async getWindowIsFixed(windowType: WindowType) {
+    const { fixed } = this._dataStoreService.getWindowData(windowType);
+    return !!fixed;
+  }
+
+  async toggleWindowFixed(windowType: WindowType) {
+    const window = this.getWindow(windowType);
+    window.toggleFixed();
+  }
+
   async addSelectionToChat(selection?: Selection) {
     if (!selection) {
       selection = this.getWindow(WindowType.SelectionTips).selection;
@@ -392,13 +403,20 @@ export class WindowService implements WindowServiceTrait {
     reviewPage.stopReview(reviewId);
   }
 
-  async getWindowIsFixed(windowType: WindowType) {
-    const { fixed } = this._dataStoreService.getWindowData(windowType);
-    return !!fixed;
+  async createTransplantProject(options: TransplantProjectOptions) {
+    const mainWindow = this.getWindow(WindowType.Main);
+    const transplantProjectPage = mainWindow.getPage(
+      MainWindowPageType.TransplantProject,
+    );
+    transplantProjectPage.createTransplantProject(options);
+    return transplantProjectPage.getActiveTransplantProjectData();
   }
 
-  async toggleWindowFixed(windowType: WindowType) {
-    const window = this.getWindow(windowType);
-    window.toggleFixed();
+  async getTransplantProjectData() {
+    const mainWindow = this.getWindow(WindowType.Main);
+    const transplantProjectPage = mainWindow.getPage(
+      MainWindowPageType.TransplantProject,
+    );
+    return transplantProjectPage.getActiveTransplantProjectData();
   }
 }
