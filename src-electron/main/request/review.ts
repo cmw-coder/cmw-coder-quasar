@@ -31,20 +31,31 @@ export const api_get_code_review_state = async (reviewId: string) =>
 const parseReviewResult = (data: string[]): ReviewResult => {
   const result: ReviewResult = {
     parsed: false,
-    originData: data.join('\n'),
+    originData: data.join('\\n'),
     data: [],
   };
   try {
     for (let i = 0; i < data.length; i++) {
       const item = data[i];
-      const object = JSON.parse(item) as ReviewParsedResult;
-      if (object.Description && object.ProblemCodeSnippet && object.Type) {
-        result.data.push(object);
+      const objectArr = JSON.parse(item) as ReviewParsedResult[];
+      if (objectArr.length > 0) {
+        for (let j = 0; j < objectArr.length; j++) {
+          const dataItem = objectArr[j];
+          if (
+            dataItem.Description &&
+            dataItem.ProblemCodeSnippet &&
+            dataItem.Type
+          ) {
+            result.data.push(dataItem);
+          }
+        }
+        result.parsed = true;
       } else {
         throw new Error('解析失败');
       }
     }
   } catch (error) {
+    result.parsed = false;
     Logger.error('parseReviewResult error', error);
   }
   return result;
@@ -100,6 +111,7 @@ export const api_stop_review = async (reviewId: string) => {
 //   ReviewResult,
 //   Feedback,
 //   ReviewState,
+//   ReviewParsedResult,
 // } from 'shared/types/review';
 // import Logger from 'electron-log/main';
 // import { timeout } from 'main/utils/common';
@@ -113,35 +125,37 @@ export const api_stop_review = async (reviewId: string) => {
 // export const api_get_code_review_state = async (reviewId: string) => {
 //   console.log('api_get_code_review_state', reviewId);
 //   await timeout(150);
-//   return ReviewState.Error;
+//   return ReviewState.Finished;
 // };
 
-// const parseReviewResult = (data: string): ReviewResult => {
+// const parseReviewResult = (data: string[]): ReviewResult => {
 //   const result: ReviewResult = {
 //     parsed: false,
-//     originData: data,
+//     originData: data.join('\\n'),
 //     data: [],
 //   };
 //   try {
-//     const object = JSON.parse(data);
-//     if (
-//       object['明确问题'] &&
-//       Object.prototype.toString.call(object['明确问题']) === '[object Array]'
-//     ) {
-//       const problems = object['明确问题'];
-//       result.data = problems.map((problem: never) => {
-//         return {
-//           index: problem['问题编号'],
-//           type: problem['问题类型'],
-//           code: problem['问题代码片段'],
-//           description: problem['问题描述'],
-//         };
-//       });
-//       result.parsed = true;
-//     } else {
-//       throw new Error('解析失败');
+//     for (let i = 0; i < data.length; i++) {
+//       const item = data[i];
+//       const objectArr = JSON.parse(item) as ReviewParsedResult[];
+//       if (objectArr.length > 0) {
+//         for (let j = 0; j < objectArr.length; j++) {
+//           const dataItem = objectArr[j];
+//           if (
+//             dataItem.Description &&
+//             dataItem.ProblemCodeSnippet &&
+//             dataItem.Type
+//           ) {
+//             result.data.push(dataItem);
+//           }
+//         }
+//         result.parsed = true;
+//       } else {
+//         throw new Error('解析失败');
+//       }
 //     }
 //   } catch (error) {
+//     result.parsed = false;
 //     Logger.error('parseReviewResult error', error);
 //   }
 //   return result;
@@ -150,22 +164,36 @@ export const api_stop_review = async (reviewId: string) => {
 // export const api_get_code_review_result = async (reviewId: string) => {
 //   console.log('api_get_code_review_result', reviewId);
 //   await timeout(150);
-//   const data = `{
-//     "明确问题": [
-//         {
-//             "问题编号": 2,
-//             "问题类型": "内存越界",
-//             "问题代码片段": "memcpy(szPktBuf + ulHeadLen, szPktBufTmp, (ULONG)uiContentLen);",
-//             "问题描述": "在使用memcpy()函数时，需要确保目标缓冲区szPktBuf有足够的空间来容纳源缓冲区szPktBufTmp的内容，否则可能会导致内存越界。建议增加边界检查。"
-//         },
-//         {
-//             "问题编号": 2,
-//             "问题类型": "内存越界",
-//             "问题代码片段": "memcpy(szPktBuf + ulHeadLen, szPktBufTmp, (ULONG)uiContentLen);",
-//             "问题描述": "在使用memcpy()函数时，需要确保目标缓冲区szPktBuf有足够的空间来容纳源缓冲区szPktBufTmp的内容，否则可能会导致内存越界。建议增加边界检查。"
-//         }
-//     ]
-// }`;
+//   const data = [
+//     `[{
+//         "Type": "资源释放",
+//         "IsProblem": true,
+//         "Number": 1,
+//         "ProblemCodeSnippet": "if (KEPOLL_INVALID_ID == ulSyncEp)\\n{\\n    atomic_inc(&g_pstSyncStat->stEPCreatErr);\\n    kmem_cache_free(g_pstSyncUCCachep, pstUCObj);\\n    return pstUCObj;\\n}\\n",
+//         "Description": "在创建epoll对象失败时，释放了单播对象pstUCObj，但没有将其设置为NULL，可能导致悬挂指针问题。"
+//     },
+//     {
+//         "Type": "资源释放",
+//         "IsProblem": false,
+//         "Number": 2,
+//         "ProblemCodeSnippet": "if (ERROR_SUCCESS != ulRet)\\n{\\n    SYNC_Destroy((ULONG)pstUCObj);\\n    pstUCObj = NULL;\\n}\\n",
+//         "Description": "在某些操作失败后，调用了SYNC_Destroy释放资源，但没有释放相关的epoll对象ulSyncEp，可能导致资源泄漏。"
+//     }]`,
+//     `[{
+//         "Type": "资源释放",
+//         "IsProblem": true,
+//         "Number": 1,
+//         "ProblemCodeSnippet": "if (KEPOLL_INVALID_ID == ulSyncEp)\\n{\\n    atomic_inc(&g_pstSyncStat->stEPCreatErr);\\n    kmem_cache_free(g_pstSyncUCCachep, pstUCObj);\\n    return pstUCObj;\\n}\\n",
+//         "Description": "在创建epoll对象失败时，释放了单播对象pstUCObj，但没有将其设置为NULL，可能导致悬挂指针问题。"
+//     },
+//     {
+//         "Type": "资源释放",
+//         "IsProblem": false,
+//         "Number": 2,
+//         "ProblemCodeSnippet": "if (ERROR_SUCCESS != ulRet)\\n{\\n    SYNC_Destroy((ULONG)pstUCObj);\\n    pstUCObj = NULL;\\n}\\n",
+//         "Description": "在某些操作失败后，调用了SYNC_Destroy释放资源，但没有释放相关的epoll对象ulSyncEp，可能导致资源泄漏。"
+//     }]`,
+//   ];
 //   return parseReviewResult(data);
 // };
 
