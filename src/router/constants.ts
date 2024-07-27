@@ -202,6 +202,22 @@ export const routes: RouteRecordRaw[] = [
         },
       },
       {
+        path: 'transplant-project',
+        components: {
+          header: () => import('layouts/headers/MainHeader.vue'),
+          leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
+          default: () => import('pages/TransplantProjectPage.vue'),
+        },
+        props: {
+          header: {
+            title: {
+              label: 'transplantProject',
+            },
+            windowType: WindowType.Main,
+          },
+        },
+      },
+      {
         path: 'settings',
         components: {
           header: () => import('layouts/headers/MainHeader.vue'),

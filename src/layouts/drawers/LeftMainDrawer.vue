@@ -42,6 +42,12 @@ const navigations: Navigation[] = [
     route: 'review',
   },
   {
+    label: 'transplantProject',
+    icon: 'mdi-transfer',
+    available: true,
+    route: 'transplant-project',
+  },
+  {
     label: 'feedback',
     icon: 'mdi-bug',
     available: true,

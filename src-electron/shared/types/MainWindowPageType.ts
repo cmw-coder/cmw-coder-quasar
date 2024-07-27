@@ -4,4 +4,5 @@ export enum MainWindowPageType {
   Review = 'Review',
   Setting = 'Setting',
   WorkFlow = 'WorkFlow',
+  TransplantProject = 'TransplantProject',
 }

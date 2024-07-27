@@ -8,6 +8,7 @@ import { CommitPage } from 'main/services/WindowService/types/MainWindow/pages/C
 import { ReviewPage } from 'main/services/WindowService/types/MainWindow/pages/ReviewPage';
 import { WorkFlowPage } from 'main/services/WindowService/types/MainWindow/pages/WorkFlowPage';
 import { SettingPage } from 'main/services/WindowService/types/MainWindow/pages/SettingPage';
+import { TransplantProjectPage } from 'main/services/WindowService/types/MainWindow/pages/TransplantProjectPage';
 
 interface PageMap {
   [MainWindowPageType.Chat]: ChatPage;
@@ -15,6 +16,7 @@ interface PageMap {
   [MainWindowPageType.Review]: ReviewPage;
   [MainWindowPageType.WorkFlow]: WorkFlowPage;
   [MainWindowPageType.Setting]: SettingPage;
+  [MainWindowPageType.TransplantProject]: TransplantProjectPage;
 }
 
 export class MainWindow extends BaseWindow {
@@ -37,6 +39,10 @@ export class MainWindow extends BaseWindow {
     this.pageMap.set(MainWindowPageType.Review, new ReviewPage());
     this.pageMap.set(MainWindowPageType.WorkFlow, new WorkFlowPage());
     this.pageMap.set(MainWindowPageType.Setting, new SettingPage());
+    this.pageMap.set(
+      MainWindowPageType.TransplantProject,
+      new TransplantProjectPage(),
+    );
   }
 
   getPage<T extends MainWindowPageType>(type: T): PageMap[T] {
