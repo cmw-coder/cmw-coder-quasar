@@ -1,15 +1,21 @@
 <script lang="ts" setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, toRaw } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useService } from 'utils/common';
 import { ServiceType } from 'shared/types/service';
-import { ReviewData, ReviewState } from 'shared/types/review';
+import {
+  Feedback,
+  ReviewData,
+  ReviewState,
+  reviewStateIconMap,
+} from 'shared/types/review';
 import { ActionApi } from 'types/ActionApi';
 import { ActionType } from 'shared/types/ActionMessage';
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import FunctionPanel from 'components/ReviewPanels/FunctionPanel.vue';
 import { Selection } from 'shared/types/Selection';
 import { useQuasar } from 'quasar';
+import { DateTime } from 'luxon';
 
 const { dialog } = useQuasar();
 
@@ -21,16 +27,6 @@ const formatSelection = (selection: Selection) => {
     rangeStr: `${selection.range.start.line} - ${selection.range.end.line}`,
     ...selection,
   };
-};
-
-const reviewStateIconMap: Record<ReviewState, string> = {
-  [ReviewState.Start]: 'mdi-clock-outline',
-  [ReviewState.References]: 'mdi-comment-text-outline',
-  [ReviewState.Finished]: 'mdi-check-circle-outline',
-  [ReviewState.Error]: 'mdi-alert-circle-outline',
-  [ReviewState.First]: 'mdi-comment-text-outline',
-  [ReviewState.Second]: 'mdi-comment-text-outline',
-  [ReviewState.Third]: 'mdi-comment-text-outline',
 };
 
 const baseName = 'pages.ReviewPage.';
@@ -132,11 +128,11 @@ const delFile = async (filePath: string) => {
   );
   if (unfinishedReviewList.length > 0) {
     dialog({
-      title: '提示',
-      message: '当前文件下还存在 review 未结束',
+      title: i18n('dialog.delFileDialog.title'),
+      message: i18n('dialog.delFileDialog.message'),
       persistent: true,
-      ok: '全部停止并删除',
-      cancel: '取消',
+      ok: i18n('dialog.delFileDialog.ok'),
+      cancel: i18n('dialog.delFileDialog.cancel'),
     }).onOk(async () => {
       await Promise.all(
         includedFileReviewList.map((item) =>
@@ -162,11 +158,11 @@ const delReviewItem = async (review: ReviewData) => {
     review.state !== ReviewState.Error
   ) {
     dialog({
-      title: '提示',
-      message: '当前 review 还未结束',
+      title: i18n('dialog.delReviewItemDialog.title'),
+      message: i18n('dialog.delReviewItemDialog.message'),
       persistent: true,
-      ok: '停止并删除',
-      cancel: '取消',
+      ok: i18n('dialog.delReviewItemDialog.ok'),
+      cancel: i18n('dialog.delReviewItemDialog.cancel'),
     }).onOk(async () => {
       await windowService.delReview(review.reviewId);
       getReviewDataList();
@@ -175,6 +171,25 @@ const delReviewItem = async (review: ReviewData) => {
     await windowService.delReview(review.reviewId);
     getReviewDataList();
   }
+};
+
+const feedBackHandle = (
+  review: ReviewData,
+  feedback: Feedback,
+  comment?: string,
+) => {
+  console.log('feedBackHandle', review, feedback, comment);
+  windowService.setReviewFeedback({
+    reviewId: review.reviewId,
+    feedback,
+    comment,
+    extraData: review.extraData,
+    createTime: DateTime.now().valueOf() / 1000,
+  });
+};
+
+const retryHandle = (review: ReviewData) => {
+  windowService.retryReview(toRaw(review));
 };
 </script>
 
@@ -239,7 +254,7 @@ const delReviewItem = async (review: ReviewData) => {
                   </q-tooltip>
                   <div class="del-btn-wrapper">
                     <q-btn
-                      title="删除文件"
+                      :title="i18n('labels.delFileTitle')"
                       icon="close"
                       size="xs"
                       flat
@@ -268,7 +283,8 @@ const delReviewItem = async (review: ReviewData) => {
                 <q-item-section avatar>
                   <q-icon
                     v-if="review.state !== ReviewState.Start"
-                    :name="reviewStateIconMap[review.state]"
+                    :name="reviewStateIconMap[review.state].icon"
+                    :color="reviewStateIconMap[review.state].color"
                   />
                   <q-circular-progress
                     v-else
@@ -295,7 +311,14 @@ const delReviewItem = async (review: ReviewData) => {
                   ></q-btn>
                 </q-item-section>
               </template>
-              <FunctionPanel :review-data="review" />
+              <FunctionPanel
+                :review-data="review"
+                @feedback="
+                  (feedback, comment) =>
+                    feedBackHandle(review, feedback, comment)
+                "
+                @retry="() => retryHandle(review)"
+              />
             </q-expansion-item>
           </q-list>
         </template>

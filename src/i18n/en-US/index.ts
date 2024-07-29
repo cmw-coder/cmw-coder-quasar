@@ -262,6 +262,34 @@ export default {
           unfix: 'Window is Unfixed',
         },
       },
+      ReviewHeader: {
+        labels: {
+          title: 'Comware Coder',
+        },
+        toolbar: {
+          rightBtn: {
+            reviewHistory: 'Review History',
+            back: 'Back',
+          },
+          title: {
+            chat: 'Chat',
+            commit: 'Commit',
+            feedback: 'Feedback',
+            review: 'Review',
+            reviewHistory: 'Review History',
+            settings: 'Settings',
+            workflow: 'Workflow',
+          },
+        },
+        tooltips: {
+          close: 'Close',
+          defaultSize: 'Restore default size',
+          minimize: 'Minimize',
+          toggleMaximize: 'Toggle maximize',
+          fix: 'Window is Fixed',
+          unfix: 'Window is Unfixed',
+        },
+      },
     },
   },
   pages: {
@@ -328,9 +356,24 @@ export default {
     },
     ReviewPage: {
       labels: {
-        currentFile: 'Current File: {file}',
+        currentFile: 'Current file: {file}',
         noFile: 'No file selected, please open a file in your editor',
-        reviewFile: 'Review Current File',
+        reviewFile: 'Review current file',
+        delFileTitle: 'Delete file',
+      },
+      dialog: {
+        delReviewItemDialog: {
+          title: 'Notice',
+          message: 'The current review has not ended',
+          ok: 'Stop and delete',
+          cancel: 'Cancel',
+        },
+        delFileDialog: {
+          title: 'Notice',
+          message: 'There are still reviews pending under the current file',
+          ok: 'Stop all and delete',
+          cancel: 'Cancel',
+        },
       },
     },
     SettingsPage: {

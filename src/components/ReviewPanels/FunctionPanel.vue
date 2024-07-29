@@ -11,6 +11,7 @@ import {
 import { useService } from 'utils/common';
 import { ServiceType } from 'shared/types/service';
 import { useI18n } from 'vue-i18n';
+import { DateTime } from 'luxon';
 
 const props = defineProps({
   reviewData: {
@@ -82,7 +83,7 @@ const stopReviewHandle = () => {
 </script>
 
 <template>
-  <div class="review-content bg-grey-10" v-if="reviewData">
+  <div class="review-content bg-blue-grey-2" v-if="reviewData">
     <div class="review-file-wrapper">
       <!-- <div class="review-file-name-wrapper">
         <div
@@ -106,6 +107,13 @@ const stopReviewHandle = () => {
           >
         </div>
       </div> -->
+      <div>
+        {{
+          DateTime.fromSeconds(reviewData.createTime).toFormat(
+            'yyyy-MM-dd HH:mm:ss',
+          )
+        }}
+      </div>
       <div class="review-file-content-wrapper">
         <q-card
           class="selection-content-card row"

@@ -155,6 +155,7 @@ export class ReviewInstance {
       feedback: this.feedback,
       errorInfo: this.errorInfo,
       extraData: this.extraData,
+      createTime: this.createTime,
     } as ReviewData;
   }
 

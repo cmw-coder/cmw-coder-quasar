@@ -260,6 +260,34 @@ export default {
           unfix: '窗口未置顶',
         },
       },
+      ReviewHeader: {
+        labels: {
+          title: 'Comware Coder',
+        },
+        toolbar: {
+          rightBtn: {
+            reviewHistory: '历史记录',
+            back: '返回',
+          },
+          title: {
+            chat: 'AI 对话',
+            commit: '代码提交',
+            feedback: '问题反馈',
+            review: '代码评审',
+            reviewHistory: '评审历史',
+            settings: '应用设置',
+            workflow: '工作流程',
+          },
+        },
+        tooltips: {
+          close: '关闭',
+          defaultSize: '恢复默认大小',
+          minimize: '最小化',
+          toggleMaximize: '切换最大化',
+          fix: '窗口置顶中',
+          unfix: '窗口未置顶',
+        },
+      },
     },
   },
   pages: {
@@ -319,6 +347,21 @@ export default {
         currentFile: '当前文件：{file}',
         noFile: '未选择文件，请在您的编辑器中打开一个文件',
         reviewFile: '评审当前文件',
+        delFileTitle: '删除文件',
+      },
+      dialog: {
+        delReviewItemDialog: {
+          title: '提示',
+          message: '当前 review 还未结束',
+          ok: '停止并删除',
+          cancel: '取消',
+        },
+        delFileDialog: {
+          title: '提示',
+          message: '当前文件下还存在 review 未结束',
+          ok: '全部停止并删除',
+          cancel: '取消',
+        },
       },
     },
     ProjectIdPage: {

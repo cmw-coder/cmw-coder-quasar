@@ -182,22 +182,34 @@ export const routes: RouteRecordRaw[] = [
       {
         path: 'review',
         components: {
-          header: () => import('layouts/headers/MainHeader.vue'),
+          header: () => import('layouts/headers/ReviewHeader.vue'),
           leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
-          rightDrawer: () =>
-            import('layouts/drawers/RightReviewHistoryDrawer.vue'),
           default: () => import('pages/ReviewPage.vue'),
         },
         props: {
           header: {
-            rightDrawer: {
-              icon: 'history',
-              label: 'reviewHistory',
-            },
             title: {
               label: 'review',
             },
             windowType: WindowType.Main,
+            rightBtnType: 'history',
+          },
+        },
+      },
+      {
+        path: 'review-history',
+        components: {
+          header: () => import('layouts/headers/ReviewHeader.vue'),
+          leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
+          default: () => import('pages/ReviewHistoryPage.vue'),
+        },
+        props: {
+          header: {
+            title: {
+              label: 'reviewHistory',
+            },
+            windowType: WindowType.Main,
+            rightBtnType: 'historyBack',
           },
         },
       },

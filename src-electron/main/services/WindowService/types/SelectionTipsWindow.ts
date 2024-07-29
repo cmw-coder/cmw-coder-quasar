@@ -7,7 +7,7 @@ import { ExtraData, Selection, TriggerPosition } from 'shared/types/Selection';
 import { ConfigService } from 'main/services/ConfigService';
 
 const WINDOW_HEIGHT = 34;
-const WINDOW_WIDTH = 460;
+const WINDOW_WIDTH = 540;
 
 export class SelectionTipsWindow extends BaseWindow {
   selection?: Selection;

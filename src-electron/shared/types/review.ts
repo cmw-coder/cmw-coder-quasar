@@ -44,6 +44,43 @@ export enum ReviewState {
   Error = -1,
 }
 
+export const reviewStateIconMap: Record<
+  ReviewState,
+  {
+    color: string;
+    icon: string;
+  }
+> = {
+  [ReviewState.Start]: {
+    color: 'blue-6',
+    icon: 'mdi-clock-outline',
+  },
+  [ReviewState.References]: {
+    color: 'cyan-6',
+    icon: 'mdi-comment-text-outline',
+  },
+  [ReviewState.Finished]: {
+    color: 'green-8',
+    icon: 'mdi-check-circle-outline',
+  },
+  [ReviewState.Error]: {
+    color: 'red-8',
+    icon: 'mdi-alert-circle-outline',
+  },
+  [ReviewState.First]: {
+    color: 'blue-6',
+    icon: 'mdi-comment-text-outline',
+  },
+  [ReviewState.Second]: {
+    color: 'blue-6',
+    icon: 'mdi-comment-text-outline',
+  },
+  [ReviewState.Third]: {
+    color: 'blue-6',
+    icon: 'mdi-comment-text-outline',
+  },
+};
+
 export enum ReviewType {
   File = 'File',
   Function = 'Function',
@@ -75,6 +112,7 @@ export interface ReviewResult {
 }
 
 export interface ReviewData {
+  createTime: number;
   references: Reference[];
   selection: Selection;
   reviewId: string;
