@@ -109,7 +109,7 @@ const stopReviewHandle = () => {
       </div> -->
       <div>
         {{
-          DateTime.fromSeconds(reviewData.createTime).toFormat(
+          DateTime.fromSeconds(reviewData.createTime || 0).toFormat(
             'yyyy-MM-dd HH:mm:ss',
           )
         }}
