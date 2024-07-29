@@ -4,7 +4,7 @@ import {
   api_get_code_review_state,
   api_stop_review,
 } from 'main/request/review';
-import { container, getService } from 'main/services';
+import { container } from 'main/services';
 import { ConfigService } from 'main/services/ConfigService';
 import { WebsocketService } from 'main/services/WebsocketService';
 import { WindowService } from 'main/services/WindowService';
@@ -23,7 +23,6 @@ import { ServiceType } from 'shared/types/service';
 import log from 'electron-log/main';
 import { DataStoreService } from 'main/services/DataStoreService';
 import { DateTime } from 'luxon';
-import { api_reportSKU } from 'main/request/sku';
 
 const REFRESH_TIME = 3000;
 
@@ -49,33 +48,6 @@ export class ReviewInstance {
     this.createReviewRequest();
     if (createdCallback) {
       this.createdCallback = createdCallback;
-    }
-    // 上报一次 review 使用
-    // 不在此处上报
-    // this.reportReviewUsage();
-  }
-
-  async reportReviewUsage() {
-    const appConfig = await getService(ServiceType.CONFIG).getConfigs();
-    try {
-      await api_reportSKU([
-        {
-          begin: DateTime.now().toMillis(),
-          end: DateTime.now().toMillis(),
-          count: 1,
-          type: 'AIGC',
-          product: 'SI',
-          firstClass: 'CODE_REVIEW',
-          secondClass: 'USE',
-          skuName: '*',
-          user: appConfig.username,
-          userType: 'USER',
-          subType: this.extraData.projectId,
-          extra: this.extraData.version,
-        },
-      ]);
-    } catch (e) {
-      log.error('reportReviewUsage.failed', e);
     }
   }
 

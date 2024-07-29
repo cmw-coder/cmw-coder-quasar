@@ -44,7 +44,8 @@ const parseReviewResult = (data: string[]): ReviewResult => {
           if (
             dataItem.Description &&
             dataItem.ProblemCodeSnippet &&
-            dataItem.Type
+            dataItem.Type &&
+            dataItem.IsProblem
           ) {
             result.data.push(dataItem);
           }
@@ -161,30 +162,17 @@ export const api_stop_review = async (reviewId: string) => {
 //   console.log('api_get_code_review_result', reviewId);
 //   await timeout(150);
 //   const data = [
+//     '[]',
 //     `[{
 //         "Type": "资源释放",
-//         "IsProblem": true,
+//         "IsProblem": false,
 //         "Number": 1,
 //         "ProblemCodeSnippet": "if (KEPOLL_INVALID_ID == ulSyncEp)\\n{\\n    atomic_inc(&g_pstSyncStat->stEPCreatErr);\\n    kmem_cache_free(g_pstSyncUCCachep, pstUCObj);\\n    return pstUCObj;\\n}\\n",
 //         "Description": "在创建epoll对象失败时，释放了单播对象pstUCObj，但没有将其设置为NULL，可能导致悬挂指针问题。"
 //     },
 //     {
 //         "Type": "资源释放",
-//         "IsProblem": false,
-//         "Number": 2,
-//         "ProblemCodeSnippet": "if (ERROR_SUCCESS != ulRet)\\n{\\n    SYNC_Destroy((ULONG)pstUCObj);\\n    pstUCObj = NULL;\\n}\\n",
-//         "Description": "在某些操作失败后，调用了SYNC_Destroy释放资源，但没有释放相关的epoll对象ulSyncEp，可能导致资源泄漏。"
-//     }]`,
-//     `[{
-//         "Type": "资源释放",
 //         "IsProblem": true,
-//         "Number": 1,
-//         "ProblemCodeSnippet": "if (KEPOLL_INVALID_ID == ulSyncEp)\\n{\\n    atomic_inc(&g_pstSyncStat->stEPCreatErr);\\n    kmem_cache_free(g_pstSyncUCCachep, pstUCObj);\\n    return pstUCObj;\\n}\\n",
-//         "Description": "在创建epoll对象失败时，释放了单播对象pstUCObj，但没有将其设置为NULL，可能导致悬挂指针问题。"
-//     },
-//     {
-//         "Type": "资源释放",
-//         "IsProblem": false,
 //         "Number": 2,
 //         "ProblemCodeSnippet": "if (ERROR_SUCCESS != ulRet)\\n{\\n    SYNC_Destroy((ULONG)pstUCObj);\\n    pstUCObj = NULL;\\n}\\n",
 //         "Description": "在某些操作失败后，调用了SYNC_Destroy释放资源，但没有释放相关的epoll对象ulSyncEp，可能导致资源泄漏。"

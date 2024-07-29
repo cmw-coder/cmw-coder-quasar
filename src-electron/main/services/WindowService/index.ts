@@ -21,6 +21,8 @@ import { UpdateWindow } from 'main/services/WindowService/types/UpdateWindow';
 import { BaseWindow } from 'main/services/WindowService/types/BaseWindow';
 import { ConfigService } from 'main/services/ConfigService';
 import { DataStoreService } from 'main/services/DataStoreService';
+import { WebsocketService } from 'main/services/WebsocketService';
+
 import { SelectionTipsWindow } from 'main/services/WindowService/types/SelectionTipsWindow';
 import { ExtraData, Selection } from 'shared/types/Selection';
 import { ReviewInstance } from 'main/components/ReviewInstance';
@@ -28,8 +30,10 @@ import { Feedback, ReviewData, ReviewType } from 'shared/types/review';
 import { ReviewDataListUpdateActionMessage } from 'shared/types/ActionMessage';
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import { Range } from 'main/types/vscode/range';
-import { getService } from 'main/services';
+import { container, getService } from 'main/services';
 import { treeSitterFolder } from 'main/services/WindowService/constants';
+import { DateTime } from 'luxon';
+import { api_reportSKU } from 'main/request/sku';
 
 interface WindowMap {
   [WindowType.Completions]: CompletionsWindow;
@@ -254,6 +258,40 @@ export class WindowService implements WindowServiceTrait {
     if (!clientInfo || !clientInfo.currentProject || !clientInfo.version) {
       return;
     }
+    // 上报一次 FILE_REVIEW 使用
+    const websocketService = container.get<WebsocketService>(
+      ServiceType.WEBSOCKET,
+    );
+    const project = await websocketService.getProjectData();
+    if (!project) {
+      return;
+    }
+    const extraData: ExtraData = {
+      projectId: project.id,
+      version: clientInfo.version,
+    };
+
+    const appConfig = await this._configService.getConfigs();
+    try {
+      await api_reportSKU([
+        {
+          begin: DateTime.now().toMillis(),
+          end: DateTime.now().toMillis(),
+          count: 1,
+          type: 'AIGC',
+          product: 'SI',
+          firstClass: 'FILE_REVIEW',
+          secondClass: 'USE',
+          skuName: '*',
+          user: appConfig.username,
+          userType: 'USER',
+          subType: extraData.projectId,
+          extra: extraData.version,
+        },
+      ]);
+    } catch (e) {
+      log.error('reportReviewUsage.failed', e);
+    }
     const mainWindow = this.getWindow(WindowType.Main);
     const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
     const content = decode(await readFile(path), 'gbk');
@@ -336,6 +374,28 @@ export class WindowService implements WindowServiceTrait {
     }
     if (!selection) {
       return;
+    }
+    // 上报一次 CODE_REVIEW 使用
+    const appConfig = await this._configService.getConfigs();
+    try {
+      await api_reportSKU([
+        {
+          begin: DateTime.now().toMillis(),
+          end: DateTime.now().toMillis(),
+          count: 1,
+          type: 'AIGC',
+          product: 'SI',
+          firstClass: 'CODE_REVIEW',
+          secondClass: 'USE',
+          skuName: '*',
+          user: appConfig.username,
+          userType: 'USER',
+          subType: extraData.projectId,
+          extra: extraData.version,
+        },
+      ]);
+    } catch (e) {
+      log.error('reportReviewUsage.failed', e);
     }
     const mainWindow = this.getWindow(WindowType.Main);
     const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
