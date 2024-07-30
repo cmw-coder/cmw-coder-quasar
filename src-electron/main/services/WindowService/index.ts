@@ -1,4 +1,4 @@
-import { BrowserWindow, app, screen } from 'electron';
+import { BrowserWindow, app, dialog, screen } from 'electron';
 import log from 'electron-log/main';
 import { readFile } from 'fs/promises';
 import { decode } from 'iconv-lite';
@@ -33,6 +33,8 @@ import { container, getService } from 'main/services';
 import { treeSitterFolder } from 'main/services/WindowService/constants';
 import { DateTime } from 'luxon';
 import { api_reportSKU } from 'main/request/sku';
+import { dirname, extname } from 'path';
+import { getFilesInDirectory, timeout } from 'main/utils/common';
 
 interface WindowMap {
   [WindowType.Completions]: CompletionsWindow;
@@ -249,15 +251,28 @@ export class WindowService implements WindowServiceTrait {
     chatPage.addSelectionToChat(selection);
   }
 
-  async reviewFile(path: string) {
-    if (!this._parserInitialized) {
+  async reviewProject(filePath?: string) {
+    const mainWindow = this.getWindow(WindowType.Main);
+    const _filePath = filePath || app.getPath('userData');
+    const basePath = dirname(_filePath);
+    if (!mainWindow._window) {
       return;
     }
+    const targetDirPathList = dialog.showOpenDialogSync(mainWindow._window, {
+      defaultPath: basePath,
+      properties: ['openDirectory'],
+    });
+    if (!targetDirPathList) {
+      return;
+    }
+    const targetDirPath = targetDirPathList[0];
+    // 递归遍历出所有文件
+    const fileList = await getFilesInDirectory(targetDirPath);
+    const cppFileList = fileList.filter((file) => extname(file) === '.c');
     const clientInfo = getService(ServiceType.WEBSOCKET).getClientInfo();
     if (!clientInfo || !clientInfo.currentProject || !clientInfo.version) {
       return;
     }
-    // 上报一次 FILE_REVIEW 使用
     const websocketService = container.get<WebsocketService>(
       ServiceType.WEBSOCKET,
     );
@@ -269,7 +284,7 @@ export class WindowService implements WindowServiceTrait {
       projectId: project.id,
       version: clientInfo.version,
     };
-
+    // 上报一次 PROJECT_REVIEW 使用
     const appConfig = await this._configService.getConfigs();
     try {
       await api_reportSKU([
@@ -279,7 +294,7 @@ export class WindowService implements WindowServiceTrait {
           count: 1,
           type: 'AIGC',
           product: 'SI',
-          firstClass: 'FILE_REVIEW',
+          firstClass: 'PROJECT_REVIEW',
           secondClass: 'USE',
           skuName: '*',
           user: appConfig.username,
@@ -291,6 +306,57 @@ export class WindowService implements WindowServiceTrait {
     } catch (e) {
       log.error('reportReviewUsage.failed', e);
     }
+    for (let i = 0; i < cppFileList.length; i++) {
+      const file = cppFileList[i];
+      await timeout(500);
+      await this.reviewFile(file, false);
+    }
+  }
+
+  async reviewFile(path: string, reportSku = true) {
+    if (!this._parserInitialized) {
+      return;
+    }
+    const clientInfo = getService(ServiceType.WEBSOCKET).getClientInfo();
+    if (!clientInfo || !clientInfo.currentProject || !clientInfo.version) {
+      return;
+    }
+    const websocketService = container.get<WebsocketService>(
+      ServiceType.WEBSOCKET,
+    );
+    const project = await websocketService.getProjectData();
+    if (!project) {
+      return;
+    }
+    const extraData: ExtraData = {
+      projectId: project.id,
+      version: clientInfo.version,
+    };
+    // 上报一次 FILE_REVIEW 使用
+    if (reportSku) {
+      const appConfig = await this._configService.getConfigs();
+      try {
+        await api_reportSKU([
+          {
+            begin: DateTime.now().toMillis(),
+            end: DateTime.now().toMillis(),
+            count: 1,
+            type: 'AIGC',
+            product: 'SI',
+            firstClass: 'FILE_REVIEW',
+            secondClass: 'USE',
+            skuName: '*',
+            user: appConfig.username,
+            userType: 'USER',
+            subType: extraData.projectId,
+            extra: extraData.version,
+          },
+        ]);
+      } catch (e) {
+        log.error('reportReviewUsage.failed', e);
+      }
+    }
+
     const mainWindow = this.getWindow(WindowType.Main);
     const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
     const content = decode(await readFile(path), 'gbk');

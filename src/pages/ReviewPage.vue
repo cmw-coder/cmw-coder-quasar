@@ -190,6 +190,22 @@ const feedBackHandle = (
 const retryHandle = (review: ReviewData) => {
   windowService.retryReview(toRaw(review));
 };
+
+const projectReview = () => {
+  windowService.reviewProject(currentFilePath.value);
+};
+
+const returnFileReviewProgress = (file: string) => {
+  const fileReviewList = reviewList.value.filter(
+    (review) => review.selection.file === file,
+  );
+  const finishedReviewList = fileReviewList.filter(
+    (review) =>
+      review.state === ReviewState.Finished ||
+      review.state === ReviewState.Error,
+  );
+  return `${finishedReviewList.length} / ${fileReviewList.length}`;
+};
 </script>
 
 <template>
@@ -211,11 +227,21 @@ const retryHandle = (review: ReviewData) => {
           </q-item-section>
           <q-item-section side>
             <q-btn
+              size="md"
               color="primary"
               unelevated
               :disable="!currentFilePath"
               :label="i18n('labels.reviewFile')"
               @click="() => startCurrentFileReview()"
+            />
+          </q-item-section>
+          <q-item-section side>
+            <q-btn
+              color="primary"
+              size="md"
+              unelevated
+              label="项目评审"
+              @click="() => projectReview()"
             />
           </q-item-section>
         </q-item>
@@ -247,6 +273,9 @@ const retryHandle = (review: ReviewData) => {
                 <div class="file-wrapper">
                   <span class="file-name">
                     {{ getFileName(item) }}
+                  </span>
+                  <span class="rest-item">
+                    {{ returnFileReviewProgress(item) }}
                   </span>
                   <q-tooltip>
                     {{ item }}
@@ -338,8 +367,11 @@ const retryHandle = (review: ReviewData) => {
   .file-name {
     white-space: nowrap;
     text-overflow: ellipsis;
-    width: 100%;
+    width: calc(100% - 40px);
     overflow: hidden;
+  }
+  .rest-item {
+    font-size: 10px;
   }
   .del-btn-wrapper {
     display: none;

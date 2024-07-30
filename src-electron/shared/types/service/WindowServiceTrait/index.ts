@@ -27,6 +27,8 @@ export interface WindowServiceTrait {
   addSelectionToChat(selection?: Selection): Promise<void>;
   reviewFile(path: string): Promise<void>;
   reviewSelection(selection?: Selection): Promise<void>;
+  getWindowIsFixed(windowType: WindowType): Promise<boolean>;
+  toggleWindowFixed(windowType: WindowType): Promise<void>;
   getReviewData(): Promise<ReviewData[]>;
   setReviewFeedback(data: {
     serverTaskId: string;
@@ -38,6 +40,5 @@ export interface WindowServiceTrait {
   retryReview(reviewData: ReviewData): Promise<void>;
   stopReview(reviewId: string): Promise<void>;
   delReview(reviewId: string): Promise<void>;
-  getWindowIsFixed(windowType: WindowType): Promise<boolean>;
-  toggleWindowFixed(windowType: WindowType): Promise<void>;
+  reviewProject(filePath?: string): Promise<void>;
 }
