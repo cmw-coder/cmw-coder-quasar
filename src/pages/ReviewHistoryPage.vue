@@ -123,6 +123,7 @@ onMounted(() => {
             <q-item
               clickable
               v-ripple
+              dense
               :active="item === activeFile"
               @click="
                 () => {
@@ -153,7 +154,7 @@ onMounted(() => {
             separator
             v-slot="{ item }: { item: ReviewData }"
           >
-            <q-expansion-item :key="item.reviewId" expand-separator>
+            <q-expansion-item dense :key="item.reviewId" expand-separator>
               <template v-slot:header>
                 <q-item-section avatar>
                   <q-icon
