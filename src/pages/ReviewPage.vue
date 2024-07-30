@@ -225,6 +225,7 @@ const retryHandle = (review: ReviewData) => {
       <q-splitter v-model="splitterModel" style="height: 100%">
         <template v-slot:before>
           <q-virtual-scroll
+            style="height: 100%"
             :items="fileList"
             separator
             v-slot="{ item }: { item: string }"
@@ -266,6 +267,7 @@ const retryHandle = (review: ReviewData) => {
 
         <template v-slot:after>
           <q-virtual-scroll
+            style="height: 100%"
             :items="activeFileReviewList"
             separator
             v-slot="{ item }: { item: ReviewData }"
@@ -312,13 +314,6 @@ const retryHandle = (review: ReviewData) => {
               />
             </q-expansion-item>
           </q-virtual-scroll>
-          <!-- <q-list
-            padding
-            separator
-            class="text-primary full-height"
-            style="padding-top: 0px"
-          >
-          </q-list> -->
         </template>
       </q-splitter>
     </div>
