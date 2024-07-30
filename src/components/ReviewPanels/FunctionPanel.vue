@@ -85,35 +85,6 @@ const stopReviewHandle = () => {
 <template>
   <div class="review-content bg-blue-grey-2" v-if="reviewData">
     <div class="review-file-wrapper">
-      <!-- <div class="review-file-name-wrapper">
-        <div
-          class="review-file text-bold text-grey text-h8"
-          :title="`${reviewData.selection.file} ${formatSelection(reviewData.selection).rangeStr}`"
-        >
-          <span class="review-file-name">{{
-            formatSelection(reviewData.selection).fileName
-          }}</span>
-          <span class="review-file-range">{{
-            formatSelection(reviewData.selection).rangeStr
-          }}</span>
-        </div>
-        <div class="file-operation">
-          <q-btn
-            flat
-            size="sm"
-            :title="i18n('labels.locateTitle')"
-            @click="() => locateFileHandle(reviewData.selection.file)"
-            >{{ i18n('labels.locate') }}</q-btn
-          >
-        </div>
-      </div> -->
-      <!-- <div>
-        {{
-          DateTime.fromSeconds(reviewData.createTime || 0).toFormat(
-            'yyyy-MM-dd HH:mm:ss',
-          )
-        }}
-      </div> -->
       <div class="review-file-content-wrapper">
         <q-card
           class="selection-content-card row"
@@ -121,6 +92,7 @@ const stopReviewHandle = () => {
           bordered
           flat
         >
+          <div class="file-full-path">{{ reviewData.selection.file }}</div>
           <div
             class="review-file-content"
             v-html="
@@ -147,6 +119,7 @@ const stopReviewHandle = () => {
         </q-timeline-entry>
 
         <q-timeline-entry
+          v-if="reviewData.state !== ReviewState.Queue"
           :title="i18n('labels.referencesTitle')"
           :subtitle="
             DateTime.fromSeconds(reviewData.startTime).toFormat(
@@ -224,7 +197,7 @@ const stopReviewHandle = () => {
               </transition>
             </q-card-section>
             <q-inner-loading
-              :showing="reviewData.state === ReviewState.References"
+              :showing="reviewData.state === ReviewState.Ready"
               :label="i18n('labels.referenceLoading')"
               label-class="text-teal"
               label-style="font-size: 1.1em"

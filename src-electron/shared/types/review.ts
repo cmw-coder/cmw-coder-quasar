@@ -59,15 +59,15 @@ export const reviewStateIconMap: Record<
   },
   [ReviewState.Ready]: {
     color: 'blue-6',
+    icon: 'mdi-comment-text-outline',
+  },
+  [ReviewState.References]: {
+    color: 'cyan-6',
     icon: 'mdi-robot-mower-outline',
   },
   [ReviewState.Start]: {
     color: 'blue-6',
     icon: 'mdi-clock-outline',
-  },
-  [ReviewState.References]: {
-    color: 'cyan-6',
-    icon: 'mdi-comment-text-outline',
   },
   [ReviewState.Finished]: {
     color: 'green-8',

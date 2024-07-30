@@ -146,24 +146,20 @@ export class ReviewPage extends BasePage {
   }
 
   async addReview(review: ReviewInstance) {
-    console.log('addReview');
     const windowService = container.get<WindowService>(ServiceType.WINDOW);
     const mainWindow = windowService.getWindow(WindowType.Main);
     this.activeReviewList.push(review);
     review.onStart = () => {
-      console.log('review.onStart');
       mainWindow.sendMessageToRenderer(
         new ReviewDataUpdateActionMessage(review.getReviewData()),
       );
     };
     review.onUpdate = () => {
-      console.log('review.onUpdate');
       mainWindow.sendMessageToRenderer(
         new ReviewDataUpdateActionMessage(review.getReviewData()),
       );
     };
     review.onEnd = () => {
-      console.log('review.onEnd');
       mainWindow.sendMessageToRenderer(
         new ReviewDataUpdateActionMessage(review.getReviewData()),
       );
@@ -173,13 +169,11 @@ export class ReviewPage extends BasePage {
           (_review) => _review.state === ReviewState.Queue,
         );
         if (queueReviewList.length > 0) {
-          console.log('queueReviewList.length', queueReviewList.length);
           const nextReview = queueReviewList[0];
           nextReview.start();
         }
       }
     };
-    console.log('this.runningReviewList', this.runningReviewList.length);
     if (this.runningReviewList.length < MAX_RUNNING_REVIEW_COUNT) {
       review.start();
     }

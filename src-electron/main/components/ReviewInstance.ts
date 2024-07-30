@@ -68,11 +68,11 @@ export class ReviewInstance {
     );
     const configService = container.get<ConfigService>(ServiceType.CONFIG);
     const appConfig = await configService.getConfigs();
-    // log.info('getCodeReviewReferences start');
+    log.info('getCodeReviewReferences start');
     this.references = await websocketService.getCodeReviewReferences(
       this.selection,
     );
-    // log.info('getCodeReviewReferences end', this.references);
+    log.info('getCodeReviewReferences end', this.references);
     this.state = ReviewState.References;
     this.referenceTime = DateTime.now().valueOf() / 1000;
     this.onUpdate();
@@ -104,11 +104,6 @@ export class ReviewInstance {
         this.timer = undefined;
       }
       this.onUpdate();
-      // const windowService = container.get<WindowService>(ServiceType.WINDOW);
-      // const mainWindow = windowService.getWindow(WindowType.Main);
-      // mainWindow.sendMessageToRenderer(
-      //   new ReviewDataUpdateActionMessage(this.getReviewData()),
-      // );
     }
     this.onStart();
   }
@@ -139,9 +134,6 @@ export class ReviewInstance {
         this.onUpdate();
         this.onEnd();
       }
-      // mainWindow.sendMessageToRenderer(
-      //   new ReviewDataUpdateActionMessage(this.getReviewData()),
-      // );
     } catch (error) {
       log.error(error);
       if (this.timer) {
@@ -151,9 +143,6 @@ export class ReviewInstance {
       this.state = ReviewState.Error;
       this.endTime = DateTime.now().valueOf() / 1000;
       this.errorInfo = (error as Error).message;
-      // mainWindow.sendMessageToRenderer(
-      //   new ReviewDataUpdateActionMessage(this.getReviewData()),
-      // );
       this.saveReviewData();
       this.onUpdate();
       this.onEnd();
