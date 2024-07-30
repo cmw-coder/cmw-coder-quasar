@@ -7,10 +7,7 @@ import {
 import { container } from 'main/services';
 import { ConfigService } from 'main/services/ConfigService';
 import { WebsocketService } from 'main/services/WebsocketService';
-import { WindowService } from 'main/services/WindowService';
-import { ReviewDataUpdateActionMessage } from 'shared/types/ActionMessage';
 import { ExtraData, Selection } from 'shared/types/Selection';
-import { WindowType } from 'shared/types/WindowType';
 import {
   Feedback,
   Reference,
@@ -104,6 +101,7 @@ export class ReviewInstance {
         this.timer = undefined;
       }
       this.onUpdate();
+      this.onEnd();
     }
     this.onStart();
   }
@@ -196,10 +194,7 @@ export class ReviewInstance {
     }
     this.state = ReviewState.Error;
     this.errorInfo = 'USER STOPPED REVIEW TASK';
-    const windowService = container.get<WindowService>(ServiceType.WINDOW);
-    const mainWindow = windowService.getWindow(WindowType.Main);
-    mainWindow.sendMessageToRenderer(
-      new ReviewDataUpdateActionMessage(this.getReviewData()),
-    );
+    this.onUpdate();
+    this.onEnd();
   }
 }

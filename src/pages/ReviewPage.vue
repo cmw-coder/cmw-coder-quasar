@@ -240,7 +240,7 @@ const returnFileReviewProgress = (file: string) => {
               color="primary"
               size="md"
               unelevated
-              label="项目评审"
+              label="目录评审"
               @click="() => projectReview()"
             />
           </q-item-section>

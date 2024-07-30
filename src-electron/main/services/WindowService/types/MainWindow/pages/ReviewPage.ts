@@ -108,20 +108,9 @@ export class ReviewPage extends BasePage {
       (review) => review.reviewId === reviewData.reviewId,
     );
     if (review) {
-      review.stop();
+      await review.stop();
+      review.start();
     }
-    // 先去除旧的
-    this.activeReviewList = this.activeReviewList.filter(
-      (review) => review.reviewId !== reviewData.reviewId,
-    );
-    // 再添加新的
-    this.activeReviewList.push(
-      new ReviewInstance(
-        reviewData.selection,
-        reviewData.extraData,
-        reviewData.reviewType,
-      ),
-    );
   }
 
   stopReview(reviewId: string) {
