@@ -224,32 +224,30 @@ const retryHandle = (review: ReviewData) => {
     <div class="rest-content">
       <q-splitter v-model="splitterModel" style="height: 100%">
         <template v-slot:before>
-          <q-list
-            padding
+          <q-virtual-scroll
+            :items="fileList"
             separator
-            class="text-primary full-height"
-            style="padding-top: 0px"
+            v-slot="{ item }: { item: string }"
           >
             <q-item
-              v-for="file in fileList"
               clickable
               v-ripple
-              :active="file === activeFile"
+              :active="item === activeFile"
               @click="
                 () => {
-                  activeFile = file;
+                  activeFile = item;
                 }
               "
-              :key="file"
+              :key="item"
               style="padding-left: 6px; padding-right: 0px"
             >
               <q-item-section>
                 <div class="file-wrapper">
                   <span class="file-name">
-                    {{ getFileName(file) }}
+                    {{ getFileName(item) }}
                   </span>
                   <q-tooltip>
-                    {{ file }}
+                    {{ item }}
                   </q-tooltip>
                   <div class="del-btn-wrapper">
                     <q-btn
@@ -257,33 +255,28 @@ const retryHandle = (review: ReviewData) => {
                       icon="close"
                       size="xs"
                       flat
-                      @click.stop="() => delFile(file)"
+                      @click.stop="() => delFile(item)"
                     />
                   </div>
                 </div>
               </q-item-section>
             </q-item>
-          </q-list>
+          </q-virtual-scroll>
         </template>
 
         <template v-slot:after>
-          <q-list
-            padding
+          <q-virtual-scroll
+            :items="activeFileReviewList"
             separator
-            class="text-primary full-height"
-            style="padding-top: 0px"
+            v-slot="{ item }: { item: ReviewData }"
           >
-            <q-expansion-item
-              v-for="review in activeFileReviewList"
-              :key="review.reviewId"
-              expand-separator
-            >
+            <q-expansion-item :key="item.reviewId" expand-separator>
               <template v-slot:header>
                 <q-item-section avatar>
                   <q-icon
-                    v-if="review.state !== ReviewState.Start"
-                    :name="reviewStateIconMap[review.state].icon"
-                    :color="reviewStateIconMap[review.state].color"
+                    v-if="item.state !== ReviewState.Start"
+                    :name="reviewStateIconMap[item.state].icon"
+                    :color="reviewStateIconMap[item.state].color"
                   />
                   <q-circular-progress
                     v-else
@@ -298,7 +291,7 @@ const retryHandle = (review: ReviewData) => {
 
                 <q-item-section>
                   {{
-                    `${formatSelection(review.selection).fileName}  ${formatSelection(review.selection).rangeStr}`
+                    `${formatSelection(item.selection).fileName}  ${formatSelection(item.selection).rangeStr}`
                   }}</q-item-section
                 >
                 <q-item-section side>
@@ -306,20 +299,26 @@ const retryHandle = (review: ReviewData) => {
                     icon="close"
                     size="sm"
                     flat
-                    @click.stop="() => delReviewItem(review)"
+                    @click.stop="() => delReviewItem(item)"
                   ></q-btn>
                 </q-item-section>
               </template>
               <FunctionPanel
-                :review-data="review"
+                :review-data="item"
                 @feedback="
-                  (feedback, comment) =>
-                    feedBackHandle(review, feedback, comment)
+                  (feedback, comment) => feedBackHandle(item, feedback, comment)
                 "
-                @retry="() => retryHandle(review)"
+                @retry="() => retryHandle(item)"
               />
             </q-expansion-item>
-          </q-list>
+          </q-virtual-scroll>
+          <!-- <q-list
+            padding
+            separator
+            class="text-primary full-height"
+            style="padding-top: 0px"
+          >
+          </q-list> -->
         </template>
       </q-splitter>
     </div>
