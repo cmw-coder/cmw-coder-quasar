@@ -27,7 +27,6 @@ import { SelectionTipsWindow } from 'main/services/WindowService/types/Selection
 import { ExtraData, Selection } from 'shared/types/Selection';
 import { ReviewInstance } from 'main/components/ReviewInstance';
 import { Feedback, ReviewData, ReviewType } from 'shared/types/review';
-import { ReviewDataListUpdateActionMessage } from 'shared/types/ActionMessage';
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import { Range } from 'main/types/vscode/range';
 import { container, getService } from 'main/services';
@@ -328,35 +327,22 @@ export class WindowService implements WindowServiceTrait {
         }),
       );
       log.debug('WindowService.reviewFile', { functionDefinitions });
-
-      reviewPage.activeReviewList.push(
-        ...functionDefinitions.map(
-          (functionDefinition) =>
-            new ReviewInstance(
-              functionDefinition,
-              {
-                projectId: clientInfo.currentProject,
-                version: clientInfo.version,
-              },
-              ReviewType.File,
-              () => {
-                mainWindow.sendMessageToRenderer(
-                  new ReviewDataListUpdateActionMessage(
-                    reviewPage.activeReviewList.map((review) =>
-                      review.getReviewData(),
-                    ),
-                  ),
-                );
-              },
-            ),
-        ),
+      const reviewList = functionDefinitions.map(
+        (functionDefinition) =>
+          new ReviewInstance(
+            functionDefinition,
+            {
+              projectId: clientInfo.currentProject,
+              version: clientInfo.version,
+            },
+            ReviewType.File,
+          ),
       );
-      await reviewPage.active();
-      mainWindow.sendMessageToRenderer(
-        new ReviewDataListUpdateActionMessage(
-          reviewPage.activeReviewList.map((review) => review.getReviewData()),
-        ),
-      );
+      for (let i = 0; i < reviewList.length; i++) {
+        const review = reviewList[i];
+        reviewPage.addReview(review);
+      }
+      reviewPage.active();
     } catch (error) {
       log.error(error);
       return;
@@ -403,29 +389,16 @@ export class WindowService implements WindowServiceTrait {
       selection,
       extraData,
       ReviewType.Function,
-      () => {
-        mainWindow.sendMessageToRenderer(
-          new ReviewDataListUpdateActionMessage(
-            reviewPage.activeReviewList.map((review) => review.getReviewData()),
-          ),
-        );
-      },
     );
-    reviewPage.activeReviewList.push(reviewInstance);
-
-    await reviewPage.active();
-    mainWindow.sendMessageToRenderer(
-      new ReviewDataListUpdateActionMessage(
-        reviewPage.activeReviewList.map((review) => review.getReviewData()),
-      ),
-    );
+    reviewPage.addReview(reviewInstance);
+    reviewPage.active();
   }
 
   async getReviewData(): Promise<ReviewData[]> {
     const reviewPage = this.getWindow(WindowType.Main).getPage(
       MainWindowPageType.Review,
     );
-    return reviewPage.activeReviewList.map((review) => review.getReviewData());
+    return reviewPage.reviewDataList;
   }
 
   async delReview(reviewId: string) {
@@ -435,7 +408,7 @@ export class WindowService implements WindowServiceTrait {
   }
 
   async setReviewFeedback(data: {
-    reviewId: string;
+    serverTaskId: string;
     feedback: Feedback;
     extraData: ExtraData;
     createTime: number;

@@ -78,7 +78,7 @@ const viewReferenceHandle = (reference: Reference) => {
 // };
 
 const stopReviewHandle = () => {
-  windowService.stopReview(props.reviewData.reviewId);
+  windowService.stopReview(props.reviewData.serverTaskId);
 };
 </script>
 
@@ -107,13 +107,13 @@ const stopReviewHandle = () => {
           >
         </div>
       </div> -->
-      <div>
+      <!-- <div>
         {{
           DateTime.fromSeconds(reviewData.createTime || 0).toFormat(
             'yyyy-MM-dd HH:mm:ss',
           )
         }}
-      </div>
+      </div> -->
       <div class="review-file-content-wrapper">
         <q-card
           class="selection-content-card row"
@@ -135,7 +135,25 @@ const stopReviewHandle = () => {
     </div>
     <div class="review-step-wrapper">
       <q-timeline v-if="reviewData.state !== ReviewState.Error">
-        <q-timeline-entry :title="i18n('labels.referencesTitle')">
+        <q-timeline-entry
+          v-if="reviewData.state === ReviewState.Queue"
+          title="排队中"
+          :subtitle="
+            DateTime.fromSeconds(reviewData.createTime).toFormat(
+              'yyyy-MM-dd HH:mm:ss',
+            )
+          "
+        >
+        </q-timeline-entry>
+
+        <q-timeline-entry
+          :title="i18n('labels.referencesTitle')"
+          :subtitle="
+            DateTime.fromSeconds(reviewData.startTime).toFormat(
+              'yyyy-MM-dd HH:mm:ss',
+            )
+          "
+        >
           <q-card
             class="relative-position"
             style="min-height: 80px; max-height: 200px; overflow-y: auto"
@@ -221,6 +239,11 @@ const stopReviewHandle = () => {
               reviewData.state,
             )
           "
+          :subtitle="
+            DateTime.fromSeconds(reviewData.referenceTime).toFormat(
+              'yyyy-MM-dd HH:mm:ss',
+            )
+          "
         >
           <q-card class="relative-position" style="min-height: 80px">
             <q-list>
@@ -304,6 +327,11 @@ const stopReviewHandle = () => {
         <q-timeline-entry
           :title="i18n('labels.reviewResultTitle')"
           v-if="reviewData.state === ReviewState.Finished"
+          :subtitle="
+            DateTime.fromSeconds(reviewData.endTime).toFormat(
+              'yyyy-MM-dd HH:mm:ss',
+            )
+          "
         >
           <q-card v-if="!reviewData.result.parsed">
             <q-card-section style="padding: 4px" class="parsed-error">

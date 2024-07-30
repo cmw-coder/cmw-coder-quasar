@@ -23,48 +23,61 @@ import { ServiceType } from 'shared/types/service';
 import log from 'electron-log/main';
 import { DataStoreService } from 'main/services/DataStoreService';
 import { DateTime } from 'luxon';
+import { uid } from 'quasar';
 
 const REFRESH_TIME = 3000;
 
 export class ReviewInstance {
   timer?: NodeJS.Timeout;
-  reviewId = '----';
-  state: ReviewState = ReviewState.References;
+  reviewId = uid();
+  serverTaskId = '';
+  state: ReviewState = ReviewState.Queue;
   result?: ReviewResult;
   references: Reference[] = [];
   feedback = Feedback.None;
   errorInfo = '';
+  // 创建时间
   createTime = DateTime.now().valueOf() / 1000;
+  // 开始运行时间
+  startTime = DateTime.now().valueOf() / 1000;
+  // 引用查找结束时间
+  referenceTime = DateTime.now().valueOf() / 1000;
+  // 流程终止时间
+  endTime = DateTime.now().valueOf() / 1000;
   reviewType: ReviewType;
-  createdCallback = () => {};
+  isRunning = false;
+  onStart = () => {};
+  onUpdate = () => {};
+  onEnd = () => {};
 
   constructor(
     private selection: Selection,
     private extraData: ExtraData,
     reviewType: ReviewType,
-    createdCallback?: () => void,
   ) {
     this.reviewType = reviewType;
-    this.createReviewRequest();
-    if (createdCallback) {
-      this.createdCallback = createdCallback;
-    }
   }
 
-  async createReviewRequest() {
+  async start() {
+    this.isRunning = true;
+    this.state = ReviewState.Ready;
+    this.startTime = DateTime.now().valueOf() / 1000;
+    this.onUpdate();
     const websocketService = container.get<WebsocketService>(
       ServiceType.WEBSOCKET,
     );
     const configService = container.get<ConfigService>(ServiceType.CONFIG);
     const appConfig = await configService.getConfigs();
-    log.info('getCodeReviewReferences start');
+    // log.info('getCodeReviewReferences start');
     this.references = await websocketService.getCodeReviewReferences(
       this.selection,
     );
-    log.info('getCodeReviewReferences end', this.references);
+    // log.info('getCodeReviewReferences end', this.references);
     this.state = ReviewState.References;
+    this.referenceTime = DateTime.now().valueOf() / 1000;
+    this.onUpdate();
     try {
-      this.reviewId = await api_code_review({
+      this.serverTaskId = await api_code_review({
         productLine: appConfig.activeTemplate,
         profileModel: appConfig.activeModel,
         templateName: 'CodeReviewV1',
@@ -75,61 +88,80 @@ export class ReviewInstance {
         },
         language: this.selection.language,
       });
-      this.createTime = DateTime.now().valueOf() / 1000;
       this.state = ReviewState.Start;
+      this.onUpdate();
       this.timer = setInterval(() => {
         this.refreshReviewState();
       }, REFRESH_TIME);
     } catch (e) {
       log.error(e);
       this.state = ReviewState.Error;
+      this.isRunning = false;
+      this.endTime = DateTime.now().valueOf() / 1000;
       this.errorInfo = (e as Error).message;
-      const windowService = container.get<WindowService>(ServiceType.WINDOW);
-      const mainWindow = windowService.getWindow(WindowType.Main);
-      mainWindow.sendMessageToRenderer(
-        new ReviewDataUpdateActionMessage(this.getReviewData()),
-      );
+      if (this.timer) {
+        clearInterval(this.timer);
+        this.timer = undefined;
+      }
+      this.onUpdate();
+      // const windowService = container.get<WindowService>(ServiceType.WINDOW);
+      // const mainWindow = windowService.getWindow(WindowType.Main);
+      // mainWindow.sendMessageToRenderer(
+      //   new ReviewDataUpdateActionMessage(this.getReviewData()),
+      // );
     }
-    this.createdCallback();
+    this.onStart();
   }
 
   async refreshReviewState() {
-    const windowService = container.get<WindowService>(ServiceType.WINDOW);
-    const mainWindow = windowService.getWindow(WindowType.Main);
     try {
-      this.state = await api_get_code_review_state(this.reviewId);
+      this.state = await api_get_code_review_state(this.serverTaskId);
       if (
         this.state === ReviewState.Third ||
         this.state === ReviewState.Finished
       ) {
         clearInterval(this.timer);
+        this.isRunning = false;
         await this.getReviewResult();
         this.state = ReviewState.Finished;
+        this.endTime = DateTime.now().valueOf() / 1000;
         this.saveReviewData();
+        this.onUpdate();
+        this.onEnd();
       }
       if (this.state === ReviewState.Error) {
         clearInterval(this.timer);
+        this.isRunning = false;
         await this.getReviewResult();
+        this.endTime = DateTime.now().valueOf() / 1000;
         this.errorInfo = this.result ? this.result.originData : '';
         this.saveReviewData();
+        this.onUpdate();
+        this.onEnd();
       }
-      mainWindow.sendMessageToRenderer(
-        new ReviewDataUpdateActionMessage(this.getReviewData()),
-      );
+      // mainWindow.sendMessageToRenderer(
+      //   new ReviewDataUpdateActionMessage(this.getReviewData()),
+      // );
     } catch (error) {
       log.error(error);
-      clearInterval(this.timer);
+      if (this.timer) {
+        clearInterval(this.timer);
+      }
+      this.isRunning = false;
       this.state = ReviewState.Error;
+      this.endTime = DateTime.now().valueOf() / 1000;
       this.errorInfo = (error as Error).message;
-      mainWindow.sendMessageToRenderer(
-        new ReviewDataUpdateActionMessage(this.getReviewData()),
-      );
+      // mainWindow.sendMessageToRenderer(
+      //   new ReviewDataUpdateActionMessage(this.getReviewData()),
+      // );
       this.saveReviewData();
+      this.onUpdate();
+      this.onEnd();
     }
   }
 
   async getReviewResult() {
-    this.result = await api_get_code_review_result(this.reviewId);
+    this.result = await api_get_code_review_result(this.serverTaskId);
   }
 
   saveReviewData() {
@@ -148,6 +180,7 @@ export class ReviewInstance {
   getReviewData() {
     return {
       reviewId: this.reviewId,
+      serverTaskId: this.serverTaskId,
       state: this.state,
       result: this.result,
       references: this.references,
@@ -156,6 +189,10 @@ export class ReviewInstance {
       errorInfo: this.errorInfo,
       extraData: this.extraData,
       createTime: this.createTime,
+      startTime: this.startTime,
+      endTime: this.endTime,
+      referenceTime: this.referenceTime,
+      isRunning: this.isRunning,
     } as ReviewData;
   }
 
@@ -163,7 +200,7 @@ export class ReviewInstance {
     clearInterval(this.timer);
     if (this.state === ReviewState.Start) {
       try {
-        await api_stop_review(this.reviewId);
+        await api_stop_review(this.serverTaskId);
       } catch (e) {
         log.error('stopReview.failed', e);
       }

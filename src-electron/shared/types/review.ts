@@ -26,6 +26,8 @@ export interface ReviewRequestParams {
 }
 
 export enum ReviewState {
+  Queue = 'Queue',
+  Ready = 'Ready',
   References = 0,
   Start = 1,
   /**
@@ -51,6 +53,14 @@ export const reviewStateIconMap: Record<
     icon: string;
   }
 > = {
+  [ReviewState.Queue]: {
+    color: 'gray-6',
+    icon: 'mdi-human-queue',
+  },
+  [ReviewState.Ready]: {
+    color: 'blue-6',
+    icon: 'mdi-robot-mower-outline',
+  },
   [ReviewState.Start]: {
     color: 'blue-6',
     icon: 'mdi-clock-outline',
@@ -112,16 +122,21 @@ export interface ReviewResult {
 }
 
 export interface ReviewData {
-  createTime: number;
   references: Reference[];
   selection: Selection;
   reviewId: string;
+  serverTaskId: string;
   state: ReviewState;
   result: ReviewResult;
   feedback: Feedback;
   errorInfo: string;
   extraData: ExtraData;
   reviewType: ReviewType;
+  isRunning: boolean;
+  createTime: number;
+  startTime: number;
+  endTime: number;
+  referenceTime: number;
 }
 
 export interface ReviewFileData {

@@ -80,7 +80,6 @@ onMounted(async () => {
   }, 100);
 
   getReviewDataList();
-
   actionApi.register(ActionType.ReviewDataListUpdate, (data) => {
     reviewList.value = data;
     if (!activeFile.value) {
@@ -180,7 +179,7 @@ const feedBackHandle = (
 ) => {
   console.log('feedBackHandle', review, feedback, comment);
   windowService.setReviewFeedback({
-    reviewId: review.reviewId,
+    serverTaskId: review.serverTaskId,
     feedback,
     comment,
     extraData: review.extraData,

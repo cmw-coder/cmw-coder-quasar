@@ -29,7 +29,7 @@ export interface WindowServiceTrait {
   reviewSelection(selection?: Selection): Promise<void>;
   getReviewData(): Promise<ReviewData[]>;
   setReviewFeedback(data: {
-    reviewId: string;
+    serverTaskId: string;
     feedback: Feedback;
     extraData: ExtraData;
     createTime: number;

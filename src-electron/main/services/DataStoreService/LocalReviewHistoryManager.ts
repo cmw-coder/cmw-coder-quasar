@@ -10,7 +10,7 @@ export class LocalReviewHistoryManager {
   constructor() {
     this.localReviewHistoryDir = path.join(
       app.getPath('userData'),
-      'reviewHistory',
+      'reviewHistoryV2',
     );
     this.checkLocalReviewHistoryDir();
   }
@@ -50,6 +50,21 @@ export class LocalReviewHistoryManager {
     } catch (e) {
       log.error('getReviewFileContent error', e);
     }
+    // 整理格式
+    res.forEach((item) => {
+      if (!item.createTime) {
+        item.createTime = 0;
+      }
+      if (!item.startTime) {
+        item.startTime = 0;
+      }
+      if (!item.endTime) {
+        item.endTime = 0;
+      }
+      if (!item.referenceTime) {
+        item.referenceTime = 0;
+      }
+    });
     return res;
   }
 

@@ -76,7 +76,7 @@ const feedBackHandle = (
 ) => {
   console.log('feedBackHandle', review, feedback, comment);
   windowService.setReviewFeedback({
-    reviewId: review.reviewId,
+    serverTaskId: review.serverTaskId,
     feedback,
     comment,
     extraData: review.extraData,

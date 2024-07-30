@@ -4,29 +4,42 @@ import { api_reportSKU } from 'main/request/sku';
 import { container, getService } from 'main/services';
 import { BasePage } from 'main/services/WindowService/types/MainWindow/pages/BasePage';
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
-import { Feedback, ReviewData } from 'shared/types/review';
+import { Feedback, ReviewData, ReviewState } from 'shared/types/review';
 import { ExtraData } from 'shared/types/Selection';
 import { ServiceType } from 'shared/types/service';
 import log from 'electron-log/main';
 import { api_feedback_review } from 'main/request/review';
 import { WindowType } from 'shared/types/WindowType';
 import { WindowService } from 'main/services/WindowService';
-import { ReviewDataListUpdateActionMessage } from 'shared/types/ActionMessage';
+import {
+  ReviewDataListUpdateActionMessage,
+  ReviewDataUpdateActionMessage,
+} from 'shared/types/ActionMessage';
+
+const MAX_RUNNING_REVIEW_COUNT = 10;
 
 export class ReviewPage extends BasePage {
-  activeReviewList: ReviewInstance[] = [];
+  private activeReviewList: ReviewInstance[] = [];
   constructor() {
     super(MainWindowPageType.Review);
   }
 
+  get runningReviewList() {
+    return this.activeReviewList.filter((review) => review.isRunning);
+  }
+
+  get reviewDataList() {
+    return this.activeReviewList.map((review) => review.getReviewData());
+  }
+
   async setReviewFeedback({
-    reviewId,
+    serverTaskId,
     feedback,
     extraData,
     createTime,
     comment,
   }: {
-    reviewId: string;
+    serverTaskId: string;
     feedback: Feedback;
     extraData: ExtraData;
     createTime: number;
@@ -79,7 +92,7 @@ export class ReviewPage extends BasePage {
 
     try {
       await api_feedback_review(
-        reviewId,
+        serverTaskId,
         appConfig.username,
         Feedback.Helpful,
         createTime,
@@ -91,34 +104,22 @@ export class ReviewPage extends BasePage {
   }
 
   async retryReview(reviewData: ReviewData) {
-    const windowService = container.get<WindowService>(ServiceType.WINDOW);
-    const mainWindow = windowService.getWindow(WindowType.Main);
-    const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
+    const review = this.activeReviewList.find(
+      (review) => review.reviewId === reviewData.reviewId,
+    );
+    if (review) {
+      review.stop();
+    }
     // 先去除旧的
-    reviewPage.activeReviewList = reviewPage.activeReviewList.filter(
+    this.activeReviewList = this.activeReviewList.filter(
       (review) => review.reviewId !== reviewData.reviewId,
     );
     // 再添加新的
-    reviewPage.activeReviewList.push(
+    this.activeReviewList.push(
       new ReviewInstance(
         reviewData.selection,
         reviewData.extraData,
         reviewData.reviewType,
-        () => {
-          mainWindow.sendMessageToRenderer(
-            new ReviewDataListUpdateActionMessage(
-              reviewPage.activeReviewList.map((review) =>
-                review.getReviewData(),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-    // 同步数据
-    mainWindow.sendMessageToRenderer(
-      new ReviewDataListUpdateActionMessage(
-        reviewPage.activeReviewList.map((review) => review.getReviewData()),
       ),
     );
   }
@@ -141,6 +142,49 @@ export class ReviewPage extends BasePage {
     }
     this.activeReviewList = this.activeReviewList.filter(
       (review) => review.reviewId !== reviewId,
+    );
+  }
+
+  async addReview(review: ReviewInstance) {
+    console.log('addReview');
+    const windowService = container.get<WindowService>(ServiceType.WINDOW);
+    const mainWindow = windowService.getWindow(WindowType.Main);
+    this.activeReviewList.push(review);
+    review.onStart = () => {
+      console.log('review.onStart');
+      mainWindow.sendMessageToRenderer(
+        new ReviewDataUpdateActionMessage(review.getReviewData()),
+      );
+    };
+    review.onUpdate = () => {
+      console.log('review.onUpdate');
+      mainWindow.sendMessageToRenderer(
+        new ReviewDataUpdateActionMessage(review.getReviewData()),
+      );
+    };
+    review.onEnd = () => {
+      console.log('review.onEnd');
+      mainWindow.sendMessageToRenderer(
+        new ReviewDataUpdateActionMessage(review.getReviewData()),
+      );
+      if (this.runningReviewList.length < MAX_RUNNING_REVIEW_COUNT) {
+        // 跑下一个任务
+        const queueReviewList = this.activeReviewList.filter(
+          (_review) => _review.state === ReviewState.Queue,
+        );
+        if (queueReviewList.length > 0) {
+          console.log('queueReviewList.length', queueReviewList.length);
+          const nextReview = queueReviewList[0];
+          nextReview.start();
+        }
+      }
+    };
+    console.log('this.runningReviewList', this.runningReviewList.length);
+    if (this.runningReviewList.length < MAX_RUNNING_REVIEW_COUNT) {
+      review.start();
+    }
+    mainWindow.sendMessageToRenderer(
+      new ReviewDataListUpdateActionMessage(this.reviewDataList),
     );
   }
 }
