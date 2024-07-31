@@ -25,6 +25,21 @@ const formatSelection = (selection: Selection) => {
     ...selection,
   };
 };
+
+const getProblemNumber = (review: ReviewData) => {
+  let result = 0;
+  if (review.state === ReviewState.Finished) {
+    if (review?.result?.parsed) {
+      review.result.data.forEach((item) => {
+        if (item.IsProblem) {
+          result += 1;
+        }
+      });
+    }
+  }
+  return result;
+};
+
 const getFileName = (filePath: string) => {
   const filePathArr = filePath.split(/\\|\//);
   return filePathArr[filePathArr.length - 1];
@@ -178,6 +193,16 @@ onMounted(() => {
                     `${formatSelection(item.selection).fileName}  ${formatSelection(item.selection).rangeStr}`
                   }}</q-item-section
                 >
+                <q-item-section side>
+                  <q-chip
+                    color="red-6"
+                    class="text-white"
+                    style="width: 22px"
+                    dense
+                  >
+                    {{ getProblemNumber(item) }}
+                  </q-chip>
+                </q-item-section>
               </template>
               <FunctionPanel
                 :review-data="item"

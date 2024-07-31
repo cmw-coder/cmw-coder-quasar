@@ -197,12 +197,16 @@ export interface HandShakeClientMessage extends WsMessage {
 
 export interface ReviewRequestClientMessage extends WsMessage {
   action: WsAction.ReviewRequest;
-  data: Reference[];
+  data: {
+    id: string;
+    references: Reference[];
+  };
 }
 
 export class ReviewRequestServerMessage implements WsMessage {
   action = WsAction.ReviewRequest;
   data: StandardResult<{
+    id: string;
     content: string;
     path: string;
     beginLine: number;
@@ -212,6 +216,7 @@ export class ReviewRequestServerMessage implements WsMessage {
 
   constructor(
     data: StandardResult<{
+      id: string;
       content: string;
       path: string;
       beginLine: number;

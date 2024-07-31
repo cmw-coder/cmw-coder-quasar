@@ -33,7 +33,7 @@ const formatSelection = (selection: Selection) => {
 const getProblemNumber = (review: ReviewData) => {
   let result = 0;
   if (review.state === ReviewState.Finished) {
-    if (review.result.parsed) {
+    if (review?.result?.parsed) {
       review.result.data.forEach((item) => {
         if (item.IsProblem) {
           result += 1;
@@ -76,19 +76,28 @@ const activeFile = ref<string>('');
 
 watch(
   () => activeFile.value,
-  async () => {
-    if (activeFile.value) {
-      activeFileReviewList.value = await windowService.getFileReviewList(
-        activeFile.value,
-      );
-    }
+  () => {
+    getActiveFileReviewList();
   },
 );
+
+const getActiveFileReviewList = async () => {
+  if (activeFile.value) {
+    activeFileReviewList.value = await windowService.getFileReviewList(
+      activeFile.value,
+    );
+  } else {
+    activeFileReviewList.value = [];
+  }
+};
 
 const getReviewDataList = async () => {
   fileList.value = await windowService.getReviewFileDetailList();
   if (!activeFile.value) {
     activeFile.value = fileList.value[0]?.path;
+  }
+  if (fileList.value.length === 0) {
+    activeFileReviewList.value = [];
   }
 };
 
@@ -104,6 +113,7 @@ onMounted(async () => {
   });
 
   actionApi.register(ActionType.ReviewDataUpdate, (data) => {
+    getReviewDataList();
     const index = activeFileReviewList.value.findIndex(
       (item) => item.reviewId === data.reviewId,
     );
@@ -133,43 +143,39 @@ onBeforeUnmount(() => {
 });
 
 const delFile = async (fileItem: ReviewFileItem) => {
-  console.log('fileItem', fileItem);
-  // const reviewList
-  // const includedFileReviewList = reviewList.filter(
-  //   (item) => item.selection.file === filePath,
-  // );
-
-  // const unfinishedReviewList = includedFileReviewList.filter(
-  //   (item) =>
-  //     item.state !== ReviewState.Finished && item.state !== ReviewState.Error,
-  // );
-  // if (unfinishedReviewList.length > 0) {
-  //   dialog({
-  //     title: i18n('dialog.delFileDialog.title'),
-  //     message: i18n('dialog.delFileDialog.message'),
-  //     persistent: true,
-  //     ok: i18n('dialog.delFileDialog.ok'),
-  //     cancel: i18n('dialog.delFileDialog.cancel'),
-  //   }).onOk(async () => {
-  //     await Promise.all(
-  //       includedFileReviewList.map((item) =>
-  //         windowService.delReview(item.reviewId),
-  //       ),
-  //     );
-  //     getReviewDataList();
-  //   });
-  // } else {
-  //   await Promise.all(
-  //     includedFileReviewList.map((item) =>
-  //       windowService.delReview(item.reviewId),
-  //     ),
-  //   );
-  //   getReviewDataList();
-  // }
+  const includedFileReviewList = await windowService.getFileReviewList(
+    fileItem.path,
+  );
+  const unfinishedReviewList = includedFileReviewList.filter(
+    (item) =>
+      item.state !== ReviewState.Finished && item.state !== ReviewState.Error,
+  );
+  if (unfinishedReviewList.length > 0) {
+    dialog({
+      title: i18n('dialog.delFileDialog.title'),
+      message: i18n('dialog.delFileDialog.message'),
+      persistent: true,
+      ok: i18n('dialog.delFileDialog.ok'),
+      cancel: i18n('dialog.delFileDialog.cancel'),
+    }).onOk(async () => {
+      await Promise.all(
+        includedFileReviewList.map((item) =>
+          windowService.delReview(item.reviewId),
+        ),
+      );
+      getReviewDataList();
+    });
+  } else {
+    await Promise.all(
+      includedFileReviewList.map((item) =>
+        windowService.delReview(item.reviewId),
+      ),
+    );
+    getReviewDataList();
+  }
 };
 
 const delReviewItem = async (review: ReviewData) => {
-  console.log('delReviewItem', review);
   if (
     review.state !== ReviewState.Finished &&
     review.state !== ReviewState.Error
@@ -183,10 +189,12 @@ const delReviewItem = async (review: ReviewData) => {
     }).onOk(async () => {
       await windowService.delReview(review.reviewId);
       getReviewDataList();
+      getActiveFileReviewList();
     });
   } else {
     await windowService.delReview(review.reviewId);
     getReviewDataList();
+    getActiveFileReviewList();
   }
 };
 
@@ -334,23 +342,23 @@ const projectReview = () => {
                     `${formatSelection(item.selection).fileName}  ${formatSelection(item.selection).rangeStr}`
                   }}</q-item-section
                 >
-                <q-item-section>
-                  <q-chip
-                    color="red-6"
-                    class="text-white"
-                    style="width: 22px"
-                    dense
-                  >
-                    {{ getProblemNumber(item) }}
-                  </q-chip>
-                </q-item-section>
                 <q-item-section side>
-                  <q-btn
-                    icon="close"
-                    size="sm"
-                    flat
-                    @click.stop="() => delReviewItem(item)"
-                  ></q-btn>
+                  <div style="width: 60px; display: flex">
+                    <q-chip
+                      color="red-6"
+                      class="text-white"
+                      style="width: 22px"
+                      dense
+                    >
+                      {{ getProblemNumber(item) }}
+                    </q-chip>
+                    <q-btn
+                      icon="close"
+                      size="sm"
+                      flat
+                      @click.stop="() => delReviewItem(item)"
+                    ></q-btn>
+                  </div>
                 </q-item-section>
               </template>
               <FunctionPanel

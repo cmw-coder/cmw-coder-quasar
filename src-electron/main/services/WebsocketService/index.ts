@@ -4,7 +4,6 @@ import { createServer } from 'http';
 import { inject, injectable } from 'inversify';
 import { posix, sep } from 'path';
 import { WebSocketServer } from 'ws';
-
 import { PromptExtractor } from 'main/components/PromptExtractor';
 import { RawInputs } from 'main/components/PromptExtractor/types';
 import {
@@ -45,6 +44,7 @@ import {
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import { Selection } from 'shared/types/Selection';
 import { Reference } from 'shared/types/review';
+import { uid } from 'quasar';
 
 @injectable()
 export class WebsocketService implements WebsocketServiceTrait {
@@ -61,7 +61,11 @@ export class WebsocketService implements WebsocketServiceTrait {
   private _promptProcessor = new PromptProcessor();
   private _promptExtractor = new PromptExtractor();
   private _webSocketServer?: WebSocketServer;
-  private referencesResolveHandle?: (value: Reference[]) => void;
+  // private referencesResolveHandle?: (value: Reference[]) => void;
+  private referencesResolveHandleMap = new Map<
+    string,
+    (value: Reference[]) => void
+  >();
 
   constructor(
     @inject(ServiceType.DATA_STORE)
@@ -504,9 +508,11 @@ export class WebsocketService implements WebsocketServiceTrait {
     );
     this._registerWsAction(WsAction.ReviewRequest, ({ data }) => {
       log.info('ReviewRequest Response', data);
-      if (this.referencesResolveHandle) {
-        this.referencesResolveHandle(data || []);
-        this.referencesResolveHandle = undefined;
+      const { id } = data;
+      const referencesResolveHandle = this.referencesResolveHandleMap.get(id);
+      if (referencesResolveHandle) {
+        referencesResolveHandle(data.references || []);
+        this.referencesResolveHandleMap.delete(id);
       }
     });
   }
@@ -523,9 +529,11 @@ export class WebsocketService implements WebsocketServiceTrait {
 
   async getCodeReviewReferences(selection: Selection) {
     const successPromise = new Promise<Reference[]>((resolve) => {
+      const id = uid();
       this.send(
         JSON.stringify(
           new ReviewRequestServerMessage({
+            id,
             result: 'success',
             content: selection.block || selection.content,
             path: selection.file,
@@ -535,7 +543,8 @@ export class WebsocketService implements WebsocketServiceTrait {
         ),
       );
       // log.info('getCodeReviewReferences', selection);
-      this.referencesResolveHandle = resolve;
+      // this.referencesResolveHandle = resolve;
+      this.referencesResolveHandleMap.set(id, resolve);
     });
 
     const timeoutPromise = new Promise<Reference[]>((resolve) => {
