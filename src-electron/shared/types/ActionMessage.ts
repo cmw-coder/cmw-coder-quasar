@@ -125,10 +125,8 @@ export class ReviewDataUpdateActionMessage implements ActionMessage {
 
 export class ReviewDataListUpdateActionMessage implements ActionMessage {
   type = ActionType.ReviewDataListUpdate;
-  data: ReviewData[];
-  constructor(data: ReviewData[]) {
-    this.data = data;
-  }
+  data: undefined;
+  constructor() {}
 }
 
 export class SwitchLocaleActionMessage implements ActionMessage {

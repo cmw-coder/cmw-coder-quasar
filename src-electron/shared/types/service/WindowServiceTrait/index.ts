@@ -1,7 +1,7 @@
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import { ExtraData, Selection } from 'shared/types/Selection';
 import { WindowType } from 'shared/types/WindowType';
-import { Feedback, ReviewData } from 'shared/types/review';
+import { Feedback, ReviewData, ReviewFileItem } from 'shared/types/review';
 
 export interface WindowServiceTrait {
   finishLogin(): Promise<void>;
@@ -41,4 +41,6 @@ export interface WindowServiceTrait {
   stopReview(reviewId: string): Promise<void>;
   delReview(reviewId: string): Promise<void>;
   reviewProject(filePath?: string): Promise<void>;
+  getReviewFileDetailList(): Promise<ReviewFileItem[]>;
+  getFileReviewList(filePath: string): Promise<ReviewData[]>;
 }

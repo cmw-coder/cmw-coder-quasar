@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { PropType, ref } from 'vue';
-// import { Selection } from 'shared/types/Selection';
+import { Selection } from 'shared/types/Selection';
 import { useHighlighter } from 'stores/highlighter';
 import {
   Reference,
@@ -25,6 +25,8 @@ const emit = defineEmits<{
   (e: 'feedback', feedback: Feedback, comment?: string): void;
 }>();
 
+const isShowCode = ref(false);
+
 const { t } = useI18n();
 const baseName = 'components.ReviewPanels.FunctionPanel.';
 const i18n = (relativePath: string, data?: Record<string, unknown>) => {
@@ -34,15 +36,15 @@ const i18n = (relativePath: string, data?: Record<string, unknown>) => {
 const windowService = useService(ServiceType.WINDOW);
 const { codeToHtml } = useHighlighter();
 
-// const formatSelection = (selection: Selection) => {
-//   const filePathArr = selection.file.split('\\');
-//   const fileName = filePathArr[filePathArr.length - 1];
-//   return {
-//     fileName,
-//     rangeStr: `${selection.range.start.line} - ${selection.range.end.line}`,
-//     ...selection,
-//   };
-// };
+const formatSelection = (selection: Selection) => {
+  const filePathArr = selection.file.split('\\');
+  const fileName = filePathArr[filePathArr.length - 1];
+  return {
+    fileName,
+    rangeStr: `${selection.range.start.line} - ${selection.range.end.line}`,
+    ...selection,
+  };
+};
 
 const formatReference = (reference: Reference) => {
   const filePathArr = reference.path.split('\\');
@@ -92,8 +94,28 @@ const stopReviewHandle = () => {
           bordered
           flat
         >
-          <div class="file-full-path">{{ reviewData.selection.file }}</div>
+          <div class="file-full-path">
+            <div>
+              <span>{{ reviewData.selection.file }}</span>
+              <span style="padding-left: 10px">
+                {{ formatSelection(reviewData.selection).rangeStr }}
+              </span>
+            </div>
+            <div>
+              <q-btn
+                size="sm"
+                flat
+                @click="
+                  () => {
+                    isShowCode = !isShowCode;
+                  }
+                "
+                >展开</q-btn
+              >
+            </div>
+          </div>
           <div
+            v-if="isShowCode"
             class="review-file-content"
             v-html="
               codeToHtml(
@@ -479,6 +501,12 @@ const stopReviewHandle = () => {
   overflow: auto;
   padding: 10px;
   .review-file-wrapper {
+    .file-full-path {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
     .review-file-name-wrapper {
       height: 40px;
       display: flex;

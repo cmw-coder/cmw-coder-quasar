@@ -4,7 +4,12 @@ import { api_reportSKU } from 'main/request/sku';
 import { container, getService } from 'main/services';
 import { BasePage } from 'main/services/WindowService/types/MainWindow/pages/BasePage';
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
-import { Feedback, ReviewData, ReviewState } from 'shared/types/review';
+import {
+  Feedback,
+  ReviewData,
+  ReviewState,
+  ReviewFileItem,
+} from 'shared/types/review';
 import { ExtraData } from 'shared/types/Selection';
 import { ServiceType } from 'shared/types/service';
 import log from 'electron-log/main';
@@ -166,8 +171,55 @@ export class ReviewPage extends BasePage {
     if (this.runningReviewList.length < MAX_RUNNING_REVIEW_COUNT) {
       review.start();
     }
-    mainWindow.sendMessageToRenderer(
-      new ReviewDataListUpdateActionMessage(this.reviewDataList),
+    mainWindow.sendMessageToRenderer(new ReviewDataListUpdateActionMessage());
+  }
+
+  async getReviewFileDetailList() {
+    const result: ReviewFileItem[] = [];
+    for (let i = 0; i < this.reviewDataList.length; i++) {
+      const review = this.reviewDataList[i];
+      const file = result.find((item) => item.path === review.selection.file);
+      let problemNumber = 0;
+      if (review.state === ReviewState.Finished) {
+        if (review.result.parsed) {
+          review.result.data.forEach((problemItem) => {
+            if (problemItem.IsProblem) {
+              problemNumber++;
+            }
+          });
+        }
+      }
+
+      if (file) {
+        file.total++;
+        if (
+          review.state === ReviewState.Finished ||
+          review.state === ReviewState.Error
+        ) {
+          file.done++;
+        }
+        if (review.state === ReviewState.Finished) {
+          file.problemNumber += problemNumber;
+        }
+      } else {
+        result.push({
+          path: review.selection.file,
+          total: 1,
+          done:
+            review.state === ReviewState.Finished ||
+            review.state === ReviewState.Error
+              ? 1
+              : 0,
+          problemNumber,
+        });
+      }
+    }
+    return result;
+  }
+
+  async getFileReviewList(filePath: string) {
+    return this.reviewDataList.filter(
+      (review) => review.selection.file === filePath,
     );
   }
 }

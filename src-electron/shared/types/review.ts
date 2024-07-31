@@ -143,3 +143,10 @@ export interface ReviewFileData {
   date: number;
   items: ReviewData[];
 }
+
+export interface ReviewFileItem {
+  path: string;
+  total: number;
+  done: number;
+  problemNumber: number;
+}

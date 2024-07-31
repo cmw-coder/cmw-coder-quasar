@@ -1,11 +1,12 @@
 <script lang="ts" setup>
-import { computed, onBeforeUnmount, onMounted, ref, toRaw } from 'vue';
+import { onBeforeUnmount, onMounted, Ref, ref, toRaw, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useService } from 'utils/common';
 import { ServiceType } from 'shared/types/service';
 import {
   Feedback,
   ReviewData,
+  ReviewFileItem,
   ReviewState,
   reviewStateIconMap,
 } from 'shared/types/review';
@@ -14,7 +15,7 @@ import { ActionType } from 'shared/types/ActionMessage';
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import FunctionPanel from 'components/ReviewPanels/FunctionPanel.vue';
 import { Selection } from 'shared/types/Selection';
-import { useQuasar } from 'quasar';
+import { QVirtualScroll, useQuasar } from 'quasar';
 import { DateTime } from 'luxon';
 
 const { dialog } = useQuasar();
@@ -29,14 +30,26 @@ const formatSelection = (selection: Selection) => {
   };
 };
 
+const getProblemNumber = (review: ReviewData) => {
+  let result = 0;
+  if (review.state === ReviewState.Finished) {
+    if (review.result.parsed) {
+      review.result.data.forEach((item) => {
+        if (item.IsProblem) {
+          result += 1;
+        }
+      });
+    }
+  }
+  return result;
+};
+
 const baseName = 'pages.ReviewPage.';
 const { t } = useI18n();
 const websocketService = useService(ServiceType.WEBSOCKET);
 const windowService = useService(ServiceType.WINDOW);
 const splitterModel = ref<number>(20);
 const actionApi = new ActionApi(baseName);
-
-const reviewList = ref<ReviewData[]>([]);
 
 const i18n = (relativePath: string, data?: Record<string, unknown>) => {
   if (data) {
@@ -55,21 +68,27 @@ const startCurrentFileReview = async () => {
 };
 let getCurrentPathInterval: NodeJS.Timer | undefined = undefined;
 
+const fileListRef = ref(null as unknown as QVirtualScroll);
+const activeFileReviewListRef = ref(null as unknown as QVirtualScroll);
+const fileList: Ref<ReviewFileItem[]> = ref([]);
+const activeFileReviewList: Ref<ReviewData[]> = ref([]);
 const activeFile = ref<string>('');
-const fileList = computed(() => {
-  const data = reviewList.value.map((item) => item.selection.file);
-  return [...new Set(data)];
-});
-const activeFileReviewList = computed(() => {
-  return reviewList.value.filter(
-    (item) => item.selection.file === activeFile.value,
-  );
-});
+
+watch(
+  () => activeFile.value,
+  async () => {
+    if (activeFile.value) {
+      activeFileReviewList.value = await windowService.getFileReviewList(
+        activeFile.value,
+      );
+    }
+  },
+);
 
 const getReviewDataList = async () => {
-  reviewList.value = await windowService.getReviewData();
+  fileList.value = await windowService.getReviewFileDetailList();
   if (!activeFile.value) {
-    activeFile.value = reviewList.value[0]?.selection?.file;
+    activeFile.value = fileList.value[0]?.path;
   }
 };
 
@@ -80,19 +99,16 @@ onMounted(async () => {
   }, 100);
 
   getReviewDataList();
-  actionApi.register(ActionType.ReviewDataListUpdate, (data) => {
-    reviewList.value = data;
-    if (!activeFile.value) {
-      activeFile.value = data[0]?.selection?.file;
-    }
+  actionApi.register(ActionType.ReviewDataListUpdate, () => {
+    getReviewDataList();
   });
 
   actionApi.register(ActionType.ReviewDataUpdate, (data) => {
-    const index = reviewList.value.findIndex(
+    const index = activeFileReviewList.value.findIndex(
       (item) => item.reviewId === data.reviewId,
     );
     if (index !== -1) {
-      reviewList.value[index] = data;
+      activeFileReviewList.value[index] = data;
     }
   });
 
@@ -116,38 +132,40 @@ onBeforeUnmount(() => {
   actionApi.unregister();
 });
 
-const delFile = async (filePath: string) => {
-  const includedFileReviewList = reviewList.value.filter(
-    (item) => item.selection.file === filePath,
-  );
+const delFile = async (fileItem: ReviewFileItem) => {
+  console.log('fileItem', fileItem);
+  // const reviewList
+  // const includedFileReviewList = reviewList.filter(
+  //   (item) => item.selection.file === filePath,
+  // );
 
-  const unfinishedReviewList = includedFileReviewList.filter(
-    (item) =>
-      item.state !== ReviewState.Finished && item.state !== ReviewState.Error,
-  );
-  if (unfinishedReviewList.length > 0) {
-    dialog({
-      title: i18n('dialog.delFileDialog.title'),
-      message: i18n('dialog.delFileDialog.message'),
-      persistent: true,
-      ok: i18n('dialog.delFileDialog.ok'),
-      cancel: i18n('dialog.delFileDialog.cancel'),
-    }).onOk(async () => {
-      await Promise.all(
-        includedFileReviewList.map((item) =>
-          windowService.delReview(item.reviewId),
-        ),
-      );
-      getReviewDataList();
-    });
-  } else {
-    await Promise.all(
-      includedFileReviewList.map((item) =>
-        windowService.delReview(item.reviewId),
-      ),
-    );
-    getReviewDataList();
-  }
+  // const unfinishedReviewList = includedFileReviewList.filter(
+  //   (item) =>
+  //     item.state !== ReviewState.Finished && item.state !== ReviewState.Error,
+  // );
+  // if (unfinishedReviewList.length > 0) {
+  //   dialog({
+  //     title: i18n('dialog.delFileDialog.title'),
+  //     message: i18n('dialog.delFileDialog.message'),
+  //     persistent: true,
+  //     ok: i18n('dialog.delFileDialog.ok'),
+  //     cancel: i18n('dialog.delFileDialog.cancel'),
+  //   }).onOk(async () => {
+  //     await Promise.all(
+  //       includedFileReviewList.map((item) =>
+  //         windowService.delReview(item.reviewId),
+  //       ),
+  //     );
+  //     getReviewDataList();
+  //   });
+  // } else {
+  //   await Promise.all(
+  //     includedFileReviewList.map((item) =>
+  //       windowService.delReview(item.reviewId),
+  //     ),
+  //   );
+  //   getReviewDataList();
+  // }
 };
 
 const delReviewItem = async (review: ReviewData) => {
@@ -194,18 +212,6 @@ const retryHandle = (review: ReviewData) => {
 const projectReview = () => {
   windowService.reviewProject(currentFilePath.value);
 };
-
-const returnFileReviewProgress = (file: string) => {
-  const fileReviewList = reviewList.value.filter(
-    (review) => review.selection.file === file,
-  );
-  const finishedReviewList = fileReviewList.filter(
-    (review) =>
-      review.state === ReviewState.Finished ||
-      review.state === ReviewState.Error,
-  );
-  return `${finishedReviewList.length} / ${fileReviewList.length}`;
-};
 </script>
 
 <template>
@@ -251,31 +257,32 @@ const returnFileReviewProgress = (file: string) => {
       <q-splitter v-model="splitterModel" style="height: 100%">
         <template v-slot:before>
           <q-virtual-scroll
+            ref="fileListRef"
             style="height: 100%"
             :items="fileList"
             separator
-            v-slot="{ item }: { item: string }"
+            v-slot="{ item }: { item: ReviewFileItem }"
           >
             <q-item
               clickable
               v-ripple
               dense
-              :active="item === activeFile"
+              :active="item.path === activeFile"
               @click="
                 () => {
-                  activeFile = item;
+                  activeFile = item.path;
                 }
               "
-              :key="item"
+              :key="item.path"
               style="padding-left: 6px; padding-right: 0px"
             >
               <q-item-section>
                 <div class="file-wrapper">
                   <span class="file-name">
-                    {{ getFileName(item) }}
+                    {{ getFileName(item.path) }}
                   </span>
                   <span class="rest-item">
-                    {{ returnFileReviewProgress(item) }}
+                    {{ item.done }} / {{ item.total }}
                   </span>
                   <q-tooltip>
                     {{ item }}
@@ -297,6 +304,7 @@ const returnFileReviewProgress = (file: string) => {
 
         <template v-slot:after>
           <q-virtual-scroll
+            ref="activeFileReviewListRef"
             style="height: 100%"
             :items="activeFileReviewList"
             separator
@@ -326,6 +334,16 @@ const returnFileReviewProgress = (file: string) => {
                     `${formatSelection(item.selection).fileName}  ${formatSelection(item.selection).rangeStr}`
                   }}</q-item-section
                 >
+                <q-item-section>
+                  <q-chip
+                    color="red-6"
+                    class="text-white"
+                    style="width: 22px"
+                    dense
+                  >
+                    {{ getProblemNumber(item) }}
+                  </q-chip>
+                </q-item-section>
                 <q-item-section side>
                   <q-btn
                     icon="close"

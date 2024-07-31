@@ -211,6 +211,16 @@ export class WindowService implements WindowServiceTrait {
     }
   }
 
+  async getWindowIsFixed(windowType: WindowType) {
+    const { fixed } = this._dataStoreService.getWindowData(windowType);
+    return !!fixed;
+  }
+
+  async toggleWindowFixed(windowType: WindowType) {
+    const window = this.getWindow(windowType);
+    window.toggleFixed();
+  }
+
   async mouseMoveInOrOutWindow(type: WindowType): Promise<void> {
     const baseWindow = this.getWindow(type);
     const window = baseWindow._window;
@@ -497,13 +507,15 @@ export class WindowService implements WindowServiceTrait {
     reviewPage.stopReview(reviewId);
   }
 
-  async getWindowIsFixed(windowType: WindowType) {
-    const { fixed } = this._dataStoreService.getWindowData(windowType);
-    return !!fixed;
+  async getReviewFileDetailList() {
+    const mainWindow = this.getWindow(WindowType.Main);
+    const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
+    return reviewPage.getReviewFileDetailList();
   }
 
-  async toggleWindowFixed(windowType: WindowType) {
-    const window = this.getWindow(windowType);
-    window.toggleFixed();
+  async getFileReviewList(filePath: string) {
+    const mainWindow = this.getWindow(WindowType.Main);
+    const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
+    return reviewPage.getFileReviewList(filePath);
   }
 }
