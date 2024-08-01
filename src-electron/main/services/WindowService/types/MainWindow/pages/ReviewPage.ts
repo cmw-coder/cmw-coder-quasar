@@ -17,7 +17,7 @@ import { api_feedback_review } from 'main/request/review';
 import { WindowType } from 'shared/types/WindowType';
 import { WindowService } from 'main/services/WindowService';
 import {
-  ReviewDataListUpdateActionMessage,
+  ReviewFileListUpdateActionMessage,
   ReviewDataUpdateActionMessage,
 } from 'shared/types/ActionMessage';
 
@@ -171,7 +171,7 @@ export class ReviewPage extends BasePage {
     if (this.runningReviewList.length < MAX_RUNNING_REVIEW_COUNT) {
       review.start();
     }
-    mainWindow.sendMessageToRenderer(new ReviewDataListUpdateActionMessage());
+    mainWindow.sendMessageToRenderer(new ReviewFileListUpdateActionMessage());
   }
 
   async getReviewFileDetailList() {

@@ -13,7 +13,7 @@ export enum ActionType {
   UpdateProgress = 'UpdateProgress',
   ToggleDarkMode = 'ToggleDarkMode',
   AddSelectionToChat = 'AddSelectionToChat',
-  ReviewDataListUpdate = 'ReviewDataListUpdate',
+  ReviewFileListUpdate = 'ReviewFileListUpdate',
   ReviewDataUpdate = 'ReviewDataUpdate',
   SwitchLocale = 'SwitchLocale',
   MainWindowActivePage = 'MainWindowActivePage',
@@ -123,8 +123,8 @@ export class ReviewDataUpdateActionMessage implements ActionMessage {
   }
 }
 
-export class ReviewDataListUpdateActionMessage implements ActionMessage {
-  type = ActionType.ReviewDataListUpdate;
+export class ReviewFileListUpdateActionMessage implements ActionMessage {
+  type = ActionType.ReviewFileListUpdate;
   data: undefined;
   constructor() {}
 }
@@ -165,7 +165,7 @@ export interface ActionMessageMapping {
   [ActionType.ToggleDarkMode]: ToggleDarkModeActionMessage;
   [ActionType.AddSelectionToChat]: AddSelectionToChatActionMessage;
   [ActionType.ReviewDataUpdate]: ReviewDataUpdateActionMessage;
-  [ActionType.ReviewDataListUpdate]: ReviewDataListUpdateActionMessage;
+  [ActionType.ReviewFileListUpdate]: ReviewFileListUpdateActionMessage;
   [ActionType.SwitchLocale]: SwitchLocaleActionMessage;
   [ActionType.MainWindowActivePage]: MainWindowActivePageActionMessage;
   [ActionType.MainWindowCheckPageReady]: MainWindowCheckPageReadyActionMessage;

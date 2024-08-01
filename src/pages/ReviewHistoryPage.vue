@@ -15,6 +15,7 @@ import { useRouter } from 'vue-router';
 
 const windowService = useService(ServiceType.WINDOW);
 const router = useRouter();
+const expandedMap = ref({} as Record<string, boolean>);
 
 const formatSelection = (selection: Selection) => {
   const filePathArr = selection.file.split(/\\|\//);
@@ -169,7 +170,22 @@ onMounted(() => {
             separator
             v-slot="{ item }: { item: ReviewData }"
           >
-            <q-expansion-item dense :key="item.reviewId" expand-separator>
+            <q-expansion-item
+              dense
+              :key="item.reviewId"
+              :model-value="!!expandedMap[item.reviewId]"
+              expand-separator
+              @hide="
+                () => {
+                  expandedMap[item.reviewId] = false;
+                }
+              "
+              @show="
+                () => {
+                  expandedMap[item.reviewId] = true;
+                }
+              "
+            >
               <template v-slot:header>
                 <q-item-section avatar>
                   <q-icon
@@ -204,13 +220,17 @@ onMounted(() => {
                   </q-chip>
                 </q-item-section>
               </template>
-              <FunctionPanel
-                :review-data="item"
-                @feedback="
-                  (feedback, comment) => feedBackHandle(item, feedback, comment)
-                "
-                @retry="() => retryHandle(item)"
-              />
+              <template v-slot:default>
+                <FunctionPanel
+                  v-if="expandedMap[item.reviewId]"
+                  :review-data="item"
+                  @feedback="
+                    (feedback, comment) =>
+                      feedBackHandle(item, feedback, comment)
+                  "
+                  @retry="() => retryHandle(item)"
+                />
+              </template>
             </q-expansion-item>
           </q-virtual-scroll>
         </template>

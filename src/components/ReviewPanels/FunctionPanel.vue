@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { PropType, ref } from 'vue';
+import { onMounted, PropType, ref } from 'vue';
 import { Selection } from 'shared/types/Selection';
 import { useHighlighter } from 'stores/highlighter';
 import {
@@ -82,6 +82,10 @@ const viewReferenceHandle = (reference: Reference) => {
 const stopReviewHandle = () => {
   windowService.stopReview(props.reviewData.serverTaskId);
 };
+
+onMounted(() => {
+  console.log('FunctionPanel mounted');
+});
 </script>
 
 <template>
@@ -110,7 +114,7 @@ const stopReviewHandle = () => {
                     isShowCode = !isShowCode;
                   }
                 "
-                >展开</q-btn
+                >{{ isShowCode ? '收起' : '展开' }}</q-btn
               >
             </div>
           </div>

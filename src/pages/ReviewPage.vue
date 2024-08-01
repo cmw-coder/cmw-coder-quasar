@@ -17,8 +17,10 @@ import FunctionPanel from 'components/ReviewPanels/FunctionPanel.vue';
 import { Selection } from 'shared/types/Selection';
 import { QVirtualScroll, useQuasar } from 'quasar';
 import { DateTime } from 'luxon';
+import { throttle } from 'quasar';
 
 const { dialog } = useQuasar();
+const expandedMap = ref({} as Record<string, boolean>);
 
 const formatSelection = (selection: Selection) => {
   const filePathArr = selection.file.split(/\\|\//);
@@ -76,50 +78,59 @@ const activeFile = ref<string>('');
 
 watch(
   () => activeFile.value,
-  () => {
-    getActiveFileReviewList();
+  async (value) => {
+    if (!value) {
+      activeFileReviewList.value = [];
+    } else {
+      activeFileReviewList.value = await windowService.getFileReviewList(
+        activeFile.value,
+      );
+    }
   },
 );
 
-const getActiveFileReviewList = async () => {
-  if (activeFile.value) {
-    activeFileReviewList.value = await windowService.getFileReviewList(
-      activeFile.value,
-    );
-  } else {
-    activeFileReviewList.value = [];
-  }
-};
-
-const getReviewDataList = async () => {
+const updateFileList = async () => {
   fileList.value = await windowService.getReviewFileDetailList();
   if (!activeFile.value) {
     activeFile.value = fileList.value[0]?.path;
+  } else {
+    const index = fileList.value.findIndex(
+      (item) => item.path === activeFile.value,
+    );
+    if (index === -1) {
+      activeFile.value = fileList.value[0]?.path;
+    }
   }
   if (fileList.value.length === 0) {
     activeFileReviewList.value = [];
   }
 };
+const throttleUpdateFileList = throttle(updateFileList, 300);
+
+const updateReviewData = (data: ReviewData) => {
+  const index = activeFileReviewList.value.findIndex(
+    (item) => item.reviewId === data.reviewId,
+  );
+  if (index !== -1) {
+    activeFileReviewList.value[index] = data;
+  }
+};
+const throttleUpdateReviewData = throttle(updateReviewData, 300);
 
 onMounted(async () => {
   currentFilePath.value = await websocketService.getCurrentFile();
   getCurrentPathInterval = setInterval(async () => {
     currentFilePath.value = await websocketService.getCurrentFile();
-  }, 100);
+  }, 500);
 
-  getReviewDataList();
-  actionApi.register(ActionType.ReviewDataListUpdate, () => {
-    getReviewDataList();
+  updateFileList();
+  actionApi.register(ActionType.ReviewFileListUpdate, () => {
+    throttleUpdateFileList();
   });
 
   actionApi.register(ActionType.ReviewDataUpdate, (data) => {
-    getReviewDataList();
-    const index = activeFileReviewList.value.findIndex(
-      (item) => item.reviewId === data.reviewId,
-    );
-    if (index !== -1) {
-      activeFileReviewList.value[index] = data;
-    }
+    throttleUpdateFileList();
+    throttleUpdateReviewData(data);
   });
 
   actionApi.register(ActionType.MainWindowCheckPageReady, (type) => {
@@ -163,7 +174,7 @@ const delFile = async (fileItem: ReviewFileItem) => {
           windowService.delReview(item.reviewId),
         ),
       );
-      getReviewDataList();
+      updateFileList();
     });
   } else {
     await Promise.all(
@@ -171,7 +182,7 @@ const delFile = async (fileItem: ReviewFileItem) => {
         windowService.delReview(item.reviewId),
       ),
     );
-    getReviewDataList();
+    updateFileList();
   }
 };
 
@@ -188,13 +199,23 @@ const delReviewItem = async (review: ReviewData) => {
       cancel: i18n('dialog.delReviewItemDialog.cancel'),
     }).onOk(async () => {
       await windowService.delReview(review.reviewId);
-      getReviewDataList();
-      getActiveFileReviewList();
+      const delReviewIndex = activeFileReviewList.value.findIndex(
+        (item) => item.reviewId === review.reviewId,
+      );
+      if (delReviewIndex !== -1) {
+        activeFileReviewList.value.splice(delReviewIndex, 1);
+      }
+      updateFileList();
     });
   } else {
     await windowService.delReview(review.reviewId);
-    getReviewDataList();
-    getActiveFileReviewList();
+    const delReviewIndex = activeFileReviewList.value.findIndex(
+      (item) => item.reviewId === review.reviewId,
+    );
+    if (delReviewIndex !== -1) {
+      activeFileReviewList.value.splice(delReviewIndex, 1);
+    }
+    updateFileList();
   }
 };
 
@@ -318,7 +339,22 @@ const projectReview = () => {
             separator
             v-slot="{ item }: { item: ReviewData }"
           >
-            <q-expansion-item :key="item.reviewId" dense expand-separator>
+            <q-expansion-item
+              :key="item.reviewId"
+              dense
+              expand-separator
+              :model-value="!!expandedMap[item.reviewId]"
+              @hide="
+                () => {
+                  expandedMap[item.reviewId] = false;
+                }
+              "
+              @show="
+                () => {
+                  expandedMap[item.reviewId] = true;
+                }
+              "
+            >
               <template v-slot:header>
                 <q-item-section avatar>
                   <q-icon
@@ -361,13 +397,17 @@ const projectReview = () => {
                   </div>
                 </q-item-section>
               </template>
-              <FunctionPanel
-                :review-data="item"
-                @feedback="
-                  (feedback, comment) => feedBackHandle(item, feedback, comment)
-                "
-                @retry="() => retryHandle(item)"
-              />
+              <template v-slot:default>
+                <FunctionPanel
+                  v-if="expandedMap[item.reviewId]"
+                  :review-data="item"
+                  @feedback="
+                    (feedback, comment) =>
+                      feedBackHandle(item, feedback, comment)
+                  "
+                  @retry="() => retryHandle(item)"
+                />
+              </template>
             </q-expansion-item>
           </q-virtual-scroll>
         </template>
