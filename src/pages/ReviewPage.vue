@@ -17,7 +17,7 @@ import FunctionPanel from 'components/ReviewPanels/FunctionPanel.vue';
 import { Selection } from 'shared/types/Selection';
 import { QVirtualScroll, useQuasar } from 'quasar';
 import { DateTime } from 'luxon';
-import { debounce } from 'quasar';
+import { throttle } from 'quasar';
 
 const { dialog } = useQuasar();
 const expandedMap = ref({} as Record<string, boolean>);
@@ -105,7 +105,7 @@ const updateFileList = async () => {
     activeFileReviewList.value = [];
   }
 };
-const debounceUpdateFileList = debounce(updateFileList, 500);
+const throttleUpdateFileList = throttle(updateFileList, 500);
 
 const updateReviewData = (data: ReviewData) => {
   const index = activeFileReviewList.value.findIndex(
@@ -115,7 +115,7 @@ const updateReviewData = (data: ReviewData) => {
     activeFileReviewList.value[index] = data;
   }
 };
-const debounceUpdateReviewData = debounce(updateReviewData, 500);
+const throttleUpdateReviewData = throttle(updateReviewData, 500);
 
 onMounted(async () => {
   currentFilePath.value = await websocketService.getCurrentFile();
@@ -125,12 +125,12 @@ onMounted(async () => {
 
   updateFileList();
   actionApi.register(ActionType.ReviewFileListUpdate, () => {
-    debounceUpdateFileList();
+    throttleUpdateFileList();
   });
 
   actionApi.register(ActionType.ReviewDataUpdate, (data) => {
-    debounceUpdateFileList();
-    debounceUpdateReviewData(data);
+    throttleUpdateFileList();
+    throttleUpdateReviewData(data);
   });
 
   actionApi.register(ActionType.MainWindowCheckPageReady, (type) => {
