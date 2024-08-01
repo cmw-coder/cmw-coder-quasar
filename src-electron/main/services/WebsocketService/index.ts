@@ -3,7 +3,9 @@ import { sync } from 'fast-glob';
 import { createServer } from 'http';
 import { inject, injectable } from 'inversify';
 import { posix, sep } from 'path';
+import { uid } from 'quasar';
 import { WebSocketServer } from 'ws';
+
 import { PromptExtractor } from 'main/components/PromptExtractor';
 import { RawInputs } from 'main/components/PromptExtractor/types';
 import {
@@ -25,6 +27,7 @@ import { DataProjectType } from 'main/stores/data/types';
 import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
 import { Range } from 'main/types/vscode/range';
+import { deleteComments } from 'main/utils/common';
 import {
   CompletionErrorCause,
   getClientVersion,
@@ -44,7 +47,6 @@ import {
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import { Selection } from 'shared/types/Selection';
 import { Reference } from 'shared/types/review';
-import { uid } from 'quasar';
 
 @injectable()
 export class WebsocketService implements WebsocketServiceTrait {
@@ -511,7 +513,12 @@ export class WebsocketService implements WebsocketServiceTrait {
       const { id } = data;
       const referencesResolveHandle = this.referencesResolveHandleMap.get(id);
       if (referencesResolveHandle) {
-        referencesResolveHandle(data.references || []);
+        referencesResolveHandle(
+          data.references.map((reference) => ({
+            ...reference,
+            content: deleteComments(reference.content),
+          })) || [],
+        );
         this.referencesResolveHandleMap.delete(id);
       }
     });

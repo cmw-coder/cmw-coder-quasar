@@ -77,3 +77,7 @@ export async function getFilesInDirectory(dir: string): Promise<string[]> {
 
   return files;
 }
+
+export const deleteComments = (content: string): string => {
+  return content.replace(/\/\/.*|\/\*[\s\S]*?\*\//g, '');
+};
