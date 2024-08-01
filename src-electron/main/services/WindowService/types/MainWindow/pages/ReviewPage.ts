@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon';
 import { ReviewInstance } from 'main/components/ReviewInstance';
 import { api_reportSKU } from 'main/request/sku';
-import { container, getService } from 'main/services';
+import { getService } from 'main/services';
 import { BasePage } from 'main/services/WindowService/types/MainWindow/pages/BasePage';
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import {
@@ -14,12 +14,12 @@ import { ExtraData } from 'shared/types/Selection';
 import { ServiceType } from 'shared/types/service';
 import log from 'electron-log/main';
 import { api_feedback_review } from 'main/request/review';
-import { WindowType } from 'shared/types/WindowType';
-import { WindowService } from 'main/services/WindowService';
-import {
-  ReviewFileListUpdateActionMessage,
-  ReviewDataUpdateActionMessage,
-} from 'shared/types/ActionMessage';
+// import { WindowType } from 'shared/types/WindowType';
+// import { WindowService } from 'main/services/WindowService';
+// import {
+//   ReviewFileListUpdateActionMessage,
+//   ReviewDataUpdateActionMessage,
+// } from 'shared/types/ActionMessage';
 
 const MAX_RUNNING_REVIEW_COUNT = 10;
 
@@ -140,23 +140,23 @@ export class ReviewPage extends BasePage {
   }
 
   async addReview(review: ReviewInstance) {
-    const windowService = container.get<WindowService>(ServiceType.WINDOW);
-    const mainWindow = windowService.getWindow(WindowType.Main);
+    // const windowService = container.get<WindowService>(ServiceType.WINDOW);
+    // const mainWindow = windowService.getWindow(WindowType.Main);
     this.activeReviewList.push(review);
     review.onStart = () => {
-      mainWindow.sendMessageToRenderer(
-        new ReviewDataUpdateActionMessage(review.reviewId),
-      );
+      // mainWindow.sendMessageToRenderer(
+      //   new ReviewDataUpdateActionMessage(review.reviewId),
+      // );
     };
     review.onUpdate = () => {
-      mainWindow.sendMessageToRenderer(
-        new ReviewDataUpdateActionMessage(review.reviewId),
-      );
+      // mainWindow.sendMessageToRenderer(
+      //   new ReviewDataUpdateActionMessage(review.reviewId),
+      // );
     };
     review.onEnd = () => {
-      mainWindow.sendMessageToRenderer(
-        new ReviewDataUpdateActionMessage(review.reviewId),
-      );
+      // mainWindow.sendMessageToRenderer(
+      //   new ReviewDataUpdateActionMessage(review.reviewId),
+      // );
       if (this.runningReviewList.length < MAX_RUNNING_REVIEW_COUNT) {
         // 跑下一个任务
         const queueReviewList = this.activeReviewList.filter(
@@ -171,7 +171,7 @@ export class ReviewPage extends BasePage {
     if (this.runningReviewList.length < MAX_RUNNING_REVIEW_COUNT) {
       review.start();
     }
-    mainWindow.sendMessageToRenderer(new ReviewFileListUpdateActionMessage());
+    // mainWindow.sendMessageToRenderer(new ReviewFileListUpdateActionMessage());
   }
 
   async getReviewFileDetailList() {
