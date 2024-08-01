@@ -145,17 +145,17 @@ export class ReviewPage extends BasePage {
     this.activeReviewList.push(review);
     review.onStart = () => {
       mainWindow.sendMessageToRenderer(
-        new ReviewDataUpdateActionMessage(review.getReviewData()),
+        new ReviewDataUpdateActionMessage(review.reviewId),
       );
     };
     review.onUpdate = () => {
       mainWindow.sendMessageToRenderer(
-        new ReviewDataUpdateActionMessage(review.getReviewData()),
+        new ReviewDataUpdateActionMessage(review.reviewId),
       );
     };
     review.onEnd = () => {
       mainWindow.sendMessageToRenderer(
-        new ReviewDataUpdateActionMessage(review.getReviewData()),
+        new ReviewDataUpdateActionMessage(review.reviewId),
       );
       if (this.runningReviewList.length < MAX_RUNNING_REVIEW_COUNT) {
         // 跑下一个任务

@@ -1,6 +1,5 @@
 import { CompletionCacheClientMessage } from 'shared/types/WsMessage';
 import { Selection } from 'shared/types/Selection';
-import { ReviewData } from 'shared/types/review';
 import { MainWindowPageType } from './MainWindowPageType';
 
 export enum ActionType {
@@ -116,10 +115,10 @@ export class AddSelectionToChatActionMessage implements ActionMessage {
 
 export class ReviewDataUpdateActionMessage implements ActionMessage {
   type = ActionType.ReviewDataUpdate;
-  data: ReviewData;
+  data: string;
 
-  constructor(data: ReviewData) {
-    this.data = data;
+  constructor(reviewId: string) {
+    this.data = reviewId;
   }
 }
 

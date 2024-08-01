@@ -78,18 +78,13 @@ const activeFile = ref<string>('');
 
 watch(
   () => activeFile.value,
-  async (value) => {
-    if (!value) {
-      activeFileReviewList.value = [];
-    } else {
-      activeFileReviewList.value = await windowService.getFileReviewList(
-        activeFile.value,
-      );
-    }
+  async () => {
+    updateActiveFileReviewList();
   },
 );
 
 const updateFileList = async () => {
+  console.log('updateFileList');
   fileList.value = await windowService.getReviewFileDetailList();
   if (!activeFile.value) {
     activeFile.value = fileList.value[0]?.path;
@@ -105,17 +100,33 @@ const updateFileList = async () => {
     activeFileReviewList.value = [];
   }
 };
-const throttleUpdateFileList = throttle(updateFileList, 500);
+const throttleUpdateFileList = throttle(updateFileList, 1000);
 
-const updateReviewData = (data: ReviewData) => {
-  const index = activeFileReviewList.value.findIndex(
-    (item) => item.reviewId === data.reviewId,
-  );
-  if (index !== -1) {
-    activeFileReviewList.value[index] = data;
+const updateActiveFileReviewList = async () => {
+  console.log('updateActiveFileReviewList');
+  if (!activeFile.value) {
+    activeFileReviewList.value = [];
+  } else {
+    activeFileReviewList.value = await windowService.getFileReviewList(
+      activeFile.value,
+    );
   }
 };
-const throttleUpdateReviewData = throttle(updateReviewData, 500);
+const throttleUpdateActiveFileReviewList = throttle(
+  updateActiveFileReviewList,
+  1000,
+);
+
+const updateReviewData = (reviewId: string) => {
+  console.log('updateReviewData');
+  const index = activeFileReviewList.value.findIndex(
+    (item) => item.reviewId === reviewId,
+  );
+  if (index !== -1) {
+    throttleUpdateActiveFileReviewList();
+  }
+  throttleUpdateFileList();
+};
 
 onMounted(async () => {
   currentFilePath.value = await websocketService.getCurrentFile();
@@ -128,9 +139,8 @@ onMounted(async () => {
     throttleUpdateFileList();
   });
 
-  actionApi.register(ActionType.ReviewDataUpdate, (data) => {
-    throttleUpdateFileList();
-    throttleUpdateReviewData(data);
+  actionApi.register(ActionType.ReviewDataUpdate, (reviewId) => {
+    updateReviewData(reviewId);
   });
 
   actionApi.register(ActionType.MainWindowCheckPageReady, (type) => {
@@ -138,7 +148,6 @@ onMounted(async () => {
       windowService.setMainWindowPageReady(MainWindowPageType.Review);
     }
   });
-  actionApi.unregister();
 });
 
 const getFileName = (filePath: string) => {
@@ -151,6 +160,7 @@ onBeforeUnmount(() => {
     clearInterval(getCurrentPathInterval);
     getCurrentPathInterval = undefined;
   }
+  actionApi.unregister();
 });
 
 const delFile = async (fileItem: ReviewFileItem) => {

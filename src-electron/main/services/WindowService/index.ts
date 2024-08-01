@@ -318,7 +318,7 @@ export class WindowService implements WindowServiceTrait {
     }
     for (let i = 0; i < cppFileList.length; i++) {
       const file = cppFileList[i];
-      await timeout(500);
+      await timeout(1000);
       await this.reviewFile(file, false);
     }
   }
@@ -418,7 +418,6 @@ export class WindowService implements WindowServiceTrait {
         const review = reviewList[i];
         reviewPage.addReview(review);
       }
-      reviewPage.active();
     } catch (error) {
       log.error(error);
       return;
