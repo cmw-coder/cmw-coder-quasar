@@ -4,6 +4,7 @@ import { decode } from 'iconv-lite';
 import { REGEXP_WORD } from 'main/components/PromptExtractor/constants';
 import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
+import { deleteComments } from 'main/utils/common';
 import { NEW_LINE_REGEX } from 'shared/constants/common';
 import { CompletionType } from 'shared/types/common';
 
@@ -105,7 +106,7 @@ export const separateTextByLine = (
   removeComments = false,
 ): string[] => {
   if (removeComments) {
-    rawText = rawText.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
+    rawText = deleteComments(rawText);
   }
   return rawText
     .split(NEW_LINE_REGEX)
