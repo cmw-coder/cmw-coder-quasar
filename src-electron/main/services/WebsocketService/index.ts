@@ -27,7 +27,6 @@ import { DataProjectType } from 'main/stores/data/types';
 import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
 import { Range } from 'main/types/vscode/range';
-import { deleteComments } from 'main/utils/common';
 import {
   CompletionErrorCause,
   getClientVersion,
@@ -513,12 +512,7 @@ export class WebsocketService implements WebsocketServiceTrait {
       const { id } = data;
       const referencesResolveHandle = this.referencesResolveHandleMap.get(id);
       if (referencesResolveHandle) {
-        referencesResolveHandle(
-          data.references.map((reference) => ({
-            ...reference,
-            content: deleteComments(reference.content),
-          })) || [],
-        );
+        referencesResolveHandle(data.references || []);
         this.referencesResolveHandleMap.delete(id);
       }
     });
