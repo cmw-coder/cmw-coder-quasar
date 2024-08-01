@@ -105,7 +105,7 @@ const updateFileList = async () => {
     activeFileReviewList.value = [];
   }
 };
-const throttleUpdateFileList = throttle(updateFileList, 300);
+const throttleUpdateFileList = throttle(updateFileList, 1000);
 
 const updateReviewData = (data: ReviewData) => {
   const index = activeFileReviewList.value.findIndex(
@@ -115,7 +115,7 @@ const updateReviewData = (data: ReviewData) => {
     activeFileReviewList.value[index] = data;
   }
 };
-const throttleUpdateReviewData = throttle(updateReviewData, 300);
+const throttleUpdateReviewData = throttle(updateReviewData, 1000);
 
 onMounted(async () => {
   currentFilePath.value = await websocketService.getCurrentFile();
