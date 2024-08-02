@@ -57,10 +57,12 @@ export class PromptElements {
       '%{NeighborSnippet}%',
       this.neighborSnippet || '',
     );
+    log.debug('removeFunctionHeader before', this.currentFilePrefix);
     question = question.replaceAll(
       '%{CurrentFilePrefix}%',
       removeFunctionHeader(this.currentFilePrefix, completionType),
     );
+    log.debug('removeFunctionHeader after', this.currentFilePrefix);
     question = question.replaceAll(
       '%{NearCode}%',
       removeFunctionHeader(

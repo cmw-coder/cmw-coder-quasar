@@ -5,7 +5,7 @@ import aiAssistantIframe from 'utils/aiAssistantIframe';
 import { ServiceType } from 'shared/types/service';
 import { ActionApi } from 'types/ActionApi';
 import { ActionType } from 'shared/types/ActionMessage';
-import { MainWindowPageType } from 'app/src-electron/shared/types/MainWindowPageType';
+import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 
 const baseName = 'pages.ChatIframe';
 const actionApi = new ActionApi(baseName);
