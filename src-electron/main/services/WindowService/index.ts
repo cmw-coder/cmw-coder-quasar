@@ -1,7 +1,5 @@
 import { BrowserWindow, app, dialog, screen } from 'electron';
 import log from 'electron-log/main';
-import { readFile } from 'fs/promises';
-import { decode } from 'iconv-lite';
 import { inject, injectable } from 'inversify';
 import Parser from 'web-tree-sitter';
 import { TrayIcon } from 'main/components/TrayIcon';
@@ -25,16 +23,12 @@ import { WebsocketService } from 'main/services/WebsocketService';
 
 import { SelectionTipsWindow } from 'main/services/WindowService/types/SelectionTipsWindow';
 import { ExtraData, Selection } from 'shared/types/Selection';
-import { ReviewInstance } from 'main/components/ReviewInstance';
-import { Feedback, ReviewData, ReviewType } from 'shared/types/review';
+import { Feedback, ReviewData } from 'shared/types/review';
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
-import { Range } from 'main/types/vscode/range';
 import { container, getService } from 'main/services';
-import { treeSitterFolder } from 'main/services/WindowService/constants';
 import { DateTime } from 'luxon';
 import { api_reportSKU } from 'main/request/sku';
-import { dirname, extname } from 'path';
-import { getFilesInDirectory, timeout } from 'main/utils/common';
+import { dirname } from 'path';
 
 interface WindowMap {
   [WindowType.Completions]: CompletionsWindow;
@@ -68,7 +62,7 @@ export class WindowService implements WindowServiceTrait {
     this.windowMap.set(WindowType.Login, new LoginWindow());
     this.windowMap.set(WindowType.Completions, new CompletionsWindow());
     this.windowMap.set(WindowType.Main, new MainWindow());
-    this.windowMap.set(WindowType.Quake, new MainWindow());
+    // this.windowMap.set(WindowType.Quake, new MainWindow());
     this.windowMap.set(WindowType.Update, new UpdateWindow());
     this.windowMap.set(WindowType.SelectionTips, new SelectionTipsWindow());
 
@@ -276,9 +270,6 @@ export class WindowService implements WindowServiceTrait {
       return;
     }
     const targetDirPath = targetDirPathList[0];
-    // 递归遍历出所有文件
-    const fileList = await getFilesInDirectory(targetDirPath);
-    const cppFileList = fileList.filter((file) => extname(file) === '.c');
     const clientInfo = getService(ServiceType.WEBSOCKET).getClientInfo();
     if (!clientInfo || !clientInfo.currentProject || !clientInfo.version) {
       return;
@@ -316,11 +307,11 @@ export class WindowService implements WindowServiceTrait {
     } catch (e) {
       log.error('reportReviewUsage.failed', e);
     }
-    for (let i = 0; i < cppFileList.length; i++) {
-      const file = cppFileList[i];
-      await timeout(1000);
-      await this.reviewFile(file, false);
-    }
+    const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
+    reviewPage.reviewSubProcess.proxyFn.reviewProject({
+      projectDirPath: targetDirPath,
+      extraData,
+    });
   }
 
   async reviewFile(path: string, reportSku = true) {
@@ -369,59 +360,10 @@ export class WindowService implements WindowServiceTrait {
 
     const mainWindow = this.getWindow(WindowType.Main);
     const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
-    const content = decode(await readFile(path), 'gbk');
-    try {
-      const parser = new Parser();
-      const language = await Parser.Language.load(
-        `${treeSitterFolder}/tree-sitter-c.wasm`,
-      );
-      parser.setLanguage(language);
-      const functionDefinitionQuery = language.query(
-        '(function_definition) @definition',
-      );
-      const tree = parser.parse(content);
-      const matches = functionDefinitionQuery.matches(tree.rootNode);
-      log.debug('WindowService.reviewFile', { matches });
-      const functionDefinitions = matches.map(
-        ({ captures }): Selection => ({
-          block: content.slice(
-            captures[0].node.startIndex,
-            captures[0].node.endIndex,
-          ),
-          file: path,
-          content: content.slice(
-            captures[0].node.startIndex,
-            captures[0].node.endIndex,
-          ),
-          range: new Range(
-            captures[0].node.startPosition.row,
-            captures[0].node.startPosition.column,
-            captures[0].node.endPosition.row,
-            captures[0].node.endPosition.column,
-          ),
-          language: 'c',
-        }),
-      );
-      log.debug('WindowService.reviewFile', { functionDefinitions });
-      const reviewList = functionDefinitions.map(
-        (functionDefinition) =>
-          new ReviewInstance(
-            functionDefinition,
-            {
-              projectId: clientInfo.currentProject,
-              version: clientInfo.version,
-            },
-            ReviewType.File,
-          ),
-      );
-      for (let i = 0; i < reviewList.length; i++) {
-        const review = reviewList[i];
-        reviewPage.addReview(review);
-      }
-    } catch (error) {
-      log.error(error);
-      return;
-    }
+    reviewPage.reviewSubProcess.proxyFn.reviewFile({
+      filePath: path,
+      extraData,
+    });
   }
 
   async reviewSelection(selection?: Selection) {
@@ -460,12 +402,10 @@ export class WindowService implements WindowServiceTrait {
     }
     const mainWindow = this.getWindow(WindowType.Main);
     const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
-    const reviewInstance = new ReviewInstance(
+    reviewPage.reviewSubProcess.proxyFn.addReview({
       selection,
       extraData,
-      ReviewType.Function,
-    );
-    reviewPage.addReview(reviewInstance);
+    });
     reviewPage.active();
   }
 
@@ -473,13 +413,13 @@ export class WindowService implements WindowServiceTrait {
     const reviewPage = this.getWindow(WindowType.Main).getPage(
       MainWindowPageType.Review,
     );
-    return reviewPage.reviewDataList;
+    return reviewPage.reviewSubProcess.proxyFn.getReviewData();
   }
 
   async delReview(reviewId: string) {
     const mainWindow = this.getWindow(WindowType.Main);
     const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
-    reviewPage.delReview(reviewId);
+    return reviewPage.reviewSubProcess.proxyFn.delReview(reviewId);
   }
 
   async setReviewFeedback(data: {
@@ -491,30 +431,32 @@ export class WindowService implements WindowServiceTrait {
   }): Promise<void> {
     const mainWindow = this.getWindow(WindowType.Main);
     const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
-    await reviewPage.setReviewFeedback(data);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    return reviewPage.reviewSubProcess.proxyFn.setReviewFeedback(data);
   }
 
-  async retryReview(reviewData: ReviewData) {
+  async retryReview(reviewId: string) {
     const mainWindow = this.getWindow(WindowType.Main);
     const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
-    reviewPage.retryReview(reviewData);
+    return reviewPage.reviewSubProcess.proxyFn.retryReview(reviewId);
   }
 
   async stopReview(reviewId: string) {
     const mainWindow = this.getWindow(WindowType.Main);
     const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
-    reviewPage.stopReview(reviewId);
+    return reviewPage.reviewSubProcess.proxyFn.stopReview(reviewId);
   }
 
-  async getReviewFileDetailList() {
+  async getReviewFileList() {
     const mainWindow = this.getWindow(WindowType.Main);
     const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
-    return reviewPage.getReviewFileDetailList();
+    return reviewPage.reviewSubProcess.proxyFn.getReviewFileList();
   }
 
   async getFileReviewList(filePath: string) {
     const mainWindow = this.getWindow(WindowType.Main);
     const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
-    return reviewPage.getFileReviewList(filePath);
+    return reviewPage.reviewSubProcess.proxyFn.getFileReviewList(filePath);
   }
 }

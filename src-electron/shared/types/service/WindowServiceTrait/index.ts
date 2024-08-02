@@ -37,10 +37,10 @@ export interface WindowServiceTrait {
     createTime: number;
     comment?: string;
   }): Promise<void>;
-  retryReview(reviewData: ReviewData): Promise<void>;
+  retryReview(reviewId: string): Promise<void>;
   stopReview(reviewId: string): Promise<void>;
   delReview(reviewId: string): Promise<void>;
   reviewProject(filePath?: string): Promise<void>;
-  getReviewFileDetailList(): Promise<ReviewFileItem[]>;
+  getReviewFileList(): Promise<ReviewFileItem[]>;
   getFileReviewList(filePath: string): Promise<ReviewData[]>;
 }
