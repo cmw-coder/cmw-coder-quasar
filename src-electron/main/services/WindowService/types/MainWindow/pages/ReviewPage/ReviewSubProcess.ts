@@ -21,9 +21,10 @@ import {
 } from 'main/request/review';
 import { container } from 'main/services';
 import { ConfigService } from 'main/services/ConfigService';
-import { WebsocketService } from 'main/services/WebsocketService';
+// import { WebsocketService } from 'main/services/WebsocketService';
 import { WindowService } from 'main/services/WindowService';
 import { cmwCoderSubprocessPath } from 'main/services/WindowService/constants';
+import { timeout } from 'main/utils/common';
 import path from 'path';
 import {
   ReviewDataUpdateActionMessage,
@@ -36,6 +37,8 @@ export class ReviewSubProcess
   extends MessageToChildProxy<ReviewChildHandler>
   implements ReviewMasterHandler
 {
+  private updatedReviewIdList: string[] = [];
+  private updateTimer: NodeJS.Timeout | undefined = undefined;
   constructor() {
     super(`${cmwCoderSubprocessPath}/dist/reviewManagerProcess.cjs`, {
       historyDir: path.join(app.getPath('userData'), 'reviewHistoryV2'),
@@ -52,22 +55,42 @@ export class ReviewSubProcess
   }
 
   async log(...payloads: never[]): Promise<void> {
-    Logger.log('[ReviewSubProcess]', ...payloads);
+    Logger.log(`[ReviewSubProcess ${this.pid}]`, ...payloads);
   }
 
   async getReferences(selection: Selection): Promise<Reference[]> {
-    const websocketService = container.get<WebsocketService>(
-      ServiceType.WEBSOCKET,
-    );
-    return websocketService.getCodeReviewReferences(selection);
+    // const websocketService = container.get<WebsocketService>(
+    //   ServiceType.WEBSOCKET,
+    // );
+    // return websocketService.getCodeReviewReferences(selection);
+    // 性能测试
+    console.log('getReferences', selection.file);
+    await timeout(1000);
+    return [];
   }
 
   async reviewDataUpdated(reviewId: string): Promise<void> {
+    if (this.updateTimer) {
+      clearTimeout(this.updateTimer);
+      this.updateTimer = undefined;
+    }
+    this.updateTimer = setTimeout(() => {
+      mainWindow.sendMessageToRenderer(
+        new ReviewDataUpdateActionMessage(this.updatedReviewIdList),
+      );
+      this.updatedReviewIdList = [];
+    }, 500);
     const windowService = container.get<WindowService>(ServiceType.WINDOW);
     const mainWindow = windowService.getWindow(WindowType.Main);
-    mainWindow.sendMessageToRenderer(
-      new ReviewDataUpdateActionMessage(reviewId),
-    );
+    if (!this.updatedReviewIdList.includes(reviewId)) {
+      this.updatedReviewIdList.push(reviewId);
+    }
+    if (this.updatedReviewIdList.length >= 10) {
+      mainWindow.sendMessageToRenderer(
+        new ReviewDataUpdateActionMessage(this.updatedReviewIdList),
+      );
+      this.updatedReviewIdList = [];
+    }
   }
 
   async reviewFileListUpdated(): Promise<void> {

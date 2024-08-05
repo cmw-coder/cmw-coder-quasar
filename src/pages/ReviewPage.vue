@@ -15,9 +15,8 @@ import { ActionType } from 'shared/types/ActionMessage';
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import FunctionPanel from 'components/ReviewPanels/FunctionPanel.vue';
 import { Selection } from 'shared/types/Selection';
-import { QVirtualScroll, useQuasar } from 'quasar';
+import { QVirtualScroll, throttle, useQuasar } from 'quasar';
 import { DateTime } from 'luxon';
-import { throttle } from 'quasar';
 
 const { dialog } = useQuasar();
 const expandedMap = ref({} as Record<string, boolean>);
@@ -100,6 +99,7 @@ const updateFileList = async () => {
     activeFileReviewList.value = [];
   }
 };
+
 const throttleUpdateFileList = throttle(updateFileList, 1000);
 
 const updateActiveFileReviewList = async () => {
@@ -112,18 +112,14 @@ const updateActiveFileReviewList = async () => {
     );
   }
 };
-const throttleUpdateActiveFileReviewList = throttle(
-  updateActiveFileReviewList,
-  1000,
-);
 
-const updateReviewData = (reviewId: string) => {
-  console.log('updateReviewData');
-  const index = activeFileReviewList.value.findIndex(
-    (item) => item.reviewId === reviewId,
-  );
-  if (index !== -1) {
-    throttleUpdateActiveFileReviewList();
+const updateReviewData = (reviewIdList: string[]) => {
+  console.log('updateReviewData', reviewIdList.length);
+  const includedFileReviewList = activeFileReviewList.value.filter((review) => {
+    return reviewIdList.includes(review.reviewId);
+  });
+  if (includedFileReviewList.length > 0) {
+    updateActiveFileReviewList();
   }
   throttleUpdateFileList();
 };
@@ -139,8 +135,8 @@ onMounted(async () => {
     throttleUpdateFileList();
   });
 
-  actionApi.register(ActionType.ReviewDataUpdate, (reviewId) => {
-    updateReviewData(reviewId);
+  actionApi.register(ActionType.ReviewDataUpdate, (reviewIdList) => {
+    updateReviewData(reviewIdList);
   });
 
   actionApi.register(ActionType.MainWindowCheckPageReady, (type) => {

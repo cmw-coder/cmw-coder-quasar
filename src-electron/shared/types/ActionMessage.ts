@@ -115,10 +115,10 @@ export class AddSelectionToChatActionMessage implements ActionMessage {
 
 export class ReviewDataUpdateActionMessage implements ActionMessage {
   type = ActionType.ReviewDataUpdate;
-  data: string;
+  data: string[];
 
-  constructor(reviewId: string) {
-    this.data = reviewId;
+  constructor(reviewIdList: string[]) {
+    this.data = reviewIdList;
   }
 }
 
