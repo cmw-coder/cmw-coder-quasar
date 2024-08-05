@@ -459,4 +459,10 @@ export class WindowService implements WindowServiceTrait {
     const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
     return reviewPage.reviewSubProcess.proxyFn.getFileReviewList(filePath);
   }
+
+  async clearReview() {
+    const mainWindow = this.getWindow(WindowType.Main);
+    const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
+    return reviewPage.reviewSubProcess.proxyFn.clearReview();
+  }
 }

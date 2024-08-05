@@ -74,11 +74,17 @@ const activeFileReviewListRef = ref(null as unknown as QVirtualScroll);
 const fileList: Ref<ReviewFileItem[]> = ref([]);
 const activeFileReviewList: Ref<ReviewData[]> = ref([]);
 const activeFile = ref<string>('');
+const activeFileReviewListLoading = ref(true);
 
 watch(
   () => activeFile.value,
   async () => {
-    updateActiveFileReviewList();
+    try {
+      activeFileReviewListLoading.value = true;
+      await updateActiveFileReviewList();
+    } finally {
+      activeFileReviewListLoading.value = false;
+    }
   },
 );
 
@@ -247,6 +253,20 @@ const retryHandle = (review: ReviewData) => {
 const projectReview = () => {
   windowService.reviewProject(currentFilePath.value);
 };
+
+const clearReview = () => {
+  dialog({
+    title: '清空评审任务',
+    message: '将清空所有评审任务，是否继续？',
+    persistent: true,
+    ok: '确定',
+    cancel: '取消',
+  }).onOk(async () => {
+    await windowService.clearReview();
+    fileList.value = [];
+    activeFileReviewList.value = [];
+  });
+};
 </script>
 
 <template>
@@ -283,6 +303,16 @@ const projectReview = () => {
               unelevated
               label="目录评审"
               @click="() => projectReview()"
+            />
+          </q-item-section>
+          <q-item-section side>
+            <q-btn
+              v-if="fileList.length > 10"
+              color="primary"
+              size="md"
+              unelevated
+              label="清空"
+              @click="() => clearReview()"
             />
           </q-item-section>
         </q-item>
@@ -338,7 +368,14 @@ const projectReview = () => {
         </template>
 
         <template v-slot:after>
+          <q-inner-loading
+            :showing="activeFileReviewListLoading"
+            label="加载中..."
+            label-class="text-teal"
+            label-style="font-size: 1.1em"
+          />
           <q-virtual-scroll
+            v-if="!activeFileReviewListLoading"
             ref="activeFileReviewListRef"
             style="height: 100%"
             :items="activeFileReviewList"
