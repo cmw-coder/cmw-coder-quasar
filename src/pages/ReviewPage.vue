@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { onBeforeUnmount, onMounted, Ref, ref, toRaw, watch } from 'vue';
+import { onBeforeUnmount, onMounted, Ref, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useService } from 'utils/common';
 import { ServiceType } from 'shared/types/service';
@@ -85,7 +85,7 @@ watch(
 
 const updateFileList = async () => {
   console.log('updateFileList');
-  fileList.value = await windowService.getReviewFileDetailList();
+  fileList.value = await windowService.getReviewFileList();
   if (!activeFile.value) {
     activeFile.value = fileList.value[0]?.path;
   } else {
@@ -245,7 +245,7 @@ const feedBackHandle = (
 };
 
 const retryHandle = (review: ReviewData) => {
-  windowService.retryReview(toRaw(review));
+  windowService.retryReview(review.reviewId);
 };
 
 const projectReview = () => {

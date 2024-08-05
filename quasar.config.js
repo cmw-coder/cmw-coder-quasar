@@ -230,8 +230,8 @@ module.exports = configure((/* ctx */) => ({
           to: 'svn',
         },
         {
-          from: 'src-electron/assets/tree-sitter',
-          to: 'tree-sitter',
+          from: 'node_modules/cmw-coder-subprocess',
+          to: 'cmw-coder-subprocess',
         },
       ],
     },
