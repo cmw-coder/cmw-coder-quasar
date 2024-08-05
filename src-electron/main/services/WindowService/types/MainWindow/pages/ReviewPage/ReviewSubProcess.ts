@@ -12,7 +12,7 @@ import { container } from 'main/services';
 import { ConfigService } from 'main/services/ConfigService';
 import { WebsocketService } from 'main/services/WebsocketService';
 import { WindowService } from 'main/services/WindowService';
-import { reviewScriptPath } from 'main/services/WindowService/constants';
+import { cmwCoderSubprocessPath } from 'main/services/WindowService/constants';
 import path from 'path';
 import {
   ReviewDataUpdateActionMessage,
@@ -26,9 +26,13 @@ export class ReviewSubProcess
   implements ReviewMasterHandler
 {
   constructor() {
-    super(reviewScriptPath, {
+    super(`${cmwCoderSubprocessPath}/dist/reviewManagerProcess.cjs`, {
       historyDir: path.join(app.getPath('userData'), 'reviewHistoryV2'),
     });
+  }
+
+  async getScriptDir(): Promise<string> {
+    return cmwCoderSubprocessPath;
   }
 
   async getConfig(): Promise<AppConfig> {

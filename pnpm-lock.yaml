@@ -16,7 +16,7 @@ dependencies:
     version: 1.7.2
   cmw-coder-subprocess:
     specifier: github:cmw-coder/cmw-coder-subprocess
-    version: github.com/cmw-coder/cmw-coder-subprocess/bf499d8110946f21c78878522ff0b74902ac9ddc
+    version: github.com/cmw-coder/cmw-coder-subprocess/a888599997b431ea3be46559e416fc66a2e3f0ad
   electron-log:
     specifier: ^5.1.4
     version: 5.1.4
@@ -4968,8 +4968,8 @@ packages:
       readable-stream: 3.6.2
     dev: true
 
-  github.com/cmw-coder/cmw-coder-subprocess/bf499d8110946f21c78878522ff0b74902ac9ddc:
-    resolution: {tarball: https://codeload.github.com/cmw-coder/cmw-coder-subprocess/tar.gz/bf499d8110946f21c78878522ff0b74902ac9ddc}
+  github.com/cmw-coder/cmw-coder-subprocess/a888599997b431ea3be46559e416fc66a2e3f0ad:
+    resolution: {tarball: https://codeload.github.com/cmw-coder/cmw-coder-subprocess/tar.gz/a888599997b431ea3be46559e416fc66a2e3f0ad}
     name: cmw-coder-subprocess
     version: 0.0.1
     dependencies:
