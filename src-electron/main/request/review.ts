@@ -75,13 +75,19 @@ export const api_get_code_review_result = async (
   return parseReviewResult(result);
 };
 
-export const api_feedback_review = async (
-  serverTaskId: string,
-  userId: string,
-  feedback: Feedback,
-  timestamp: number,
-  comment: string,
-) => {
+export const api_feedback_review = async ({
+  serverTaskId,
+  userId,
+  feedback,
+  timestamp,
+  comment,
+}: {
+  serverTaskId: string;
+  userId: string;
+  feedback: Feedback;
+  timestamp: number;
+  comment: string;
+}) => {
   return request({
     url: '/kong/RdTestAiService/v1/chatgpt/question/review/feedback',
     method: 'post',
