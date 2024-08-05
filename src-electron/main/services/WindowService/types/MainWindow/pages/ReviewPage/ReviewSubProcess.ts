@@ -21,10 +21,10 @@ import {
 } from 'main/request/review';
 import { container } from 'main/services';
 import { ConfigService } from 'main/services/ConfigService';
-import { WebsocketService } from 'main/services/WebsocketService';
+// import { WebsocketService } from 'main/services/WebsocketService';
+import { timeout } from 'main/utils/common';
 import { WindowService } from 'main/services/WindowService';
 import { cmwCoderSubprocessPath } from 'main/services/WindowService/constants';
-// import { timeout } from 'main/utils/common';
 import path from 'path';
 import {
   ReviewDataUpdateActionMessage,
@@ -59,14 +59,14 @@ export class ReviewSubProcess
   }
 
   async getReferences(selection: Selection): Promise<Reference[]> {
-    const websocketService = container.get<WebsocketService>(
-      ServiceType.WEBSOCKET,
-    );
-    return websocketService.getCodeReviewReferences(selection);
+    // const websocketService = container.get<WebsocketService>(
+    //   ServiceType.WEBSOCKET,
+    // );
+    // return websocketService.getCodeReviewReferences(selection);
     // 性能测试
-    // console.log('getReferences', selection.file);
-    // await timeout(1000);
-    // return [];
+    console.log('getReferences', selection.file);
+    await timeout(1000);
+    return [];
   }
 
   async reviewDataUpdated(reviewId: string): Promise<void> {
