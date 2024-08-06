@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, onMounted, ref, toRaw, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useService } from 'utils/common';
 import { ServiceType } from 'shared/types/service';
 import {
@@ -11,10 +11,10 @@ import {
 import { Selection } from 'shared/types/Selection';
 import FunctionPanel from 'components/ReviewPanels/FunctionPanel.vue';
 import { DateTime } from 'luxon';
-import { useRouter } from 'vue-router';
+// import { useRouter } from 'vue-router';
 
 const windowService = useService(ServiceType.WINDOW);
-const router = useRouter();
+// const router = useRouter();
 const expandedMap = ref({} as Record<string, boolean>);
 
 const formatSelection = (selection: Selection) => {
@@ -48,14 +48,12 @@ const getFileName = (filePath: string) => {
 
 const splitterModel = ref<number>(20);
 
-const dataStoreService = useService(ServiceType.DATA_STORE);
-
 const selectedDate = ref('');
 const dateList = ref<string[]>([]);
 const reviewList = ref<ReviewData[]>([]);
 
 const getReviewDateList = async () => {
-  const data = await dataStoreService.getReviewHistoryFiles();
+  const data = await windowService.getReviewHistoryFiles();
   dateList.value = data.sort(
     (a, b) => new Date(b).getTime() - new Date(a).getTime(),
   );
@@ -78,7 +76,7 @@ watch(
   () => selectedDate.value,
   async () => {
     if (selectedDate.value === '') return;
-    reviewList.value = await dataStoreService.getReviewFileContent(
+    reviewList.value = await windowService.getReviewFileContent(
       selectedDate.value,
     );
     activeFile.value = fileList.value[0];
@@ -102,8 +100,9 @@ const feedBackHandle = (
 };
 
 const retryHandle = async (review: ReviewData) => {
-  await windowService.retryReview(toRaw(review));
-  router.back();
+  console.log('retryHandle', review);
+  // await windowService.retryReview(toRaw(review));
+  // router.back();
 };
 
 onMounted(() => {

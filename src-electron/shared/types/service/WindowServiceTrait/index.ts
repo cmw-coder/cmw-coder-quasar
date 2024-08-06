@@ -44,4 +44,6 @@ export interface WindowServiceTrait {
   getReviewFileList(): Promise<ReviewFileItem[]>;
   getFileReviewList(filePath: string): Promise<ReviewData[]>;
   clearReview(): Promise<unknown>;
+  getReviewHistoryFiles(): Promise<string[]>;
+  getReviewFileContent(filePath: string): Promise<ReviewData[]>;
 }
