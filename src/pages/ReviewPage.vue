@@ -88,9 +88,15 @@ watch(
   },
 );
 
+const isUpdatingFileList = ref(false);
 const updateFileList = async () => {
+  if (isUpdatingFileList.value) {
+    return;
+  }
+  isUpdatingFileList.value = true;
   console.log('updateFileList');
   fileList.value = await windowService.getReviewFileList();
+  isUpdatingFileList.value = false;
   if (!activeFile.value) {
     activeFile.value = fileList.value[0]?.path;
   } else {
@@ -108,7 +114,12 @@ const updateFileList = async () => {
 
 const throttleUpdateFileList = throttle(updateFileList, 1000);
 
+const isUpdatingActiveFileReviewList = ref(false);
 const updateActiveFileReviewList = async () => {
+  if (isUpdatingActiveFileReviewList.value) {
+    return;
+  }
+  isUpdatingActiveFileReviewList.value = true;
   console.log('updateActiveFileReviewList');
   if (!activeFile.value) {
     activeFileReviewList.value = [];
@@ -117,6 +128,7 @@ const updateActiveFileReviewList = async () => {
       activeFile.value,
     );
   }
+  isUpdatingActiveFileReviewList.value = false;
 };
 
 const updateReviewData = (reviewIdList: string[]) => {
