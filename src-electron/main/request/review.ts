@@ -7,17 +7,15 @@ import {
 } from 'shared/types/review';
 import request from 'main/request';
 import Logger from 'electron-log/main';
-import { uid } from 'quasar';
 
 export const api_code_review = async (data: ReviewRequestParams) => {
-  const createId = uid();
-  Logger.log('api_code_review start', createId);
+  Logger.log('api_code_review start', data);
   const result = await request<string>({
     url: '/kong/RdTestAiService/v1/chatgpt/question/review',
     method: 'post',
     data,
   });
-  Logger.log('api_code_review end', createId);
+  Logger.log('api_code_review end', result);
   return result;
 };
 
