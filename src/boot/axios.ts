@@ -1,29 +1,12 @@
-import axios, { AxiosResponse } from 'axios';
+import axios from 'axios';
 
 import { StepInfo } from 'stores/workflow/types';
 import { NEW_LINE_REGEX } from 'shared/constants/common';
 
 declare module '@vue/runtime-core' {
   // noinspection JSUnusedGlobalSymbols
-  interface ComponentCustomProperties {
-    $authCode: (userId: string) => Promise<AxiosResponse>;
-    $login: (userId: string, code: string) => Promise<AxiosResponse<LoginData>>;
-  }
+  interface ComponentCustomProperties {}
 }
-
-type LoginData =
-  | {
-      userId: null;
-      token: null;
-      refreshToken: null;
-      error: string;
-    }
-  | {
-      userId: string;
-      token: string;
-      refreshToken: string;
-      error: null;
-    };
 
 interface LangChainDataResponse {
   event: 'data';

@@ -23,7 +23,7 @@ const finish = () => {
 };
 
 onMounted(async () => {
-  account.value = await configService.getConfig('username') ?? '';
+  account.value = (await configService.getConfig('username')) ?? '';
 });
 </script>
 

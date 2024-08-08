@@ -59,7 +59,7 @@ const navigations: Navigation[] = [
 <template>
   <q-drawer
     behavior="desktop"
-    bordered
+    elevated
     no-swipe-backdrop
     no-swipe-close
     no-swipe-open

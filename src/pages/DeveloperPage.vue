@@ -17,6 +17,7 @@ const i18n = (relativePath: string) => {
   return t('pages.DeveloperPage.' + relativePath);
 };
 
+const utilsService = useService(ServiceType.UTILS);
 const websocketService = useService(ServiceType.WEBSOCKET);
 const windowService = useService(ServiceType.WINDOW);
 
@@ -41,7 +42,7 @@ const similarSnippets = ref<SimilarSnippet[]>([]);
 const checkReferenceFolder = async () => {
   if (referenceFolder.path) {
     referenceFolder.loading = true;
-    referenceFolder.error = !(await websocketService.checkFolderExist(
+    referenceFolder.error = !(await utilsService.checkFolderExist(
       referenceFolder.path,
     ));
     referenceFolder.loading = false;
@@ -51,7 +52,7 @@ const checkReferenceFolder = async () => {
 const getCurrentFileContent = async () => {
   if (currentFile.path) {
     currentFile.loading = true;
-    const content = await websocketService.getFileContent(currentFile.path);
+    const content = await utilsService.getFileContent(currentFile.path);
     if (content) {
       currentFile.content = content;
       currentFile.error = false;

@@ -92,7 +92,7 @@ export const routes: RouteRecordRaw[] = [
       {
         path: 'selection-tips',
         components: {
-          default: () => import('pages/CodeSelectedTipsPage.vue'),
+          default: () => import('pages/SelectionTipsPage.vue'),
         },
         props: {
           header: {
@@ -121,6 +121,9 @@ export const routes: RouteRecordRaw[] = [
         },
         props: {
           header: {
+            title: {
+              label: 'chat',
+            },
             windowType: WindowType.Main,
           },
         },
@@ -134,6 +137,9 @@ export const routes: RouteRecordRaw[] = [
         },
         props: {
           header: {
+            title: {
+              label: 'commit',
+            },
             windowType: WindowType.Main,
           },
           default: {
@@ -150,6 +156,9 @@ export const routes: RouteRecordRaw[] = [
         },
         props: {
           header: {
+            title: {
+              label: 'developer',
+            },
             windowType: WindowType.Main,
           },
         },
@@ -163,7 +172,44 @@ export const routes: RouteRecordRaw[] = [
         },
         props: {
           header: {
+            title: {
+              label: 'feedback',
+            },
             windowType: WindowType.Main,
+          },
+        },
+      },
+      {
+        path: 'review',
+        components: {
+          header: () => import('layouts/headers/ReviewHeader.vue'),
+          leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
+          default: () => import('pages/ReviewPage.vue'),
+        },
+        props: {
+          header: {
+            title: {
+              label: 'review',
+            },
+            windowType: WindowType.Main,
+            rightBtnType: 'history',
+          },
+        },
+      },
+      {
+        path: 'review-history',
+        components: {
+          header: () => import('layouts/headers/ReviewHeader.vue'),
+          leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
+          default: () => import('pages/ReviewHistoryPage.vue'),
+        },
+        props: {
+          header: {
+            title: {
+              label: 'reviewHistory',
+            },
+            windowType: WindowType.Main,
+            rightBtnType: 'historyBack',
           },
         },
       },
@@ -176,6 +222,9 @@ export const routes: RouteRecordRaw[] = [
         },
         props: {
           header: {
+            title: {
+              label: 'settings',
+            },
             windowType: WindowType.Main,
           },
         },
@@ -189,32 +238,9 @@ export const routes: RouteRecordRaw[] = [
         },
         props: {
           header: {
-            windowType: WindowType.Main,
-          },
-        },
-      },
-      {
-        path: 'commit',
-        components: {
-          header: () => import('layouts/headers/MainHeader.vue'),
-          leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
-          default: () => import('pages/CommitPage.vue'),
-        },
-        props: {
-          header: {
-            windowType: WindowType.Main,
-          },
-        },
-      },
-      {
-        path: 'review',
-        components: {
-          header: () => import('layouts/headers/MainHeader.vue'),
-          leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
-          default: () => import('pages/ReviewPage/ReviewPage.vue'),
-        },
-        props: {
-          header: {
+            title: {
+              label: 'workflow',
+            },
             windowType: WindowType.Main,
           },
         },

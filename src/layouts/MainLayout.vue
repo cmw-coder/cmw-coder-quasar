@@ -32,6 +32,7 @@ bus.on('drawer', (action, position) => {
 
 onMounted(() => {
   actionApi.register(ActionType.MainWindowActivePage, (type) => {
+    console.log('MainWindowActivePage', type);
     router.push(MAIN_WINDOW_PAGE_URL_MAPPING[type]);
   });
 });

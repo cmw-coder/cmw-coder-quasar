@@ -7,6 +7,7 @@ import { DataStoreService } from 'main/services/DataStoreService';
 import { StatisticsService } from 'main/services/StatisticsService';
 import { SvnService } from 'main/services/SvnService';
 import { UpdaterService } from 'main/services/UpdaterService';
+import { UtilsService } from 'main/services/UtilsService';
 import { WebsocketService } from 'main/services/WebsocketService';
 import { WindowService } from 'main/services/WindowService';
 import { ServiceType, ServiceTypeMapping } from 'shared/types/service';
@@ -21,6 +22,7 @@ container.bind(ServiceType.DATA_STORE).to(DataStoreService);
 container.bind(ServiceType.STATISTICS).to(StatisticsService);
 container.bind(ServiceType.SVN).to(SvnService);
 container.bind(ServiceType.UPDATER).to(UpdaterService);
+container.bind(ServiceType.UTILS).to(UtilsService);
 container.bind(ServiceType.WEBSOCKET).to(WebsocketService);
 container.bind(ServiceType.WINDOW).to(WindowService);
 

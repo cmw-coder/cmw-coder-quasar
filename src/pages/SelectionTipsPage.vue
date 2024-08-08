@@ -4,7 +4,7 @@ import { useService } from 'utils/common';
 import { ServiceType } from 'shared/types/service';
 import { WindowType } from 'shared/types/WindowType';
 
-const baseName = 'pages.CodeSelectedTipsPage.';
+const baseName = 'pages.SelectionTipsPage.';
 const windowService = useService(ServiceType.WINDOW);
 
 const { t } = useI18n();
@@ -28,32 +28,38 @@ const reviewHandle = () => {
 
 <template>
   <div class="selection-tips-wrapper">
-    <q-btn
-      class="text-white"
-      flat
-      color="primary"
-      :label="i18n('labels.addToChat')"
-      @click="addToChatHandle"
-    />
-    <q-btn
-      flat
-      class="text-white"
-      color="primary"
-      :label="i18n('labels.review')"
-      @click="reviewHandle"
-    />
+    <div class="btn-wrapper">
+      <q-btn
+        class="text-white"
+        flat
+        color="primary"
+        :label="i18n('labels.addToChat')"
+        @click="addToChatHandle"
+      />
+    </div>
+    <div class="btn-wrapper">
+      <q-btn
+        flat
+        class="text-white"
+        color="primary"
+        :label="i18n('labels.review')"
+        @click="reviewHandle"
+      />
+    </div>
   </div>
 </template>
 
 <style scoped lang="scss">
 .selection-tips-wrapper {
   height: 100vh;
-  width: 100vw;
+  width: auto;
   overflow: hidden;
+  flex-wrap: nowrap;
   display: flex;
-  align-items: center;
-  justify-content: space-around;
-  background-color: hsla(0, 0%, 0%, 0.4);
+  flex-wrap: nowrap;
+  .btn-wrapper {
+    background-color: hsla(0, 0%, 0%, 0.4);
+  }
 }
 </style>
 

@@ -229,6 +229,10 @@ module.exports = configure((/* ctx */) => ({
           from: 'src-electron/assets/svn',
           to: 'svn',
         },
+        {
+          from: 'node_modules/cmw-coder-subprocess',
+          to: 'cmw-coder-subprocess',
+        },
       ],
     },
     unPackagedInstallParams: ['install', '--prod', '--no-frozen-lockfile'],

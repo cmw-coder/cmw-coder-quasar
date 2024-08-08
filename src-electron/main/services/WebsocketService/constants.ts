@@ -1,0 +1,1 @@
+export const MAX_REFERENCES_REQUEST_TIME = 30000;

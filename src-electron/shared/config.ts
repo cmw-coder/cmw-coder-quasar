@@ -20,6 +20,8 @@ export const defaultServerUrlMap: Record<NetworkZone, string> = {
 
 export const defaultAppConfigNetworkZoneMap: Record<NetworkZone, AppConfig> = {
   [NetworkZone.Normal]: {
+    locale: 'ZH-CN',
+    showSelectedTipsWindow: true,
     networkZone: NetworkZone.Unknown,
     username: '',
     token: '',
@@ -58,6 +60,8 @@ export const defaultAppConfigNetworkZoneMap: Record<NetworkZone, AppConfig> = {
     },
   },
   [NetworkZone.Public]: {
+    locale: 'ZH-CN',
+    showSelectedTipsWindow: true,
     networkZone: NetworkZone.Unknown,
     username: '',
     token: '',
@@ -96,6 +100,8 @@ export const defaultAppConfigNetworkZoneMap: Record<NetworkZone, AppConfig> = {
     },
   },
   [NetworkZone.Secure]: {
+    locale: 'ZH-CN',
+    showSelectedTipsWindow: true,
     networkZone: NetworkZone.Unknown,
     username: '',
     token: '',
@@ -134,6 +140,8 @@ export const defaultAppConfigNetworkZoneMap: Record<NetworkZone, AppConfig> = {
     },
   },
   [NetworkZone.Unknown]: {
+    locale: 'ZH-CN',
+    showSelectedTipsWindow: true,
     networkZone: NetworkZone.Unknown,
     username: '',
     token: '',
