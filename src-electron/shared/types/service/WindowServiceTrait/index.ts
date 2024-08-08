@@ -1,5 +1,5 @@
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
-import { ExtraData, Selection } from 'shared/types/Selection';
+import { Selection } from 'shared/types/Selection';
 import { WindowType } from 'shared/types/WindowType';
 import { Feedback, ReviewData, ReviewFileItem } from 'shared/types/review';
 
