@@ -193,19 +193,11 @@ const delFile = async (fileItem: ReviewFileItem) => {
       ok: i18n('dialog.delFileDialog.ok'),
       cancel: i18n('dialog.delFileDialog.cancel'),
     }).onOk(async () => {
-      await Promise.all(
-        includedFileReviewList.map((item) =>
-          windowService.delReview(item.reviewId),
-        ),
-      );
+      await windowService.delReviewByFile(fileItem.path);
       updateFileList();
     });
   } else {
-    await Promise.all(
-      includedFileReviewList.map((item) =>
-        windowService.delReview(item.reviewId),
-      ),
-    );
+    await windowService.delReviewByFile(fileItem.path);
     updateFileList();
   }
 };

@@ -40,6 +40,7 @@ export interface WindowServiceTrait {
   retryReview(reviewId: string): Promise<void>;
   stopReview(reviewId: string): Promise<void>;
   delReview(reviewId: string): Promise<void>;
+  delReviewByFile(filePath: string): Promise<void>;
   reviewProject(filePath?: string): Promise<void>;
   getReviewFileList(): Promise<ReviewFileItem[]>;
   getFileReviewList(filePath: string): Promise<ReviewData[]>;

@@ -422,6 +422,12 @@ export class WindowService implements WindowServiceTrait {
     return reviewPage.reviewSubProcess.proxyFn.delReview(reviewId);
   }
 
+  async delReviewByFile(filePath: string): Promise<void> {
+    const mainWindow = this.getWindow(WindowType.Main);
+    const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
+    return reviewPage.reviewSubProcess.proxyFn.delReviewByFile(filePath);
+  }
+
   async setReviewFeedback(data: {
     serverTaskId: string;
     userId: string;

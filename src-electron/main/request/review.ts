@@ -102,6 +102,7 @@ export const api_feedback_review = async ({
 };
 
 export const api_stop_review = async (serverTaskId: string) => {
+  Logger.log('api_stop_review', serverTaskId);
   return request({
     url: '/kong/RdTestAiService/v1/chatgpt/question/review/stop',
     method: 'post',
