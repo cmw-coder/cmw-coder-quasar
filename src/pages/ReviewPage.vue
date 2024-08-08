@@ -243,18 +243,26 @@ const delReviewItem = async (review: ReviewData) => {
   }
 };
 
-const feedBackHandle = (
+const feedBackHandle = async (
   review: ReviewData,
   feedback: Feedback,
   comment?: string,
 ) => {
-  console.log('feedBackHandle', review, feedback, comment);
+  const configService = useService(ServiceType.CONFIG);
+  const username = await configService.getConfig('username');
+  console.log('feedBackHandle', {
+    serverTaskId: review.serverTaskId,
+    userId: username || 'NONE',
+    feedback,
+    comment: comment || '',
+    timestamp: DateTime.now().valueOf() / 1000,
+  });
   windowService.setReviewFeedback({
     serverTaskId: review.serverTaskId,
+    userId: username || 'NONE',
     feedback,
-    comment,
-    extraData: review.extraData,
-    createTime: DateTime.now().valueOf() / 1000,
+    comment: comment || '',
+    timestamp: DateTime.now().valueOf() / 1000,
   });
 };
 

@@ -202,7 +202,7 @@ export const api_stop_review = async (serverTaskId: string) => {
 //   comment: string;
 // }) => {
 //   console.log(
-//     'api_get_code_review_result',
+//     'api_feedback_review',
 //     serverTaskId,
 //     userId,
 //     feedback,
@@ -214,7 +214,7 @@ export const api_stop_review = async (serverTaskId: string) => {
 // };
 
 // export const api_stop_review = async (serverTaskId: string) => {
-//   console.log('api_get_code_review_result', serverTaskId);
+//   console.log('api_stop_review', serverTaskId);
 //   await timeout(150);
 //   return '1111-2222-3333-4444';
 // };

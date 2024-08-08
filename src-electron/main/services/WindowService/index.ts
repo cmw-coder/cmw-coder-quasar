@@ -424,15 +424,13 @@ export class WindowService implements WindowServiceTrait {
 
   async setReviewFeedback(data: {
     serverTaskId: string;
+    userId: string;
     feedback: Feedback;
-    extraData: ExtraData;
-    createTime: number;
-    comment?: string;
+    timestamp: number;
+    comment: string;
   }): Promise<void> {
     const mainWindow = this.getWindow(WindowType.Main);
     const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
     return reviewPage.reviewSubProcess.proxyFn.setReviewFeedback(data);
   }
 

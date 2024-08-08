@@ -32,10 +32,10 @@ export interface WindowServiceTrait {
   getReviewData(): Promise<ReviewData[]>;
   setReviewFeedback(data: {
     serverTaskId: string;
+    userId: string;
     feedback: Feedback;
-    extraData: ExtraData;
-    createTime: number;
-    comment?: string;
+    timestamp: number;
+    comment: string;
   }): Promise<void>;
   retryReview(reviewId: string): Promise<void>;
   stopReview(reviewId: string): Promise<void>;

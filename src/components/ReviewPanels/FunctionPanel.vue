@@ -80,7 +80,7 @@ const viewReferenceHandle = (reference: Reference) => {
 // };
 
 const stopReviewHandle = () => {
-  windowService.stopReview(props.reviewData.serverTaskId);
+  windowService.stopReview(props.reviewData.reviewId);
 };
 
 onMounted(() => {
@@ -124,7 +124,7 @@ onMounted(() => {
             v-html="
               codeToHtml(
                 reviewData.selection.content,
-                reviewData.selection.language,
+                reviewData.selection.language as any,
               )
             "
           />
@@ -374,7 +374,7 @@ onMounted(() => {
                     v-html="
                       codeToHtml(
                         resultItem.ProblemCodeSnippet,
-                        reviewData.selection.language,
+                        reviewData.selection.language as any,
                       )
                     "
                   />
@@ -465,7 +465,10 @@ onMounted(() => {
             class="code"
             style="padding: 10px; overflow: auto; border: 1px solid #eee"
             v-html="
-              codeToHtml(activeReference.content, reviewData.selection.language)
+              codeToHtml(
+                activeReference.content,
+                reviewData.selection.language as any,
+              )
             "
           />
         </q-card-section>
