@@ -75,6 +75,7 @@ export class PromptProcessor {
         questionParams,
         this._abortController.signal,
       );
+      log.debug('PromptProcessor.process.answers', answers);
       getService(ServiceType.STATISTICS).completionUpdateRequestEndTime(
         actionId,
       );
