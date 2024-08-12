@@ -23,7 +23,7 @@ import { WebsocketService } from 'main/services/WebsocketService';
 
 import { SelectionTipsWindow } from 'main/services/WindowService/types/SelectionTipsWindow';
 import { ExtraData, Selection } from 'shared/types/Selection';
-import { Feedback, ReviewData } from 'shared/types/review';
+import { Feedback, ReviewData } from 'cmw-coder-subprocess';
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import { container, getService } from 'main/services';
 import { DateTime } from 'luxon';

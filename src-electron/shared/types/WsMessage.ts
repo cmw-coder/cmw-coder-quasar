@@ -1,7 +1,7 @@
 import { Completions } from 'main/components/PromptProcessor/types';
 import { CaretPosition, SymbolInfo } from 'shared/types/common';
 import { KeptRatio } from 'main/services/StatisticsService/types';
-import { Reference } from 'shared/types/review';
+import { Reference } from 'cmw-coder-subprocess';
 
 export enum WsAction {
   ChatInsert = 'ChatInsert',

@@ -2,16 +2,11 @@
 import { onMounted, PropType, ref } from 'vue';
 import { Selection } from 'shared/types/Selection';
 import { useHighlighter } from 'stores/highlighter';
-import {
-  Reference,
-  ReviewData,
-  ReviewState,
-  Feedback,
-} from 'shared/types/review';
 import { useService } from 'utils/common';
 import { ServiceType } from 'shared/types/service';
 import { useI18n } from 'vue-i18n';
 import { DateTime } from 'luxon';
+import { ReviewData, Feedback, Reference } from 'cmw-coder-subprocess';
 
 const props = defineProps({
   reviewData: {

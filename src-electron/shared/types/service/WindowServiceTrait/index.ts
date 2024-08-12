@@ -1,7 +1,7 @@
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import { Selection } from 'shared/types/Selection';
 import { WindowType } from 'shared/types/WindowType';
-import { Feedback, ReviewData, ReviewFileItem } from 'shared/types/review';
+import { Feedback, ReviewData, ReviewFileItem } from 'cmw-coder-subprocess';
 
 export interface WindowServiceTrait {
   finishLogin(): Promise<void>;

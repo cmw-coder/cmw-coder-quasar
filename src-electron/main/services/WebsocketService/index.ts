@@ -45,7 +45,7 @@ import {
 } from 'shared/types/WsMessage';
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import { Selection } from 'shared/types/Selection';
-import { Reference } from 'shared/types/review';
+import { Reference } from 'cmw-coder-subprocess';
 
 @injectable()
 export class WebsocketService implements WebsocketServiceTrait {

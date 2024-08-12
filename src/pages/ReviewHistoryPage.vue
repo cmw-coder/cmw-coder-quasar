@@ -7,7 +7,7 @@ import {
   ReviewData,
   ReviewState,
   reviewStateIconMap,
-} from 'shared/types/review';
+} from 'cmw-coder-subprocess';
 import { Selection } from 'shared/types/Selection';
 import FunctionPanel from 'components/ReviewPanels/FunctionPanel.vue';
 import { DateTime } from 'luxon';

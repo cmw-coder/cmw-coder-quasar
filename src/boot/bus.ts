@@ -1,7 +1,6 @@
+import { ReviewData } from 'cmw-coder-subprocess';
 import { EventBus } from 'quasar';
 import { boot } from 'quasar/wrappers';
-
-import { ReviewData } from 'shared/types/review';
 
 export const bus = new EventBus<{
   drawer: (

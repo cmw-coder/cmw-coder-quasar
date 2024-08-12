@@ -4,7 +4,7 @@ import {
   ReviewRequestParams,
   Feedback,
   ReviewParsedResult,
-} from 'shared/types/review';
+} from 'cmw-coder-subprocess';
 import request from 'main/request';
 import Logger from 'electron-log/main';
 

@@ -9,7 +9,7 @@ import {
   ReviewFileItem,
   ReviewState,
   reviewStateIconMap,
-} from 'shared/types/review';
+} from 'cmw-coder-subprocess';
 import { ActionApi } from 'types/ActionApi';
 import { ActionType } from 'shared/types/ActionMessage';
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
