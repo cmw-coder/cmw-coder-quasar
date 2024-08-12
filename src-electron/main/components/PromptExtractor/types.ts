@@ -43,9 +43,7 @@ export class PromptElements {
   constructor(prefix: string, suffix: string) {
     this.prefix = prefix.trimStart();
     this.suffix = suffix.trimEnd();
-    log.debug('getBoundingPrefix before', this.prefix);
     this.currentFilePrefix = getBoundingPrefix(this.prefix) ?? this.prefix;
-    log.debug('getBoundingPrefix after', this.currentFilePrefix);
   }
 
   async stringify(completionType: CompletionType) {
@@ -59,12 +57,10 @@ export class PromptElements {
       '%{NeighborSnippet}%',
       this.neighborSnippet || '',
     );
-    log.debug('removeFunctionHeader before', this.currentFilePrefix);
     question = question.replaceAll(
       '%{CurrentFilePrefix}%',
       removeFunctionHeader(this.currentFilePrefix, completionType),
     );
-    log.debug('removeFunctionHeader after', this.currentFilePrefix);
     question = question.replaceAll(
       '%{NearCode}%',
       removeFunctionHeader(
