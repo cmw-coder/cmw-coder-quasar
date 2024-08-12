@@ -60,9 +60,9 @@ export class PromptExtractor {
       })(),
       (async () => {
         const relativeDefinitions = await inputs.getRelativeDefinitions();
-        getService(ServiceType.STATISTICS).completionUpdateRelativeDefinitionsTime(
-          actionId,
-        );
+        getService(
+          ServiceType.STATISTICS,
+        ).completionUpdateRelativeDefinitionsTime(actionId);
         return relativeDefinitions;
       })(),
     ]);

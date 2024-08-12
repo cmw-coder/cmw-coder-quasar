@@ -1,5 +1,7 @@
-import { BrowserWindow, app, screen } from 'electron';
+import { BrowserWindow, app, dialog, screen } from 'electron';
+import log from 'electron-log/main';
 import { inject, injectable } from 'inversify';
+import Parser from 'web-tree-sitter';
 import { TrayIcon } from 'main/components/TrayIcon';
 import { MenuEntry } from 'main/components/TrayIcon/types';
 import { WindowServiceTrait } from 'shared/types/service/WindowServiceTrait';
@@ -17,13 +19,16 @@ import { UpdateWindow } from 'main/services/WindowService/types/UpdateWindow';
 import { BaseWindow } from 'main/services/WindowService/types/BaseWindow';
 import { ConfigService } from 'main/services/ConfigService';
 import { DataStoreService } from 'main/services/DataStoreService';
+import { WebsocketService } from 'main/services/WebsocketService';
+
 import { SelectionTipsWindow } from 'main/services/WindowService/types/SelectionTipsWindow';
-import { Selection } from 'shared/types/Selection';
-import { ReviewInstance } from 'main/components/ReviewInstance';
-import { Feedback, ReviewState } from 'shared/types/review';
-import { ReviewDataUpdateActionMessage } from 'shared/types/ActionMessage';
-import { dialog } from 'electron/main';
+import { ExtraData, Selection } from 'shared/types/Selection';
+import { Feedback, ReviewData } from 'cmw-coder-subprocess';
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
+import { container, getService } from 'main/services';
+import { DateTime } from 'luxon';
+import { api_reportSKU } from 'main/request/sku';
+import { dirname } from 'path';
 
 interface WindowMap {
   [WindowType.Completions]: CompletionsWindow;
@@ -42,19 +47,22 @@ export class WindowService implements WindowServiceTrait {
   trayIcon: TrayIcon;
   windowMap = new Map<WindowType, BaseWindow>();
 
+  private _parserInitialized = false;
+
   constructor(
     @inject(ServiceType.CONFIG)
     private _configService: ConfigService,
     @inject(ServiceType.DATA_STORE)
     private _dataStoreService: DataStoreService,
   ) {
+    Parser.init().then(() => (this._parserInitialized = true));
     this.windowMap.set(WindowType.Feedback, new FeedbackWindow());
     this.windowMap.set(WindowType.ProjectId, new ProjectIdWindow());
     this.windowMap.set(WindowType.Welcome, new WelcomeWindow());
     this.windowMap.set(WindowType.Login, new LoginWindow());
     this.windowMap.set(WindowType.Completions, new CompletionsWindow());
     this.windowMap.set(WindowType.Main, new MainWindow());
-    this.windowMap.set(WindowType.Quake, new MainWindow());
+    // this.windowMap.set(WindowType.Quake, new MainWindow());
     this.windowMap.set(WindowType.Update, new UpdateWindow());
     this.windowMap.set(WindowType.SelectionTips, new SelectionTipsWindow());
 
@@ -197,6 +205,16 @@ export class WindowService implements WindowServiceTrait {
     }
   }
 
+  async getWindowIsFixed(windowType: WindowType) {
+    const { fixed } = this._dataStoreService.getWindowData(windowType);
+    return !!fixed;
+  }
+
+  async toggleWindowFixed(windowType: WindowType) {
+    const window = this.getWindow(windowType);
+    window.toggleFixed();
+  }
+
   async mouseMoveInOrOutWindow(type: WindowType): Promise<void> {
     const baseWindow = this.getWindow(type);
     const window = baseWindow._window;
@@ -237,6 +255,117 @@ export class WindowService implements WindowServiceTrait {
     chatPage.addSelectionToChat(selection);
   }
 
+  async reviewProject(filePath?: string) {
+    const mainWindow = this.getWindow(WindowType.Main);
+    const _filePath = filePath || app.getPath('userData');
+    const basePath = dirname(_filePath);
+    if (!mainWindow._window) {
+      return;
+    }
+    const targetDirPathList = dialog.showOpenDialogSync(mainWindow._window, {
+      defaultPath: basePath,
+      properties: ['openDirectory'],
+    });
+    if (!targetDirPathList) {
+      return;
+    }
+    const targetDirPath = targetDirPathList[0];
+    const clientInfo = getService(ServiceType.WEBSOCKET).getClientInfo();
+    if (!clientInfo || !clientInfo.currentProject || !clientInfo.version) {
+      return;
+    }
+    const websocketService = container.get<WebsocketService>(
+      ServiceType.WEBSOCKET,
+    );
+    const project = await websocketService.getProjectData();
+    if (!project) {
+      return;
+    }
+    const extraData: ExtraData = {
+      projectId: project.id,
+      version: clientInfo.version,
+    };
+    // 上报一次 PROJECT_REVIEW 使用
+    const appConfig = await this._configService.getConfigs();
+    try {
+      await api_reportSKU([
+        {
+          begin: DateTime.now().toMillis(),
+          end: DateTime.now().toMillis(),
+          count: 1,
+          type: 'AIGC',
+          product: 'SI',
+          firstClass: 'PROJECT_REVIEW',
+          secondClass: 'USE',
+          skuName: '*',
+          user: appConfig.username,
+          userType: 'USER',
+          subType: extraData.projectId,
+          extra: extraData.version,
+        },
+      ]);
+    } catch (e) {
+      log.error('reportReviewUsage.failed', e);
+    }
+    const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
+    reviewPage.reviewSubProcess.proxyFn.reviewProject({
+      projectDirPath: targetDirPath,
+      extraData,
+    });
+  }
+
+  async reviewFile(path: string, reportSku = true) {
+    if (!this._parserInitialized) {
+      return;
+    }
+    const clientInfo = getService(ServiceType.WEBSOCKET).getClientInfo();
+    if (!clientInfo || !clientInfo.currentProject || !clientInfo.version) {
+      return;
+    }
+    const websocketService = container.get<WebsocketService>(
+      ServiceType.WEBSOCKET,
+    );
+    const project = await websocketService.getProjectData();
+    if (!project) {
+      return;
+    }
+    const extraData: ExtraData = {
+      projectId: project.id,
+      version: clientInfo.version,
+    };
+    // 上报一次 FILE_REVIEW 使用
+    if (reportSku) {
+      const appConfig = await this._configService.getConfigs();
+      try {
+        await api_reportSKU([
+          {
+            begin: DateTime.now().toMillis(),
+            end: DateTime.now().toMillis(),
+            count: 1,
+            type: 'AIGC',
+            product: 'SI',
+            firstClass: 'FILE_REVIEW',
+            secondClass: 'USE',
+            skuName: '*',
+            user: appConfig.username,
+            userType: 'USER',
+            subType: extraData.projectId,
+            extra: extraData.version,
+          },
+        ]);
+      } catch (e) {
+        log.error('reportReviewUsage.failed', e);
+      }
+    }
+
+    const mainWindow = this.getWindow(WindowType.Main);
+    const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
+    reviewPage.reviewSubProcess.proxyFn.reviewFile({
+      filePath: path,
+      extraData,
+    });
+  }
+
   async reviewSelection(selection?: Selection) {
     const selectionTipsWindow = this.getWindow(WindowType.SelectionTips);
     const extraData = selectionTipsWindow.extraData;
@@ -249,87 +378,107 @@ export class WindowService implements WindowServiceTrait {
     if (!selection) {
       return;
     }
+    // 上报一次 CODE_REVIEW 使用
+    const appConfig = await this._configService.getConfigs();
+    try {
+      await api_reportSKU([
+        {
+          begin: DateTime.now().toMillis(),
+          end: DateTime.now().toMillis(),
+          count: 1,
+          type: 'AIGC',
+          product: 'SI',
+          firstClass: 'CODE_REVIEW',
+          secondClass: 'USE',
+          skuName: '*',
+          user: appConfig.username,
+          userType: 'USER',
+          subType: extraData.projectId,
+          extra: extraData.version,
+        },
+      ]);
+    } catch (e) {
+      log.error('reportReviewUsage.failed', e);
+    }
     const mainWindow = this.getWindow(WindowType.Main);
     const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
-    // 上一个 review 尚未结束
-    if (
-      reviewPage.activeReview &&
-      ![ReviewState.Error, ReviewState.Finished].includes(
-        reviewPage.activeReview.state,
-      )
-    ) {
-      const mainWindow = this.getWindow(WindowType.Main);
-      if (mainWindow._window) {
-        dialog.showMessageBox(mainWindow._window, {
-          message: '存在进行中的 review 任务',
-        });
-      }
-      return;
-    }
-
-    reviewPage.activeReview = new ReviewInstance(selection, extraData);
-    await reviewPage.active();
-    mainWindow.sendMessageToRenderer(
-      new ReviewDataUpdateActionMessage(
-        reviewPage.activeReview.getReviewData(),
-      ),
-    );
+    reviewPage.reviewSubProcess.proxyFn.addReview({
+      selection,
+      extraData,
+    });
+    reviewPage.active();
   }
 
-  async getReviewData() {
+  async getReviewData(): Promise<ReviewData[]> {
     const reviewPage = this.getWindow(WindowType.Main).getPage(
       MainWindowPageType.Review,
     );
-    const activeReview = reviewPage.activeReview;
-    if (!activeReview) return undefined;
-    return activeReview.getReviewData();
+    return reviewPage.reviewSubProcess.proxyFn.getReviewData();
   }
-  async setActiveReviewFeedback(
-    feedback: Feedback,
-    comment?: string,
-  ): Promise<void> {
+
+  async delReview(reviewId: string) {
     const mainWindow = this.getWindow(WindowType.Main);
     const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
-    const activeReview = reviewPage.activeReview;
-    if (activeReview) {
-      activeReview.feedback = feedback;
-      activeReview.saveReviewData();
-      mainWindow.sendMessageToRenderer(
-        new ReviewDataUpdateActionMessage(activeReview.getReviewData()),
-      );
-      if (feedback === Feedback.Helpful) {
-        activeReview.reportHelpful();
-      } else if (feedback === Feedback.NotHelpful) {
-        activeReview.reportUnHelpful(comment);
-      }
-    }
+    return reviewPage.reviewSubProcess.proxyFn.delReview(reviewId);
   }
 
-  async retryActiveReview() {
+  async delReviewByFile(filePath: string): Promise<void> {
     const mainWindow = this.getWindow(WindowType.Main);
     const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
-    const activeReview = reviewPage.activeReview;
-    if (activeReview) {
-      activeReview.retry();
-    }
+    return reviewPage.reviewSubProcess.proxyFn.delReviewByFile(filePath);
   }
 
-  async stopActiveReview() {
+  async setReviewFeedback(data: {
+    serverTaskId: string;
+    userId: string;
+    feedback: Feedback;
+    timestamp: number;
+    comment: string;
+  }): Promise<void> {
     const mainWindow = this.getWindow(WindowType.Main);
     const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
-    const activeReview = reviewPage.activeReview;
-    if (activeReview) {
-      activeReview.stop();
-    }
+    return reviewPage.reviewSubProcess.proxyFn.setReviewFeedback(data);
   }
 
-  async getWindowIsFixed(windowType: WindowType) {
-    const { fixed } = this._dataStoreService.getWindowData(windowType);
-    return !!fixed;
+  async retryReview(reviewId: string) {
+    const mainWindow = this.getWindow(WindowType.Main);
+    const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
+    return reviewPage.reviewSubProcess.proxyFn.retryReview(reviewId);
   }
 
-  async toggleWindowFixed(windowType: WindowType) {
-    const window = this.getWindow(windowType);
-    window.toggleFixed();
+  async stopReview(reviewId: string) {
+    const mainWindow = this.getWindow(WindowType.Main);
+    const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
+    return reviewPage.reviewSubProcess.proxyFn.stopReview(reviewId);
+  }
+
+  async getReviewFileList() {
+    const mainWindow = this.getWindow(WindowType.Main);
+    const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
+    return reviewPage.reviewSubProcess.proxyFn.getReviewFileList();
+  }
+
+  async getFileReviewList(filePath: string) {
+    const mainWindow = this.getWindow(WindowType.Main);
+    const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
+    return reviewPage.reviewSubProcess.proxyFn.getFileReviewList(filePath);
+  }
+
+  async clearReview() {
+    const mainWindow = this.getWindow(WindowType.Main);
+    const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
+    return reviewPage.reviewSubProcess.proxyFn.clearReview();
+  }
+
+  async getReviewHistoryFiles() {
+    const mainWindow = this.getWindow(WindowType.Main);
+    const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
+    return reviewPage.reviewSubProcess.proxyFn.getReviewHistoryFiles();
+  }
+
+  async getReviewFileContent(filePath: string) {
+    const mainWindow = this.getWindow(WindowType.Main);
+    const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
+    return reviewPage.reviewSubProcess.proxyFn.getReviewFileContent(filePath);
   }
 }

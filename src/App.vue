@@ -52,3 +52,30 @@ onBeforeUnmount(() => {
 <template>
   <router-view :key="`${baseName}-${reloadKey ? '0' : '1'}`" />
 </template>
+
+<style>
+/* 整个滚动条 */
+::-webkit-scrollbar {
+  width: 8px; /* 宽度 */
+  height: 8px;
+}
+
+/* 滚动条轨道 */
+::-webkit-scrollbar-track {
+  background: #f1f1f1; /* 轨道背景 */
+}
+
+/* 滚动条滑块 */
+::-webkit-scrollbar-thumb {
+  background: #888; /* 滑块颜色 */
+}
+
+/* 滑块在悬停时 */
+::-webkit-scrollbar-thumb:hover {
+  background: #555; /* 悬停时的滑块颜色 */
+}
+
+body.body--dark .bg-blue-grey-2 {
+  background-color: #3c515a !important;
+}
+</style>

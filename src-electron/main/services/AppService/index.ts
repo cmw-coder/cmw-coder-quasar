@@ -1,4 +1,4 @@
-import { app, ipcMain, Menu, shell } from 'electron';
+import { app, BrowserWindow, ipcMain, Menu, shell } from 'electron';
 import log from 'electron-log/main';
 import { inject, injectable } from 'inversify';
 import { DateTime } from 'luxon';
@@ -74,6 +74,7 @@ export class AppService implements AppServiceTrait {
       this._windowService.getWindow(WindowType.Main).show();
     });
     app.whenReady().then(async () => {
+      // app.disableHardwareAcceleration();
       this.initShortcutHandler();
 
       log.info('Comware Coder is ready');
@@ -236,6 +237,14 @@ export class AppService implements AppServiceTrait {
     });
     globalShortcut.register('CommandOrControl+Alt+L', () => {
       this._windowService.reviewSelection();
+    });
+
+    // 注册open devtool 快捷键
+    globalShortcut.register('CommandOrControl+Shift+I', () => {
+      const window = BrowserWindow.getFocusedWindow();
+      if (window) {
+        window.webContents.openDevTools();
+      }
     });
   }
 

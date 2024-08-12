@@ -1,4 +1,12 @@
 import { IncomingMessage, ServerResponse } from 'http';
+import type { WebSocket } from 'ws';
+
+export interface ClientInfo {
+  client: WebSocket;
+  currentFile?: string;
+  currentProject: string;
+  version: string;
+}
 
 export enum HttpContentType {
   FORM = 'application/x-www-form-urlencoded',

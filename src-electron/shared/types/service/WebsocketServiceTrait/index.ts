@@ -1,10 +1,9 @@
 import { DataProjectType } from 'main/stores/data/types';
 import { SimilarSnippet } from 'shared/types/common';
+import { ClientInfo } from 'main/services/WebsocketService/types';
 
 export interface WebsocketServiceTrait {
-  checkFolderExist(path: string): Promise<boolean>;
-
-  getFileContent(path: string): Promise<string | undefined>;
+  getCurrentFile(): Promise<string | undefined>;
 
   getProjectData(): Promise<DataProjectType | undefined>;
 
@@ -16,6 +15,8 @@ export interface WebsocketServiceTrait {
     prefix: string,
     suffix: string,
   ): Promise<SimilarSnippet[]>;
+
+  getClientInfo(pid?: number): ClientInfo | undefined;
 
   send(message: string, pid?: number): void;
 }

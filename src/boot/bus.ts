@@ -1,3 +1,4 @@
+import { ReviewData } from 'cmw-coder-subprocess';
 import { EventBus } from 'quasar';
 import { boot } from 'quasar/wrappers';
 
@@ -6,6 +7,7 @@ export const bus = new EventBus<{
     action: 'close' | 'open' | 'toggle',
     position: 'left' | 'right',
   ) => void;
+  review: (data: ReviewData) => void;
 }>();
 
 // noinspection JSUnusedGlobalSymbols

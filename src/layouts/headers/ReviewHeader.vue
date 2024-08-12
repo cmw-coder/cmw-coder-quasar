@@ -6,13 +6,10 @@ import { bus } from 'boot/bus';
 import { ServiceType } from 'shared/types/service';
 import { WindowType } from 'shared/types/WindowType';
 import { useService } from 'utils/common';
+import { useRouter } from 'vue-router';
 
 interface Props {
   leftDrawer?: {
-    icon?: string;
-    label?: string;
-  };
-  rightDrawer?: {
     icon?: string;
     label?: string;
   };
@@ -21,6 +18,7 @@ interface Props {
     label?: string;
   };
   windowType: WindowType;
+  rightBtnType: 'history' | 'historyBack';
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -31,7 +29,7 @@ const { t } = useI18n();
 const windowService = useService(ServiceType.WINDOW);
 
 const i18n = (relativePath: string) => {
-  return t('layouts.headers.MainHeader.' + relativePath);
+  return t('layouts.headers.ReviewHeader.' + relativePath);
 };
 
 const isFixed = ref(false);
@@ -80,6 +78,16 @@ onBeforeUnmount(() => {
   document.body.removeEventListener('mouseenter', bodyMouseInHandler);
   document.body.removeEventListener('mouseleave', bodyMouseInHandler);
 });
+
+const router = useRouter();
+
+const goToReviewHistory = () => {
+  router.push({ path: '/main/review-history' });
+};
+
+const back = () => {
+  router.back();
+};
 </script>
 
 <template>
@@ -146,18 +154,23 @@ onBeforeUnmount(() => {
         </template>
       </q-toolbar-title>
       <q-btn
-        v-if="rightDrawer?.icon || rightDrawer?.label"
+        v-if="rightBtnType === 'history'"
         dense
         flat
         no-caps
-        :icon-right="rightDrawer?.icon"
-        :label="
-          rightDrawer.label
-            ? i18n(`toolbar.rightDrawer.${rightDrawer.label}`)
-            : undefined
-        "
-        :round="(rightDrawer?.icon && !rightDrawer?.label) === true"
-        @click="bus.emit('drawer', 'toggle', 'right')"
+        icon-right="history"
+        :label="i18n('toolbar.rightBtn.reviewHistory')"
+        @click="() => goToReviewHistory()"
+      />
+
+      <q-btn
+        v-if="rightBtnType === 'historyBack'"
+        dense
+        flat
+        no-caps
+        icon="mdi-arrow-left"
+        :label="i18n('toolbar.rightBtn.back')"
+        @click="() => back()"
       />
     </q-toolbar>
   </q-header>

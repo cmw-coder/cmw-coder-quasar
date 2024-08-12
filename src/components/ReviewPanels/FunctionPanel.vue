@@ -1,18 +1,19 @@
 <script lang="ts" setup>
-import { PropType, ref } from 'vue';
+import { onMounted, PropType, ref } from 'vue';
 import { Selection } from 'shared/types/Selection';
 import { useHighlighter } from 'stores/highlighter';
-import {
-  Reference,
-  ReviewData,
-  ReviewState,
-  Feedback,
-} from 'shared/types/review';
-import { useService } from 'app/src/utils/common';
-import { ServiceType } from 'app/src-electron/shared/types/service';
+import { useService } from 'utils/common';
+import { ServiceType } from 'shared/types/service';
 import { useI18n } from 'vue-i18n';
+import { DateTime } from 'luxon';
+import {
+  ReviewData,
+  Feedback,
+  Reference,
+  ReviewState,
+} from 'cmw-coder-subprocess';
 
-defineProps({
+const props = defineProps({
   reviewData: {
     type: Object as PropType<ReviewData>,
     required: true,
@@ -24,12 +25,14 @@ const emit = defineEmits<{
   (e: 'feedback', feedback: Feedback, comment?: string): void;
 }>();
 
+const isShowCode = ref(false);
+
 const { t } = useI18n();
-const baseName = 'pages.ReviewPage.components.reviewView.';
+const baseName = 'components.ReviewPanels.FunctionPanel.';
 const i18n = (relativePath: string, data?: Record<string, unknown>) => {
   return data ? t(baseName + relativePath, data) : t(baseName + relativePath);
 };
-const appService = useService(ServiceType.App);
+// const appService = useService(ServiceType.App);
 const windowService = useService(ServiceType.WINDOW);
 const { codeToHtml } = useHighlighter();
 
@@ -71,41 +74,23 @@ const viewReferenceHandle = (reference: Reference) => {
   viewReferenceDialogFlag.value = true;
 };
 
-const locateFileHandle = (file: string) => {
-  console.log('locate file: ', file);
-  appService.locateFileInFolder(file);
-};
+// const locateFileHandle = (file: string) => {
+//   console.log('locate file: ', file);
+//   appService.locateFileInFolder(file);
+// };
 
 const stopReviewHandle = () => {
-  windowService.stopActiveReview();
+  windowService.stopReview(props.reviewData.reviewId);
 };
+
+onMounted(() => {
+  console.log('FunctionPanel mounted');
+});
 </script>
 
 <template>
-  <div class="review-content" v-if="reviewData">
+  <div class="review-content bg-blue-grey-2" v-if="reviewData">
     <div class="review-file-wrapper">
-      <div class="review-file-name-wrapper">
-        <div
-          class="review-file text-bold text-grey text-h8"
-          :title="`${reviewData.selection.file} ${formatSelection(reviewData.selection).rangeStr}`"
-        >
-          <span class="review-file-name">{{
-            formatSelection(reviewData.selection).fileName
-          }}</span>
-          <span class="review-file-range">{{
-            formatSelection(reviewData.selection).rangeStr
-          }}</span>
-        </div>
-        <div class="file-operation">
-          <q-btn
-            flat
-            size="sm"
-            :title="i18n('labels.locateTitle')"
-            @click="() => locateFileHandle(reviewData.selection.file)"
-            >{{ i18n('labels.locate') }}</q-btn
-          >
-        </div>
-      </div>
       <div class="review-file-content-wrapper">
         <q-card
           class="selection-content-card row"
@@ -113,12 +98,33 @@ const stopReviewHandle = () => {
           bordered
           flat
         >
+          <div class="file-full-path">
+            <div>
+              <span>{{ reviewData.selection.file }}</span>
+              <span style="padding-left: 10px">
+                {{ formatSelection(reviewData.selection).rangeStr }}
+              </span>
+            </div>
+            <div>
+              <q-btn
+                size="sm"
+                flat
+                @click="
+                  () => {
+                    isShowCode = !isShowCode;
+                  }
+                "
+                >{{ isShowCode ? '收起' : '展开' }}</q-btn
+              >
+            </div>
+          </div>
           <div
+            v-if="isShowCode"
             class="review-file-content"
             v-html="
               codeToHtml(
                 reviewData.selection.content,
-                reviewData.selection.language,
+                reviewData.selection.language as any,
               )
             "
           />
@@ -127,7 +133,26 @@ const stopReviewHandle = () => {
     </div>
     <div class="review-step-wrapper">
       <q-timeline v-if="reviewData.state !== ReviewState.Error">
-        <q-timeline-entry :title="i18n('labels.referencesTitle')">
+        <q-timeline-entry
+          v-if="reviewData.state === ReviewState.Queue"
+          title="排队中"
+          :subtitle="
+            DateTime.fromSeconds(reviewData.createTime).toFormat(
+              'yyyy-MM-dd HH:mm:ss',
+            )
+          "
+        >
+        </q-timeline-entry>
+
+        <q-timeline-entry
+          v-if="reviewData.state !== ReviewState.Queue"
+          :title="i18n('labels.referencesTitle')"
+          :subtitle="
+            DateTime.fromSeconds(reviewData.startTime).toFormat(
+              'yyyy-MM-dd HH:mm:ss',
+            )
+          "
+        >
           <q-card
             class="relative-position"
             style="min-height: 80px; max-height: 200px; overflow-y: auto"
@@ -198,7 +223,7 @@ const stopReviewHandle = () => {
               </transition>
             </q-card-section>
             <q-inner-loading
-              :showing="reviewData.state === ReviewState.References"
+              :showing="reviewData.state === ReviewState.Ready"
               :label="i18n('labels.referenceLoading')"
               label-class="text-teal"
               label-style="font-size: 1.1em"
@@ -211,6 +236,11 @@ const stopReviewHandle = () => {
           v-if="
             [ReviewState.Start, ReviewState.First, ReviewState.Second].includes(
               reviewData.state,
+            )
+          "
+          :subtitle="
+            DateTime.fromSeconds(reviewData.referenceTime).toFormat(
+              'yyyy-MM-dd HH:mm:ss',
             )
           "
         >
@@ -296,6 +326,11 @@ const stopReviewHandle = () => {
         <q-timeline-entry
           :title="i18n('labels.reviewResultTitle')"
           v-if="reviewData.state === ReviewState.Finished"
+          :subtitle="
+            DateTime.fromSeconds(reviewData.endTime).toFormat(
+              'yyyy-MM-dd HH:mm:ss',
+            )
+          "
         >
           <q-card v-if="!reviewData.result.parsed">
             <q-card-section style="padding: 4px" class="parsed-error">
@@ -319,12 +354,13 @@ const stopReviewHandle = () => {
                 flat
                 class="result-item"
                 v-for="(resultItem, index) in reviewData.result.data"
+                v-show="resultItem.IsProblem"
                 :key="index"
                 style="margin-bottom: 10px"
               >
                 <q-card-section style="padding: 2px">
                   <q-chip color="red-8" class="text-white">{{
-                    resultItem.type
+                    resultItem.Type
                   }}</q-chip>
                 </q-card-section>
                 <q-card-section style="padding: 2px">
@@ -336,12 +372,15 @@ const stopReviewHandle = () => {
                       border: 1px solid #eee;
                     "
                     v-html="
-                      codeToHtml(resultItem.code, reviewData.selection.language)
+                      codeToHtml(
+                        resultItem.ProblemCodeSnippet,
+                        reviewData.selection.language as any,
+                      )
                     "
                   />
                 </q-card-section>
                 <q-card-section style="padding: 2px">{{
-                  resultItem.description
+                  resultItem.Description
                 }}</q-card-section>
               </q-card>
             </template>
@@ -426,7 +465,10 @@ const stopReviewHandle = () => {
             class="code"
             style="padding: 10px; overflow: auto; border: 1px solid #eee"
             v-html="
-              codeToHtml(activeReference.content, reviewData.selection.language)
+              codeToHtml(
+                activeReference.content,
+                reviewData.selection.language as any,
+              )
             "
           />
         </q-card-section>
@@ -462,11 +504,16 @@ const stopReviewHandle = () => {
 
 <style scoped lang="scss">
 .review-content {
-  height: calc(100% - 50px);
   width: 100%;
   overflow: auto;
   padding: 10px;
   .review-file-wrapper {
+    .file-full-path {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
     .review-file-name-wrapper {
       height: 40px;
       display: flex;

@@ -1,12 +1,10 @@
 import log from 'electron-log/main';
 import { sync } from 'fast-glob';
-import { existsSync } from 'fs';
-import { lstat, readFile } from 'fs/promises';
 import { createServer } from 'http';
-import { decode } from 'iconv-lite';
 import { inject, injectable } from 'inversify';
 import { posix, sep } from 'path';
-import { type WebSocket, WebSocketServer } from 'ws';
+import { uid } from 'quasar';
+import { WebSocketServer } from 'ws';
 
 import { PromptExtractor } from 'main/components/PromptExtractor';
 import { RawInputs } from 'main/components/PromptExtractor/types';
@@ -17,7 +15,13 @@ import {
 import { PromptProcessor } from 'main/components/PromptProcessor';
 import { DataStoreService } from 'main/services/DataStoreService';
 import { StatisticsService } from 'main/services/StatisticsService';
-import { HttpMethod, HttpRouter } from 'main/services/WebsocketService/types';
+import { MAX_REFERENCES_REQUEST_TIME } from 'main/services/WebsocketService/constants';
+import {
+  ClientInfo,
+  HttpMethod,
+  HttpRouter,
+} from 'main/services/WebsocketService/types';
+import { findSvnPath } from 'main/services/WebsocketService/utils';
 import { WindowService } from 'main/services/WindowService';
 import { DataProjectType } from 'main/stores/data/types';
 import { TextDocument } from 'main/types/TextDocument';
@@ -41,15 +45,7 @@ import {
 } from 'shared/types/WsMessage';
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import { Selection } from 'shared/types/Selection';
-import { Reference } from 'shared/types/review';
-
-interface ClientInfo {
-  client: WebSocket;
-  currentProject: string;
-  version: string;
-}
-
-const MAX_REFERENCES_REQUEST_TIME = 30000;
+import { Reference } from 'cmw-coder-subprocess';
 
 @injectable()
 export class WebsocketService implements WebsocketServiceTrait {
@@ -66,7 +62,11 @@ export class WebsocketService implements WebsocketServiceTrait {
   private _promptProcessor = new PromptProcessor();
   private _promptExtractor = new PromptExtractor();
   private _webSocketServer?: WebSocketServer;
-  private referencesResolveHandle?: (value: Reference[]) => void;
+  // private referencesResolveHandle?: (value: Reference[]) => void;
+  private referencesResolveHandleMap = new Map<
+    string,
+    (value: Reference[]) => void
+  >();
 
   constructor(
     @inject(ServiceType.DATA_STORE)
@@ -120,17 +120,8 @@ export class WebsocketService implements WebsocketServiceTrait {
     );
   }
 
-  async checkFolderExist(path: string): Promise<boolean> {
-    return existsSync(path) && (await lstat(path)).isDirectory();
-  }
-
-  async getFileContent(path: string): Promise<string | undefined> {
-    try {
-      return decode(await readFile(path), 'gbk');
-    } catch (e) {
-      log.error('getFileContent', e);
-      return undefined;
-    }
+  async getCurrentFile(): Promise<string | undefined> {
+    return this.getClientInfo(this._lastActivePid)?.currentFile;
   }
 
   async getProjectData() {
@@ -414,7 +405,7 @@ export class WebsocketService implements WebsocketServiceTrait {
       mainWindow.show();
       const mainWindowPage = mainWindow.getPage(MainWindowPageType.Commit);
       mainWindowPage.setCurrentFile(currentFile);
-      mainWindowPage.active();
+      mainWindowPage.active().catch();
     });
     this._registerWsAction(WsAction.EditorFocusState, ({ data: isFocused }) => {
       if (!isFocused) {
@@ -448,31 +439,14 @@ export class WebsocketService implements WebsocketServiceTrait {
         }
       }
     });
-    this._registerWsAction(
-      WsAction.EditorSwitchProject,
-      ({ data: project }, pid) => {
-        const clientInfo = this._clientInfoMap.get(pid);
-        if (clientInfo) {
-          clientInfo.currentProject = project;
-        }
-      },
-    );
-    this._registerWsAction(
-      WsAction.EditorSwitchSvn,
-      async ({ data: svnPath }, pid) => {
-        const project = this.getClientInfo(pid)?.currentProject;
-        if (project && project.length) {
-          try {
-            await this._dataStoreService.setProjectSvn(project, svnPath);
-          } catch (e) {
-            log.error('EditorSwitchSvn', e);
-          }
-        }
-      },
-    );
-
     this._registerWsAction(WsAction.EditorSelection, ({ data }) => {
       if (data.dimensions.height === 0 || data.content.length === 0) {
+        this._windowService.getWindow(WindowType.SelectionTips).hide();
+        return;
+      }
+
+      const project = this.getClientInfo(this._lastActivePid)?.currentProject;
+      if (!project) {
         this._windowService.getWindow(WindowType.SelectionTips).hide();
         return;
       }
@@ -491,28 +465,55 @@ export class WebsocketService implements WebsocketServiceTrait {
         ),
         language: 'c',
       };
-      const project = this.getClientInfo(this._lastActivePid)?.currentProject;
-      if (project) {
-        const { id: projectId } = getProjectData(project);
-        selectionTipsWindow.trigger(
-          {
-            x: data.dimensions.x,
-            y: data.dimensions.y - 30,
-          },
-          selection,
-          {
-            projectId: projectId,
-            version: getClientVersion(this._lastActivePid),
-          },
-        );
-      }
+      const { id: projectId } = getProjectData(project);
+      selectionTipsWindow.trigger(
+        {
+          x: data.dimensions.x,
+          y: data.dimensions.y - 30,
+        },
+        selection,
+        {
+          projectId: projectId,
+          version: getClientVersion(this._lastActivePid),
+        },
+      );
     });
-
+    this._registerWsAction(
+      WsAction.EditorSwitchFile,
+      async ({ data: filePath }, pid) => {
+        const clientInfo = this._clientInfoMap.get(pid);
+        if (clientInfo) {
+          clientInfo.currentFile = filePath;
+          const svnPath = findSvnPath(filePath);
+          if (svnPath) {
+            try {
+              await this._dataStoreService.setProjectSvn(
+                clientInfo.currentProject,
+                svnPath,
+              );
+            } catch (e) {
+              log.error('EditorSwitchSvn', e);
+            }
+          }
+        }
+      },
+    );
+    this._registerWsAction(
+      WsAction.EditorSwitchProject,
+      ({ data: project }, pid) => {
+        const clientInfo = this._clientInfoMap.get(pid);
+        if (clientInfo) {
+          clientInfo.currentProject = project;
+        }
+      },
+    );
     this._registerWsAction(WsAction.ReviewRequest, ({ data }) => {
       log.info('ReviewRequest Response', data);
-      if (this.referencesResolveHandle) {
-        this.referencesResolveHandle(data || []);
-        this.referencesResolveHandle = undefined;
+      const { id } = data;
+      const referencesResolveHandle = this.referencesResolveHandleMap.get(id);
+      if (referencesResolveHandle) {
+        referencesResolveHandle(data.references || []);
+        this.referencesResolveHandleMap.delete(id);
       }
     });
   }
@@ -529,9 +530,11 @@ export class WebsocketService implements WebsocketServiceTrait {
 
   async getCodeReviewReferences(selection: Selection) {
     const successPromise = new Promise<Reference[]>((resolve) => {
+      const id = uid();
       this.send(
         JSON.stringify(
           new ReviewRequestServerMessage({
+            id,
             result: 'success',
             content: selection.block || selection.content,
             path: selection.file,
@@ -540,8 +543,9 @@ export class WebsocketService implements WebsocketServiceTrait {
           }),
         ),
       );
-      log.info('getCodeReviewReferences', selection);
-      this.referencesResolveHandle = resolve;
+      // log.info('getCodeReviewReferences', selection);
+      // this.referencesResolveHandle = resolve;
+      this.referencesResolveHandleMap.set(id, resolve);
     });
 
     const timeoutPromise = new Promise<Reference[]>((resolve) => {

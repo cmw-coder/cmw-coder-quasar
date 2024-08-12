@@ -3,7 +3,8 @@ import {
   ReviewState,
   ReviewRequestParams,
   Feedback,
-} from 'shared/types/review';
+  ReviewParsedResult,
+} from 'cmw-coder-subprocess';
 import request from 'main/request';
 import Logger from 'electron-log/main';
 
@@ -18,77 +19,80 @@ export const api_code_review = async (data: ReviewRequestParams) => {
   return result;
 };
 
-export const api_get_code_review_state = async (reviewId: string) => {
-  Logger.log('api_get_code_review_state start', reviewId);
-  const result = await request<ReviewState>({
+export const api_get_code_review_state = async (serverTaskId: string) =>
+  request<ReviewState>({
     url: '/kong/RdTestAiService/v1/chatgpt/question/review/status',
     method: 'get',
     params: {
-      taskId: reviewId,
+      taskId: serverTaskId,
     },
   });
-  Logger.log('api_get_code_review_state end', result);
-  return result;
-};
 
-const parseReviewResult = (data: string): ReviewResult => {
+const parseReviewResult = (data: string[]): ReviewResult => {
   const result: ReviewResult = {
     parsed: false,
-    originData: data,
+    originData: data.join('\\n'),
     data: [],
   };
   try {
-    const object = JSON.parse(data);
-    if (
-      object['明确问题'] &&
-      Object.prototype.toString.call(object['明确问题']) === '[object Array]'
-    ) {
-      const problems = object['明确问题'];
-      result.data = problems.map((problem: never) => {
-        return {
-          index: problem['问题编号'],
-          type: problem['问题类型'],
-          code: problem['问题代码片段'],
-          description: problem['问题描述'],
-        };
-      });
-      result.parsed = true;
-    } else {
-      throw new Error('解析失败');
+    for (let i = 0; i < data.length; i++) {
+      const item = data[i];
+      const objectArr = JSON.parse(item) as ReviewParsedResult[];
+      if (objectArr.length > 0) {
+        for (let j = 0; j < objectArr.length; j++) {
+          const dataItem = objectArr[j];
+          if (
+            dataItem.Description &&
+            dataItem.ProblemCodeSnippet &&
+            dataItem.Type &&
+            dataItem.IsProblem
+          ) {
+            result.data.push(dataItem);
+          }
+        }
+        result.parsed = true;
+      }
     }
   } catch (error) {
+    result.parsed = false;
     Logger.error('parseReviewResult error', error);
   }
   return result;
 };
 
 export const api_get_code_review_result = async (
-  reviewId: string,
+  serverTaskId: string,
 ): Promise<ReviewResult> => {
-  Logger.log('api_get_code_review_result start', reviewId);
-  const result = await request<string>({
+  Logger.log('api_get_code_review_result start', serverTaskId);
+  const result = await request<string[]>({
     url: '/kong/RdTestAiService/v1/chatgpt/question/review/result',
     method: 'get',
     params: {
-      taskId: reviewId,
+      taskId: serverTaskId,
     },
   });
   Logger.log('api_get_code_review_result end', result);
   return parseReviewResult(result);
 };
 
-export const api_feedback_review = async (
-  reviewId: string,
-  userId: string,
-  feedback: Feedback,
-  timestamp: number,
-  comment: string,
-) => {
+export const api_feedback_review = async ({
+  serverTaskId,
+  userId,
+  feedback,
+  timestamp,
+  comment,
+}: {
+  serverTaskId: string;
+  userId: string;
+  feedback: Feedback;
+  timestamp: number;
+  comment: string;
+}) => {
   return request({
     url: '/kong/RdTestAiService/v1/chatgpt/question/review/feedback',
     method: 'post',
     data: {
-      id: reviewId,
+      id: serverTaskId,
       userId,
       feedback: feedback === Feedback.Helpful ? 1 : 0,
       timestamp,
@@ -97,12 +101,13 @@ export const api_feedback_review = async (
   });
 };
 
-export const api_stop_review = async (reviewId: string) => {
+export const api_stop_review = async (serverTaskId: string) => {
+  Logger.log('api_stop_review', serverTaskId);
   return request({
     url: '/kong/RdTestAiService/v1/chatgpt/question/review/stop',
     method: 'post',
     params: {
-      taskId: reviewId,
+      taskId: serverTaskId,
     },
   });
 };
@@ -112,85 +117,94 @@ export const api_stop_review = async (reviewId: string) => {
 //   ReviewResult,
 //   Feedback,
 //   ReviewState,
+//   ReviewParsedResult,
 // } from 'shared/types/review';
 // import Logger from 'electron-log/main';
 // import { timeout } from 'main/utils/common';
 
 // export const api_code_review = async (data: ReviewRequestParams) => {
-//   console.log('api_code_review', data);
+//   data.language = 'C';
+//   // console.log('api_code_review', data);
 //   await timeout(150);
-//   return '1111-2222-3333-4444';
+//   return Math.random() + '';
 // };
 
-// export const api_get_code_review_state = async (reviewId: string) => {
-//   console.log('api_get_code_review_state', reviewId);
+// export const api_get_code_review_state = async (serverTaskId: string) => {
+//   console.log('api_get_code_review_state', serverTaskId);
 //   await timeout(150);
-//   return ReviewState.Second;
+//   return ReviewState.Start;
 // };
 
-// const parseReviewResult = (data: string): ReviewResult => {
+// const parseReviewResult = (data: string[]): ReviewResult => {
 //   const result: ReviewResult = {
 //     parsed: false,
-//     originData: data,
+//     originData: data.join('\\n'),
 //     data: [],
 //   };
 //   try {
-//     const object = JSON.parse(data);
-//     if (
-//       object['明确问题'] &&
-//       Object.prototype.toString.call(object['明确问题']) === '[object Array]'
-//     ) {
-//       const problems = object['明确问题'];
-//       result.data = problems.map((problem: never) => {
-//         return {
-//           index: problem['问题编号'],
-//           type: problem['问题类型'],
-//           code: problem['问题代码片段'],
-//           description: problem['问题描述'],
-//         };
-//       });
-//       result.parsed = true;
-//     } else {
-//       throw new Error('解析失败');
+//     for (let i = 0; i < data.length; i++) {
+//       const item = data[i];
+//       const objectArr = JSON.parse(item) as ReviewParsedResult[];
+//       if (objectArr.length > 0) {
+//         for (let j = 0; j < objectArr.length; j++) {
+//           const dataItem = objectArr[j];
+//           if (
+//             dataItem.Description &&
+//             dataItem.ProblemCodeSnippet &&
+//             dataItem.Type
+//           ) {
+//             result.data.push(dataItem);
+//           }
+//         }
+//         result.parsed = true;
+//       }
 //     }
 //   } catch (error) {
+//     result.parsed = false;
 //     Logger.error('parseReviewResult error', error);
 //   }
 //   return result;
 // };
 
-// export const api_get_code_review_result = async (reviewId: string) => {
-//   console.log('api_get_code_review_result', reviewId);
+// export const api_get_code_review_result = async (serverTaskId: string) => {
+//   console.log('api_get_code_review_result', serverTaskId);
 //   await timeout(150);
-//   const data = `{
-//     "明确问题": [
-//         {
-//             "问题编号": 2,
-//             "问题类型": "内存越界",
-//             "问题代码片段": "memcpy(szPktBuf + ulHeadLen, szPktBufTmp, (ULONG)uiContentLen);",
-//             "问题描述": "在使用memcpy()函数时，需要确保目标缓冲区szPktBuf有足够的空间来容纳源缓冲区szPktBufTmp的内容，否则可能会导致内存越界。建议增加边界检查。"
-//         },
-//         {
-//             "问题编号": 2,
-//             "问题类型": "内存越界",
-//             "问题代码片段": "memcpy(szPktBuf + ulHeadLen, szPktBufTmp, (ULONG)uiContentLen);",
-//             "问题描述": "在使用memcpy()函数时，需要确保目标缓冲区szPktBuf有足够的空间来容纳源缓冲区szPktBufTmp的内容，否则可能会导致内存越界。建议增加边界检查。"
-//         }
-//     ]
-// }`;
+//   const data = [
+//     '[]',
+//     `[{
+//         "Type": "资源释放",
+//         "IsProblem": false,
+//         "Number": 1,
+//         "ProblemCodeSnippet": "if (KEPOLL_INVALID_ID == ulSyncEp)\\n{\\n    atomic_inc(&g_pstSyncStat->stEPCreatErr);\\n    kmem_cache_free(g_pstSyncUCCachep, pstUCObj);\\n    return pstUCObj;\\n}\\n",
+//         "Description": "在创建epoll对象失败时，释放了单播对象pstUCObj，但没有将其设置为NULL，可能导致悬挂指针问题。"
+//     },
+//     {
+//         "Type": "资源释放",
+//         "IsProblem": true,
+//         "Number": 2,
+//         "ProblemCodeSnippet": "if (ERROR_SUCCESS != ulRet)\\n{\\n    SYNC_Destroy((ULONG)pstUCObj);\\n    pstUCObj = NULL;\\n}\\n",
+//         "Description": "在某些操作失败后，调用了SYNC_Destroy释放资源，但没有释放相关的epoll对象ulSyncEp，可能导致资源泄漏。"
+//     }]`,
+//   ];
 //   return parseReviewResult(data);
 // };
 
-// export const api_feedback_review = async (
-//   reviewId: string,
-//   userId: string,
-//   feedback: Feedback,
-//   timestamp: number,
-//   comment: string,
-// ) => {
+// export const api_feedback_review = async ({
+//   serverTaskId,
+//   userId,
+//   feedback,
+//   timestamp,
+//   comment,
+// }: {
+//   serverTaskId: string;
+//   userId: string;
+//   feedback: Feedback;
+//   timestamp: number;
+//   comment: string;
+// }) => {
 //   console.log(
-//     'api_get_code_review_result',
-//     reviewId,
+//     'api_feedback_review',
+//     serverTaskId,
 //     userId,
 //     feedback,
 //     timestamp,
@@ -200,8 +214,8 @@ export const api_stop_review = async (reviewId: string) => {
 //   return '1111-2222-3333-4444';
 // };
 
-// export const api_stop_review = async (reviewId: string) => {
-//   console.log('api_get_code_review_result', reviewId);
+// export const api_stop_review = async (serverTaskId: string) => {
+//   console.log('api_stop_review', serverTaskId);
 //   await timeout(150);
 //   return '1111-2222-3333-4444';
 // };

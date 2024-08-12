@@ -1,7 +1,7 @@
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import { Selection } from 'shared/types/Selection';
 import { WindowType } from 'shared/types/WindowType';
-import { Feedback, ReviewData } from 'shared/types/review';
+import { Feedback, ReviewData, ReviewFileItem } from 'cmw-coder-subprocess';
 
 export interface WindowServiceTrait {
   finishLogin(): Promise<void>;
@@ -25,11 +25,26 @@ export interface WindowServiceTrait {
   mouseMoveInOrOutWindow(type: WindowType): Promise<void>;
   setMainWindowPageReady(type: MainWindowPageType): Promise<void>;
   addSelectionToChat(selection?: Selection): Promise<void>;
+  reviewFile(path: string): Promise<void>;
   reviewSelection(selection?: Selection): Promise<void>;
-  getReviewData(): Promise<ReviewData | undefined>;
-  setActiveReviewFeedback(feedback: Feedback, comment?: string): Promise<void>;
-  retryActiveReview(): Promise<void>;
-  stopActiveReview(): Promise<void>;
   getWindowIsFixed(windowType: WindowType): Promise<boolean>;
   toggleWindowFixed(windowType: WindowType): Promise<void>;
+  getReviewData(): Promise<ReviewData[]>;
+  setReviewFeedback(data: {
+    serverTaskId: string;
+    userId: string;
+    feedback: Feedback;
+    timestamp: number;
+    comment: string;
+  }): Promise<void>;
+  retryReview(reviewId: string): Promise<void>;
+  stopReview(reviewId: string): Promise<void>;
+  delReview(reviewId: string): Promise<void>;
+  delReviewByFile(filePath: string): Promise<void>;
+  reviewProject(filePath?: string): Promise<void>;
+  getReviewFileList(): Promise<ReviewFileItem[]>;
+  getFileReviewList(filePath: string): Promise<ReviewData[]>;
+  clearReview(): Promise<unknown>;
+  getReviewHistoryFiles(): Promise<string[]>;
+  getReviewFileContent(filePath: string): Promise<ReviewData[]>;
 }
