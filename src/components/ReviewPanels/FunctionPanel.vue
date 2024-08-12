@@ -6,7 +6,12 @@ import { useService } from 'utils/common';
 import { ServiceType } from 'shared/types/service';
 import { useI18n } from 'vue-i18n';
 import { DateTime } from 'luxon';
-import { ReviewData, Feedback, Reference } from 'cmw-coder-subprocess';
+import {
+  ReviewData,
+  Feedback,
+  Reference,
+  ReviewState,
+} from 'cmw-coder-subprocess';
 
 const props = defineProps({
   reviewData: {

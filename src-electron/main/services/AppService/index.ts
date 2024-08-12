@@ -74,6 +74,7 @@ export class AppService implements AppServiceTrait {
       this._windowService.getWindow(WindowType.Main).show();
     });
     app.whenReady().then(async () => {
+      // app.disableHardwareAcceleration();
       this.initShortcutHandler();
 
       log.info('Comware Coder is ready');

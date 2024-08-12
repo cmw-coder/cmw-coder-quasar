@@ -10,7 +10,6 @@ import {
 } from 'cmw-coder-subprocess';
 import { Selection } from 'shared/types/Selection';
 import FunctionPanel from 'components/ReviewPanels/FunctionPanel.vue';
-import { DateTime } from 'luxon';
 // import { useRouter } from 'vue-router';
 
 const windowService = useService(ServiceType.WINDOW);
@@ -89,14 +88,14 @@ const feedBackHandle = (
   comment?: string,
 ) => {
   console.log('feedBackHandle', review, feedback, comment);
-  windowService.setReviewFeedback({
-    serverTaskId: review.serverTaskId,
-    feedback,
-    comment,
-    extraData: review.extraData,
-    createTime: DateTime.now().valueOf() / 1000,
-  });
-  review.feedback = feedback;
+  // windowService.setReviewFeedback({
+  //   serverTaskId: review.serverTaskId,
+  //   feedback,
+  //   comment,
+  //   extraData: review.extraData,
+  //   createTime: DateTime.now().valueOf() / 1000,
+  // });
+  // review.feedback = feedback;
 };
 
 const retryHandle = async (review: ReviewData) => {
