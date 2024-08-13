@@ -279,6 +279,7 @@ export class PromptExtractor {
     );
     inputLines.push(...suffixInputLines);
     const inputString = inputLines.join('\n').slice(0, 512);
+    log.debug('PromptExtractor.getRagCode.api_code_rag', inputString);
     const { output } = await Promise.race([
       api_code_rag(inputString),
       new Promise<{
