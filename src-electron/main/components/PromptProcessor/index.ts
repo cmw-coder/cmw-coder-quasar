@@ -68,6 +68,7 @@ export class PromptProcessor {
       log.debug('PromptProcessor.process.questionParams', {
         ...questionParams,
         question: '',
+        suffix: '',
       });
       log.debug(
         'PromptProcessor.process.questionParams.question',
