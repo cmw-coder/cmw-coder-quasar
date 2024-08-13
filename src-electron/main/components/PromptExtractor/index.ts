@@ -25,6 +25,7 @@ import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
 import { SimilarSnippet } from 'shared/types/common';
 import { ServiceType } from 'shared/types/service';
+import { api_code_rag } from 'main/request/rag';
 
 export class PromptExtractor {
   private _similarSnippetConfig: SimilarSnippetConfig = {
@@ -43,14 +44,18 @@ export class PromptExtractor {
     similarSnippetCount: number = 1,
   ): Promise<PromptElements> {
     const { elements, document, position, recentFiles } = inputs;
+    const functionPrefix =
+      getFunctionPrefix(elements.prefix) ?? elements.prefix;
+    const functionSuffix =
+      getFunctionSuffix(elements.suffix) ?? elements.suffix;
 
-    const [similarSnippets, relativeDefinitions] = await Promise.all([
+    const [similarSnippets, relativeDefinitions, ragCode] = await Promise.all([
       (async () => {
         const result = await this.getSimilarSnippets(
           document,
           position,
-          getFunctionPrefix(elements.prefix) ?? elements.prefix,
-          getFunctionSuffix(elements.suffix) ?? elements.suffix,
+          functionPrefix,
+          functionSuffix,
           recentFiles,
         );
         getService(ServiceType.STATISTICS).completionUpdateSimilarSnippetsTime(
@@ -65,6 +70,7 @@ export class PromptExtractor {
         ).completionUpdateRelativeDefinitionsTime(actionId);
         return relativeDefinitions;
       })(),
+      this.getRagCode(functionPrefix, functionSuffix),
     ]);
 
     const similarSnippetsSliced = similarSnippets
@@ -76,6 +82,9 @@ export class PromptExtractor {
     log.debug('PromptExtractor.getPromptComponents', {
       minScore: this._similarSnippetConfig.minScore,
       mostSimilarSnippets: similarSnippetsSliced,
+    });
+    log.debug('PromptExtractor.getPromptComponents.ragCode', {
+      ragCode,
     });
 
     if (similarSnippetsSliced.length) {
@@ -164,6 +173,8 @@ export class PromptExtractor {
           .join('\n');
       }
     }
+
+    elements.ragCode = ragCode;
 
     return elements;
   }
@@ -262,5 +273,29 @@ export class PromptExtractor {
       .filter((mostSimilarSnippet) => mostSimilarSnippet.score > 0)
       .sort((first, second) => first.score - second.score)
       .reverse();
+  }
+
+  async getRagCode(prefix: string, suffix: string) {
+    const inputLines: string[] = [];
+    const prefixLines = separateTextByLine(prefix, true);
+    // prefix 取后5行
+    const prefixInputLines = prefixLines.slice(
+      Math.max(prefixLines.length - 5, 0),
+    );
+    inputLines.push(...prefixInputLines);
+    const suffixLines = separateTextByLine(suffix, true);
+    // suffix 取前3行
+    const suffixInputLines = suffixLines.slice(
+      0,
+      Math.min(suffixLines.length, 3),
+    );
+    inputLines.push(...suffixInputLines);
+    const inputString = inputLines.join('\n').slice(0, 512);
+    const { output } = await api_code_rag(inputString);
+    return output
+      .map((item) => {
+        return `<file_seq>${item.filePath}\n${item.similarCode}`;
+      })
+      .join('\n');
   }
 }

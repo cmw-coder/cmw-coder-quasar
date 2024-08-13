@@ -39,6 +39,8 @@ export class PromptElements {
   neighborSnippet?: string;
   // CurrentFilePrefix
   currentFilePrefix: string;
+  // RagCode
+  ragCode?: string;
 
   constructor(prefix: string, suffix: string) {
     this.prefix = prefix.trimStart();
@@ -88,7 +90,7 @@ export class PromptElements {
     );
     question = question.replaceAll('%{ImportList}%', this.importList || '');
     question = question.replaceAll('%{Comment}%', this.comment || '');
-
+    question = question.replaceAll('%{RagCode}%', this.ragCode || '');
     return question;
   }
 }

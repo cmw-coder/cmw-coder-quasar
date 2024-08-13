@@ -65,7 +65,14 @@ export class PromptProcessor {
         templateName:
           completionType === CompletionType.Line ? 'ShortLineCode' : 'LineCode',
       };
-      log.debug('PromptProcessor.process.questionParams', questionParams);
+      log.debug('PromptProcessor.process.questionParams', {
+        ...questionParams,
+        question: '',
+      });
+      log.debug(
+        'PromptProcessor.process.questionParams.question',
+        questionParams.question,
+      );
       getService(ServiceType.STATISTICS).completionUpdatePromptConstructTime(
         actionId,
         appConfig.activeModel,
