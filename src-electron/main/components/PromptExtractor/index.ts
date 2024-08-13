@@ -5,6 +5,7 @@ import {
   IGNORE_COMMON_WORD,
   IGNORE_COMWARE_INTERNAL,
   IGNORE_RESERVED_KEYWORDS,
+  MAX_RAG_CODE_QUERY_TIME,
 } from 'main/components/PromptExtractor/constants';
 import {
   PromptElements,
@@ -20,12 +21,14 @@ import {
   tokenize,
   getFunctionSuffix,
 } from 'main/components/PromptExtractor/utils';
-import { getService } from 'main/services';
+import { container, getService } from 'main/services';
 import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
 import { SimilarSnippet } from 'shared/types/common';
 import { ServiceType } from 'shared/types/service';
-import { api_code_rag } from 'main/request/rag';
+import { api_code_rag, RagCode } from 'main/request/rag';
+import { ConfigService } from 'main/services/ConfigService';
+import { NetworkZone } from 'shared/config';
 
 export class PromptExtractor {
   private _similarSnippetConfig: SimilarSnippetConfig = {
@@ -122,26 +125,6 @@ export class PromptExtractor {
     }
 
     if (relativeDefinitions.length) {
-      // const remainingCharacters =
-      //   6000 -
-      //   promptElements.file.length -
-      //   promptElements.folder.length -
-      //   promptElements.language.length -
-      //   promptElements.prefix.length -
-      //   (promptElements.similarSnippet?.length ?? 0) -
-      //   promptElements.suffix.length;
-      // const relativeDefinitionsTruncated = Array<RelativeDefinition>();
-      // let currentCharacters = 0;
-      // for (const relativeDefinition of relativeDefinitions) {
-      //   if (
-      //     currentCharacters + relativeDefinition.content.length <=
-      //     remainingCharacters
-      //   ) {
-      //     relativeDefinitionsTruncated.push(relativeDefinition);
-      //     currentCharacters += relativeDefinition.content.length;
-      //   }
-      // }
-
       elements.symbols = relativeDefinitions
         .map((relativeDefinition) => relativeDefinition.content)
         .join('\n');
@@ -276,6 +259,11 @@ export class PromptExtractor {
   }
 
   async getRagCode(prefix: string, suffix: string) {
+    const configService = container.get<ConfigService>(ServiceType.CONFIG);
+    const networkZone = await configService.getConfig('networkZone');
+    if (networkZone !== NetworkZone.Normal) {
+      return '';
+    }
     const inputLines: string[] = [];
     const prefixLines = separateTextByLine(prefix, true);
     // prefix 取后5行
@@ -291,10 +279,21 @@ export class PromptExtractor {
     );
     inputLines.push(...suffixInputLines);
     const inputString = inputLines.join('\n').slice(0, 512);
-    const { output } = await api_code_rag(inputString);
+    const { output } = await Promise.race([
+      api_code_rag(inputString),
+      new Promise<{
+        output: RagCode[];
+      }>((resolve) => {
+        setTimeout(() => {
+          resolve({
+            output: [],
+          });
+        }, MAX_RAG_CODE_QUERY_TIME);
+      }),
+    ]);
     return output
       .map((item) => {
-        return `<file_seq>${item.filePath}\n${item.similarCode}`;
+        return `<file_sep>${item.filePath}\n${item.similarCode}`;
       })
       .join('\n');
   }

@@ -179,3 +179,5 @@ export const MODULE_PATH = {
   WLAN: 'WLAN/src',
   X86PLAT: 'X86PLAT/src',
 } as const;
+
+export const MAX_RAG_CODE_QUERY_TIME = 400;
