@@ -118,7 +118,7 @@ export const api_stop_review = async (serverTaskId: string) => {
 //   Feedback,
 //   ReviewState,
 //   ReviewParsedResult,
-// } from 'shared/types/review';
+// } from 'cmw-coder-subprocess';
 // import Logger from 'electron-log/main';
 // import { timeout } from 'main/utils/common';
 
@@ -132,7 +132,7 @@ export const api_stop_review = async (serverTaskId: string) => {
 // export const api_get_code_review_state = async (serverTaskId: string) => {
 //   console.log('api_get_code_review_state', serverTaskId);
 //   await timeout(150);
-//   return ReviewState.Start;
+//   return ReviewState.Finished;
 // };
 
 // const parseReviewResult = (data: string[]): ReviewResult => {
