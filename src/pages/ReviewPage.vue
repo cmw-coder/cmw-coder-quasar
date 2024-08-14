@@ -268,11 +268,11 @@ const projectReview = () => {
 
 const clearReview = () => {
   dialog({
-    title: '清空评审任务',
-    message: '将清空所有评审任务，是否继续？',
+    title: i18n('dialog.clearReviewDialog.title'),
+    message: i18n('dialog.clearReviewDialog.message'),
     persistent: true,
-    ok: '确定',
-    cancel: '取消',
+    ok: i18n('dialog.clearReviewDialog.ok'),
+    cancel: i18n('dialog.clearReviewDialog.cancel'),
   }).onOk(async () => {
     await windowService.clearReview();
     fileList.value = [];
