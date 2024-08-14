@@ -73,7 +73,7 @@ export class PromptExtractor {
         ).completionUpdateRelativeDefinitionsTime(actionId);
         return relativeDefinitions;
       })(),
-      this.getRagCode(functionPrefix, functionSuffix),
+      this.getRagCode(functionPrefix, functionSuffix, document.fileName),
     ]);
 
     const similarSnippetsSliced = similarSnippets
@@ -258,7 +258,7 @@ export class PromptExtractor {
       .reverse();
   }
 
-  async getRagCode(prefix: string, suffix: string) {
+  async getRagCode(prefix: string, suffix: string, filePath: string) {
     const configService = container.get<ConfigService>(ServiceType.CONFIG);
     const networkZone = await configService.getConfig('networkZone');
     if (networkZone !== NetworkZone.Normal) {
@@ -292,7 +292,11 @@ export class PromptExtractor {
         }, MAX_RAG_CODE_QUERY_TIME);
       }),
     ]);
-    return output
+    const fileName = basename(filePath);
+    const filteredOutput = output.filter(
+      (item) => basename(item.filePath) !== fileName,
+    );
+    return filteredOutput
       .map((item) => {
         return `<file_sep>${item.filePath}\n${item.similarCode}`;
       })
