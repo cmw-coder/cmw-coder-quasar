@@ -363,6 +363,9 @@ export default {
         noFile: 'No file selected, please open a file in your editor',
         reviewFile: 'Review current file',
         delFileTitle: 'Delete file',
+        projectReview: 'Project Review',
+        clear: 'Clear ',
+        loading: 'Loading...',
       },
       dialog: {
         delReviewItemDialog: {

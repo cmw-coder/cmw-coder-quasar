@@ -313,7 +313,7 @@ const clearReview = () => {
               color="primary"
               size="md"
               unelevated
-              label="目录评审"
+              :label="i18n('labels.projectReview')"
               @click="() => projectReview()"
             />
           </q-item-section>
@@ -323,7 +323,7 @@ const clearReview = () => {
               color="primary"
               size="md"
               unelevated
-              label="清空"
+              :label="i18n('labels.clear')"
               @click="() => clearReview()"
             />
           </q-item-section>
@@ -382,7 +382,7 @@ const clearReview = () => {
         <template v-slot:after>
           <q-inner-loading
             :showing="activeFileReviewListLoading"
-            label="加载中..."
+            :label="i18n('labels.loading')"
             label-class="text-teal"
             label-style="font-size: 1.1em"
           />
@@ -436,6 +436,7 @@ const clearReview = () => {
                 <q-item-section side>
                   <div style="width: 60px; display: flex">
                     <q-chip
+                      v-show="getProblemNumber(item) > 0"
                       color="red-6"
                       class="text-white"
                       style="width: 22px"

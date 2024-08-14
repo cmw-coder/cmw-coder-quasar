@@ -351,6 +351,9 @@ export default {
         noFile: '未选择文件，请在您的编辑器中打开一个文件',
         reviewFile: '评审当前文件',
         delFileTitle: '删除文件',
+        projectReview: '目录评审',
+        clear: '清空',
+        loading: '加载中...',
       },
       dialog: {
         delReviewItemDialog: {
