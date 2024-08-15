@@ -434,7 +434,13 @@ const clearReview = () => {
                   }}</q-item-section
                 >
                 <q-item-section side>
-                  <div style="width: 60px; display: flex">
+                  <div
+                    style="
+                      width: 74px;
+                      display: flex;
+                      justify-content: flex-end;
+                    "
+                  >
                     <q-chip
                       v-show="getProblemNumber(item) > 0"
                       color="red-6"
