@@ -26,7 +26,7 @@ import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
 import { SimilarSnippet } from 'shared/types/common';
 import { ServiceType } from 'shared/types/service';
-import { api_code_rag, RagCode } from 'main/request/rag';
+import { api_code_rag, RagCode, ResolveReason } from 'main/request/rag';
 import { ConfigService } from 'main/services/ConfigService';
 import { NetworkZone } from 'shared/config';
 
@@ -280,19 +280,33 @@ export class PromptExtractor {
     inputLines.push(...suffixInputLines);
     const inputString = inputLines.join('\n').slice(0, 512);
     log.debug('PromptExtractor.getRagCode.api_code_rag', inputString);
-    const { output } = await Promise.race([
-      api_code_rag(inputString),
+    const { output, reason } = await Promise.race([
       new Promise<{
+        reason: ResolveReason;
+        output: RagCode[];
+      }>((resolve) => {
+        api_code_rag(inputString).then((result) => {
+          resolve({
+            ...result,
+            reason: ResolveReason.DONE,
+          });
+        });
+      }),
+      new Promise<{
+        reason: ResolveReason;
         output: RagCode[];
       }>((resolve) => {
         setTimeout(() => {
-          log.info('PromptExtractor.getRagCode.timeout');
           resolve({
+            reason: ResolveReason.TIMEOUT,
             output: [],
           });
         }, MAX_RAG_CODE_QUERY_TIME);
       }),
     ]);
+    if (reason === ResolveReason.TIMEOUT) {
+      log.debug('PromptExtractor.getRagCode.timeout');
+    }
     const filteredOutput = output.filter(
       (item) => basename(item.filePath) !== basename(filePath),
     );

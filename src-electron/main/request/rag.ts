@@ -7,6 +7,11 @@ export interface RagCode {
   similarScore: number;
 }
 
+export enum ResolveReason {
+  DONE = 'DONE',
+  TIMEOUT = 'TIMEOUT',
+}
+
 export const api_code_rag = async (input: string) => {
   return request<{
     output: RagCode[];
