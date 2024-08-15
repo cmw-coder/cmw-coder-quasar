@@ -286,15 +286,15 @@ export class PromptExtractor {
         output: RagCode[];
       }>((resolve) => {
         setTimeout(() => {
+          log.info('PromptExtractor.getRagCode.timeout');
           resolve({
             output: [],
           });
         }, MAX_RAG_CODE_QUERY_TIME);
       }),
     ]);
-    const fileName = basename(filePath);
     const filteredOutput = output.filter(
-      (item) => basename(item.filePath) !== fileName,
+      (item) => basename(item.filePath) !== basename(filePath),
     );
     return filteredOutput
       .map((item) => {
