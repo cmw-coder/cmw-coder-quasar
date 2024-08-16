@@ -280,12 +280,17 @@ export class PromptExtractor {
     inputLines.push(...suffixInputLines);
     const inputString = inputLines.join('\n').slice(0, 512);
     log.debug('PromptExtractor.getRagCode.api_code_rag', inputString);
+    const startTime = Date.now();
     const { output, reason } = await Promise.race([
       new Promise<{
         reason: ResolveReason;
         output: RagCode[];
       }>((resolve) => {
         api_code_rag(inputString).then((result) => {
+          log.debug(
+            'PromptExtractor.getRagCode.api_code_rag.time',
+            Date.now() - startTime,
+          );
           resolve({
             ...result,
             reason: ResolveReason.DONE,
@@ -297,6 +302,10 @@ export class PromptExtractor {
         output: RagCode[];
       }>((resolve) => {
         setTimeout(() => {
+          log.debug(
+            'PromptExtractor.getRagCode.timeout.time',
+            Date.now() - startTime,
+          );
           resolve({
             reason: ResolveReason.TIMEOUT,
             output: [],
