@@ -12,11 +12,23 @@ export enum ResolveReason {
   TIMEOUT = 'TIMEOUT',
 }
 
-export const api_code_rag = async (input: string) => {
+export const api_code_rag2 = async (input: string) => {
   return request<{
     output: RagCode[];
   }>({
     url: '/kong/RdTestAiService/v1/chatgpt/question/rag',
+    method: 'post',
+    data: {
+      input,
+    },
+  });
+};
+
+export const api_code_rag = async (input: string) => {
+  return request<{
+    output: RagCode[];
+  }>({
+    url: 'http://10.113.36.121/code_search/invoke',
     method: 'post',
     data: {
       input,
