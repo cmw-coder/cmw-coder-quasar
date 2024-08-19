@@ -15,7 +15,7 @@ export enum ResolveReason {
   TIMEOUT = 'TIMEOUT',
 }
 
-export const api_code_rag2 = async (input: string) => {
+export const api_code_rag = async (input: string) => {
   const startTime = Date.now();
   try {
     const result = await request<{
@@ -38,7 +38,7 @@ export const api_code_rag2 = async (input: string) => {
   }
 };
 
-export const api_code_rag = async (input: string) => {
+export const api_code_rag2 = async (input: string) => {
   const startTime = Date.now();
   try {
     const data = await axios<{
