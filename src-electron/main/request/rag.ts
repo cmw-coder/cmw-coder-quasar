@@ -1,4 +1,5 @@
 import request from 'main/request';
+import axios from 'axios';
 
 export interface RagCode {
   similarCode: string;
@@ -25,7 +26,7 @@ export const api_code_rag2 = async (input: string) => {
 };
 
 export const api_code_rag = async (input: string) => {
-  return request<{
+  const data = await axios<{
     output: RagCode[];
   }>({
     url: 'http://10.113.36.121/code_search/invoke',
@@ -34,4 +35,5 @@ export const api_code_rag = async (input: string) => {
       input,
     },
   });
+  return data.data;
 };
