@@ -5,7 +5,6 @@ import {
   IGNORE_COMMON_WORD,
   IGNORE_COMWARE_INTERNAL,
   IGNORE_RESERVED_KEYWORDS,
-  MAX_RAG_CODE_QUERY_TIME,
 } from 'main/components/PromptExtractor/constants';
 import {
   PromptElements,
@@ -26,7 +25,7 @@ import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
 import { SimilarSnippet } from 'shared/types/common';
 import { ServiceType } from 'shared/types/service';
-import { api_code_rag, RagCode, ResolveReason } from 'main/request/rag';
+import { api_code_rag } from 'main/request/rag';
 import { ConfigService } from 'main/services/ConfigService';
 import { NetworkZone } from 'shared/config';
 
@@ -279,43 +278,8 @@ export class PromptExtractor {
     );
     inputLines.push(...suffixInputLines);
     const inputString = inputLines.join('\n').slice(0, 512);
-    log.debug('PromptExtractor.getRagCode.api_code_rag', inputString);
-    const startTime = Date.now();
-    const { output, reason } = await Promise.race([
-      new Promise<{
-        reason: ResolveReason;
-        output: RagCode[];
-      }>((resolve) => {
-        api_code_rag(inputString).then((result) => {
-          log.debug(
-            'PromptExtractor.getRagCode.api_code_rag.time',
-            Date.now() - startTime,
-          );
-          resolve({
-            ...result,
-            reason: ResolveReason.DONE,
-          });
-        });
-      }),
-      new Promise<{
-        reason: ResolveReason;
-        output: RagCode[];
-      }>((resolve) => {
-        setTimeout(() => {
-          log.debug(
-            'PromptExtractor.getRagCode.timeout.time',
-            Date.now() - startTime,
-          );
-          resolve({
-            reason: ResolveReason.TIMEOUT,
-            output: [],
-          });
-        }, MAX_RAG_CODE_QUERY_TIME);
-      }),
-    ]);
-    if (reason === ResolveReason.TIMEOUT) {
-      log.debug('PromptExtractor.getRagCode.timeout');
-    }
+    log.debug('PromptExtractor.getRagCode.api_code_rag.input', inputString);
+    const { output } = await api_code_rag(inputString);
     const filteredOutput = output.filter(
       (item) => basename(item.filePath) !== basename(filePath),
     );
