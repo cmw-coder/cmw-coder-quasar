@@ -29,7 +29,7 @@ export const api_code_rag = async (input: string) => {
   const data = await axios<{
     output: RagCode[];
   }>({
-    url: 'http://10.113.36.121/code_search/invoke',
+    url: 'http://10.113.36.121:9306/code_search/invoke',
     method: 'post',
     data: {
       input,
