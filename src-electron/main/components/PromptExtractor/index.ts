@@ -20,7 +20,7 @@ import {
   tokenize,
   getFunctionSuffix,
 } from 'main/components/PromptExtractor/utils';
-import { container, getService } from 'main/services';
+import { container } from 'main/services';
 import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
 import { SimilarSnippet } from 'shared/types/common';
@@ -46,7 +46,7 @@ export class PromptExtractor {
     inputs: RawInputs,
     similarSnippetCount: number = 1,
   ): Promise<PromptElements> {
-    const { elements, document, position, recentFiles } = inputs;
+    const { elements, document } = inputs;
     const functionPrefix =
       getFunctionPrefix(elements.prefix) ?? elements.prefix;
     const functionSuffix =
