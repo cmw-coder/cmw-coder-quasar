@@ -28,6 +28,7 @@ import { ServiceType } from 'shared/types/service';
 import { api_code_rag } from 'main/request/rag';
 import { ConfigService } from 'main/services/ConfigService';
 import { NetworkZone } from 'shared/config';
+import { timeout } from 'main/utils/common';
 
 export class PromptExtractor {
   private _similarSnippetConfig: SimilarSnippetConfig = {
@@ -53,24 +54,30 @@ export class PromptExtractor {
 
     const [similarSnippets, relativeDefinitions, ragCode] = await Promise.all([
       (async () => {
-        const result = await this.getSimilarSnippets(
-          document,
-          position,
-          functionPrefix,
-          functionSuffix,
-          recentFiles,
-        );
-        getService(ServiceType.STATISTICS).completionUpdateSimilarSnippetsTime(
-          actionId,
-        );
-        return result;
+        // const result = await this.getSimilarSnippets(
+        //   document,
+        //   position,
+        //   functionPrefix,
+        //   functionSuffix,
+        //   recentFiles,
+        // );
+        // getService(ServiceType.STATISTICS).completionUpdateSimilarSnippetsTime(
+        //   actionId,
+        // );
+        await timeout(400);
+        return [] as SimilarSnippet[];
       })(),
       (async () => {
-        const relativeDefinitions = await inputs.getRelativeDefinitions();
-        getService(
-          ServiceType.STATISTICS,
-        ).completionUpdateRelativeDefinitionsTime(actionId);
-        return relativeDefinitions;
+        // const relativeDefinitions = await inputs.getRelativeDefinitions();
+        // getService(
+        //   ServiceType.STATISTICS,
+        // ).completionUpdateRelativeDefinitionsTime(actionId);
+        // return relativeDefinitions;
+        await timeout(400);
+        return [] as {
+          path: string;
+          content: string;
+        }[];
       })(),
       this.getRagCode(functionPrefix, functionSuffix, document.fileName),
     ]);
