@@ -20,7 +20,7 @@ import {
   tokenize,
   getFunctionSuffix,
 } from 'main/components/PromptExtractor/utils';
-import { container } from 'main/services';
+import { container, getService } from 'main/services';
 import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
 import { SimilarSnippet } from 'shared/types/common';
@@ -28,7 +28,6 @@ import { ServiceType } from 'shared/types/service';
 import { api_code_rag } from 'main/request/rag';
 import { ConfigService } from 'main/services/ConfigService';
 import { NetworkZone } from 'shared/config';
-import { timeout } from 'main/utils/common';
 
 export class PromptExtractor {
   private _similarSnippetConfig: SimilarSnippetConfig = {
@@ -46,7 +45,7 @@ export class PromptExtractor {
     inputs: RawInputs,
     similarSnippetCount: number = 1,
   ): Promise<PromptElements> {
-    const { elements, document } = inputs;
+    const { elements, document, position, recentFiles } = inputs;
     const functionPrefix =
       getFunctionPrefix(elements.prefix) ?? elements.prefix;
     const functionSuffix =
@@ -54,30 +53,24 @@ export class PromptExtractor {
 
     const [similarSnippets, relativeDefinitions, ragCode] = await Promise.all([
       (async () => {
-        // const result = await this.getSimilarSnippets(
-        //   document,
-        //   position,
-        //   functionPrefix,
-        //   functionSuffix,
-        //   recentFiles,
-        // );
-        // getService(ServiceType.STATISTICS).completionUpdateSimilarSnippetsTime(
-        //   actionId,
-        // );
-        await timeout(400);
-        return [] as SimilarSnippet[];
+        const result = await this.getSimilarSnippets(
+          document,
+          position,
+          functionPrefix,
+          functionSuffix,
+          recentFiles,
+        );
+        getService(ServiceType.STATISTICS).completionUpdateSimilarSnippetsTime(
+          actionId,
+        );
+        return result;
       })(),
       (async () => {
-        // const relativeDefinitions = await inputs.getRelativeDefinitions();
-        // getService(
-        //   ServiceType.STATISTICS,
-        // ).completionUpdateRelativeDefinitionsTime(actionId);
-        // return relativeDefinitions;
-        await timeout(400);
-        return [] as {
-          path: string;
-          content: string;
-        }[];
+        const relativeDefinitions = await inputs.getRelativeDefinitions();
+        getService(
+          ServiceType.STATISTICS,
+        ).completionUpdateRelativeDefinitionsTime(actionId);
+        return relativeDefinitions;
       })(),
       this.getRagCode(functionPrefix, functionSuffix, document.fileName),
     ]);
