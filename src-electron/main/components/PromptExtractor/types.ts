@@ -50,11 +50,12 @@ export class PromptElements {
 
   async stringify(completionType: CompletionType) {
     const dataStoreService = getService(ServiceType.DATA_STORE);
-    const { common } = (await dataStoreService.getActiveModelContent()).prompt[
-      'c'
-    ].other.code;
+    const { common, commonMulti } = (
+      await dataStoreService.getActiveModelContent()
+    ).prompt['c'].other.code;
 
-    let question = common;
+    let question =
+      completionType === CompletionType.Line ? common : commonMulti;
     question = question.replaceAll(
       '%{NeighborSnippet}%',
       this.neighborSnippet || '',

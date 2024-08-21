@@ -17,9 +17,13 @@ enum TemplateType {
 }
 
 interface PromptTemplate {
+  // 单行
   common: string;
+  // 多行
   commonMulti: string;
+  // 行内
   commonInline: string;
+  // 外挂知识库
   embedding: string;
 }
 
