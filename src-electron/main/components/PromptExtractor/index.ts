@@ -41,7 +41,7 @@ export class PromptExtractor {
     log.info('PromptExtractor.getSimilarSnippets.enable');
   }
 
-  async getPromptComponents2(
+  async getPromptComponents(
     actionId: string,
     inputs: RawInputs,
     similarSnippetCount: number = 1,
@@ -162,7 +162,7 @@ export class PromptExtractor {
     return elements;
   }
 
-  async getPromptComponents(
+  async getPromptComponents2(
     actionId: string,
     inputs: RawInputs,
     similarSnippetCount: number = 1,
