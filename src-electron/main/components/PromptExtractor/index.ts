@@ -28,6 +28,7 @@ import { ServiceType } from 'shared/types/service';
 import { api_code_rag } from 'main/request/rag';
 import { ConfigService } from 'main/services/ConfigService';
 import { NetworkZone } from 'shared/config';
+import { timeout } from 'main/utils/common';
 
 export class PromptExtractor {
   private _similarSnippetConfig: SimilarSnippetConfig = {
@@ -40,7 +41,7 @@ export class PromptExtractor {
     log.info('PromptExtractor.getSimilarSnippets.enable');
   }
 
-  async getPromptComponents(
+  async getPromptComponents2(
     actionId: string,
     inputs: RawInputs,
     similarSnippetCount: number = 1,
@@ -71,6 +72,118 @@ export class PromptExtractor {
           ServiceType.STATISTICS,
         ).completionUpdateRelativeDefinitionsTime(actionId);
         return relativeDefinitions;
+      })(),
+      this.getRagCode(functionPrefix, functionSuffix, document.fileName),
+    ]);
+
+    const similarSnippetsSliced = similarSnippets
+      .filter(
+        (similarSnippet) =>
+          similarSnippet.score > this._similarSnippetConfig.minScore,
+      )
+      .slice(0, similarSnippetCount);
+    log.debug('PromptExtractor.getPromptComponents', {
+      minScore: this._similarSnippetConfig.minScore,
+      mostSimilarSnippets: similarSnippetsSliced,
+    });
+    log.debug('PromptExtractor.getPromptComponents.ragCode', {
+      ragCode,
+    });
+
+    if (similarSnippetsSliced.length) {
+      elements.similarSnippet = similarSnippetsSliced
+        .map((similarSnippet) => similarSnippet.content)
+        .join('\n');
+
+      const selfFileSimilarSnippets = similarSnippetsSliced.filter(
+        (item) =>
+          item.path.toLocaleLowerCase() ===
+          document.fileName.toLocaleLowerCase(),
+      );
+      const otherFileSimilarSnippets = similarSnippetsSliced.filter(
+        (item) =>
+          item.path.toLocaleLowerCase() !==
+          document.fileName.toLocaleLowerCase(),
+      );
+
+      if (selfFileSimilarSnippets.length) {
+        elements.currentFilePrefix =
+          selfFileSimilarSnippets
+            .map((similarSnippet) => similarSnippet.content)
+            .join('\n') +
+          '\n' +
+          elements.currentFilePrefix;
+      }
+      if (otherFileSimilarSnippets.length) {
+        elements.neighborSnippet = otherFileSimilarSnippets
+          .map(
+            (similarSnippet) =>
+              `<file_sep>${basename(similarSnippet.path)}\n${similarSnippet.content}`,
+          )
+          .join('\n');
+      }
+    }
+
+    if (relativeDefinitions.length) {
+      elements.symbols = relativeDefinitions
+        .map((relativeDefinition) => relativeDefinition.content)
+        .join('\n');
+
+      const selfFileRelativeDefinitions = relativeDefinitions.filter(
+        (item) =>
+          item.path.toLocaleLowerCase() ===
+          document.fileName.toLocaleLowerCase(),
+      );
+      const otherFileRelativeDefinitions = relativeDefinitions.filter(
+        (item) =>
+          item.path.toLocaleLowerCase() !==
+          document.fileName.toLocaleLowerCase(),
+      );
+      if (selfFileRelativeDefinitions.length) {
+        elements.currentFilePrefix =
+          selfFileRelativeDefinitions
+            .map((relativeDefinition) => relativeDefinition.content)
+            .join('\n') +
+          '\n' +
+          elements.currentFilePrefix;
+      }
+      if (otherFileRelativeDefinitions.length) {
+        elements.neighborSnippet = otherFileRelativeDefinitions
+          .map(
+            (relativeDefinition) =>
+              `<file_sep>${basename(relativeDefinition.path)}\n${relativeDefinition.content}`,
+          )
+          .join('\n');
+      }
+    }
+
+    elements.ragCode = ragCode;
+
+    return elements;
+  }
+
+  async getPromptComponents(
+    actionId: string,
+    inputs: RawInputs,
+    similarSnippetCount: number = 1,
+  ): Promise<PromptElements> {
+    const { elements, document } = inputs;
+    const functionPrefix =
+      getFunctionPrefix(elements.prefix) ?? elements.prefix;
+    const functionSuffix =
+      getFunctionSuffix(elements.suffix) ?? elements.suffix;
+
+    const [similarSnippets, relativeDefinitions, ragCode] = await Promise.all([
+      (async () => {
+        await timeout(400);
+        return [] as SimilarSnippet[];
+      })(),
+      (async () => {
+        await timeout(400);
+        return [] as {
+          path: string;
+          content: string;
+        }[];
       })(),
       this.getRagCode(functionPrefix, functionSuffix, document.fileName),
     ]);
