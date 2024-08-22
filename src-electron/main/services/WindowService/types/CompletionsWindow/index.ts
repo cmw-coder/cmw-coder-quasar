@@ -14,11 +14,17 @@ import {
 import { ServiceType } from 'shared/types/service';
 import { WindowType } from 'shared/types/WindowType';
 import { timeout } from 'main/utils/common';
+import { SimilarSnippetsProcess } from 'main/services/WindowService/types/CompletionsWindow/SimilarSnippetsSubprocess';
 
 const RE_CREATE_TIME = 1000 * 60 * 30;
 
 export class CompletionsWindow extends BaseWindow {
   private _reCreateTimer?: NodeJS.Timeout;
+  private _similarSnippetsSubprocess = new SimilarSnippetsProcess();
+
+  get similarSnippetsSubprocess() {
+    return this._similarSnippetsSubprocess;
+  }
 
   constructor() {
     const { compatibility } = container

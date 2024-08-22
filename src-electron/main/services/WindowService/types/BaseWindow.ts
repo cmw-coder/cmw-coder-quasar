@@ -107,7 +107,7 @@ export abstract class BaseWindow {
     this._window.once('ready-to-show', () => {
       if (this._window) {
         if (process.env.NODE_ENV === 'development') {
-          this._window.webContents.openDevTools({ mode: 'detach' });
+          // this._window.webContents.openDevTools({ mode: 'detach' });
         }
       }
     });

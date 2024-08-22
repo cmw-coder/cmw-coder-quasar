@@ -1,9 +1,8 @@
 import {
   AppConfig,
   Feedback,
-  MessageToChildProxy,
   Reference,
-  ReviewChildHandler,
+  MessageToReviewChildProxy,
   ReviewMasterHandler,
   ReviewRequestParams,
   ReviewResult,
@@ -34,7 +33,7 @@ import { ServiceType } from 'shared/types/service';
 import { WindowType } from 'shared/types/WindowType';
 
 export class ReviewSubProcess
-  extends MessageToChildProxy<ReviewChildHandler>
+  extends MessageToReviewChildProxy
   implements ReviewMasterHandler
 {
   private updatedReviewIdList: string[] = [];

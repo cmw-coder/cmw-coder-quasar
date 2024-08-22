@@ -1,11 +1,5 @@
 import log from 'electron-log/main';
 import { basename } from 'path';
-
-import {
-  IGNORE_COMMON_WORD,
-  IGNORE_COMWARE_INTERNAL,
-  IGNORE_RESERVED_KEYWORDS,
-} from 'main/components/PromptExtractor/constants';
 import {
   PromptElements,
   RawInputs,
@@ -13,11 +7,7 @@ import {
 } from 'main/components/PromptExtractor/types';
 import {
   getFunctionPrefix,
-  getAllOtherTabContents,
-  getRemainedCodeContents,
-  getMostSimilarSnippetStartLine,
   separateTextByLine,
-  tokenize,
   getFunctionSuffix,
 } from 'main/components/PromptExtractor/utils';
 import { container, getService } from 'main/services';
@@ -28,7 +18,8 @@ import { ServiceType } from 'shared/types/service';
 import { api_code_rag } from 'main/request/rag';
 import { ConfigService } from 'main/services/ConfigService';
 import { NetworkZone } from 'shared/config';
-import { timeout } from 'main/utils/common';
+import { WindowService } from 'main/services/WindowService';
+import { WindowType } from 'shared/types/WindowType';
 
 export class PromptExtractor {
   private _similarSnippetConfig: SimilarSnippetConfig = {
@@ -162,118 +153,6 @@ export class PromptExtractor {
     return elements;
   }
 
-  async getPromptComponents2(
-    actionId: string,
-    inputs: RawInputs,
-    similarSnippetCount: number = 1,
-  ): Promise<PromptElements> {
-    const { elements, document } = inputs;
-    const functionPrefix =
-      getFunctionPrefix(elements.prefix) ?? elements.prefix;
-    const functionSuffix =
-      getFunctionSuffix(elements.suffix) ?? elements.suffix;
-
-    const [similarSnippets, relativeDefinitions, ragCode] = await Promise.all([
-      (async () => {
-        await timeout(400);
-        return [] as SimilarSnippet[];
-      })(),
-      (async () => {
-        await timeout(400);
-        return [] as {
-          path: string;
-          content: string;
-        }[];
-      })(),
-      this.getRagCode(functionPrefix, functionSuffix, document.fileName),
-    ]);
-
-    const similarSnippetsSliced = similarSnippets
-      .filter(
-        (similarSnippet) =>
-          similarSnippet.score > this._similarSnippetConfig.minScore,
-      )
-      .slice(0, similarSnippetCount);
-    log.debug('PromptExtractor.getPromptComponents', {
-      minScore: this._similarSnippetConfig.minScore,
-      mostSimilarSnippets: similarSnippetsSliced,
-    });
-    log.debug('PromptExtractor.getPromptComponents.ragCode', {
-      ragCode,
-    });
-
-    if (similarSnippetsSliced.length) {
-      elements.similarSnippet = similarSnippetsSliced
-        .map((similarSnippet) => similarSnippet.content)
-        .join('\n');
-
-      const selfFileSimilarSnippets = similarSnippetsSliced.filter(
-        (item) =>
-          item.path.toLocaleLowerCase() ===
-          document.fileName.toLocaleLowerCase(),
-      );
-      const otherFileSimilarSnippets = similarSnippetsSliced.filter(
-        (item) =>
-          item.path.toLocaleLowerCase() !==
-          document.fileName.toLocaleLowerCase(),
-      );
-
-      if (selfFileSimilarSnippets.length) {
-        elements.currentFilePrefix =
-          selfFileSimilarSnippets
-            .map((similarSnippet) => similarSnippet.content)
-            .join('\n') +
-          '\n' +
-          elements.currentFilePrefix;
-      }
-      if (otherFileSimilarSnippets.length) {
-        elements.neighborSnippet = otherFileSimilarSnippets
-          .map(
-            (similarSnippet) =>
-              `<file_sep>${basename(similarSnippet.path)}\n${similarSnippet.content}`,
-          )
-          .join('\n');
-      }
-    }
-
-    if (relativeDefinitions.length) {
-      elements.symbols = relativeDefinitions
-        .map((relativeDefinition) => relativeDefinition.content)
-        .join('\n');
-
-      const selfFileRelativeDefinitions = relativeDefinitions.filter(
-        (item) =>
-          item.path.toLocaleLowerCase() ===
-          document.fileName.toLocaleLowerCase(),
-      );
-      const otherFileRelativeDefinitions = relativeDefinitions.filter(
-        (item) =>
-          item.path.toLocaleLowerCase() !==
-          document.fileName.toLocaleLowerCase(),
-      );
-      if (selfFileRelativeDefinitions.length) {
-        elements.currentFilePrefix =
-          selfFileRelativeDefinitions
-            .map((relativeDefinition) => relativeDefinition.content)
-            .join('\n') +
-          '\n' +
-          elements.currentFilePrefix;
-      }
-      if (otherFileRelativeDefinitions.length) {
-        elements.neighborSnippet = otherFileRelativeDefinitions
-          .map(
-            (relativeDefinition) =>
-              `<file_sep>${basename(relativeDefinition.path)}\n${relativeDefinition.content}`,
-          )
-          .join('\n');
-      }
-    }
-
-    elements.ragCode = ragCode;
-
-    return elements;
-  }
-
   async getSimilarSnippets(
     document: TextDocument,
     position: Position,
@@ -281,93 +160,17 @@ export class PromptExtractor {
     functionSuffix: string,
     recentFiles: string[],
   ): Promise<SimilarSnippet[]> {
-    log.debug({
-      fileName: document.fileName,
-      recentFiles,
-    });
-    if (this._slowRecentFiles) {
-      if (
-        !this._slowRecentFiles.some(
-          (slowFile) => !recentFiles.includes(slowFile),
-        )
-      ) {
-        return [];
-      }
-      this.enableSimilarSnippet();
-    }
-    const startTime = Date.now();
-    const tabContentsWithoutComments = (
-      await getAllOtherTabContents(recentFiles)
-    ).map((tabContent) => ({
-      path: tabContent.path,
-      lines: separateTextByLine(tabContent.content, true),
-    }));
-
-    const remainedCodeContents = getRemainedCodeContents(
-      document,
-      position,
-      functionPrefix,
-      functionSuffix,
-    );
-    tabContentsWithoutComments.push(
+    const windowService = container.get<WindowService>(ServiceType.WINDOW);
+    const completionsWindow = windowService.getWindow(WindowType.Completions);
+    return completionsWindow.similarSnippetsSubprocess.proxyFn.getSimilarSnippets(
       {
-        path: document.fileName,
-        lines: remainedCodeContents.before,
-      },
-      {
-        path: document.fileName,
-        lines: remainedCodeContents.after,
+        file: document.fileName,
+        position,
+        functionPrefix,
+        functionSuffix,
+        recentFiles,
       },
     );
-
-    const similarSnippets = Array<SimilarSnippet>();
-    const referenceSnippetLines = separateTextByLine(
-      functionPrefix + functionSuffix,
-    );
-    log.debug('PromptExtractor.getSimilarSnippets', {
-      referenceSnippetLines,
-    });
-
-    tabContentsWithoutComments.forEach(({ path, lines }) => {
-      const { score, startLine } = getMostSimilarSnippetStartLine(
-        lines.map((line) =>
-          tokenize(line, [
-            IGNORE_RESERVED_KEYWORDS,
-            IGNORE_COMMON_WORD,
-            IGNORE_COMWARE_INTERNAL,
-          ]),
-        ),
-        tokenize(referenceSnippetLines.join('\n'), [
-          IGNORE_RESERVED_KEYWORDS,
-          IGNORE_COMMON_WORD,
-          IGNORE_COMWARE_INTERNAL,
-        ]),
-        referenceSnippetLines.length,
-      );
-      const currentMostSimilarSnippet: SimilarSnippet = {
-        path,
-        score: score,
-        content: lines
-          .slice(startLine, startLine + referenceSnippetLines.length + 10)
-          .join('\n'),
-      };
-
-      similarSnippets.push(currentMostSimilarSnippet);
-    });
-
-    const endTime = Date.now();
-    if (endTime - startTime > 1000) {
-      log.info(
-        'PromptExtractor.getSimilarSnippets.disable',
-        endTime - startTime,
-      );
-      this._slowRecentFiles = recentFiles;
-    }
-
-    return similarSnippets
-      .filter((mostSimilarSnippet) => mostSimilarSnippet.score > 0)
-      .sort((first, second) => first.score - second.score)
-      .reverse();
   }
 
   async getRagCode(prefix: string, suffix: string, filePath: string) {
