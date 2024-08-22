@@ -1,5 +1,4 @@
 import { createHash } from 'crypto';
-import log from 'electron-log/main';
 import { PromptElements } from 'main/components/PromptExtractor/types';
 import { getBoundingSuffix } from 'main/components/PromptExtractor/utils';
 import { Completions, LRUCache } from 'main/components/PromptProcessor/types';
@@ -11,6 +10,7 @@ import { ServiceType } from 'shared/types/service';
 import { api_question } from 'main/request/api';
 import { CompletionType } from 'shared/types/common';
 import { getService } from 'main/services';
+import completionLog from '../Loggers/completionLog';
 
 export class PromptProcessor {
   private _abortController?: AbortController;
@@ -28,14 +28,14 @@ export class PromptProcessor {
       .digest('base64');
     const completionCached = this._cache.get(cacheKey);
     if (completionCached) {
-      log.debug('PromptProcessor.process.cacheHit', completionCached);
+      completionLog.debug('PromptProcessor.process.cacheHit', completionCached);
       return completionCached;
     }
 
     this._abortController?.abort();
 
     const completionType = getCompletionType(promptElements);
-    log.debug(
+    completionLog.debug(
       'PromptProcessor.process.completionType',
       promptElements,
       completionType,
@@ -65,15 +65,14 @@ export class PromptProcessor {
         templateName:
           completionType === CompletionType.Line ? 'ShortLineCode' : 'LineCode',
       };
-      log.debug('PromptProcessor.process.questionParams', {
+      completionLog.debug('PromptProcessor.process.questionParams', {
         ...questionParams,
         question: '',
         suffix: '',
       });
-      log.debug(
-        'PromptProcessor.process.questionParams.question',
+      completionLog.debug('PromptProcessor.process.questionParams.question', [
         questionParams.question,
-      );
+      ]);
       getService(ServiceType.STATISTICS).completionUpdatePromptConstructTime(
         actionId,
         appConfig.activeModel,
@@ -83,7 +82,7 @@ export class PromptProcessor {
         questionParams,
         this._abortController.signal,
       );
-      log.debug('PromptProcessor.process.answers', answers);
+      completionLog.debug('PromptProcessor.process.answers', answers);
       getService(ServiceType.STATISTICS).completionUpdateRequestEndTime(
         actionId,
       );
@@ -94,7 +93,7 @@ export class PromptProcessor {
         promptElements.prefix,
       );
       if (candidates.length) {
-        log.info('PromptProcessor.process.cacheMiss', candidates);
+        completionLog.info('PromptProcessor.process.cacheMiss', candidates);
         this._cache.put(cacheKey, { candidates, type: completionType });
         return {
           candidates: candidates,
@@ -102,7 +101,7 @@ export class PromptProcessor {
         };
       }
     } catch (e) {
-      log.error('PromptProcessor.process.error', e);
+      completionLog.error('PromptProcessor.process.error', e);
       return undefined;
     }
   }

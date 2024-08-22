@@ -10,7 +10,7 @@ import {
   Selection,
 } from 'cmw-coder-subprocess';
 import { app } from 'electron';
-import Logger from 'electron-log/main';
+import reviewLog from 'main/components/Loggers/reviewLog';
 import {
   api_code_review,
   api_feedback_review,
@@ -54,7 +54,7 @@ export class ReviewSubProcess
   }
 
   async log(...payloads: never[]): Promise<void> {
-    Logger.log(`[ReviewSubProcess ${this.pid}]`, ...payloads);
+    reviewLog.log(...payloads);
   }
 
   async getReferences(selection: Selection): Promise<Reference[]> {

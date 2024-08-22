@@ -1,6 +1,6 @@
 import { MessageToSimilarSnippetsChildProxy } from 'cmw-coder-subprocess';
 import { SimilarSnippetsMasterHandler } from 'cmw-coder-subprocess/dist/types/SimilarSnippetsHandler';
-import Logger from 'electron-log/main';
+import completionLog from 'main/components/Loggers/completionLog';
 import { cmwCoderSubprocessPath } from 'main/services/WindowService/constants';
 
 export class SimilarSnippetsProcess
@@ -12,6 +12,6 @@ export class SimilarSnippetsProcess
   }
 
   async log(...payloads: never[]): Promise<void> {
-    Logger.log(`[SimilarSnippetsProcess ${this.pid}]`, ...payloads);
+    completionLog.log(...payloads);
   }
 }

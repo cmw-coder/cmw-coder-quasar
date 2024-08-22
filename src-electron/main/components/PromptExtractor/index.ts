@@ -1,4 +1,3 @@
-import log from 'electron-log/main';
 import { basename } from 'path';
 import {
   PromptElements,
@@ -20,6 +19,7 @@ import { ConfigService } from 'main/services/ConfigService';
 import { NetworkZone } from 'shared/config';
 import { WindowService } from 'main/services/WindowService';
 import { WindowType } from 'shared/types/WindowType';
+import completionLog from '../Loggers/completionLog';
 
 export class PromptExtractor {
   private _similarSnippetConfig: SimilarSnippetConfig = {
@@ -29,7 +29,7 @@ export class PromptExtractor {
 
   enableSimilarSnippet() {
     this._slowRecentFiles = undefined;
-    log.info('PromptExtractor.getSimilarSnippets.enable');
+    completionLog.info('PromptExtractor.getSimilarSnippets.enable');
   }
 
   async getPromptComponents(
@@ -73,11 +73,11 @@ export class PromptExtractor {
           similarSnippet.score > this._similarSnippetConfig.minScore,
       )
       .slice(0, similarSnippetCount);
-    log.debug('PromptExtractor.getPromptComponents', {
+    completionLog.debug('PromptExtractor.getPromptComponents', {
       minScore: this._similarSnippetConfig.minScore,
       mostSimilarSnippets: similarSnippetsSliced,
     });
-    log.debug('PromptExtractor.getPromptComponents.ragCode', {
+    completionLog.debug('PromptExtractor.getPromptComponents.ragCode', {
       ragCode,
     });
 
@@ -194,7 +194,10 @@ export class PromptExtractor {
     );
     inputLines.push(...suffixInputLines);
     const inputString = inputLines.join('\n').slice(0, 512);
-    log.debug('PromptExtractor.getRagCode.api_code_rag.input', inputString);
+    completionLog.debug(
+      'PromptExtractor.getRagCode.api_code_rag.input',
+      inputString,
+    );
     const { output } = await api_code_rag(inputString);
     const filteredOutput = output.filter(
       (item) => basename(item.filePath) !== basename(filePath),

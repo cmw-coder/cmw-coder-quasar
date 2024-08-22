@@ -1,4 +1,3 @@
-import log from 'electron-log/main';
 import { readFile } from 'fs/promises';
 import { decode } from 'iconv-lite';
 import { basename, dirname } from 'path';
@@ -16,6 +15,7 @@ import { NEW_LINE_REGEX } from 'shared/constants/common';
 import { CompletionType, SymbolInfo } from 'shared/types/common';
 import { CompletionGenerateClientMessage } from 'shared/types/WsMessage';
 import { ServiceType } from 'shared/types/service';
+import completionLog from '../Loggers/completionLog';
 
 export class PromptElements {
   // NearCode
@@ -150,7 +150,7 @@ export class RawInputs {
               .join('\n'),
           };
         } catch (e) {
-          log.warn(e);
+          completionLog.error('getRelativeDefinitions', e);
           return {
             path,
             content: '',

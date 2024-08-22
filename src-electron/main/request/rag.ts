@@ -1,7 +1,7 @@
 import request from 'main/request';
 import axios from 'axios';
-import Logger from 'electron-log';
 import { MAX_RAG_CODE_QUERY_TIME } from 'main/components/PromptExtractor/constants';
+import completionLog from 'main/components/Loggers/completionLog';
 
 export interface RagCode {
   similarCode: string;
@@ -28,10 +28,10 @@ export const api_code_rag = async (input: string) => {
       },
       timeout: MAX_RAG_CODE_QUERY_TIME,
     });
-    Logger.debug('api_code_rag.success', Date.now() - startTime);
+    completionLog.debug('api_code_rag.success', Date.now() - startTime);
     return result;
   } catch (e) {
-    Logger.error('api_code_rag.error', e);
+    completionLog.error('api_code_rag.error', e);
     return {
       output: [],
     };
@@ -51,10 +51,10 @@ export const api_code_rag2 = async (input: string) => {
       },
       timeout: MAX_RAG_CODE_QUERY_TIME,
     });
-    Logger.debug('api_code_rag.success', Date.now() - startTime);
+    completionLog.debug('api_code_rag.success', Date.now() - startTime);
     return data.data;
   } catch (e) {
-    Logger.error('api_code_rag.error', e);
+    completionLog.error('api_code_rag.error', e);
     return {
       output: [],
     };

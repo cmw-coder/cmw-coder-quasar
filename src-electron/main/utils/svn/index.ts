@@ -1,5 +1,3 @@
-import log from 'electron-log/main';
-
 import {
   executeCommand,
   folderLatestModificationTime,
@@ -11,18 +9,19 @@ import { DataStoreService } from 'main/services/DataStoreService';
 import { StatisticsService } from 'main/services/StatisticsService';
 import { svnPath } from 'main/services/SvnService/constants';
 import { NEW_LINE_REGEX } from 'shared/constants/common';
+import statisticsLog from 'main/components/Loggers/statisticsLog';
 
 export const getRevision = async (path: string): Promise<number> => {
   const { stdout, stderr } = await executeCommand(`${svnPath} info`, path);
   if (stderr && stderr.length) {
-    log.error('Get SVN info failed:', stderr);
+    statisticsLog.error('Get SVN info failed:', stderr);
     return -1;
   }
   const revision = stdout.match(/Last Changed Rev: (\d+)/)?.[1];
   if (revision) {
     return parseInt(revision);
   }
-  log.error('Parse revision failed:', stdout);
+  statisticsLog.error('Parse revision failed:', stdout);
   return -1;
 };
 
@@ -78,7 +77,7 @@ export const reportProjectAdditions = async () => {
   )
     .filter(({ addedLines }) => addedLines > 0)
     .forEach(({ path, id, addedLines, lastAddedLines }) => {
-      log.debug('reportProjectAdditions', {
+      statisticsLog.debug('reportProjectAdditions', {
         path,
         id,
         addedLines,
