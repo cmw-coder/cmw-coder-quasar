@@ -12,6 +12,6 @@ export class SimilarSnippetsProcess
   }
 
   async log(...payloads: never[]): Promise<void> {
-    completionLog.log(...payloads);
+    completionLog.log('[SimilarSnippetsSubprocess]', ...payloads);
   }
 }
