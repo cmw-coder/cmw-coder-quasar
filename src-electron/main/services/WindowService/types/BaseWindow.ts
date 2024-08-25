@@ -10,7 +10,6 @@ import { WindowType } from 'shared/types/WindowType';
 import { container } from 'main/services';
 import { DataStoreService } from 'main/services/DataStoreService';
 import { ActionMessageMapping } from 'shared/types/ActionMessage';
-import log from 'electron-log/main';
 import { resolve } from 'path';
 
 export interface windowOptions extends BrowserWindowConstructorOptions {
@@ -85,7 +84,7 @@ export abstract class BaseWindow {
         });
       },
     );
-    this._window.loadURL(this._url).catch((e) => log.warn('loadURL', e));
+    this._window.loadURL(this._url).catch((e) => Logger.warn('loadURL', e));
 
     this.afterCreated();
 
@@ -107,7 +106,7 @@ export abstract class BaseWindow {
     this._window.once('ready-to-show', () => {
       if (this._window) {
         if (process.env.NODE_ENV === 'development') {
-          this._window.webContents.openDevTools({ mode: 'detach' });
+          // this._window.webContents.openDevTools({ mode: 'detach' });
         }
       }
     });

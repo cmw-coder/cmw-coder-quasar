@@ -18,6 +18,10 @@ const props = defineProps({
     type: Object as PropType<ReviewData>,
     required: true,
   },
+  feedbackEnabled: {
+    type: Boolean,
+    default: true,
+  },
 });
 
 const emit = defineEmits<{
@@ -114,7 +118,9 @@ onMounted(() => {
                     isShowCode = !isShowCode;
                   }
                 "
-                >{{ isShowCode ? '收起' : '展开' }}</q-btn
+                >{{
+                  isShowCode ? i18n('labels.collapse') : i18n('labels.expand')
+                }}</q-btn
               >
             </div>
           </div>
@@ -135,7 +141,7 @@ onMounted(() => {
       <q-timeline v-if="reviewData.state !== ReviewState.Error">
         <q-timeline-entry
           v-if="reviewData.state === ReviewState.Queue"
-          title="排队中"
+          :title="i18n('labels.queuing')"
           :subtitle="
             DateTime.fromSeconds(reviewData.createTime).toFormat(
               'yyyy-MM-dd HH:mm:ss',
@@ -397,6 +403,7 @@ onMounted(() => {
             />
             <template v-if="reviewData.feedback === Feedback.None">
               <q-btn
+                v-if="feedbackEnabled"
                 flat
                 align="between"
                 :label="i18n('labels.useless')"
@@ -411,6 +418,7 @@ onMounted(() => {
               />
 
               <q-btn
+                v-if="feedbackEnabled"
                 flat
                 align="between"
                 :label="i18n('labels.helpful')"

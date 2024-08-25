@@ -1,9 +1,9 @@
-import log from 'electron-log/main';
 import { extname } from 'path';
 
 import { PromptElements } from 'main/components/PromptExtractor/types';
 import { NEW_LINE_REGEX } from 'shared/constants/common';
 import { CompletionType } from 'shared/types/common';
+import completionLog from '../Loggers/completionLog';
 
 // Start with '//', '#', '{', '/**' or end with '**/'
 const functionHeaderEndRegex = /^\/\/|^#|^\{|^\/\*\*|\*\*\/\s*$/;
@@ -21,7 +21,7 @@ export const getCompletionType = (
 
   const lastNonEmptyLine =
     promptElements.prefix.trimEnd().split(NEW_LINE_REGEX).at(-1) ?? '';
-  log.debug('getCompletionType', {
+  completionLog.debug('getCompletionType', {
     lastNonEmptyLine,
     functionHeaderEndTest: functionHeaderEndRegex.test(lastNonEmptyLine),
     extension: extname(promptElements.file ?? ''),

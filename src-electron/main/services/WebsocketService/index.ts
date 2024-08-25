@@ -46,6 +46,8 @@ import {
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import { Selection } from 'shared/types/Selection';
 import { Reference } from 'cmw-coder-subprocess';
+import completionLog from 'main/components/Loggers/completionLog';
+import reviewLog from 'main/components/Loggers/reviewLog';
 
 @injectable()
 export class WebsocketService implements WebsocketServiceTrait {
@@ -165,7 +167,7 @@ export class WebsocketService implements WebsocketServiceTrait {
       getFunctionSuffix(suffix) ?? suffix,
       recentFiles,
     );
-    log.debug('WebsocketService.getSimilarSnippets', {
+    completionLog.debug('WebsocketService.getSimilarSnippets', {
       similarSnippets,
     });
     return similarSnippets;
@@ -276,9 +278,9 @@ export class WebsocketService implements WebsocketServiceTrait {
             ratio,
             getClientVersion(pid),
           )
-          .catch((e) => log.warn('WsAction.CompletionEdit', e));
+          .catch((e) => completionLog.warn('WsAction.CompletionEdit', e));
       } catch (e) {
-        log.warn('WsAction.CompletionEdit', e);
+        completionLog.warn('WsAction.CompletionEdit', e);
         this._statisticsReporterService.completionAbort(actionId);
       }
     });
@@ -307,7 +309,7 @@ export class WebsocketService implements WebsocketServiceTrait {
             projectId,
           );
 
-          log.debug('WsAction.CompletionGenerate', data);
+          completionLog.debug('WsAction.CompletionGenerate', data);
 
           const promptElements =
             await this._promptExtractor.getPromptComponents(
@@ -394,7 +396,7 @@ export class WebsocketService implements WebsocketServiceTrait {
               height,
               { x, y },
             )
-            .catch((e) => log.warn('WsAction.CompletionSelect', e));
+            .catch((e) => completionLog.warn('WsAction.CompletionSelect', e));
         }
       } catch {
         this._statisticsReporterService.completionAbort(actionId);
@@ -492,7 +494,7 @@ export class WebsocketService implements WebsocketServiceTrait {
                 svnPath,
               );
             } catch (e) {
-              log.error('EditorSwitchSvn', e);
+              completionLog.error('EditorSwitchSvn', e);
             }
           }
         }
@@ -508,7 +510,7 @@ export class WebsocketService implements WebsocketServiceTrait {
       },
     );
     this._registerWsAction(WsAction.ReviewRequest, ({ data }) => {
-      log.info('ReviewRequest Response', data);
+      reviewLog.info('ReviewRequest Response', data);
       const { id } = data;
       const referencesResolveHandle = this.referencesResolveHandleMap.get(id);
       if (referencesResolveHandle) {

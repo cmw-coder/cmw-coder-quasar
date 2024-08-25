@@ -1,4 +1,3 @@
-import log from 'electron-log/main';
 import { injectable } from 'inversify';
 import { DateTime } from 'luxon';
 import { extname, basename, join } from 'path';
@@ -21,6 +20,7 @@ import { constructData } from 'main/services/StatisticsService/utils';
 import { NEW_LINE_REGEX } from 'shared/constants/common';
 import { CaretPosition } from 'shared/types/common';
 import { StatisticsServiceTrait } from 'shared/types/service/StatisticsServiceTrait';
+import statisticsLog from 'main/components/Loggers/statisticsLog';
 
 @injectable()
 export class StatisticsService implements StatisticsServiceTrait {
@@ -51,7 +51,7 @@ export class StatisticsService implements StatisticsServiceTrait {
       return;
     }
 
-    log.debug('StatisticsReporter.completionAccept', {
+    statisticsLog.debug('StatisticsReporter.completionAccept', {
       completions: data.completions,
       position: data.position,
       projectId: data.projectId,
@@ -86,7 +86,7 @@ export class StatisticsService implements StatisticsServiceTrait {
         ),
       );
     } catch (e) {
-      log.error('StatisticsReporter.completionAccept.failed', e);
+      statisticsLog.error('StatisticsReporter.completionAccept.failed', e);
     }
   }
 
@@ -117,7 +117,7 @@ export class StatisticsService implements StatisticsServiceTrait {
     ) {
       // TODO: Check if this works
       this._lastCursorPosition = data.position;
-      log.debug('StatisticsReporter.completionCancel', {
+      statisticsLog.debug('StatisticsReporter.completionCancel', {
         position: data.position,
         projectId: data.projectId,
         timelines: {
@@ -154,7 +154,7 @@ export class StatisticsService implements StatisticsServiceTrait {
       return;
     }
 
-    log.debug({ timelines: data.timelines });
+    statisticsLog.debug({ timelines: data.timelines });
 
     const requestData: CollectionData = {
       createTime: data.timelines.proxyEndEditorInfo.toFormat(
@@ -209,7 +209,7 @@ export class StatisticsService implements StatisticsServiceTrait {
       },
     };
 
-    log.debug('StatisticsReporter.completionKept', { requestData });
+    statisticsLog.debug('StatisticsReporter.completionKept', { requestData });
 
     try {
       await Promise.all([
@@ -229,7 +229,7 @@ export class StatisticsService implements StatisticsServiceTrait {
             ),
       ]);
     } catch (e) {
-      log.error('StatisticsReporter.completionKept.failed', e);
+      statisticsLog.error('StatisticsReporter.completionKept.failed', e);
     }
     this.completionAbort(actionId);
   }
@@ -262,7 +262,7 @@ export class StatisticsService implements StatisticsServiceTrait {
       data.position.line >= 0 &&
       data.position.line != this._lastCursorPosition.line
     ) {
-      log.debug('StatisticsReporter.completionSelected', {
+      statisticsLog.debug('StatisticsReporter.completionSelected', {
         completions: data.completions,
         position: data.position,
         projectId: data.projectId,
@@ -290,7 +290,7 @@ export class StatisticsService implements StatisticsServiceTrait {
         skuNameGenerateMapping[data.completions.type],
       )
         .then((data) => api_reportSKU(data))
-        .catch((e) => log.warn(e));
+        .catch((e) => statisticsLog.warn(e));
     }
     return candidate;
   }
@@ -344,7 +344,7 @@ export class StatisticsService implements StatisticsServiceTrait {
   }
 
   async copiedLines(count: number, projectId: string, version: string) {
-    log.debug('StatisticsReporter.copiedLines', {
+    statisticsLog.debug('StatisticsReporter.copiedLines', {
       count,
       projectId,
       version,
@@ -362,7 +362,7 @@ export class StatisticsService implements StatisticsServiceTrait {
         ),
       );
     } catch (e) {
-      log.error('StatisticsReporter.copiedLines.failed', e);
+      statisticsLog.error('StatisticsReporter.copiedLines.failed', e);
     }
   }
 
@@ -373,7 +373,7 @@ export class StatisticsService implements StatisticsServiceTrait {
     projectId: string,
     version: string,
   ) {
-    log.debug('StatisticsReporter.incrementLines', {
+    statisticsLog.debug('StatisticsReporter.incrementLines', {
       count,
       startTime,
       endTime,
@@ -393,7 +393,7 @@ export class StatisticsService implements StatisticsServiceTrait {
         ),
       );
     } catch (e) {
-      log.error('StatisticsReporter.incrementLinesFailed', e);
+      statisticsLog.error('StatisticsReporter.incrementLinesFailed', e);
     }
   }
 }

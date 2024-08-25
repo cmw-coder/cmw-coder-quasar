@@ -6,16 +6,16 @@ import {
   ReviewParsedResult,
 } from 'cmw-coder-subprocess';
 import request from 'main/request';
-import Logger from 'electron-log/main';
+import reviewLog from 'main/components/Loggers/reviewLog';
 
 export const api_code_review = async (data: ReviewRequestParams) => {
-  Logger.log('api_code_review start', data);
+  reviewLog.log('api_code_review start', data);
   const result = await request<string>({
     url: '/kong/RdTestAiService/v1/chatgpt/question/review',
     method: 'post',
     data,
   });
-  Logger.log('api_code_review end', result);
+  reviewLog.log('api_code_review end', result);
   return result;
 };
 
@@ -55,7 +55,7 @@ const parseReviewResult = (data: string[]): ReviewResult => {
     }
   } catch (error) {
     result.parsed = false;
-    Logger.error('parseReviewResult error', error);
+    reviewLog.error('parseReviewResult error', error);
   }
   return result;
 };
@@ -63,7 +63,7 @@ const parseReviewResult = (data: string[]): ReviewResult => {
 export const api_get_code_review_result = async (
   serverTaskId: string,
 ): Promise<ReviewResult> => {
-  Logger.log('api_get_code_review_result start', serverTaskId);
+  reviewLog.log('api_get_code_review_result start', serverTaskId);
   const result = await request<string[]>({
     url: '/kong/RdTestAiService/v1/chatgpt/question/review/result',
     method: 'get',
@@ -71,7 +71,7 @@ export const api_get_code_review_result = async (
       taskId: serverTaskId,
     },
   });
-  Logger.log('api_get_code_review_result end', result);
+  reviewLog.log('api_get_code_review_result end', result);
   return parseReviewResult(result);
 };
 
@@ -102,7 +102,7 @@ export const api_feedback_review = async ({
 };
 
 export const api_stop_review = async (serverTaskId: string) => {
-  Logger.log('api_stop_review', serverTaskId);
+  reviewLog.log('api_stop_review', serverTaskId);
   return request({
     url: '/kong/RdTestAiService/v1/chatgpt/question/review/stop',
     method: 'post',
@@ -118,8 +118,9 @@ export const api_stop_review = async (serverTaskId: string) => {
 //   Feedback,
 //   ReviewState,
 //   ReviewParsedResult,
-// } from 'shared/types/review';
-// import Logger from 'electron-log/main';
+// } from 'cmw-coder-subprocess';
+// import reviewLog from 'main/components/Loggers/reviewLog';
+
 // import { timeout } from 'main/utils/common';
 
 // export const api_code_review = async (data: ReviewRequestParams) => {
@@ -132,7 +133,7 @@ export const api_stop_review = async (serverTaskId: string) => {
 // export const api_get_code_review_state = async (serverTaskId: string) => {
 //   console.log('api_get_code_review_state', serverTaskId);
 //   await timeout(150);
-//   return ReviewState.Start;
+//   return ReviewState.Finished;
 // };
 
 // const parseReviewResult = (data: string[]): ReviewResult => {
@@ -161,7 +162,7 @@ export const api_stop_review = async (serverTaskId: string) => {
 //     }
 //   } catch (error) {
 //     result.parsed = false;
-//     Logger.error('parseReviewResult error', error);
+//     reviewLog.error('parseReviewResult error', error);
 //   }
 //   return result;
 // };

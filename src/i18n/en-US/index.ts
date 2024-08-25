@@ -103,6 +103,9 @@ export default {
           rejectDialogCancel: 'Cancel',
           helpful: 'Helpful',
           referenceViewDialogTitle: 'Reference Code',
+          expand: 'Expand',
+          collapse: 'Collapse',
+          queuing: 'Queuing',
         },
       },
     },
@@ -360,6 +363,9 @@ export default {
         noFile: 'No file selected, please open a file in your editor',
         reviewFile: 'Review current file',
         delFileTitle: 'Delete file',
+        projectReview: 'Project Review',
+        clear: 'Clear ',
+        loading: 'Loading...',
       },
       dialog: {
         delReviewItemDialog: {
@@ -372,6 +378,12 @@ export default {
           title: 'Notice',
           message: 'There are still reviews pending under the current file',
           ok: 'Stop all and delete',
+          cancel: 'Cancel',
+        },
+        clearReviewDialog: {
+          title: 'Clear all reviews',
+          message: 'Are you sure you want to clear all reviews?',
+          ok: 'Confirm',
           cancel: 'Cancel',
         },
       },

@@ -103,6 +103,9 @@ export default {
           rejectDialogCancel: '取消',
           helpful: '有帮助',
           referenceViewDialogTitle: '引用代码',
+          expand: '展开',
+          collapse: '收起',
+          queuing: '排队中',
         },
       },
     },
@@ -348,6 +351,9 @@ export default {
         noFile: '未选择文件，请在您的编辑器中打开一个文件',
         reviewFile: '评审当前文件',
         delFileTitle: '删除文件',
+        projectReview: '目录评审',
+        clear: '清空',
+        loading: '加载中...',
       },
       dialog: {
         delReviewItemDialog: {
@@ -360,6 +366,12 @@ export default {
           title: '提示',
           message: '当前文件下还存在 review 未结束',
           ok: '全部停止并删除',
+          cancel: '取消',
+        },
+        clearReviewDialog: {
+          title: '清空评审任务',
+          message: '将清空所有评审任务, 是否继续？',
+          ok: '确定',
           cancel: '取消',
         },
       },

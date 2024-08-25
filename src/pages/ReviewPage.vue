@@ -268,11 +268,11 @@ const projectReview = () => {
 
 const clearReview = () => {
   dialog({
-    title: '清空评审任务',
-    message: '将清空所有评审任务，是否继续？',
+    title: i18n('dialog.clearReviewDialog.title'),
+    message: i18n('dialog.clearReviewDialog.message'),
     persistent: true,
-    ok: '确定',
-    cancel: '取消',
+    ok: i18n('dialog.clearReviewDialog.ok'),
+    cancel: i18n('dialog.clearReviewDialog.cancel'),
   }).onOk(async () => {
     await windowService.clearReview();
     fileList.value = [];
@@ -313,7 +313,7 @@ const clearReview = () => {
               color="primary"
               size="md"
               unelevated
-              label="目录评审"
+              :label="i18n('labels.projectReview')"
               @click="() => projectReview()"
             />
           </q-item-section>
@@ -323,7 +323,7 @@ const clearReview = () => {
               color="primary"
               size="md"
               unelevated
-              label="清空"
+              :label="i18n('labels.clear')"
               @click="() => clearReview()"
             />
           </q-item-section>
@@ -382,7 +382,7 @@ const clearReview = () => {
         <template v-slot:after>
           <q-inner-loading
             :showing="activeFileReviewListLoading"
-            label="加载中..."
+            :label="i18n('labels.loading')"
             label-class="text-teal"
             label-style="font-size: 1.1em"
           />
@@ -434,8 +434,15 @@ const clearReview = () => {
                   }}</q-item-section
                 >
                 <q-item-section side>
-                  <div style="width: 60px; display: flex">
+                  <div
+                    style="
+                      width: 74px;
+                      display: flex;
+                      justify-content: flex-end;
+                    "
+                  >
                     <q-chip
+                      v-show="getProblemNumber(item) > 0"
                       color="red-6"
                       class="text-white"
                       style="width: 22px"

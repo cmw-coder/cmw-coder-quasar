@@ -1,4 +1,3 @@
-import log from 'electron-log/main';
 import { readFile } from 'fs/promises';
 import { decode } from 'iconv-lite';
 import { basename, dirname } from 'path';
@@ -16,6 +15,7 @@ import { NEW_LINE_REGEX } from 'shared/constants/common';
 import { CompletionType, SymbolInfo } from 'shared/types/common';
 import { CompletionGenerateClientMessage } from 'shared/types/WsMessage';
 import { ServiceType } from 'shared/types/service';
+import completionLog from '../Loggers/completionLog';
 
 export class PromptElements {
   // NearCode
@@ -39,6 +39,8 @@ export class PromptElements {
   neighborSnippet?: string;
   // CurrentFilePrefix
   currentFilePrefix: string;
+  // RagCode
+  ragCode?: string;
 
   constructor(prefix: string, suffix: string) {
     this.prefix = prefix.trimStart();
@@ -48,11 +50,12 @@ export class PromptElements {
 
   async stringify(completionType: CompletionType) {
     const dataStoreService = getService(ServiceType.DATA_STORE);
-    const { common } = (await dataStoreService.getActiveModelContent()).prompt[
-      'c'
-    ].other.code;
+    const { common, commonMulti } = (
+      await dataStoreService.getActiveModelContent()
+    ).prompt['c'].other.code;
 
-    let question = common;
+    let question =
+      completionType === CompletionType.Line ? common : commonMulti;
     question = question.replaceAll(
       '%{NeighborSnippet}%',
       this.neighborSnippet || '',
@@ -88,7 +91,7 @@ export class PromptElements {
     );
     question = question.replaceAll('%{ImportList}%', this.importList || '');
     question = question.replaceAll('%{Comment}%', this.comment || '');
-
+    question = question.replaceAll('%{RagCode}%', this.ragCode || '');
     return question;
   }
 }
@@ -147,7 +150,7 @@ export class RawInputs {
               .join('\n'),
           };
         } catch (e) {
-          log.warn(e);
+          completionLog.error('getRelativeDefinitions', e);
           return {
             path,
             content: '',
