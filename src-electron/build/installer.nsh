@@ -67,6 +67,7 @@
   ${If} $SI3_INSTALL_DIR != ''
   ${AndIf} ${FileExists} '$SI3_INSTALL_DIR\Insight3.exe'
     ${KillIfRunning} 'Insight3.exe'
+    ${KillIfRunning} 'ctags.exe'
 
     SetOutPath '$SI3_INSTALL_DIR'
       File '${BUILD_RESOURCES_DIR}\build\assets\Insight3.exe'
@@ -87,6 +88,7 @@
   ${If} $SI4_INSTALL_DIR != ''
   ${AndIf} ${FileExists} '$SI4_INSTALL_DIR\sourceinsight4.exe'
     ${KillIfRunning} 'sourceinsight4.exe'
+    ${KillIfRunning} 'ctags.exe'
 
     SetOutPath '$SI4_INSTALL_DIR'
       File '${BUILD_RESOURCES_DIR}\build\assets\sourceinsight4.exe'
