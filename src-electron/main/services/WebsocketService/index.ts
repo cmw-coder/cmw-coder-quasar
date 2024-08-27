@@ -48,6 +48,7 @@ import { Selection } from 'shared/types/Selection';
 import { Reference } from 'cmw-coder-subprocess';
 import completionLog from 'main/components/Loggers/completionLog';
 import reviewLog from 'main/components/Loggers/reviewLog';
+import { NEW_LINE_REGEX } from 'shared/constants/common';
 
 @injectable()
 export class WebsocketService implements WebsocketServiceTrait {
@@ -415,13 +416,13 @@ export class WebsocketService implements WebsocketServiceTrait {
       }
     });
     this._registerWsAction(WsAction.EditorPaste, ({ data }, pid) => {
-      const { count } = data;
+      const { content } = data;
       const project = this.getClientInfo(pid)?.currentProject;
       if (project && project.length) {
         try {
           const { id: projectId } = getProjectData(project);
           this._statisticsReporterService
-            .copiedLines(count, projectId, getClientVersion(pid))
+            .copiedLines(content.split(NEW_LINE_REGEX).length, projectId, getClientVersion(pid))
             .catch();
         } catch (e) {
           const error = <Error>e;
