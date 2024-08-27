@@ -50,6 +50,18 @@ export class DataStoreService implements DataStoreServiceTrait {
         }
         store.set('window', appData.window);
       },
+      '1.2.7': (store) => {
+        log.info('Upgrading "appData" store to 1.2.7 ...');
+        const appData = store.store;
+        if (!appData.project) {
+          appData.project = {};
+        } else {
+          for (const key in appData.project) {
+            appData.project[key].isAutoManaged = true;
+          }
+        }
+        store.set('project', appData.project);
+      },
     },
   });
 
@@ -155,6 +167,7 @@ export class DataStoreService implements DataStoreServiceTrait {
     } else {
       project[path] = {
         id: projectId,
+        isAutoManaged: true,
         lastAddedLines: 0,
         svn: [],
       };
