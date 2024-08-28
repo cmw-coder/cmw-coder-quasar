@@ -64,14 +64,13 @@
 !macroend
 
 !macro customInstall
+  ${If} 1 > 0
+    ${KillIfRunning} 'ctags.exe'
+  ${EndIf}
+
   ${If} $SI3_INSTALL_DIR != ''
   ${AndIf} ${FileExists} '$SI3_INSTALL_DIR\Insight3.exe'
-    ${If} 1 > 0
-      ${KillIfRunning} 'Insight3.exe'
-    ${EndIf}
-    ${If} 1 > 0
-      ${KillIfRunning} 'ctags.exe'
-    ${EndIf}
+    ${KillIfRunning} 'Insight3.exe'
 
     SetOutPath '$SI3_INSTALL_DIR'
       File '${BUILD_RESOURCES_DIR}\build\assets\Insight3.exe'
@@ -91,12 +90,7 @@
   ${EndIf}
   ${If} $SI4_INSTALL_DIR != ''
   ${AndIf} ${FileExists} '$SI4_INSTALL_DIR\sourceinsight4.exe'
-    ${If} 1 > 0
-      ${KillIfRunning} 'sourceinsight4.exe'
-    ${EndIf}
-    ${If} 1 > 0
-      ${KillIfRunning} 'ctags.exe'
-    ${EndIf}
+    ${KillIfRunning} 'sourceinsight4.exe'
 
     SetOutPath '$SI4_INSTALL_DIR'
       File '${BUILD_RESOURCES_DIR}\build\assets\sourceinsight4.exe'
