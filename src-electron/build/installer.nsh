@@ -66,10 +66,10 @@
 !macro customInstall
   ${If} $SI3_INSTALL_DIR != ''
   ${AndIf} ${FileExists} '$SI3_INSTALL_DIR\Insight3.exe'
-    ${If} 1
+    ${If} 1 > 0
       ${KillIfRunning} 'Insight3.exe'
     ${EndIf}
-    ${If} 1
+    ${If} 1 > 0
       ${KillIfRunning} 'ctags.exe'
     ${EndIf}
 
@@ -91,10 +91,10 @@
   ${EndIf}
   ${If} $SI4_INSTALL_DIR != ''
   ${AndIf} ${FileExists} '$SI4_INSTALL_DIR\sourceinsight4.exe'
-    ${If} 1
+    ${If} 1 > 0
       ${KillIfRunning} 'sourceinsight4.exe'
     ${EndIf}
-    ${If} 1
+    ${If} 1 > 0
       ${KillIfRunning} 'ctags.exe'
     ${EndIf}
 
