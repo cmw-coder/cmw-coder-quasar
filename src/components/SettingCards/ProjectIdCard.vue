@@ -223,7 +223,7 @@ onMounted(() => {
               style="margin-right: 10px"
             />
             <q-btn
-              label="i18n('labels.editDialogConfirm')"
+              :label="i18n('labels.editDialogConfirm')"
               color="primary"
               @click="() => confirmEdit()"
             />
