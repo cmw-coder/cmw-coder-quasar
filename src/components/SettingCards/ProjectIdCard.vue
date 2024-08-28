@@ -220,8 +220,13 @@ onMounted(() => {
               flat
               :label="i18n('labels.editDialogCancel')"
               v-close-popup
+              style="margin-right: 10px"
             />
-            <q-btn label="确认" color="primary" @click="() => confirmEdit()" />
+            <q-btn
+              label="i18n('labels.editDialogConfirm')"
+              color="primary"
+              @click="() => confirmEdit()"
+            />
           </q-card-section>
         </q-form>
       </q-card>
