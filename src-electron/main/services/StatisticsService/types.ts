@@ -32,6 +32,21 @@ export interface CollectionData {
   };
 }
 
+export interface CopyPasteData {
+  content: string;
+  context: {
+    prefix: string;
+    suffix: string;
+  }
+  path: string;
+  position: CaretPosition;
+  projectId: string;
+  recentFiles: string[];
+  repo: string;
+  svn: string[];
+  userId: string;
+}
+
 export class CompletionData {
   private _checked = new Set<number>();
   private _lastChecked: number = -1;

@@ -13,8 +13,8 @@ import {
 } from 'main/services/StatisticsService/constants';
 import {
   CollectionData,
-  CompletionData,
-  KeptRatio,
+  CompletionData, CopyPasteData,
+  KeptRatio
 } from 'main/services/StatisticsService/types';
 import { constructData } from 'main/services/StatisticsService/utils';
 import { NEW_LINE_REGEX } from 'shared/constants/common';
@@ -340,6 +340,15 @@ export class StatisticsService implements StatisticsServiceTrait {
     const data = this._recentCompletion.get(actionId);
     if (data) {
       data.timelines.coderEndSimilarSnippets = DateTime.now();
+    }
+  }
+
+  async copiedContents(data: CopyPasteData){
+    statisticsLog.debug('StatisticsReporter.copiedContents', data);
+    try {
+      // TODO: Connect to API
+    } catch (e) {
+      statisticsLog.error('StatisticsReporter.copiedContents.failed', e);
     }
   }
 
