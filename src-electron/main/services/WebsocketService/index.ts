@@ -48,6 +48,9 @@ import { Selection } from 'shared/types/Selection';
 import { Reference } from 'cmw-coder-subprocess';
 import completionLog from 'main/components/Loggers/completionLog';
 import reviewLog from 'main/components/Loggers/reviewLog';
+import { NEW_LINE_REGEX } from 'shared/constants/common';
+import { MODULE_PATH } from 'main/components/PromptExtractor/constants';
+import { getService } from 'main/services';
 
 @injectable()
 export class WebsocketService implements WebsocketServiceTrait {
@@ -414,14 +417,64 @@ export class WebsocketService implements WebsocketServiceTrait {
         this._windowService.getWindow(WindowType.Completions).hide();
       }
     });
-    this._registerWsAction(WsAction.EditorPaste, ({ data }, pid) => {
-      const { count } = data;
-      const project = this.getClientInfo(pid)?.currentProject;
-      if (project && project.length) {
+    this._registerWsAction(WsAction.EditorPaste, async ({ data }, pid) => {
+      const clientInfo = this._clientInfoMap.get(pid);
+      if (
+        clientInfo &&
+        clientInfo.currentFile?.length &&
+        clientInfo.currentProject?.length
+      ) {
         try {
-          const { id: projectId } = getProjectData(project);
+          const { content, position, recentFiles } = data;
+          const { id: projectId } = getProjectData(clientInfo.currentProject);
           this._statisticsReporterService
-            .copiedLines(count, projectId, getClientVersion(pid))
+            .copiedLines(
+              content.split(NEW_LINE_REGEX).length,
+              projectId,
+              getClientVersion(pid),
+            )
+            .catch();
+          const document = new TextDocument(clientInfo.currentFile);
+          let repo = '';
+          for (const [key, value] of Object.entries(MODULE_PATH)) {
+            if (document.fileName.includes(value)) {
+              repo = key;
+              break;
+            }
+          }
+          this._statisticsReporterService
+            .copiedContents({
+              content,
+              context: {
+                prefix: document.getText(
+                  new Range(
+                    Math.max(position.line - 30, 0),
+                    0,
+                    position.line,
+                    position.character,
+                  ),
+                ),
+                suffix: document.getText(
+                  new Range(
+                    position.line,
+                    position.character,
+                    Math.min(position.line + 30, document.lineCount),
+                    document.lineCount,
+                  ),
+                ),
+              },
+              path: document.fileName,
+              position,
+              projectId,
+              recentFiles,
+              repo,
+              svn: (
+                this._dataStoreService.getAppdata().project[projectId]?.svn ??
+                []
+              ).map(({ directory }) => directory),
+              userId: (await getService(ServiceType.CONFIG).getConfigs())
+                .username,
+            })
             .catch();
         } catch (e) {
           const error = <Error>e;
@@ -431,7 +484,7 @@ export class WebsocketService implements WebsocketServiceTrait {
               this._windowService.getWindow(WindowType.ProjectId).show();
               this._windowService
                 .getWindow(WindowType.ProjectId)
-                .setProject(project);
+                .setProject(clientInfo.currentProject);
               break;
             }
             default: {

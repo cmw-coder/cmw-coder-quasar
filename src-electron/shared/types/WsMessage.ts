@@ -154,7 +154,12 @@ export interface EditorFocusStateClientMessage extends WsMessage {
 export interface EditorPasteClientMessage extends WsMessage {
   action: WsAction.EditorPaste;
   data: {
-    count: number;
+    content: string;
+    position: {
+      character: number;
+      line: number;
+    };
+    recentFiles: string[];
   };
 }
 

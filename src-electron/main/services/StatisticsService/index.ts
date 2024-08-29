@@ -5,7 +5,11 @@ import { uid } from 'quasar';
 
 import { PromptElements } from 'main/components/PromptExtractor/types';
 import { Completions } from 'main/components/PromptProcessor/types';
-import { api_collection_code_v2, api_reportSKU } from 'main/request/sku';
+import {
+  api_collection_code_v2,
+  api_collection_copy,
+  api_reportSKU,
+} from 'main/request/sku';
 import {
   skuNameAcceptMapping,
   skuNameGenerateMapping,
@@ -14,6 +18,7 @@ import {
 import {
   CollectionData,
   CompletionData,
+  CopyPasteData,
   KeptRatio,
 } from 'main/services/StatisticsService/types';
 import { constructData } from 'main/services/StatisticsService/utils';
@@ -340,6 +345,15 @@ export class StatisticsService implements StatisticsServiceTrait {
     const data = this._recentCompletion.get(actionId);
     if (data) {
       data.timelines.coderEndSimilarSnippets = DateTime.now();
+    }
+  }
+
+  async copiedContents(data: CopyPasteData) {
+    statisticsLog.debug('StatisticsReporter.copiedContents', data);
+    try {
+      await api_collection_copy(data);
+    } catch (e) {
+      statisticsLog.error('StatisticsReporter.copiedContents.failed', e);
     }
   }
 
