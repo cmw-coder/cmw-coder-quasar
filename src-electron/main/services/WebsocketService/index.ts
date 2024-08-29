@@ -458,8 +458,8 @@ export class WebsocketService implements WebsocketServiceTrait {
                   new Range(
                     position.line,
                     position.character,
-                    Math.min(position.line + 30, document.lineCount),
-                    document.lineCount,
+                    Math.min(position.line + 31, document.lineCount),
+                    0,
                   ),
                 ),
               },
