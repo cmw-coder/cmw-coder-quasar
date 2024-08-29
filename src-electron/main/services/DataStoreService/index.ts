@@ -50,7 +50,7 @@ export class DataStoreService implements DataStoreServiceTrait {
         }
         store.set('window', appData.window);
       },
-      '1.2.7': (store) => {
+      '1.2.8': (store) => {
         log.info('Upgrading "appData" store to 1.2.7 ...');
         const appData = store.store;
         if (!appData.project) {
