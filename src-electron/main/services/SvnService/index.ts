@@ -1,8 +1,10 @@
+import { dialog } from 'electron';
 import log from 'electron-log/main';
 import { injectable } from 'inversify';
 
 import { container } from 'main/services';
 import { DataStoreService } from 'main/services/DataStoreService';
+import { WindowService } from 'main/services/WindowService';
 import { svnPath } from 'main/services/SvnService/constants';
 import { fileDiff, repoStatus } from 'main/services/SvnService/utils';
 import { WebsocketService } from 'main/services/WebsocketService';
@@ -10,6 +12,10 @@ import { executeCommand } from 'main/utils/common';
 import { NEW_LINE_REGEX } from 'shared/constants/common';
 import { ServiceType } from 'shared/types/service';
 import type { SvnServiceTrait } from 'shared/types/service/SvnServiceTrait';
+import { WindowType } from 'shared/types/WindowType';
+import path from 'path';
+import fs from 'fs';
+import { getRevision } from 'main/utils/svn';
 
 @injectable()
 export class SvnService implements SvnServiceTrait {
@@ -79,5 +85,33 @@ export class SvnService implements SvnServiceTrait {
       throw new Error(stderr);
     }
     return stdout;
+  }
+
+  async selectSvnDirectory() {
+    const WindowService = container.get<WindowService>(ServiceType.WINDOW);
+    const mainWindow = WindowService.getWindow(WindowType.Main);
+    if (!mainWindow._window) {
+      return;
+    }
+    const targetDirPathList = dialog.showOpenDialogSync(mainWindow._window, {
+      properties: ['openDirectory'],
+    });
+    if (!targetDirPathList) {
+      return;
+    }
+    const svnDirPath = targetDirPathList[0];
+    const svnExistDir = path.join(svnDirPath, '.svn');
+    if (!fs.existsSync(svnExistDir)) {
+      dialog.showMessageBox(mainWindow._window, {
+        message: '该目录下不存在 .svn 目录，请选择 svn 项目目录',
+        type: 'error',
+      });
+      return;
+    }
+    const revision = await getRevision(svnDirPath);
+    return {
+      directory: svnDirPath,
+      revision,
+    };
   }
 }

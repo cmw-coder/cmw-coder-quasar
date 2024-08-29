@@ -34,6 +34,7 @@ export interface DataCompatibilityType {
 
 export interface DataProjectType {
   id: string;
+  isAutoManaged: boolean;
   lastAddedLines: number;
   svn: {
     directory: string;

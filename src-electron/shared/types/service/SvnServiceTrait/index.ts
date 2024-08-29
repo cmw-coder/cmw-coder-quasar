@@ -8,4 +8,11 @@ export interface SvnServiceTrait {
     }[]
   >;
   commit(projectPath: string, message: string): Promise<string>;
+  selectSvnDirectory(): Promise<
+    | {
+        directory: string;
+        revision: number;
+      }
+    | undefined
+  >;
 }
