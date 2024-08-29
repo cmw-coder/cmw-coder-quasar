@@ -1,6 +1,9 @@
 import statisticsLog from 'main/components/Loggers/statisticsLog';
 import request from 'main/request';
-import { CollectionData } from 'main/services/StatisticsService/types';
+import {
+  CollectionData,
+  CopyPasteData,
+} from 'main/services/StatisticsService/types';
 
 export interface ReportSkuDto {
   begin?: number;
@@ -38,6 +41,13 @@ export const api_reportSKU = async (data: ReportSkuDto[]) => {
 export const api_collection_code_v2 = async (data: CollectionData[]) =>
   request({
     url: '/kong/RdTestAiService/chatgpt/collection/v2',
+    method: 'post',
+    data,
+  });
+
+export const api_collection_copy = async (data: CopyPasteData) =>
+  request({
+    url: '/kong/RdTestAiService/v1/chatgpt/question/copy',
     method: 'post',
     data,
   });

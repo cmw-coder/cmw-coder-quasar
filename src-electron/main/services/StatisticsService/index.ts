@@ -5,7 +5,11 @@ import { uid } from 'quasar';
 
 import { PromptElements } from 'main/components/PromptExtractor/types';
 import { Completions } from 'main/components/PromptProcessor/types';
-import { api_collection_code_v2, api_reportSKU } from 'main/request/sku';
+import {
+  api_collection_code_v2,
+  api_collection_copy,
+  api_reportSKU,
+} from 'main/request/sku';
 import {
   skuNameAcceptMapping,
   skuNameGenerateMapping,
@@ -13,8 +17,9 @@ import {
 } from 'main/services/StatisticsService/constants';
 import {
   CollectionData,
-  CompletionData, CopyPasteData,
-  KeptRatio
+  CompletionData,
+  CopyPasteData,
+  KeptRatio,
 } from 'main/services/StatisticsService/types';
 import { constructData } from 'main/services/StatisticsService/utils';
 import { NEW_LINE_REGEX } from 'shared/constants/common';
@@ -343,10 +348,10 @@ export class StatisticsService implements StatisticsServiceTrait {
     }
   }
 
-  async copiedContents(data: CopyPasteData){
+  async copiedContents(data: CopyPasteData) {
     statisticsLog.debug('StatisticsReporter.copiedContents', data);
     try {
-      // TODO: Connect to API
+      await api_collection_copy(data);
     } catch (e) {
       statisticsLog.error('StatisticsReporter.copiedContents.failed', e);
     }
