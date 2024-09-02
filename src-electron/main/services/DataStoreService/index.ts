@@ -186,6 +186,9 @@ export class DataStoreService implements DataStoreServiceTrait {
   async setProjectSvn(projectPath: string, svnPath: string) {
     const project = this.appDataStore.get('project');
     const projectData = project[projectPath];
+    if (!projectData) {
+      return;
+    }
     if (!projectData.isAutoManaged) {
       return;
     }
