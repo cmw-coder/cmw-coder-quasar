@@ -92,6 +92,13 @@ export class PromptElements {
     question = question.replaceAll('%{ImportList}%', this.importList || '');
     question = question.replaceAll('%{Comment}%', this.comment || '');
     question = question.replaceAll('%{RagCode}%', this.ragCode || '');
+    completionLog.info('Template Length: ', {
+      ragCode: this.ragCode?.length,
+      neighborSnippet: this.neighborSnippet?.length,
+      symbols: this.symbols?.length,
+      currentFilePrefix: this.currentFilePrefix.length,
+      suffix: this.suffix.length,
+    });
     return question;
   }
 }

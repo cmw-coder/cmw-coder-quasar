@@ -19,7 +19,7 @@ import { ConfigService } from 'main/services/ConfigService';
 import { NetworkZone } from 'shared/config';
 import { WindowService } from 'main/services/WindowService';
 import { WindowType } from 'shared/types/WindowType';
-import completionLog from '../Loggers/completionLog';
+import completionLog from 'main/components/Loggers/completionLog';
 
 export class PromptExtractor {
   private _similarSnippetConfig: SimilarSnippetConfig = {
@@ -77,6 +77,7 @@ export class PromptExtractor {
       minScore: this._similarSnippetConfig.minScore,
       mostSimilarSnippets: similarSnippetsSliced,
     });
+
     completionLog.debug('PromptExtractor.getPromptComponents.ragCode', {
       ragCode,
     });
