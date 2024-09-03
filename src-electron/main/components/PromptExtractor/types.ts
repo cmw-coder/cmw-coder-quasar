@@ -168,6 +168,9 @@ export class RawInputs {
       }),
     );
 
-    return result.filter(({ content }) => content.split('\n').length <= 100);
+    return result.filter(
+      ({ content }) =>
+        content.split('\n').length <= 100 && content.length <= 1024,
+    );
   }
 }
