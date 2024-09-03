@@ -143,7 +143,7 @@ export class RawInputs {
   }
 
   async getRelativeDefinitions() {
-    const result = Promise.all(
+    const result = await Promise.all(
       this.symbols.map(async ({ path, startLine, endLine }) => {
         try {
           return {
@@ -168,6 +168,6 @@ export class RawInputs {
       }),
     );
 
-    return result;
+    return result.filter(({ content }) => content.split('\n').length <= 100);
   }
 }
