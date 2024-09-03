@@ -161,7 +161,7 @@ onMounted(() => {
               :hint="i18n('labels.idInputHint')"
               :maxlength="14"
               outlined
-              v-model="editProject.id"
+              v-model.trim="editProject.id"
               :rules="[
                 (val) =>
                   /^NV[0-9]{12}$/.test(val) ||
