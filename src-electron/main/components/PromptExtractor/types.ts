@@ -94,10 +94,12 @@ export class PromptElements {
     question = question.replaceAll('%{RagCode}%', this.ragCode || '');
     completionLog.info('Template Length: ', {
       ragCode: this.ragCode?.length,
-      neighborSnippet: this.neighborSnippet?.length,
       symbols: this.symbols?.length,
-      currentFilePrefix: this.currentFilePrefix.length,
+      similarSnippet: this.similarSnippet?.length,
+      prefix: this.prefix.length,
       suffix: this.suffix.length,
+      currentFilePrefix: this.currentFilePrefix.length,
+      neighborSnippet: this.neighborSnippet?.length,
     });
     return question;
   }
