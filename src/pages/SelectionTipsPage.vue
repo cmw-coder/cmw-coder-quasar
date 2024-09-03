@@ -37,7 +37,7 @@ const reviewHandle = () => {
         @click="addToChatHandle"
       />
     </div>
-    <div class="btn-wrapper">
+    <div class="btn-wrapper" style="display: none">
       <q-btn
         flat
         class="text-white"
