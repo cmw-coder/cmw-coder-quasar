@@ -37,7 +37,7 @@ export interface CopyPasteData {
   context: {
     prefix: string;
     suffix: string;
-  }
+  };
   path: string;
   position: CaretPosition;
   projectId: string;
