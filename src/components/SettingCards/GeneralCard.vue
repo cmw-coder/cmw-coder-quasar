@@ -138,7 +138,7 @@ onMounted(async () => {
         </q-item-section>
         <q-item-section side>
           <div class="row items-center">
-            <q-input v-model="baseServerUrl" />
+            <q-input v-model.trim="baseServerUrl" />
           </div>
         </q-item-section>
       </q-item>

@@ -42,6 +42,16 @@ export class ConfigService implements ConfigServiceTrait {
         log.info('Upgrading "appConfig" store to 1.2.6 ...');
         store.set('showSelectedTipsWindow', true);
       },
+      '1.2.9': (store) => {
+        log.info('Upgrading "appConfig" store to 1.2.9 ...');
+        const configData = store.store;
+        if (
+          configData.baseServerUrl === 'http://10.113.36.113' ||
+          configData.baseServerUrl === 'http://10.113.36.121/internal-beta'
+        ) {
+          store.set('baseServerUrl', 'http://10.113.36.121');
+        }
+      },
     },
   });
 

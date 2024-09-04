@@ -51,7 +51,7 @@ export class DataStoreService implements DataStoreServiceTrait {
         store.set('window', appData.window);
       },
       '1.2.8': (store) => {
-        log.info('Upgrading "appData" store to 1.2.7 ...');
+        log.info('Upgrading "appData" store to 1.2.8 ...');
         const appData = store.store;
         if (!appData.project) {
           appData.project = {};
@@ -186,6 +186,9 @@ export class DataStoreService implements DataStoreServiceTrait {
   async setProjectSvn(projectPath: string, svnPath: string) {
     const project = this.appDataStore.get('project');
     const projectData = project[projectPath];
+    if (!projectData) {
+      return;
+    }
     if (!projectData.isAutoManaged) {
       return;
     }

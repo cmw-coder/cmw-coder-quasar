@@ -92,6 +92,15 @@ export class PromptElements {
     question = question.replaceAll('%{ImportList}%', this.importList || '');
     question = question.replaceAll('%{Comment}%', this.comment || '');
     question = question.replaceAll('%{RagCode}%', this.ragCode || '');
+    completionLog.info('Template Length: ', {
+      ragCode: this.ragCode?.length,
+      symbols: this.symbols?.length,
+      similarSnippet: this.similarSnippet?.length,
+      prefix: this.prefix.length,
+      suffix: this.suffix.length,
+      currentFilePrefix: this.currentFilePrefix.length,
+      neighborSnippet: this.neighborSnippet?.length,
+    });
     return question;
   }
 }
@@ -134,7 +143,7 @@ export class RawInputs {
   }
 
   async getRelativeDefinitions() {
-    const result = Promise.all(
+    const result = await Promise.all(
       this.symbols.map(async ({ path, startLine, endLine }) => {
         try {
           return {
@@ -159,6 +168,9 @@ export class RawInputs {
       }),
     );
 
-    return result;
+    return result.filter(
+      ({ content }) =>
+        content.split('\n').length <= 100 && content.length <= 1024,
+    );
   }
 }

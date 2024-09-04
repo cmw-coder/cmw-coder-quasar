@@ -38,7 +38,7 @@ const navigations: Navigation[] = [
   {
     label: 'review',
     icon: 'mdi-message-draw',
-    available: true,
+    available: false,
     route: 'review',
   },
   {
