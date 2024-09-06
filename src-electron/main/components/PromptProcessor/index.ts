@@ -70,9 +70,10 @@ export class PromptProcessor {
         question: '',
         suffix: '',
       });
-      completionLog.debug('PromptProcessor.process.questionParams.question', [
+      completionLog.debug(
+        'PromptProcessor.process.questionParams.question',
         questionParams.question,
-      ]);
+      );
       getService(ServiceType.STATISTICS).completionUpdatePromptConstructTime(
         actionId,
         appConfig.activeModel,
