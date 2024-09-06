@@ -1,6 +1,6 @@
 import { CompletionCacheClientMessage } from 'shared/types/WsMessage';
 import { Selection } from 'shared/types/Selection';
-import { MainWindowPageType } from './MainWindowPageType';
+import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 
 export enum ActionType {
   CompletionClear = 'CompletionClear',
