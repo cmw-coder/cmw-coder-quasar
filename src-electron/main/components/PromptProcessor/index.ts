@@ -73,7 +73,10 @@ export class PromptProcessor {
       });
       completionQuestionLog.debug(
         'PromptProcessor.process.questionParams.question',
-        questionParams.question,
+        (questionParams.question = questionParams.question.replace(
+          /\r?\n/g,
+          '\\n',
+        )),
       );
       getService(ServiceType.STATISTICS).completionUpdatePromptConstructTime(
         actionId,
