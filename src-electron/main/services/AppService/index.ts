@@ -163,7 +163,6 @@ export class AppService implements AppServiceTrait {
   }
 
   initAdditionReport() {
-    reportProjectAdditions().catch();
     return scheduleJob(
       {
         hour: 3,
