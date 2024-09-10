@@ -87,7 +87,10 @@ export class AppService implements AppServiceTrait {
       for (let i = 0; i < oldProjectKeys.length; i++) {
         const key = oldProjectKeys[i];
         if (newProjectData[key] === undefined) {
-          newProjectData[key] = oldProjectData[key];
+          newProjectData[key] = {
+            ...oldProjectData[key],
+            isAutoManaged: true,
+          };
         }
       }
       this._dataStoreService.setAppData('project', newProjectData);

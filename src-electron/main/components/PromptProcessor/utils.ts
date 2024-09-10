@@ -72,6 +72,10 @@ export const processGeneratedSuggestions = (
       );
       return lines.slice(firstNonEmptyLineIndex).join('\n');
     })
+    /// Remove end empty lines
+    .map((generatedSuggestion) => {
+      return generatedSuggestion.trimEnd();
+    })
     /// Filter out empty suggestions.
     .filter((generatedSuggestion) => generatedSuggestion.length > 0);
 
