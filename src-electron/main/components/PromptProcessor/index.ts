@@ -10,7 +10,8 @@ import { ServiceType } from 'shared/types/service';
 import { api_question } from 'main/request/api';
 import { CompletionType } from 'shared/types/common';
 import { getService } from 'main/services';
-import completionLog from '../Loggers/completionLog';
+import completionLog from 'main/components/Loggers/completionLog';
+import completionQuestionLog from 'main/components/Loggers/completionQuestionLog';
 
 export class PromptProcessor {
   private _abortController?: AbortController;
@@ -70,9 +71,10 @@ export class PromptProcessor {
         question: '',
         suffix: '',
       });
-      completionLog.debug('PromptProcessor.process.questionParams.question', [
-        questionParams.question,
-      ]);
+      completionQuestionLog.debug(
+        'PromptProcessor.process.questionParams.question',
+        questionParams.question.replace(/\r?\n/g, '\\n'),
+      );
       getService(ServiceType.STATISTICS).completionUpdatePromptConstructTime(
         actionId,
         appConfig.activeModel,

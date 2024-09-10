@@ -9,7 +9,7 @@ import { FileChanges } from 'shared/types/service/SvnServiceTrait/types';
 import { WindowType } from 'shared/types/WindowType';
 import { generateCommitPrompt } from 'utils/commitPrompt';
 import { getLastDirName, useService } from 'utils/common';
-import { api_questionStream } from '../request/api';
+import { api_questionStream } from 'src/request/api';
 import { ActionApi } from 'types/ActionApi';
 import { ActionType } from 'shared/types/ActionMessage';
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';

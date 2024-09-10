@@ -15,7 +15,7 @@ import { NEW_LINE_REGEX } from 'shared/constants/common';
 import { CompletionType, SymbolInfo } from 'shared/types/common';
 import { CompletionGenerateClientMessage } from 'shared/types/WsMessage';
 import { ServiceType } from 'shared/types/service';
-import completionLog from '../Loggers/completionLog';
+import completionLog from 'main/components/Loggers/completionLog';
 
 export class PromptElements {
   // NearCode
