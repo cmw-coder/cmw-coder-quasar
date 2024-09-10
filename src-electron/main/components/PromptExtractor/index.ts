@@ -181,20 +181,20 @@ export class PromptExtractor {
       return '';
     }
     const inputLines: string[] = [];
-    const prefixLines = separateTextByLine(prefix);
+    const prefixLines = separateTextByLine(prefix.trim());
     // prefix 取后5行
     const prefixInputLines = prefixLines.slice(
       Math.max(prefixLines.length - 5, 0),
     );
     inputLines.push(...prefixInputLines);
-    const suffixLines = separateTextByLine(suffix);
+    const suffixLines = separateTextByLine(suffix.trim());
     // suffix 取前3行
     const suffixInputLines = suffixLines.slice(
       0,
       Math.min(suffixLines.length, 3),
     );
     inputLines.push(...suffixInputLines);
-    const inputString = inputLines.join('\n').slice(0, 512);
+    const inputString = inputLines.join('\n').slice(0, 512).trim();
     completionLog.debug(
       'PromptExtractor.getRagCode.api_code_rag.input',
       inputString,

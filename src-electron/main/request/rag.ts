@@ -16,6 +16,12 @@ export enum ResolveReason {
 }
 
 export const api_code_rag = async (input: string) => {
+  if (input === '') {
+    completionLog.debug('api_code_rag.input.empty');
+    return {
+      output: [],
+    };
+  }
   const startTime = Date.now();
   try {
     const result = await request<{
