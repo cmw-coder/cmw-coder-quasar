@@ -24,7 +24,6 @@ import { getRevision } from 'main/utils/svn';
 import { ConfigService } from 'main/services/ConfigService';
 import { ChatFileContent } from 'shared/types/ChatMessage';
 import { LocalChatManager } from 'main/services/DataStoreService/LocalChatManager';
-import { scheduleJob } from 'node-schedule';
 
 const defaultStoreData = extend<AppData>(true, {}, defaultAppData);
 
@@ -80,9 +79,11 @@ export class DataStoreService implements DataStoreServiceTrait {
     private _configService: ConfigService,
   ) {
     // 定时重新获取模板内容
-    scheduleJob(
-      '0 0 */1 * * *',
-      this.scheduleJobUpdateActiveModelContent.bind(this),
+    setInterval(
+      () => {
+        this.scheduleJobUpdateActiveModelContent();
+      },
+      60 * 60 * 1000,
     );
   }
 
