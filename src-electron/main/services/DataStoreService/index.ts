@@ -24,6 +24,7 @@ import { getRevision } from 'main/utils/svn';
 import { ConfigService } from 'main/services/ConfigService';
 import { ChatFileContent } from 'shared/types/ChatMessage';
 import { LocalChatManager } from 'main/services/DataStoreService/LocalChatManager';
+import { scheduleJob } from 'node-schedule';
 
 const defaultStoreData = extend<AppData>(true, {}, defaultAppData);
 
@@ -77,7 +78,40 @@ export class DataStoreService implements DataStoreServiceTrait {
   constructor(
     @inject(ServiceType.CONFIG)
     private _configService: ConfigService,
-  ) {}
+  ) {
+    // 定时重新获取模板内容
+    scheduleJob(
+      {
+        hour: 1,
+        minute: 0,
+      },
+      this.scheduleJobUpdateActiveModelContent.bind(this),
+    );
+  }
+
+  async scheduleJobUpdateActiveModelContent() {
+    try {
+      log.info('DataStoreService.scheduleJob.updateActiveModelContent');
+      let { activeModel, activeModelKey } =
+        await this._configService.getConfigs();
+      await this._updateCurrentQuestionTemplateFile();
+      if (!this.currentQuestionTemplateFile) {
+        return;
+      }
+      const models = Object.keys(this.currentQuestionTemplateFile);
+      if (!models.includes(activeModel)) {
+        // 本地选择模型已不在服务器模型列表中
+        activeModel = models[0];
+        activeModelKey =
+          this.currentQuestionTemplateFile[activeModel].config.modelKey;
+        await this._configService.setConfig('activeModel', activeModel);
+        await this._configService.setConfig('activeModelKey', activeModelKey);
+      }
+      this.activeModelContent = this.currentQuestionTemplateFile[activeModel];
+    } catch (e) {
+      log.error('DataStoreService.scheduleJob.updateActiveModelContent', e);
+    }
+  }
 
   getWindowData(windowType: WindowType) {
     const windowData = this.appDataStore.get('window');
@@ -107,6 +141,16 @@ export class DataStoreService implements DataStoreServiceTrait {
 
   setAppData<T extends keyof AppData>(key: T, value: AppData[T]) {
     this.appDataStore.set(key, value);
+  }
+
+  private async _updateCurrentQuestionTemplateFile() {
+    try {
+      const { activeTemplate } = await this._configService.getConfigs();
+      this.currentQuestionTemplateFile =
+        await api_getProductLineQuestionTemplateFile(activeTemplate);
+    } catch (error) {
+      log.error('DataStoreService._updateCurrentQuestionTemplateFile', error);
+    }
   }
 
   async refreshServerTemplateList() {
@@ -201,16 +245,6 @@ export class DataStoreService implements DataStoreServiceTrait {
         revision: await getRevision(svnPath),
       });
       this.appDataStore.set('project', project);
-    }
-  }
-
-  private async _updateCurrentQuestionTemplateFile() {
-    try {
-      const { activeTemplate } = await this._configService.getConfigs();
-      this.currentQuestionTemplateFile =
-        await api_getProductLineQuestionTemplateFile(activeTemplate);
-    } catch (error) {
-      log.error('DataStoreService._updateCurrentQuestionTemplateFile', error);
     }
   }
 
