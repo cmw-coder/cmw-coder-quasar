@@ -81,10 +81,7 @@ export class DataStoreService implements DataStoreServiceTrait {
   ) {
     // 定时重新获取模板内容
     scheduleJob(
-      {
-        hour: 1,
-        minute: 0,
-      },
+      '0 0 */1 * * *',
       this.scheduleJobUpdateActiveModelContent.bind(this),
     );
   }
