@@ -319,6 +319,9 @@ export class WebsocketService implements WebsocketServiceTrait {
               actionId,
               new RawInputs(data, project),
             );
+          this._statisticsReporterService.completionUpdateEndGetPromptComponentsTime(
+            actionId,
+          );
           this._statisticsReporterService.completionUpdatePromptElements(
             actionId,
             promptElements,

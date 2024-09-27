@@ -21,7 +21,10 @@ import {
   CopyPasteData,
   KeptRatio,
 } from 'main/services/StatisticsService/types';
-import { constructData } from 'main/services/StatisticsService/utils';
+import {
+  constructData,
+  formatTimelines,
+} from 'main/services/StatisticsService/utils';
 import { NEW_LINE_REGEX } from 'shared/constants/common';
 import { CaretPosition } from 'shared/types/common';
 import { StatisticsServiceTrait } from 'shared/types/service/StatisticsServiceTrait';
@@ -60,17 +63,7 @@ export class StatisticsService implements StatisticsServiceTrait {
       completions: data.completions,
       position: data.position,
       projectId: data.projectId,
-      timelines: {
-        startGenerate: data.timelines.proxyEndEditorInfo.toFormat(
-          'yyyy-MM-dd HH:mm:ss:SSS',
-        ),
-        endGenerate: data.timelines.coderEndPostProcess.toFormat(
-          'yyyy-MM-dd HH:mm:ss:SSS',
-        ),
-        startAccept: data.timelines.coderStartAccept.toFormat(
-          'yyyy-MM-dd HH:mm:ss:SSS',
-        ),
-      },
+      timelines: formatTimelines(data.timelines),
       version,
     });
 
@@ -125,17 +118,7 @@ export class StatisticsService implements StatisticsServiceTrait {
       statisticsLog.debug('StatisticsReporter.completionCancel', {
         position: data.position,
         projectId: data.projectId,
-        timelines: {
-          startGenerate: data.timelines.proxyEndEditorInfo.toFormat(
-            'yyyy-MM-dd HH:mm:ss:SSS',
-          ),
-          endGenerate: data.timelines.coderEndPostProcess.toFormat(
-            'yyyy-MM-dd HH:mm:ss:SSS',
-          ),
-          startAccept: data.timelines.coderStartAccept.toFormat(
-            'yyyy-MM-dd HH:mm:ss:SSS',
-          ),
-        },
+        timelines: formatTimelines(data.timelines),
         version,
       });
     }
@@ -159,7 +142,9 @@ export class StatisticsService implements StatisticsServiceTrait {
       return;
     }
 
-    statisticsLog.debug({ timelines: data.timelines });
+    statisticsLog.debug('completionEdit', {
+      timelines: formatTimelines(data.timelines),
+    });
 
     const requestData: CollectionData = {
       createTime: data.timelines.proxyEndEditorInfo.toFormat(
@@ -271,17 +256,7 @@ export class StatisticsService implements StatisticsServiceTrait {
         completions: data.completions,
         position: data.position,
         projectId: data.projectId,
-        timelines: {
-          startGenerate: data.timelines.proxyEndEditorInfo.toFormat(
-            'yyyy-MM-dd HH:mm:ss:SSS',
-          ),
-          endGenerate: data.timelines.coderEndPostProcess.toFormat(
-            'yyyy-MM-dd HH:mm:ss:SSS',
-          ),
-          startAccept: data.timelines.coderStartAccept.toFormat(
-            'yyyy-MM-dd HH:mm:ss:SSS',
-          ),
-        },
+        timelines: formatTimelines(data.timelines),
         version,
       });
       const lineLength = candidate.split(NEW_LINE_REGEX).length;
@@ -345,6 +320,20 @@ export class StatisticsService implements StatisticsServiceTrait {
     const data = this._recentCompletion.get(actionId);
     if (data) {
       data.timelines.coderEndSimilarSnippets = DateTime.now();
+    }
+  }
+
+  completionUpdateRagCodeTime(actionId: string) {
+    const data = this._recentCompletion.get(actionId);
+    if (data) {
+      data.timelines.coderEndRagCode = DateTime.now();
+    }
+  }
+
+  completionUpdateEndGetPromptComponentsTime(actionId: string) {
+    const data = this._recentCompletion.get(actionId);
+    if (data) {
+      data.timelines.coderEndGetPromptComponents = DateTime.now();
     }
   }
 

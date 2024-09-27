@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon';
 import { ReportSkuDto } from 'main/request/sku';
 import { getService } from 'main/services';
 import { ServiceType } from 'shared/types/service';
@@ -33,4 +34,14 @@ export const constructData = async (
       skuName: skuName,
     },
   ];
+};
+
+export const formatTimelines = (timelines: Record<string, DateTime>) => {
+  const keys = Object.keys(timelines);
+  const result = {} as Record<string, string>;
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
+    result[key] = timelines[key].toFormat('yyyy-MM-dd HH:mm:ss:SSS');
+  }
+  return result;
 };

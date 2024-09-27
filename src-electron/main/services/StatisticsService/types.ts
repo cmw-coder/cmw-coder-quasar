@@ -62,7 +62,9 @@ export class CompletionData {
     proxyStartSymbolInfo: DateTime;
     proxyEndEditorInfo: DateTime;
     coderEndSimilarSnippets: DateTime;
+    coderEndRagCode: DateTime;
     coderEndRelativeDefinitions: DateTime;
+    coderEndGetPromptComponents: DateTime;
     coderEndConstructPrompt: DateTime;
     coderEndRequest: DateTime;
     coderEndPostProcess: DateTime;
@@ -81,7 +83,9 @@ export class CompletionData {
       proxyStartSymbolInfo: DateTime.fromMillis(symbol),
       proxyEndEditorInfo: DateTime.fromMillis(end),
       coderEndSimilarSnippets: DateTime.invalid('Uninitialized'),
+      coderEndRagCode: DateTime.invalid('Uninitialized'),
       coderEndRelativeDefinitions: DateTime.invalid('Uninitialized'),
+      coderEndGetPromptComponents: DateTime.invalid('Uninitialized'),
       coderEndConstructPrompt: DateTime.invalid('Uninitialized'),
       coderEndRequest: DateTime.invalid('Uninitialized'),
       coderEndPostProcess: DateTime.invalid('Uninitialized'),
