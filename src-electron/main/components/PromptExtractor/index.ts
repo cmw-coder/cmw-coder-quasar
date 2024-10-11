@@ -64,7 +64,17 @@ export class PromptExtractor {
         ).completionUpdateRelativeDefinitionsTime(actionId);
         return relativeDefinitions;
       })(),
-      this.getRagCode(functionPrefix, functionSuffix, document.fileName),
+      (async () => {
+        const ragCode = await this.getRagCode(
+          functionPrefix,
+          functionSuffix,
+          document.fileName,
+        );
+        getService(ServiceType.STATISTICS).completionUpdateRagCodeTime(
+          actionId,
+        );
+        return ragCode;
+      })(),
     ]);
 
     const similarSnippetsSliced = similarSnippets
