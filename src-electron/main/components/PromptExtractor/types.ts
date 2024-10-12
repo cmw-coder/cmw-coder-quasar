@@ -122,7 +122,7 @@ export class RawInputs {
     project: string,
   ) {
     const { caret, path, prefix, recentFiles, suffix, symbols } = rawData;
-    this.document = new TextDocument(path);
+    this.document = new TextDocument(path, prefix + suffix);
     this.elements = new PromptElements(prefix, suffix);
     this.position = new Position(caret.line, caret.character);
     this.project = project;
