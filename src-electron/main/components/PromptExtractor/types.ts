@@ -2,6 +2,7 @@ import { readFile } from 'fs/promises';
 import { decode } from 'iconv-lite';
 import { basename, dirname } from 'path';
 
+import completionLog from 'main/components/Loggers/completionLog';
 import { MODULE_PATH } from 'main/components/PromptExtractor/constants';
 import {
   getBoundingPrefix,
@@ -11,11 +12,11 @@ import {
 import { getService } from 'main/services';
 import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
+import { deleteComments } from 'main/utils/common';
 import { NEW_LINE_REGEX } from 'shared/constants/common';
 import { CompletionType, SymbolInfo } from 'shared/types/common';
 import { CompletionGenerateClientMessage } from 'shared/types/WsMessage';
 import { ServiceType } from 'shared/types/service';
-import completionLog from 'main/components/Loggers/completionLog';
 
 export class PromptElements {
   // NearCode
@@ -26,6 +27,9 @@ export class PromptElements {
   language?: string;
   file?: string;
   folder?: string;
+  frequentFunctions?: string;
+  globals?: string;
+  includes?: string;
   repo?: string;
   // SimilarSnippet
   similarSnippet?: string;
@@ -140,6 +144,67 @@ export class RawInputs {
         break;
       }
     }
+  }
+
+  async getCalledFunctionIdentifiers(): Promise<string[]> {
+    const appService = getService(ServiceType.App);
+    const fileContent = this.document.getText();
+    const tree = await appService.parseTree(fileContent);
+    return (
+      await appService.createQuery(
+        '(call_expression (identifier) @function_identifier)',
+      )
+    )
+      .matches(tree.rootNode)
+      .map(({ captures }) =>
+        fileContent.substring(
+          captures[0].node.startIndex,
+          captures[0].node.endIndex,
+        ),
+      );
+  }
+
+  async getGlobals(): Promise<string> {
+    const appService = getService(ServiceType.App);
+    const fileContent = this.document.getText();
+    const tree = await appService.parseTree(fileContent);
+    const functionDefinitionIndices = (
+      await appService.createQuery('(function_definition) @definition')
+    )
+      .matches(tree.rootNode)
+      .map(({ captures }) => ({
+        begin: captures[0].node.startIndex,
+        end: captures[0].node.endIndex,
+      }));
+    const includeIndices = (
+      await appService.createQuery('(preproc_include) @include')
+    )
+      .matches(tree.rootNode)
+      .map(({ captures }) => ({
+        begin: captures[0].node.startIndex,
+        end: captures[0].node.endIndex,
+      }));
+    return deleteComments(
+      this.document.getTruncatedContents([
+        ...functionDefinitionIndices,
+        ...includeIndices,
+      ]),
+    );
+  }
+
+  async getIncludes(): Promise<string> {
+    const appService = getService(ServiceType.App);
+    const fileContent = deleteComments(this.document.getText());
+    const tree = await appService.parseTree(fileContent);
+    return (await appService.createQuery('(preproc_include) @include'))
+      .matches(tree.rootNode)
+      .map(({ captures }) =>
+        fileContent.substring(
+          captures[0].node.startIndex,
+          captures[0].node.endIndex,
+        ),
+      )
+      .join('\n');
   }
 
   async getRelativeDefinitions() {

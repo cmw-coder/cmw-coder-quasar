@@ -226,12 +226,16 @@ module.exports = configure((/* ctx */) => ({
       },
       extraResources: [
         {
+          from: 'node_modules/cmw-coder-subprocess',
+          to: 'cmw-coder-subprocess',
+        },
+        {
           from: 'src-electron/assets/svn',
           to: 'svn',
         },
         {
-          from: 'node_modules/cmw-coder-subprocess',
-          to: 'cmw-coder-subprocess',
+          from: 'src-electron/assets/tree-sitter',
+          to: 'tree-sitter',
         },
       ],
     },

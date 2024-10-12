@@ -111,7 +111,6 @@ export class WebsocketService implements WebsocketServiceTrait {
           suffix: string;
         }>();
         const { character, folder, line, path, prefix, suffix } = body;
-        this._promptExtractor.enableSimilarSnippet();
         const similarSnippets = await this.getSimilarSnippets(
           character,
           folder,
@@ -162,7 +161,6 @@ export class WebsocketService implements WebsocketServiceTrait {
     )
       .map((fileName) => fileName.split(sep).join(posix.sep))
       .filter((fileName) => fileName !== document.fileName);
-    this._promptExtractor.enableSimilarSnippet();
     const similarSnippets = this._promptExtractor.getSimilarSnippets(
       document,
       position,

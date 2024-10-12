@@ -1,7 +1,6 @@
 import { BrowserWindow, app, dialog, screen } from 'electron';
 import log from 'electron-log/main';
 import { inject, injectable } from 'inversify';
-import Parser from 'web-tree-sitter';
 import { TrayIcon } from 'main/components/TrayIcon';
 import { MenuEntry } from 'main/components/TrayIcon/types';
 import { WindowServiceTrait } from 'shared/types/service/WindowServiceTrait';
@@ -55,7 +54,6 @@ export class WindowService implements WindowServiceTrait {
     @inject(ServiceType.DATA_STORE)
     private _dataStoreService: DataStoreService,
   ) {
-    Parser.init().then(() => (this._parserInitialized = true));
     this.windowMap.set(WindowType.Feedback, new FeedbackWindow());
     this.windowMap.set(WindowType.ProjectId, new ProjectIdWindow());
     this.windowMap.set(WindowType.Welcome, new WelcomeWindow());

@@ -6,8 +6,8 @@ import {
 } from 'main/components/PromptExtractor/types';
 import {
   getFunctionPrefix,
-  separateTextByLine,
   getFunctionSuffix,
+  separateTextByLine,
 } from 'main/components/PromptExtractor/utils';
 import { container, getService } from 'main/services';
 import { TextDocument } from 'main/types/TextDocument';
@@ -25,12 +25,6 @@ export class PromptExtractor {
   private _similarSnippetConfig: SimilarSnippetConfig = {
     minScore: 0.5,
   };
-  private _slowRecentFiles?: string[];
-
-  enableSimilarSnippet() {
-    this._slowRecentFiles = undefined;
-    completionLog.info('PromptExtractor.getSimilarSnippets.enable');
-  }
 
   async getPromptComponents(
     actionId: string,
@@ -43,7 +37,60 @@ export class PromptExtractor {
     const functionSuffix =
       getFunctionSuffix(elements.suffix) ?? elements.suffix;
 
-    const [similarSnippets, relativeDefinitions, ragCode] = await Promise.all([
+    const [
+      calledFunctionIdentifiers,
+      globals,
+      includes,
+      ragCode,
+      relativeDefinitions,
+      similarSnippets,
+    ] = await Promise.all([
+      (async () => {
+        const calledFunctionIdentifiers =
+          await inputs.getCalledFunctionIdentifiers();
+
+        // TODO: Add statistics
+        // getService(ServiceType.STATISTICS).completionUpdateRagCodeTime(
+        //   actionId,
+        // );
+        return calledFunctionIdentifiers;
+      })(),
+      (async () => {
+        const globals = await inputs.getGlobals();
+
+        // TODO: Add statistics
+        // getService(ServiceType.STATISTICS).completionUpdateRagCodeTime(
+        //   actionId,
+        // );
+        return globals;
+      })(),
+      (async () => {
+        const includes = await inputs.getIncludes();
+
+        // TODO: Add statistics
+        // getService(ServiceType.STATISTICS).completionUpdateRagCodeTime(
+        //   actionId,
+        // );
+        return includes;
+      })(),
+      (async () => {
+        const ragCode = await this.getRagCode(
+          functionPrefix,
+          functionSuffix,
+          document.fileName,
+        );
+        getService(ServiceType.STATISTICS).completionUpdateRagCodeTime(
+          actionId,
+        );
+        return ragCode;
+      })(),
+      (async () => {
+        const relativeDefinitions = await inputs.getRelativeDefinitions();
+        getService(
+          ServiceType.STATISTICS,
+        ).completionUpdateRelativeDefinitionsTime(actionId);
+        return relativeDefinitions;
+      })(),
       (async () => {
         const result = await this.getSimilarSnippets(
           document,
@@ -57,25 +104,32 @@ export class PromptExtractor {
         );
         return result;
       })(),
-      (async () => {
-        const relativeDefinitions = await inputs.getRelativeDefinitions();
-        getService(
-          ServiceType.STATISTICS,
-        ).completionUpdateRelativeDefinitionsTime(actionId);
-        return relativeDefinitions;
-      })(),
-      (async () => {
-        const ragCode = await this.getRagCode(
-          functionPrefix,
-          functionSuffix,
-          document.fileName,
-        );
-        getService(ServiceType.STATISTICS).completionUpdateRagCodeTime(
-          actionId,
-        );
-        return ragCode;
-      })(),
     ]);
+
+    const frequencyMap = new Map<string, number>();
+    for (const identifier of calledFunctionIdentifiers) {
+      const count = frequencyMap.get(identifier) ?? 0;
+      frequencyMap.set(identifier, count + 1);
+    }
+    // Sort frequencyMap
+    const calledFunctionIdentifiersSorted = Array.from(frequencyMap.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map((item) => item[0]);
+
+    console.log(
+      'PromptExtractor.getPromptComponents.calledFunctionIdentifiersSorted',
+      {
+        calledFunctionIdentifiersSorted,
+      },
+    );
+
+    // TODO: Get the most frequent called function's declaration
+    elements.frequentFunctions = calledFunctionIdentifiersSorted.slice(
+      0,
+      Math.ceil(calledFunctionIdentifiersSorted.length * 0.3),
+    ).join('\n');
+    elements.globals = globals;
+    elements.includes = includes;
 
     const similarSnippetsSliced = similarSnippets
       .filter(
