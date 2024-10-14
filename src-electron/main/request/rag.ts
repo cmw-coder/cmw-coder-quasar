@@ -14,10 +14,12 @@ export interface RagCode {
 }
 
 export interface RagFunctionDeclaration {
-  input: string;
   output: {
-    content: string;
-    path: string;
+    functionName: string;
+    functionDeclarations: {
+      content: string;
+      path: string;
+    }[];
   }[];
 }
 
@@ -72,7 +74,7 @@ export const apiRagFunctionDeclaration = async (input: string) => {
     //   },
     //   timeout: MAX_RAG_FUNCTION_DECLARATION_QUERY_TIME,
     // });
-    const { data } = await axios.post<RagFunctionDeclaration[]>(
+    const { data } = await axios.post<RagFunctionDeclaration>(
       'http://10.113.36.127:9306/func_name_declaration/invoke',
       {
         input,
@@ -85,7 +87,7 @@ export const apiRagFunctionDeclaration = async (input: string) => {
       'apiRagFunctionDeclaration.success',
       Date.now() - startTime,
     );
-    return data;
+    return data.output;
   } catch (e) {
     completionLog.error('apiRagFunctionDeclaration.error', e);
     return [];

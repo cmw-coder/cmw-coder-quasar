@@ -299,11 +299,11 @@ export class PromptExtractor {
       .join('\n')
       .trim();
     const functionDeclarations = await apiRagFunctionDeclaration(inputString);
-    return functionDeclarations.map(({ output }) => {
+    return functionDeclarations.map(({ functionDeclarations }) => {
       let longestPathPrefixContent = '';
-      let longestPathPrefixCount = -1;
+      let longestPathPrefixCount = -2;
 
-      output.forEach(({ content, path }) => {
+      functionDeclarations.forEach(({ content, path }) => {
         const mismatchIndex = path
           .split('')
           .findIndex((char, index) => char !== currentRepoPath[index]);
