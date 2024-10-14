@@ -42,29 +42,23 @@ export class PromptExtractor {
       (async () => {
         const calledFunctionIdentifiers =
           await inputs.getCalledFunctionIdentifiers();
-
-        // TODO: Add statistics
-        // getService(ServiceType.STATISTICS).completionUpdateRagCodeTime(
-        //   actionId,
-        // );
+        getService(
+          ServiceType.STATISTICS,
+        ).completionUpdateCalledFunctionIdentifiersTime(actionId);
         return calledFunctionIdentifiers;
       })(),
       (async () => {
         const globals = await inputs.getGlobals();
-
-        // TODO: Add statistics
-        // getService(ServiceType.STATISTICS).completionUpdateRagCodeTime(
-        //   actionId,
-        // );
+        getService(ServiceType.STATISTICS).completionUpdateGlobalsTime(
+          actionId,
+        );
         return globals;
       })(),
       (async () => {
         const includes = await inputs.getIncludes();
-
-        // TODO: Add statistics
-        // getService(ServiceType.STATISTICS).completionUpdateRagCodeTime(
-        //   actionId,
-        // );
+        getService(ServiceType.STATISTICS).completionUpdateIncludesTime(
+          actionId,
+        );
         return includes;
       })(),
       (async () => {
@@ -119,14 +113,11 @@ export class PromptExtractor {
     elements.globals = globals;
     elements.includes = includes;
 
-    console.log(
-      'PromptExtractor.getPromptComponents',
-      {
-        calledFunctionIdentifiersSorted,
-        globals,
-        includes
-      },
-    );
+    console.log('PromptExtractor.getPromptComponents', {
+      calledFunctionIdentifiersSorted,
+      globals,
+      includes,
+    });
 
     const similarSnippetsSliced = similarSnippets
       .filter(

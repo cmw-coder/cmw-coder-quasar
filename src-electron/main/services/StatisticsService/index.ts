@@ -275,6 +275,27 @@ export class StatisticsService implements StatisticsServiceTrait {
     return candidate;
   }
 
+  completionUpdateCalledFunctionIdentifiersTime(actionId: string) {
+    const data = this._recentCompletion.get(actionId);
+    if (data) {
+      data.timelines.coderEndCalledFunctionIdentifiers = DateTime.now();
+    }
+  }
+
+  completionUpdateGlobalsTime(actionId: string) {
+    const data = this._recentCompletion.get(actionId);
+    if (data) {
+      data.timelines.coderEndGlobals = DateTime.now();
+    }
+  }
+
+  completionUpdateIncludesTime(actionId: string) {
+    const data = this._recentCompletion.get(actionId);
+    if (data) {
+      data.timelines.coderEndIncludes = DateTime.now();
+    }
+  }
+
   completionUpdateProjectId(actionId: string, projectId: string) {
     const data = this._recentCompletion.get(actionId);
     if (data) {
