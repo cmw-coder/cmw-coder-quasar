@@ -55,7 +55,9 @@ export class PromptElements {
 
   constructor(fullPrefix: string, fullSuffix: string) {
     this.fullPrefix = fullPrefix.trimStart();
-    this.slicedPrefix = this.fullPrefix.substring(this.fullPrefix.length - 500);
+    this.slicedPrefix = this.fullPrefix.substring(
+      this.fullPrefix.length - 1000,
+    );
     this.fullSuffix = fullSuffix.trimEnd();
     this.slicedSuffix = this.fullSuffix.substring(0, 100);
     this.functionPrefix = getFunctionPrefix(this.fullPrefix) || '';
