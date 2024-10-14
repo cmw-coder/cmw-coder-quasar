@@ -299,6 +299,9 @@ export class PromptExtractor {
       .join('\n')
       .trim();
     const functionDeclarations = await apiRagFunctionDeclaration(inputString);
+    completionLog.debug('getRagFunctionDeclaration', {
+      functionDeclarations,
+    });
     return functionDeclarations.map(({ functionDeclarations }) => {
       let longestPathPrefixContent = '';
       let longestPathPrefixCount = -2;
