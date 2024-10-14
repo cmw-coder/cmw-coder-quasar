@@ -181,3 +181,4 @@ export const MODULE_PATH = {
 } as const;
 
 export const MAX_RAG_CODE_QUERY_TIME = 400;
+export const MAX_RAG_FUNCTION_DECLARATION_QUERY_TIME = 800;

@@ -10,7 +10,7 @@ import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
 import { SimilarSnippet } from 'shared/types/common';
 import { ServiceType } from 'shared/types/service';
-import { api_code_rag } from 'main/request/rag';
+import { apiRagCode, apiRagFunctionDeclaration } from 'main/request/rag';
 import { ConfigService } from 'main/services/ConfigService';
 import { NetworkZone } from 'shared/config';
 import { WindowService } from 'main/services/WindowService';
@@ -107,9 +107,17 @@ export class PromptExtractor {
       .sort((a, b) => b[1] - a[1])
       .map((item) => item[0]);
     // TODO: Get the most frequent called function's declaration
-    elements.frequentFunctions = calledFunctionIdentifiersSorted
-      .slice(0, Math.ceil(calledFunctionIdentifiersSorted.length * 0.3))
-      .join('\n');
+    elements.frequentFunctions = (
+      await this.getRagFunctionDeclaration(
+        calledFunctionIdentifiersSorted.slice(
+          0,
+          Math.ceil(calledFunctionIdentifiersSorted.length * 0.3),
+        ),
+        document.fileName.substring(
+          document.fileName.indexOf(elements.repo ?? ''),
+        ),
+      )
+    ).join('\n');
     elements.globals = globals;
     elements.includes = includes;
 
@@ -134,7 +142,7 @@ export class PromptExtractor {
       ragCode,
     });
 
-    // 拼接 neighborSnippet  currentFilePrefix
+    // 拼接 neighborSnippet currentFilePrefix
     if (similarSnippetsSliced.length) {
       elements.similarSnippet = similarSnippetsSliced
         .map((similarSnippet) => similarSnippet.content)
@@ -261,11 +269,7 @@ export class PromptExtractor {
     );
     inputLines.push(...suffixInputLines);
     const inputString = inputLines.join('\n').slice(0, 512).trim();
-    completionLog.debug(
-      'PromptExtractor.getRagCode.api_code_rag.input',
-      inputString,
-    );
-    const { output } = await api_code_rag(inputString);
+    const { output } = await apiRagCode(inputString);
     const filteredOutput = output.filter(
       (item) => basename(item.filePath) !== basename(filePath),
     );
@@ -274,5 +278,42 @@ export class PromptExtractor {
         return `<file_sep>${item.filePath}\n${item.similarCode}`;
       })
       .join('\n');
+  }
+
+  async getRagFunctionDeclaration(
+    identifiers: string[],
+    currentRepoPath: string,
+  ) {
+    const configService = container.get<ConfigService>(ServiceType.CONFIG);
+    const networkZone = await configService.getConfig('networkZone');
+    if (networkZone !== NetworkZone.Normal) {
+      return [];
+    }
+    const inputString = identifiers
+      .slice(
+        0,
+        identifiers.findIndex(
+          (_, i) => identifiers.slice(0, i).join('\n').trim().length >= 512,
+        ),
+      )
+      .join('\n')
+      .trim();
+    const functionDeclarations = await apiRagFunctionDeclaration(inputString);
+    return functionDeclarations.map(({ output }) => {
+      let longestPathPrefixContent = '';
+      let longestPathPrefixCount = -1;
+
+      output.forEach(({ content, path }) => {
+        const mismatchIndex = path
+          .split('')
+          .findIndex((char, index) => char !== currentRepoPath[index]);
+        if (mismatchIndex > longestPathPrefixCount) {
+          longestPathPrefixCount = mismatchIndex;
+          longestPathPrefixContent = content;
+        }
+      });
+
+      return longestPathPrefixContent;
+    });
   }
 }
