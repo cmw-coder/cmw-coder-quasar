@@ -120,7 +120,7 @@ export class PromptElements {
       currentFilePrefix: this.currentFilePrefix.length,
       neighborSnippet: this.neighborSnippet?.length,
     });
-    return question;
+    return question.trim();
   }
 }
 
