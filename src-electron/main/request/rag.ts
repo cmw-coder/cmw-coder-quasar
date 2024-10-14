@@ -16,7 +16,7 @@ export interface RagCode {
 export interface RagFunctionDeclaration {
   output: {
     functionName: string;
-    functionDeclarations: {
+    functionDeclaration: {
       content: string;
       path: string;
     }[];

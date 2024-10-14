@@ -302,11 +302,11 @@ export class PromptExtractor {
     completionLog.debug('getRagFunctionDeclaration', {
       functionDeclarations,
     });
-    return functionDeclarations.map(({ functionDeclarations }) => {
+    return functionDeclarations.map(({ functionDeclaration }) => {
       let longestPathPrefixContent = '';
       let longestPathPrefixCount = -2;
 
-      functionDeclarations.forEach(({ content, path }) => {
+      functionDeclaration.forEach(({ content, path }) => {
         const mismatchIndex = path
           .split('')
           .findIndex((char, index) => char !== currentRepoPath[index]);
