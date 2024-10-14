@@ -28,6 +28,7 @@ import { WindowType } from 'shared/types/WindowType';
 import { AppServiceTrait } from 'shared/types/service/AppServiceTrait';
 import * as process from 'node:process';
 import * as Electron from 'electron';
+import Logger from 'electron-log';
 
 interface AbstractServicePort {
   [key: string]: ((...args: unknown[]) => Promise<unknown>) | undefined;
@@ -64,7 +65,13 @@ export class AppService implements AppServiceTrait {
     log.info('AppService init');
     this._initApplication();
     this._initIpc();
-    this._initTreeSitter().then();
+    this._initTreeSitter()
+      .then(() => {
+        Logger.info('_initTreeSitter.success');
+      })
+      .catch((e) => {
+        Logger.error('_initTreeSitter.error', e);
+      });
     this._initScheduler();
     this._initShortcutHandler();
   }
