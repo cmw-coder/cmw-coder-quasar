@@ -311,7 +311,6 @@ export class WebsocketService implements WebsocketServiceTrait {
           );
 
           completionLog.debug('WsAction.CompletionGenerate', data);
-
           const promptElements =
             await this._promptExtractor.getPromptComponents(
               actionId,

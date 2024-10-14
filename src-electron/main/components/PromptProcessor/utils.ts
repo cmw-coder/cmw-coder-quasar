@@ -14,13 +14,14 @@ export const getCompletionType = (
   promptElements: PromptElements,
 ): CompletionType => {
   if (
-    (promptElements.prefix.split(NEW_LINE_REGEX).at(-1) ?? '').trim().length > 0
+    (promptElements.fullPrefix.split(NEW_LINE_REGEX).at(-1) ?? '').trim()
+      .length > 0
   ) {
     return CompletionType.Line;
   }
 
   const lastNonEmptyLine =
-    promptElements.prefix.trimEnd().split(NEW_LINE_REGEX).at(-1) ?? '';
+    promptElements.fullPrefix.trimEnd().split(NEW_LINE_REGEX).at(-1) ?? '';
   completionLog.debug('getCompletionType', {
     lastNonEmptyLine,
     functionHeaderEndTest: functionHeaderEndRegex.test(lastNonEmptyLine),

@@ -4,11 +4,7 @@ import {
   RawInputs,
   SimilarSnippetConfig,
 } from 'main/components/PromptExtractor/types';
-import {
-  getFunctionPrefix,
-  getFunctionSuffix,
-  separateTextByLine,
-} from 'main/components/PromptExtractor/utils';
+import { separateTextByLine } from 'main/components/PromptExtractor/utils';
 import { container, getService } from 'main/services';
 import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
@@ -32,10 +28,8 @@ export class PromptExtractor {
     similarSnippetCount: number = 1,
   ): Promise<PromptElements> {
     const { elements, document, position, recentFiles } = inputs;
-    const functionPrefix =
-      getFunctionPrefix(elements.prefix) ?? elements.prefix;
-    const functionSuffix =
-      getFunctionSuffix(elements.suffix) ?? elements.suffix;
+    const queryPrefix = elements.functionPrefix ?? elements.slicedPrefix;
+    const querySuffix = elements.functionSuffix ?? elements.slicedSuffix;
 
     const [
       calledFunctionIdentifiers,
@@ -75,8 +69,8 @@ export class PromptExtractor {
       })(),
       (async () => {
         const ragCode = await this.getRagCode(
-          functionPrefix,
-          functionSuffix,
+          queryPrefix,
+          querySuffix,
           document.fileName,
         );
         getService(ServiceType.STATISTICS).completionUpdateRagCodeTime(
@@ -95,8 +89,8 @@ export class PromptExtractor {
         const result = await this.getSimilarSnippets(
           document,
           position,
-          functionPrefix,
-          functionSuffix,
+          queryPrefix,
+          querySuffix,
           recentFiles,
         );
         getService(ServiceType.STATISTICS).completionUpdateSimilarSnippetsTime(
@@ -106,6 +100,9 @@ export class PromptExtractor {
       })(),
     ]);
 
+    elements.ragCode = ragCode;
+
+    // 获取 frequentFunctions  globals  includes
     const frequencyMap = new Map<string, number>();
     for (const identifier of calledFunctionIdentifiers) {
       const count = frequencyMap.get(identifier) ?? 0;
@@ -124,10 +121,9 @@ export class PromptExtractor {
     );
 
     // TODO: Get the most frequent called function's declaration
-    elements.frequentFunctions = calledFunctionIdentifiersSorted.slice(
-      0,
-      Math.ceil(calledFunctionIdentifiersSorted.length * 0.3),
-    ).join('\n');
+    elements.frequentFunctions = calledFunctionIdentifiersSorted
+      .slice(0, Math.ceil(calledFunctionIdentifiersSorted.length * 0.3))
+      .join('\n');
     elements.globals = globals;
     elements.includes = includes;
 
@@ -146,6 +142,7 @@ export class PromptExtractor {
       ragCode,
     });
 
+    // 拼接 neighborSnippet  currentFilePrefix
     if (similarSnippetsSliced.length) {
       elements.similarSnippet = similarSnippetsSliced
         .map((similarSnippet) => similarSnippet.content)
@@ -211,9 +208,22 @@ export class PromptExtractor {
           )
           .join('\n');
       }
+      // 本文件全局变量
+      if (elements.globals) {
+        elements.currentFilePrefix =
+          elements.globals + '\n' + elements.currentFilePrefix;
+      }
+      // 本文件高频接口的函数声明
+      if (elements.frequentFunctions) {
+        elements.currentFilePrefix =
+          elements.frequentFunctions + '\n' + elements.currentFilePrefix;
+      }
+      // 本文件 include 块
+      if (elements.includes) {
+        elements.currentFilePrefix =
+          elements.includes + '\n' + elements.currentFilePrefix;
+      }
     }
-
-    elements.ragCode = ragCode;
 
     return elements;
   }

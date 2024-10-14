@@ -1,6 +1,5 @@
 import { createHash } from 'crypto';
 import { PromptElements } from 'main/components/PromptExtractor/types';
-import { getBoundingSuffix } from 'main/components/PromptExtractor/utils';
 import { Completions, LRUCache } from 'main/components/PromptProcessor/types';
 import {
   getCompletionType,
@@ -25,7 +24,7 @@ export class PromptProcessor {
     const appConfig = await getService(ServiceType.CONFIG).getConfigs();
 
     const cacheKey = createHash('sha1')
-      .update(promptElements.prefix.trimEnd())
+      .update(promptElements.fullPrefix.trimEnd())
       .digest('base64');
     const completionCached = this._cache.get(cacheKey);
     if (completionCached) {
@@ -57,8 +56,7 @@ export class PromptProcessor {
         maxTokens: completionConfig.maxTokenCount,
         temperature: completionConfig.temperature,
         stop: completionConfig.stopTokens,
-        suffix:
-          getBoundingSuffix(promptElements.suffix) ?? promptElements.suffix,
+        suffix: '',
         plugin: 'SI',
         profileModel: appConfig.activeModel,
         productLine: appConfig.activeTemplate,
@@ -92,7 +90,7 @@ export class PromptProcessor {
       candidates = processGeneratedSuggestions(
         candidates,
         completionType,
-        promptElements.prefix,
+        promptElements.fullPrefix,
       );
       if (candidates.length) {
         completionLog.info('PromptProcessor.process.cacheMiss', candidates);

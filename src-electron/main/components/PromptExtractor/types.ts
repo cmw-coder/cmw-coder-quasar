@@ -5,8 +5,8 @@ import { basename, dirname } from 'path';
 import completionLog from 'main/components/Loggers/completionLog';
 import { MODULE_PATH } from 'main/components/PromptExtractor/constants';
 import {
-  getBoundingPrefix,
-  getBoundingSuffix,
+  getFunctionPrefix,
+  getFunctionSuffix,
   removeFunctionHeader,
 } from 'main/components/PromptExtractor/utils';
 import { getService } from 'main/services';
@@ -19,11 +19,16 @@ import { CompletionGenerateClientMessage } from 'shared/types/WsMessage';
 import { ServiceType } from 'shared/types/service';
 
 export class PromptElements {
-  // NearCode
-  prefix: string;
-  // SuffixCode
-  suffix: string;
-  // Language
+  // 全上文
+  fullPrefix: string;
+  slicedPrefix: string;
+  // 全下文
+  fullSuffix: string;
+  slicedSuffix: string;
+  // 函数内部时上文
+  functionPrefix: string;
+  // 函数内部时下文
+  functionSuffix: string;
   language?: string;
   file?: string;
   folder?: string;
@@ -45,11 +50,21 @@ export class PromptElements {
   currentFilePrefix: string;
   // RagCode
   ragCode?: string;
+  // 是否在函数内部
+  insideFunction: boolean;
 
-  constructor(prefix: string, suffix: string) {
-    this.prefix = prefix.trimStart();
-    this.suffix = suffix.trimEnd();
-    this.currentFilePrefix = getBoundingPrefix(this.prefix) ?? this.prefix;
+  constructor(fullPrefix: string, fullSuffix: string) {
+    this.fullPrefix = fullPrefix.trimStart();
+    this.slicedPrefix = this.fullPrefix.substring(this.fullPrefix.length - 500);
+    this.fullSuffix = fullSuffix.trimEnd();
+    this.slicedSuffix = this.fullSuffix.substring(0, 100);
+    this.functionPrefix = getFunctionPrefix(this.fullPrefix) || '';
+    this.functionSuffix = getFunctionSuffix(this.fullSuffix) || '';
+    this.insideFunction = this.functionPrefix ? true : false;
+
+    this.currentFilePrefix = this.insideFunction
+      ? this.functionPrefix
+      : this.slicedPrefix;
   }
 
   async stringify(completionType: CompletionType) {
@@ -71,14 +86,14 @@ export class PromptElements {
     question = question.replaceAll(
       '%{NearCode}%',
       removeFunctionHeader(
-        getBoundingPrefix(this.prefix) ?? this.prefix,
+        this.insideFunction ? this.functionPrefix : this.slicedPrefix,
         completionType,
       ),
     );
     question = question.replaceAll(
       '%{SuffixCode}%',
       removeFunctionHeader(
-        getBoundingSuffix(this.suffix) ?? this.suffix,
+        this.insideFunction ? this.functionSuffix : this.slicedSuffix,
         completionType,
       ),
     );
@@ -100,8 +115,8 @@ export class PromptElements {
       ragCode: this.ragCode?.length,
       symbols: this.symbols?.length,
       similarSnippet: this.similarSnippet?.length,
-      prefix: this.prefix.length,
-      suffix: this.suffix.length,
+      slicedPrefix: this.slicedPrefix.length,
+      slicedSuffix: this.slicedSuffix.length,
       currentFilePrefix: this.currentFilePrefix.length,
       neighborSnippet: this.neighborSnippet?.length,
     });

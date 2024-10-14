@@ -150,8 +150,8 @@ export class StatisticsService implements StatisticsServiceTrait {
       createTime: data.timelines.proxyEndEditorInfo.toFormat(
         'yyyy-MM-dd HH:mm:ss',
       ),
-      prefix: data.elements.prefix,
-      suffix: data.elements.suffix,
+      prefix: data.elements.slicedPrefix,
+      suffix: data.elements.slicedSuffix,
       repo: data.elements.repo ?? '',
       path: join(data.elements.folder ?? '', data.elements.file ?? ''),
       fileSuffix: data.elements.file
