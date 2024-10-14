@@ -62,7 +62,7 @@ export class PromptElements {
     this.slicedSuffix = this.fullSuffix.substring(0, 100);
     this.functionPrefix = getFunctionPrefix(this.fullPrefix) || '';
     this.functionSuffix = getFunctionSuffix(this.fullSuffix) || '';
-    this.insideFunction = this.functionPrefix ? true : false;
+    this.insideFunction = !!this.functionPrefix;
 
     this.currentFilePrefix = this.insideFunction
       ? this.functionPrefix
@@ -206,7 +206,7 @@ export class RawInputs {
         ...functionDefinitionIndices,
         ...includeIndices,
       ]),
-    );
+    ).split(NEW_LINE_REGEX).filter((line) => line.trim().length > 0).join('\n');
   }
 
   async getIncludes(): Promise<string> {
@@ -219,7 +219,7 @@ export class RawInputs {
         fileContent.substring(
           captures[0].node.startIndex,
           captures[0].node.endIndex,
-        ),
+        ).replaceAll('\n', ''),
       )
       .join('\n');
   }

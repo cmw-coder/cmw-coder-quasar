@@ -112,20 +112,21 @@ export class PromptExtractor {
     const calledFunctionIdentifiersSorted = Array.from(frequencyMap.entries())
       .sort((a, b) => b[1] - a[1])
       .map((item) => item[0]);
-
-    console.log(
-      'PromptExtractor.getPromptComponents.calledFunctionIdentifiersSorted',
-      {
-        calledFunctionIdentifiersSorted,
-      },
-    );
-
     // TODO: Get the most frequent called function's declaration
     elements.frequentFunctions = calledFunctionIdentifiersSorted
       .slice(0, Math.ceil(calledFunctionIdentifiersSorted.length * 0.3))
       .join('\n');
     elements.globals = globals;
     elements.includes = includes;
+
+    console.log(
+      'PromptExtractor.getPromptComponents',
+      {
+        calledFunctionIdentifiersSorted,
+        globals,
+        includes
+      },
+    );
 
     const similarSnippetsSliced = similarSnippets
       .filter(
