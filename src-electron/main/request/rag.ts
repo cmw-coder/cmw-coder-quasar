@@ -23,11 +23,6 @@ export interface RagFunctionDeclaration {
   }[];
 }
 
-export enum ResolveReason {
-  DONE = 'DONE',
-  TIMEOUT = 'TIMEOUT',
-}
-
 export const apiRagCode = async (input: string) => {
   if (!input.length) {
     completionLog.debug('apiRagCode.input.empty');
