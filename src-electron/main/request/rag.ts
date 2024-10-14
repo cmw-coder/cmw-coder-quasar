@@ -1,9 +1,10 @@
 import request from 'main/request';
 import {
   MAX_RAG_CODE_QUERY_TIME,
-  MAX_RAG_FUNCTION_DECLARATION_QUERY_TIME
+  MAX_RAG_FUNCTION_DECLARATION_QUERY_TIME,
 } from 'main/components/PromptExtractor/constants';
 import completionLog from 'main/components/Loggers/completionLog';
+import axios from 'axios';
 
 export interface RagCode {
   similarCode: string;
@@ -32,10 +33,7 @@ export const apiRagCode = async (input: string) => {
       output: [],
     };
   }
-  completionLog.debug(
-    'apiRagCode.input',
-    input,
-  );
+  completionLog.debug('apiRagCode.input', input);
   const startTime = Date.now();
   try {
     const result = await request<{
@@ -63,22 +61,31 @@ export const apiRagFunctionDeclaration = async (input: string) => {
     completionLog.debug('apiRagFunctionDeclaration.input.empty');
     return [];
   }
-  completionLog.debug(
-    'apiRagFunctionDeclaration.input',
-    input,
-  );
+  completionLog.debug('apiRagFunctionDeclaration.input', input);
   const startTime = Date.now();
   try {
-    const result = await request<RagFunctionDeclaration[]>({
-      url: '/kong/RdTestAiService/v1/chatgpt/question/rag/function-declarations',
-      method: 'post',
-      data: {
+    // const result = await request<RagFunctionDeclaration[]>({
+    //   url: '/kong/RdTestAiService/v1/chatgpt/question/rag/function-declarations',
+    //   method: 'post',
+    //   data: {
+    //     input,
+    //   },
+    //   timeout: MAX_RAG_FUNCTION_DECLARATION_QUERY_TIME,
+    // });
+    const { data } = await axios.post<RagFunctionDeclaration[]>(
+      'http://10.113.36.127:9306/func_name_declaration/invoke',
+      {
         input,
       },
-      timeout: MAX_RAG_FUNCTION_DECLARATION_QUERY_TIME,
-    });
-    completionLog.debug('apiRagFunctionDeclaration.success', Date.now() - startTime);
-    return result;
+      {
+        timeout: MAX_RAG_FUNCTION_DECLARATION_QUERY_TIME,
+      },
+    );
+    completionLog.debug(
+      'apiRagFunctionDeclaration.success',
+      Date.now() - startTime,
+    );
+    return data;
   } catch (e) {
     completionLog.error('apiRagFunctionDeclaration.error', e);
     return [];
