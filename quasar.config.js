@@ -230,6 +230,10 @@ module.exports = configure((/* ctx */) => ({
           to: 'cmw-coder-subprocess',
         },
         {
+          from: 'src-electron/assets/ctags',
+          to: 'ctags',
+        },
+        {
           from: 'src-electron/assets/svn',
           to: 'svn',
         },
