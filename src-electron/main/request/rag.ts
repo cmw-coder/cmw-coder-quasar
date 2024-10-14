@@ -70,7 +70,7 @@ export const apiRagFunctionDeclaration = async (input: string) => {
     //   timeout: MAX_RAG_FUNCTION_DECLARATION_QUERY_TIME,
     // });
     const { data } = await axios.post<RagFunctionDeclaration>(
-      'http://10.113.36.127:9306/func_name_declaration/invoke',
+      'http://10.113.36.104:9306/func_name_declaration/invoke',
       {
         input,
       },
