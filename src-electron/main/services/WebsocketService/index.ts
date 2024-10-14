@@ -344,6 +344,7 @@ export class WebsocketService implements WebsocketServiceTrait {
 
           this._statisticsReporterService.completionAbort(actionId);
         } catch (e) {
+          console.log(e);
           const error = <Error>e;
           let result: StandardResult['result'] = 'error';
           switch (error.cause) {
@@ -363,6 +364,9 @@ export class WebsocketService implements WebsocketServiceTrait {
                 .getWindow(WindowType.ProjectId)
                 .setProject(project);
               break;
+            }
+            default: {
+              completionLog.error('WsAction.CompletionGenerate.error', error);
             }
           }
 
