@@ -80,15 +80,18 @@ export const processGeneratedSuggestions = (
     /// Filter out empty suggestions.
     .filter((generatedSuggestion) => generatedSuggestion.length > 0);
 
-  switch (completionType) {
-    case CompletionType.Snippet:
-    case CompletionType.Function: {
-      return result;
-    }
-    case CompletionType.Line: {
-      return result.map((suggestion) =>
-        suggestion.split(NEW_LINE_REGEX)[0].trimEnd(),
-      );
-    }
-  }
+  // 2024-10-15 Remove switch statement
+  // switch (completionType) {
+  //   case CompletionType.Snippet:
+  //   case CompletionType.Function: {
+  //     return result;
+  //   }
+  //   case CompletionType.Line: {
+  //     return result.map((suggestion) =>
+  //       suggestion.split(NEW_LINE_REGEX)[0].trimEnd(),
+  //     );
+  //   }
+  // }
+
+  return result;
 };
