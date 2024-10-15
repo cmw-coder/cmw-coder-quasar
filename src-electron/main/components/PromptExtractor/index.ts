@@ -34,13 +34,13 @@ export class PromptExtractor {
     const queryPrefix = elements.functionPrefix ?? elements.slicedPrefix;
     const querySuffix = elements.functionSuffix ?? elements.slicedSuffix;
 
-    this._getFrequentFunctions(actionId, inputs).then((frequentFunctions) => {
+    this._getFrequentFunctions(inputs).then((frequentFunctions) => {
       this._frequentFunctions = frequentFunctions;
     });
-    this._getGlobals(actionId, inputs).then((globals) => {
+    inputs.getGlobals().then((globals) => {
       this._globals = globals;
     });
-    this._getIncludes(actionId, inputs).then((includes) => {
+    inputs.getIncludes().then((includes) => {
       this._includes = includes;
     });
 
@@ -207,10 +207,7 @@ export class PromptExtractor {
     );
   }
 
-  private async _getFrequentFunctions(
-    actionId: string,
-    inputs: RawInputs,
-  ): Promise<string> {
+  private async _getFrequentFunctions(inputs: RawInputs): Promise<string> {
     const calledFunctionIdentifiers =
       await inputs.getCalledFunctionIdentifiers();
     const frequencyMap = new Map<string, number>();
@@ -221,7 +218,7 @@ export class PromptExtractor {
     const calledFunctionIdentifiersSorted = Array.from(frequencyMap.entries())
       .sort((a, b) => b[1] - a[1])
       .map((item) => item[0]);
-    const frequentFunctions = (
+    return (
       await this._getRagFunctionDeclaration(
         calledFunctionIdentifiersSorted.slice(
           0,
@@ -232,22 +229,6 @@ export class PromptExtractor {
         ),
       )
     ).join('\n');
-    getService(ServiceType.STATISTICS).completionUpdateFrequentFunctionsTime(
-      actionId,
-    );
-    return frequentFunctions;
-  }
-
-  private async _getGlobals(actionId: string, inputs: RawInputs) {
-    const globals = await inputs.getGlobals();
-    getService(ServiceType.STATISTICS).completionUpdateGlobalsTime(actionId);
-    return globals;
-  }
-
-  private async _getIncludes(actionId: string, inputs: RawInputs) {
-    const includes = await inputs.getIncludes();
-    getService(ServiceType.STATISTICS).completionUpdateIncludesTime(actionId);
-    return includes;
   }
 
   private async _getRagCode(prefix: string, suffix: string, filePath: string) {
