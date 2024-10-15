@@ -43,19 +43,19 @@ export class PromptProcessor {
 
     this._abortController = new AbortController();
 
+    // 2024-10-15 去除 CompletionType.Line
     const completionConfig =
       completionType === CompletionType.Function
         ? appConfig.completionConfigs.function
-        : completionType === CompletionType.Line
-          ? appConfig.completionConfigs.line
-          : appConfig.completionConfigs.snippet;
+        : appConfig.completionConfigs.snippet;
 
     try {
       const questionParams = {
         question: await promptElements.stringify(completionType),
         maxTokens: completionConfig.maxTokenCount,
         temperature: completionConfig.temperature,
-        stop: completionConfig.stopTokens,
+        // 2024-10-15 仅保留如下 stop 参数，去除 \n  \n}  }等
+        stop: ['<fim_pad>', '<｜end▁of▁sentence｜>'],
         suffix: '',
         plugin: 'SI',
         profileModel: appConfig.activeModel,
