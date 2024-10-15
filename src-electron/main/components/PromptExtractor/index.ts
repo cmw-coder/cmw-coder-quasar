@@ -20,7 +20,11 @@ import completionLog from 'main/components/Loggers/completionLog';
 export class PromptExtractor {
   private _globals: string = '';
   private _includes: string = '';
+  private _lastCaretPosition: Position = new Position(-1, -1);
   private _frequentFunctions: string = '';
+  private _ragCode: string = '';
+  private _relativeDefinitions: { path: string; content: string }[] = [];
+  private _similarSnippets: SimilarSnippet[] = [];
   private _similarSnippetConfig: SimilarSnippetConfig = {
     minScore: 0.5,
   };
@@ -44,53 +48,61 @@ export class PromptExtractor {
       this._includes = includes;
     });
 
-    const [ragCode, relativeDefinitions, similarSnippets] = await Promise.all([
-      (async () => {
-        const ragCode = await this._getRagCode(
-          queryPrefix,
-          querySuffix,
-          document.fileName,
-        );
-        getService(ServiceType.STATISTICS).completionUpdateRagCodeTime(
-          actionId,
-        );
-        return ragCode;
-      })(),
-      (async () => {
-        const relativeDefinitions = await inputs.getRelativeDefinitions();
-        getService(
-          ServiceType.STATISTICS,
-        ).completionUpdateRelativeDefinitionsTime(actionId);
-        return relativeDefinitions;
-      })(),
-      (async () => {
-        const result = await this.getSimilarSnippets(
-          document,
-          position,
-          queryPrefix,
-          querySuffix,
-          recentFiles,
-        );
-        getService(ServiceType.STATISTICS).completionUpdateSimilarSnippetsTime(
-          actionId,
-        );
-        return result;
-      })(),
-    ]);
+    if (position.line != this._lastCaretPosition.line) {
+      const [ragCode, relativeDefinitions, similarSnippets] = await Promise.all(
+        [
+          (async () => {
+            const ragCode = await this._getRagCode(
+              queryPrefix,
+              querySuffix,
+              document.fileName,
+            );
+            getService(ServiceType.STATISTICS).completionUpdateRagCodeTime(
+              actionId,
+            );
+            return ragCode;
+          })(),
+          (async () => {
+            const relativeDefinitions = await inputs.getRelativeDefinitions();
+            getService(
+              ServiceType.STATISTICS,
+            ).completionUpdateRelativeDefinitionsTime(actionId);
+            return relativeDefinitions;
+          })(),
+          (async () => {
+            const result = await this.getSimilarSnippets(
+              document,
+              position,
+              queryPrefix,
+              querySuffix,
+              recentFiles,
+            );
+            getService(
+              ServiceType.STATISTICS,
+            ).completionUpdateSimilarSnippetsTime(actionId);
+            return result;
+          })(),
+        ],
+      );
+      this._ragCode = ragCode;
+      this._relativeDefinitions = relativeDefinitions;
+      this._similarSnippets = similarSnippets;
+      this._lastCaretPosition = position;
+    }
 
     elements.frequentFunctions = this._frequentFunctions;
     elements.globals = this._globals;
     elements.includes = this._includes;
-    elements.ragCode = ragCode;
+    elements.ragCode = this._ragCode;
 
     console.log('PromptExtractor.getPromptComponents', {
       frequentFunctions: elements.frequentFunctions,
       globals: elements.globals,
       includes: elements.includes,
-      ragCode,
+      ragCode: this._ragCode,
     });
 
-    const similarSnippetsSliced = similarSnippets
+    const similarSnippetsSliced = this._similarSnippets
       .filter(
         (similarSnippet) =>
           similarSnippet.score > this._similarSnippetConfig.minScore,
@@ -136,17 +148,17 @@ export class PromptExtractor {
       }
     }
 
-    if (relativeDefinitions.length) {
-      elements.symbols = relativeDefinitions
+    if (this._relativeDefinitions.length) {
+      elements.symbols = this._relativeDefinitions
         .map((relativeDefinition) => relativeDefinition.content)
         .join('\n');
 
-      const selfFileRelativeDefinitions = relativeDefinitions.filter(
+      const selfFileRelativeDefinitions = this._relativeDefinitions.filter(
         (item) =>
           item.path.toLocaleLowerCase() ===
           document.fileName.toLocaleLowerCase(),
       );
-      const otherFileRelativeDefinitions = relativeDefinitions.filter(
+      const otherFileRelativeDefinitions = this._relativeDefinitions.filter(
         (item) =>
           item.path.toLocaleLowerCase() !==
           document.fileName.toLocaleLowerCase(),
