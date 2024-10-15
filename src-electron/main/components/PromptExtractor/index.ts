@@ -18,6 +18,8 @@ import { WindowType } from 'shared/types/WindowType';
 import completionLog from 'main/components/Loggers/completionLog';
 
 export class PromptExtractor {
+  private _globals: string = '';
+  private _includes: string = '';
   private _frequentFunctions: string = '';
   private _similarSnippetConfig: SimilarSnippetConfig = {
     minScore: 0.5,
@@ -35,65 +37,56 @@ export class PromptExtractor {
     this._getFrequentFunctions(actionId, inputs).then((frequentFunctions) => {
       this._frequentFunctions = frequentFunctions;
     });
+    this._getGlobals(actionId, inputs).then((globals) => {
+      this._globals = globals;
+    });
+    this._getIncludes(actionId, inputs).then((includes) => {
+      this._includes = includes;
+    });
 
-    const [globals, includes, ragCode, relativeDefinitions, similarSnippets] =
-      await Promise.all([
-        (async () => {
-          const globals = await inputs.getGlobals();
-          getService(ServiceType.STATISTICS).completionUpdateGlobalsTime(
-            actionId,
-          );
-          return globals;
-        })(),
-        (async () => {
-          const includes = await inputs.getIncludes();
-          getService(ServiceType.STATISTICS).completionUpdateIncludesTime(
-            actionId,
-          );
-          return includes;
-        })(),
-        (async () => {
-          const ragCode = await this.getRagCode(
-            queryPrefix,
-            querySuffix,
-            document.fileName,
-          );
-          getService(ServiceType.STATISTICS).completionUpdateRagCodeTime(
-            actionId,
-          );
-          return ragCode;
-        })(),
-        (async () => {
-          const relativeDefinitions = await inputs.getRelativeDefinitions();
-          getService(
-            ServiceType.STATISTICS,
-          ).completionUpdateRelativeDefinitionsTime(actionId);
-          return relativeDefinitions;
-        })(),
-        (async () => {
-          const result = await this.getSimilarSnippets(
-            document,
-            position,
-            queryPrefix,
-            querySuffix,
-            recentFiles,
-          );
-          getService(
-            ServiceType.STATISTICS,
-          ).completionUpdateSimilarSnippetsTime(actionId);
-          return result;
-        })(),
-      ]);
+    const [ragCode, relativeDefinitions, similarSnippets] = await Promise.all([
+      (async () => {
+        const ragCode = await this._getRagCode(
+          queryPrefix,
+          querySuffix,
+          document.fileName,
+        );
+        getService(ServiceType.STATISTICS).completionUpdateRagCodeTime(
+          actionId,
+        );
+        return ragCode;
+      })(),
+      (async () => {
+        const relativeDefinitions = await inputs.getRelativeDefinitions();
+        getService(
+          ServiceType.STATISTICS,
+        ).completionUpdateRelativeDefinitionsTime(actionId);
+        return relativeDefinitions;
+      })(),
+      (async () => {
+        const result = await this.getSimilarSnippets(
+          document,
+          position,
+          queryPrefix,
+          querySuffix,
+          recentFiles,
+        );
+        getService(ServiceType.STATISTICS).completionUpdateSimilarSnippetsTime(
+          actionId,
+        );
+        return result;
+      })(),
+    ]);
 
     elements.frequentFunctions = this._frequentFunctions;
-    elements.globals = globals;
-    elements.includes = includes;
+    elements.globals = this._globals;
+    elements.includes = this._includes;
     elements.ragCode = ragCode;
 
     console.log('PromptExtractor.getPromptComponents', {
       frequentFunctions: elements.frequentFunctions,
-      globals,
-      includes,
+      globals: elements.globals,
+      includes: elements.includes,
       ragCode,
     });
 
@@ -229,7 +222,7 @@ export class PromptExtractor {
       .sort((a, b) => b[1] - a[1])
       .map((item) => item[0]);
     const frequentFunctions = (
-      await this.getRagFunctionDeclaration(
+      await this._getRagFunctionDeclaration(
         calledFunctionIdentifiersSorted.slice(
           0,
           Math.ceil(calledFunctionIdentifiersSorted.length * 0.3),
@@ -245,7 +238,19 @@ export class PromptExtractor {
     return frequentFunctions;
   }
 
-  async getRagCode(prefix: string, suffix: string, filePath: string) {
+  private async _getGlobals(actionId: string, inputs: RawInputs) {
+    const globals = await inputs.getGlobals();
+    getService(ServiceType.STATISTICS).completionUpdateGlobalsTime(actionId);
+    return globals;
+  }
+
+  private async _getIncludes(actionId: string, inputs: RawInputs) {
+    const includes = await inputs.getIncludes();
+    getService(ServiceType.STATISTICS).completionUpdateIncludesTime(actionId);
+    return includes;
+  }
+
+  private async _getRagCode(prefix: string, suffix: string, filePath: string) {
     const configService = container.get<ConfigService>(ServiceType.CONFIG);
     const networkZone = await configService.getConfig('networkZone');
     if (networkZone !== NetworkZone.Normal) {
@@ -277,7 +282,7 @@ export class PromptExtractor {
       .join('\n');
   }
 
-  async getRagFunctionDeclaration(
+  private async _getRagFunctionDeclaration(
     identifiers: string[],
     currentRepoPath: string,
   ) {
