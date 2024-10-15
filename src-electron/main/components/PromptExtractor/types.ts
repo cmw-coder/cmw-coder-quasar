@@ -94,10 +94,12 @@ export class PromptElements {
     );
     question = question.replaceAll(
       '%{SuffixCode}%',
-      removeFunctionHeader(
-        this.insideFunction ? this.functionSuffix : this.slicedSuffix,
-        completionType,
-      ),
+      completionType === CompletionType.Function
+        ? ''
+        : removeFunctionHeader(
+            this.insideFunction ? this.functionSuffix : this.slicedSuffix,
+            completionType,
+          ),
     );
     question = question.replaceAll('%{Language}%', this.language || '');
     question = question.replaceAll('%{FilePath}%', this.file || '');
@@ -206,7 +208,10 @@ export class RawInputs {
         ...functionDefinitionIndices,
         ...includeIndices,
       ]),
-    ).split(NEW_LINE_REGEX).filter((line) => line.trim().length > 0).join('\n');
+    )
+      .split(NEW_LINE_REGEX)
+      .filter((line) => line.trim().length > 0)
+      .join('\n');
   }
 
   async getIncludes(): Promise<string> {
@@ -216,10 +221,9 @@ export class RawInputs {
     return (await appService.createQuery('(preproc_include) @include'))
       .matches(tree.rootNode)
       .map(({ captures }) =>
-        fileContent.substring(
-          captures[0].node.startIndex,
-          captures[0].node.endIndex,
-        ).replaceAll('\n', ''),
+        fileContent
+          .substring(captures[0].node.startIndex, captures[0].node.endIndex)
+          .replaceAll('\n', ''),
       )
       .join('\n');
   }
