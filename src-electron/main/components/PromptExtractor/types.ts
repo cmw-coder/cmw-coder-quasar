@@ -123,6 +123,9 @@ export class PromptElements {
       slicedSuffix: this.slicedSuffix.length,
       currentFilePrefix: this.currentFilePrefix.length,
       neighborSnippet: this.neighborSnippet?.length,
+      globals: this.globals?.length,
+      includes: this.includes?.length,
+      frequentFunctions: this.frequentFunctions?.length,
     });
     return question.trim();
   }
