@@ -89,7 +89,6 @@ export class PromptProcessor {
       let candidates = answers.map((answer) => answer.text);
       candidates = processGeneratedSuggestions(
         candidates,
-        completionType,
         promptElements.fullPrefix,
       );
       if (candidates.length) {

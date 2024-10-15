@@ -37,8 +37,7 @@ export class TextDocument {
     // Remove substrings from the string
     for (const { begin, end } of indices) {
       content =
-        content.substring(0, begin - offset) +
-        content.substring(end - offset);
+        content.substring(0, begin - offset) + content.substring(end - offset);
       offset += end - begin;
     }
 

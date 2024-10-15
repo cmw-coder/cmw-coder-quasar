@@ -18,7 +18,7 @@ import { WindowType } from 'shared/types/WindowType';
 import completionLog from 'main/components/Loggers/completionLog';
 
 export class PromptExtractor {
-  private _frequentFunctions: string[] = [];
+  private _frequentFunctions: string = '';
   private _similarSnippetConfig: SimilarSnippetConfig = {
     minScore: 0.5,
   };
@@ -32,99 +32,69 @@ export class PromptExtractor {
     const queryPrefix = elements.functionPrefix ?? elements.slicedPrefix;
     const querySuffix = elements.functionSuffix ?? elements.slicedSuffix;
 
-    const [
-      frequentFunctions,
-      globals,
-      includes,
-      ragCode,
-      relativeDefinitions,
-      similarSnippets,
-    ] = await Promise.all([
-      (async () => {
-        const calledFunctionIdentifiers =
-          await inputs.getCalledFunctionIdentifiers();
-        const frequencyMap = new Map<string, number>();
-        for (const identifier of calledFunctionIdentifiers) {
-          const count = frequencyMap.get(identifier) ?? 0;
-          frequencyMap.set(identifier, count + 1);
-        }
-        const calledFunctionIdentifiersSorted = Array.from(frequencyMap.entries())
-          .sort((a, b) => b[1] - a[1])
-          .map((item) => item[0]);
-        const frequentFunctions = (
-          await this.getRagFunctionDeclaration(
-            calledFunctionIdentifiersSorted.slice(
-              0,
-              Math.ceil(calledFunctionIdentifiersSorted.length * 0.3),
-            ),
-            document.fileName.substring(
-              document.fileName.indexOf(elements.repo ?? ''),
-            ),
-          )
-        ).join('\n')
-        getService(
-          ServiceType.STATISTICS,
-        ).completionUpdateFrequentFunctionsTime(actionId);
-        return frequentFunctions;
-      })(),
-      (async () => {
-        const globals = await inputs.getGlobals();
-        getService(ServiceType.STATISTICS).completionUpdateGlobalsTime(
-          actionId,
-        );
-        return globals;
-      })(),
-      (async () => {
-        const includes = await inputs.getIncludes();
-        getService(ServiceType.STATISTICS).completionUpdateIncludesTime(
-          actionId,
-        );
-        return includes;
-      })(),
-      (async () => {
-        const ragCode = await this.getRagCode(
-          queryPrefix,
-          querySuffix,
-          document.fileName,
-        );
-        getService(ServiceType.STATISTICS).completionUpdateRagCodeTime(
-          actionId,
-        );
-        return ragCode;
-      })(),
-      (async () => {
-        const relativeDefinitions = await inputs.getRelativeDefinitions();
-        getService(
-          ServiceType.STATISTICS,
-        ).completionUpdateRelativeDefinitionsTime(actionId);
-        return relativeDefinitions;
-      })(),
-      (async () => {
-        const result = await this.getSimilarSnippets(
-          document,
-          position,
-          queryPrefix,
-          querySuffix,
-          recentFiles,
-        );
-        getService(ServiceType.STATISTICS).completionUpdateSimilarSnippetsTime(
-          actionId,
-        );
-        return result;
-      })(),
-    ]);
+    this._getFrequentFunctions(actionId, inputs).then((frequentFunctions) => {
+      this._frequentFunctions = frequentFunctions;
+    });
 
+    const [globals, includes, ragCode, relativeDefinitions, similarSnippets] =
+      await Promise.all([
+        (async () => {
+          const globals = await inputs.getGlobals();
+          getService(ServiceType.STATISTICS).completionUpdateGlobalsTime(
+            actionId,
+          );
+          return globals;
+        })(),
+        (async () => {
+          const includes = await inputs.getIncludes();
+          getService(ServiceType.STATISTICS).completionUpdateIncludesTime(
+            actionId,
+          );
+          return includes;
+        })(),
+        (async () => {
+          const ragCode = await this.getRagCode(
+            queryPrefix,
+            querySuffix,
+            document.fileName,
+          );
+          getService(ServiceType.STATISTICS).completionUpdateRagCodeTime(
+            actionId,
+          );
+          return ragCode;
+        })(),
+        (async () => {
+          const relativeDefinitions = await inputs.getRelativeDefinitions();
+          getService(
+            ServiceType.STATISTICS,
+          ).completionUpdateRelativeDefinitionsTime(actionId);
+          return relativeDefinitions;
+        })(),
+        (async () => {
+          const result = await this.getSimilarSnippets(
+            document,
+            position,
+            queryPrefix,
+            querySuffix,
+            recentFiles,
+          );
+          getService(
+            ServiceType.STATISTICS,
+          ).completionUpdateSimilarSnippetsTime(actionId);
+          return result;
+        })(),
+      ]);
 
-    elements.frequentFunctions = frequentFunctions;
+    elements.frequentFunctions = this._frequentFunctions;
     elements.globals = globals;
     elements.includes = includes;
     elements.ragCode = ragCode;
 
     console.log('PromptExtractor.getPromptComponents', {
-      frequentFunctions,
+      frequentFunctions: elements.frequentFunctions,
       globals,
       includes,
-      ragCode
+      ragCode,
     });
 
     const similarSnippetsSliced = similarSnippets
@@ -242,6 +212,37 @@ export class PromptExtractor {
         recentFiles,
       },
     );
+  }
+
+  private async _getFrequentFunctions(
+    actionId: string,
+    inputs: RawInputs,
+  ): Promise<string> {
+    const calledFunctionIdentifiers =
+      await inputs.getCalledFunctionIdentifiers();
+    const frequencyMap = new Map<string, number>();
+    for (const identifier of calledFunctionIdentifiers) {
+      const count = frequencyMap.get(identifier) ?? 0;
+      frequencyMap.set(identifier, count + 1);
+    }
+    const calledFunctionIdentifiersSorted = Array.from(frequencyMap.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map((item) => item[0]);
+    const frequentFunctions = (
+      await this.getRagFunctionDeclaration(
+        calledFunctionIdentifiersSorted.slice(
+          0,
+          Math.ceil(calledFunctionIdentifiersSorted.length * 0.3),
+        ),
+        inputs.document.fileName.substring(
+          inputs.document.fileName.indexOf(inputs.elements.repo ?? ''),
+        ),
+      )
+    ).join('\n');
+    getService(ServiceType.STATISTICS).completionUpdateFrequentFunctionsTime(
+      actionId,
+    );
+    return frequentFunctions;
   }
 
   async getRagCode(prefix: string, suffix: string, filePath: string) {
