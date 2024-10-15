@@ -275,10 +275,10 @@ export class StatisticsService implements StatisticsServiceTrait {
     return candidate;
   }
 
-  completionUpdateCalledFunctionIdentifiersTime(actionId: string) {
+  completionUpdateFrequentFunctionsTime(actionId: string) {
     const data = this._recentCompletion.get(actionId);
     if (data) {
-      data.timelines.coderEndCalledFunctionIdentifiers = DateTime.now();
+      data.timelines.coderEndFrequentFunctions = DateTime.now();
     }
   }
 

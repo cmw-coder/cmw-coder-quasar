@@ -18,6 +18,7 @@ import { WindowType } from 'shared/types/WindowType';
 import completionLog from 'main/components/Loggers/completionLog';
 
 export class PromptExtractor {
+  private _frequentFunctions: string[] = [];
   private _similarSnippetConfig: SimilarSnippetConfig = {
     minScore: 0.5,
   };
@@ -32,7 +33,7 @@ export class PromptExtractor {
     const querySuffix = elements.functionSuffix ?? elements.slicedSuffix;
 
     const [
-      calledFunctionIdentifiers,
+      frequentFunctions,
       globals,
       includes,
       ragCode,
@@ -42,10 +43,29 @@ export class PromptExtractor {
       (async () => {
         const calledFunctionIdentifiers =
           await inputs.getCalledFunctionIdentifiers();
+        const frequencyMap = new Map<string, number>();
+        for (const identifier of calledFunctionIdentifiers) {
+          const count = frequencyMap.get(identifier) ?? 0;
+          frequencyMap.set(identifier, count + 1);
+        }
+        const calledFunctionIdentifiersSorted = Array.from(frequencyMap.entries())
+          .sort((a, b) => b[1] - a[1])
+          .map((item) => item[0]);
+        const frequentFunctions = (
+          await this.getRagFunctionDeclaration(
+            calledFunctionIdentifiersSorted.slice(
+              0,
+              Math.ceil(calledFunctionIdentifiersSorted.length * 0.3),
+            ),
+            document.fileName.substring(
+              document.fileName.indexOf(elements.repo ?? ''),
+            ),
+          )
+        ).join('\n')
         getService(
           ServiceType.STATISTICS,
-        ).completionUpdateCalledFunctionIdentifiersTime(actionId);
-        return calledFunctionIdentifiers;
+        ).completionUpdateFrequentFunctionsTime(actionId);
+        return frequentFunctions;
       })(),
       (async () => {
         const globals = await inputs.getGlobals();
@@ -94,37 +114,17 @@ export class PromptExtractor {
       })(),
     ]);
 
-    elements.ragCode = ragCode;
 
-    // 获取 frequentFunctions  globals  includes
-    const frequencyMap = new Map<string, number>();
-    for (const identifier of calledFunctionIdentifiers) {
-      const count = frequencyMap.get(identifier) ?? 0;
-      frequencyMap.set(identifier, count + 1);
-    }
-    // Sort frequencyMap
-    const calledFunctionIdentifiersSorted = Array.from(frequencyMap.entries())
-      .sort((a, b) => b[1] - a[1])
-      .map((item) => item[0]);
-    // TODO: Get the most frequent called function's declaration
-    elements.frequentFunctions = (
-      await this.getRagFunctionDeclaration(
-        calledFunctionIdentifiersSorted.slice(
-          0,
-          Math.ceil(calledFunctionIdentifiersSorted.length * 0.3),
-        ),
-        document.fileName.substring(
-          document.fileName.indexOf(elements.repo ?? ''),
-        ),
-      )
-    ).join('\n');
+    elements.frequentFunctions = frequentFunctions;
     elements.globals = globals;
     elements.includes = includes;
+    elements.ragCode = ragCode;
 
     console.log('PromptExtractor.getPromptComponents', {
-      calledFunctionIdentifiersSorted,
+      frequentFunctions,
       globals,
       includes,
+      ragCode
     });
 
     const similarSnippetsSliced = similarSnippets
@@ -136,10 +136,6 @@ export class PromptExtractor {
     completionLog.debug('PromptExtractor.getPromptComponents', {
       minScore: this._similarSnippetConfig.minScore,
       mostSimilarSnippets: similarSnippetsSliced,
-    });
-
-    completionLog.debug('PromptExtractor.getPromptComponents.ragCode', {
-      ragCode,
     });
 
     // 拼接 neighborSnippet currentFilePrefix
