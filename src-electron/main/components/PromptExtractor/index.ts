@@ -16,6 +16,7 @@ import { NetworkZone } from 'shared/config';
 import { WindowService } from 'main/services/WindowService';
 import { WindowType } from 'shared/types/WindowType';
 import completionLog from 'main/components/Loggers/completionLog';
+import { asyncMemoizeWithLimit } from 'shared/utils';
 
 export class PromptExtractor {
   private _globals: string = '';
@@ -28,6 +29,7 @@ export class PromptExtractor {
   private _similarSnippetConfig: SimilarSnippetConfig = {
     minScore: 0.5,
   };
+  private _memoizedApiRagCode = asyncMemoizeWithLimit(apiRagCode, 50);
 
   async getPromptComponents(
     actionId: string,
@@ -264,7 +266,7 @@ export class PromptExtractor {
     );
     inputLines.push(...suffixInputLines);
     const inputString = inputLines.join('\n').slice(0, 512).trim();
-    const { output } = await apiRagCode(inputString);
+    const { output } = await this._memoizedApiRagCode(inputString);
     const filteredOutput = output.filter(
       (item) => basename(item.filePath) !== basename(filePath),
     );
