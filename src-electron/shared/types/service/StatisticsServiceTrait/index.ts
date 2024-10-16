@@ -1,4 +1,7 @@
 export interface StatisticsServiceTrait {
+  completionUpdateFrequentFunctionsTime: (actionId: string) => void;
+  completionUpdateGlobalsTime: (actionId: string) => void;
+  completionUpdateIncludesTime: (actionId: string) => void;
   completionUpdatePromptConstructTime: (
     actionId: string,
     model: string,

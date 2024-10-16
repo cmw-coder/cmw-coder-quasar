@@ -11,8 +11,12 @@ export class TextDocument {
   lineCount: number;
   private readonly _content: string;
 
-  constructor(filePath: string) {
-    this._content = decode(readFileSync(filePath), 'gb2312');
+  constructor(filePath: string, content?: string) {
+    if (content) {
+      this._content = content;
+    } else {
+      this._content = decode(readFileSync(filePath), 'gb2312');
+    }
     this.fileName = filePath.replaceAll('\\', '/');
     this.lineCount = this._content.split(NEW_LINE_REGEX).length;
   }
@@ -23,6 +27,21 @@ export class TextDocument {
       position.character +
       1
     );
+  }
+
+  getTruncatedContents(indices: { begin: number; end: number }[]): string {
+    // Sort indices in descending order based on startIndex
+    indices.sort((a, b) => a.begin - b.begin);
+    let content = this._content;
+    let offset = 0;
+    // Remove substrings from the string
+    for (const { begin, end } of indices) {
+      content =
+        content.substring(0, begin - offset) + content.substring(end - offset);
+      offset += end - begin;
+    }
+
+    return content;
   }
 
   getText(range?: Range): string {

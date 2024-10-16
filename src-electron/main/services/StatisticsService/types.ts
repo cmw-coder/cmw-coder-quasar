@@ -61,6 +61,9 @@ export class CompletionData {
     proxyStartEditorInfo: DateTime;
     proxyStartSymbolInfo: DateTime;
     proxyEndEditorInfo: DateTime;
+    coderEndFrequentFunctions: DateTime;
+    coderEndGlobals: DateTime;
+    coderEndIncludes: DateTime;
     coderEndSimilarSnippets: DateTime;
     coderEndRagCode: DateTime;
     coderEndRelativeDefinitions: DateTime;
@@ -82,6 +85,9 @@ export class CompletionData {
       proxyStartEditorInfo: DateTime.fromMillis(start),
       proxyStartSymbolInfo: DateTime.fromMillis(symbol),
       proxyEndEditorInfo: DateTime.fromMillis(end),
+      coderEndFrequentFunctions: DateTime.invalid('Uninitialized'),
+      coderEndGlobals: DateTime.invalid('Uninitialized'),
+      coderEndIncludes: DateTime.invalid('Uninitialized'),
       coderEndSimilarSnippets: DateTime.invalid('Uninitialized'),
       coderEndRagCode: DateTime.invalid('Uninitialized'),
       coderEndRelativeDefinitions: DateTime.invalid('Uninitialized'),

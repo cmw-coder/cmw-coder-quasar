@@ -150,8 +150,8 @@ export class StatisticsService implements StatisticsServiceTrait {
       createTime: data.timelines.proxyEndEditorInfo.toFormat(
         'yyyy-MM-dd HH:mm:ss',
       ),
-      prefix: data.elements.prefix,
-      suffix: data.elements.suffix,
+      prefix: data.elements.slicedPrefix,
+      suffix: data.elements.slicedSuffix,
       repo: data.elements.repo ?? '',
       path: join(data.elements.folder ?? '', data.elements.file ?? ''),
       fileSuffix: data.elements.file
@@ -273,6 +273,27 @@ export class StatisticsService implements StatisticsServiceTrait {
         .catch((e) => statisticsLog.warn(e));
     }
     return candidate;
+  }
+
+  completionUpdateFrequentFunctionsTime(actionId: string) {
+    const data = this._recentCompletion.get(actionId);
+    if (data) {
+      data.timelines.coderEndFrequentFunctions = DateTime.now();
+    }
+  }
+
+  completionUpdateGlobalsTime(actionId: string) {
+    const data = this._recentCompletion.get(actionId);
+    if (data) {
+      data.timelines.coderEndGlobals = DateTime.now();
+    }
+  }
+
+  completionUpdateIncludesTime(actionId: string) {
+    const data = this._recentCompletion.get(actionId);
+    if (data) {
+      data.timelines.coderEndIncludes = DateTime.now();
+    }
   }
 
   completionUpdateProjectId(actionId: string, projectId: string) {

@@ -10,6 +10,10 @@ import { CompletionType } from 'shared/types/common';
 
 const { readFile } = promises;
 
+/**
+ * @deprecated
+ */
+// 找到第一个函数注释头的结尾
 export const getBoundingPrefix = (input: string): string | undefined => {
   const lines = input.split(NEW_LINE_REGEX);
   const firstCommentEndLine = lines.findIndex((line) =>
@@ -20,6 +24,9 @@ export const getBoundingPrefix = (input: string): string | undefined => {
   }
 };
 
+/**
+ * @deprecated
+ */
 export const getBoundingSuffix = (input: string): string | undefined => {
   const lines = input.split(NEW_LINE_REGEX);
   const lastFunctionEndLine = lines.findLastIndex((line) => /^}\S*/.test(line));

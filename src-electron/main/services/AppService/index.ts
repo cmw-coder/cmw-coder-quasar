@@ -1,10 +1,14 @@
-import { app, BrowserWindow, ipcMain, Menu, shell } from 'electron';
+import { app, BrowserWindow, ipcMain, Menu } from 'electron';
+import { globalShortcut } from 'electron/main';
 import log from 'electron-log/main';
 import { inject, injectable } from 'inversify';
 import { DateTime } from 'luxon';
 import { scheduleJob } from 'node-schedule';
 import { release, version } from 'os';
+import Parser, { Query, Tree } from 'web-tree-sitter';
+
 import { container } from 'main/services';
+import { treeSitterCPath } from 'main/services/AppService/constants';
 import { ConfigService } from 'main/services/ConfigService';
 import { DataStoreService } from 'main/services/DataStoreService';
 import { UpdaterService } from 'main/services/UpdaterService';
@@ -22,7 +26,9 @@ import { ActionMessage, ActionType } from 'shared/types/ActionMessage';
 import { NetworkZone } from 'shared/config';
 import { WindowType } from 'shared/types/WindowType';
 import { AppServiceTrait } from 'shared/types/service/AppServiceTrait';
-import { globalShortcut } from 'electron/main';
+import * as process from 'node:process';
+import * as Electron from 'electron';
+import Logger from 'electron-log';
 
 interface AbstractServicePort {
   [key: string]: ((...args: unknown[]) => Promise<unknown>) | undefined;
@@ -30,6 +36,10 @@ interface AbstractServicePort {
 
 @injectable()
 export class AppService implements AppServiceTrait {
+  private _parser?: Parser;
+  private _parserInitialized = false;
+  private _parserLanguage?: Parser.Language;
+
   constructor(
     @inject(ServiceType.WINDOW)
     private _windowService: WindowService,
@@ -53,12 +63,40 @@ export class AppService implements AppServiceTrait {
       ];
     });
     log.info('AppService init');
-    this.initApplication();
-    this.initAdditionReport();
-    this.initIpcMain();
+    this._initApplication();
+    this._initIpc();
+    this._initTreeSitter()
+      .then(() => {
+        Logger.info('_initTreeSitter.success');
+      })
+      .catch((e) => {
+        Logger.error('_initTreeSitter.error', e);
+      });
+    this._initScheduler();
+    this._initShortcutHandler();
   }
 
-  initApplication() {
+  async createQuery(queryString: string): Promise<Query> {
+    if (!this._parserInitialized || !this._parserLanguage) {
+      await this._initTreeSitter();
+    }
+    if (!this._parserLanguage) {
+      throw new Error('Tree-sitter cannot be initialized');
+    }
+    return this._parserLanguage.query(queryString);
+  }
+
+  async parseTree(content: string): Promise<Tree> {
+    if (!this._parserInitialized || !this._parserLanguage) {
+      await this._initTreeSitter();
+    }
+    if (!this._parser) {
+      throw new Error('Tree-sitter cannot be initialized');
+    }
+    return this._parser.parse(content);
+  }
+
+  private _initApplication() {
     log.info(`OS version: ${version()} (${release()})`);
     Menu.setApplicationMenu(null);
     if (!app.requestSingleInstanceLock()) {
@@ -74,9 +112,6 @@ export class AppService implements AppServiceTrait {
       this._windowService.getWindow(WindowType.Main).show();
     });
     app.whenReady().then(async () => {
-      // app.disableHardwareAcceleration();
-      this.initShortcutHandler();
-
       log.info('Comware Coder is ready');
       // ========================
       log.info('Migrate data from old data store (< 1.2.0)');
@@ -118,17 +153,6 @@ export class AppService implements AppServiceTrait {
       this._windowService.trayIcon.notify('正在检查更新……');
       this._updaterService.checkUpdate().catch();
 
-      scheduleJob(
-        {
-          hour: [1, 13],
-          minute: 0,
-        },
-        () => {
-          this._windowService.trayIcon.notify('正在检查更新……');
-          this._updaterService.checkUpdate().catch();
-        },
-      );
-
       this._windowService.trayIcon.activate();
       // 创建代码窗口
       this._windowService.getWindow(WindowType.Completions).create();
@@ -165,17 +189,7 @@ export class AppService implements AppServiceTrait {
     });
   }
 
-  initAdditionReport() {
-    return scheduleJob(
-      {
-        hour: 3,
-        minute: 0,
-      },
-      reportProjectAdditions,
-    );
-  }
-
-  initIpcMain() {
+  private _initIpc() {
     ipcMain.handle(
       SERVICE_CALL_KEY,
       <T extends ServiceType>(
@@ -192,7 +206,6 @@ export class AppService implements AppServiceTrait {
         throw new Error('Function not found');
       },
     );
-
     ipcMain.on(ACTION_API_KEY, (_, message: ActionMessage) =>
       triggerAction(message.type, message.data),
     );
@@ -214,7 +227,16 @@ export class AppService implements AppServiceTrait {
     );
   }
 
-  initShortcutHandler() {
+  private async _initTreeSitter() {
+    await Parser.init();
+    this._parserInitialized = true;
+    this._parserLanguage = await Parser.Language.load(treeSitterCPath);
+    const parser = new Parser();
+    parser.setLanguage(this._parserLanguage);
+    this._parser = parser;
+  }
+
+  private _initShortcutHandler() {
     // app.on('browser-window-blur', () => {
     //   globalShortcut.unregisterAll();
     // });
@@ -232,26 +254,41 @@ export class AppService implements AppServiceTrait {
     //     log.debug('Shift+F5 is pressed: Shortcut Disabled');
     //   });
     // });
-
-    // 注册选中代码快捷键
-    globalShortcut.register('CommandOrControl+Alt+I', () => {
-      this._windowService.addSelectionToChat();
-    });
-    globalShortcut.register('CommandOrControl+Alt+L', () => {
-      this._windowService.reviewSelection();
-    });
-
-    // 注册open devtool 快捷键
-    globalShortcut.register('CommandOrControl+Shift+I', () => {
-      const window = BrowserWindow.getFocusedWindow();
-      if (window) {
-        window.webContents.openDevTools();
-      }
+    app.whenReady().then(() => {
+      // 注册选中代码快捷键
+      globalShortcut.register('CommandOrControl+Alt+I', async () => {
+        await this._windowService.addSelectionToChat();
+      });
+      globalShortcut.register('CommandOrControl+Alt+L', async () => {
+        await this._windowService.reviewSelection();
+      });
+      // 注册open devtool 快捷键
+      globalShortcut.register('CommandOrControl+Shift+I', () => {
+        const window = BrowserWindow.getFocusedWindow();
+        if (window) {
+          window.webContents.openDevTools();
+        }
+      });
     });
   }
 
-  async locateFileInFolder(filePath: string) {
-    console.log('locateFileInFolder', filePath);
-    shell.showItemInFolder(filePath.replaceAll('/', '\\'));
+  private _initScheduler() {
+    scheduleJob(
+      {
+        hour: [1, 13],
+        minute: 0,
+      },
+      () => {
+        this._windowService.trayIcon.notify('正在检查更新……');
+        this._updaterService.checkUpdate().catch();
+      },
+    );
+    scheduleJob(
+      {
+        hour: 3,
+        minute: 0,
+      },
+      reportProjectAdditions,
+    );
   }
 }

@@ -1,36 +1,35 @@
-import { basename } from 'path';
+import { basename, extname } from 'path';
 import {
   PromptElements,
   RawInputs,
   SimilarSnippetConfig,
 } from 'main/components/PromptExtractor/types';
-import {
-  getFunctionPrefix,
-  separateTextByLine,
-  getFunctionSuffix,
-} from 'main/components/PromptExtractor/utils';
+import { separateTextByLine } from 'main/components/PromptExtractor/utils';
 import { container, getService } from 'main/services';
 import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
 import { SimilarSnippet } from 'shared/types/common';
 import { ServiceType } from 'shared/types/service';
-import { api_code_rag } from 'main/request/rag';
+import { apiRagCode, apiRagFunctionDeclaration } from 'main/request/rag';
 import { ConfigService } from 'main/services/ConfigService';
 import { NetworkZone } from 'shared/config';
 import { WindowService } from 'main/services/WindowService';
 import { WindowType } from 'shared/types/WindowType';
 import completionLog from 'main/components/Loggers/completionLog';
+import { asyncMemoizeWithLimit } from 'shared/utils';
 
 export class PromptExtractor {
+  private _globals: string = '';
+  private _includes: string = '';
+  private _lastCaretPosition: Position = new Position(-1, -1);
+  private _frequentFunctions: string = '';
+  private _ragCode: string = '';
+  private _relativeDefinitions: { path: string; content: string }[] = [];
+  private _similarSnippets: SimilarSnippet[] = [];
   private _similarSnippetConfig: SimilarSnippetConfig = {
     minScore: 0.5,
   };
-  private _slowRecentFiles?: string[];
-
-  enableSimilarSnippet() {
-    this._slowRecentFiles = undefined;
-    completionLog.info('PromptExtractor.getSimilarSnippets.enable');
-  }
+  private _memoizedApiRagCode = asyncMemoizeWithLimit(apiRagCode, 50);
 
   async getPromptComponents(
     actionId: string,
@@ -38,46 +37,80 @@ export class PromptExtractor {
     similarSnippetCount: number = 1,
   ): Promise<PromptElements> {
     const { elements, document, position, recentFiles } = inputs;
-    const functionPrefix =
-      getFunctionPrefix(elements.prefix) ?? elements.prefix;
-    const functionSuffix =
-      getFunctionSuffix(elements.suffix) ?? elements.suffix;
+    const queryPrefix = elements.functionPrefix ?? elements.slicedPrefix;
+    const querySuffix = elements.functionSuffix ?? elements.slicedSuffix;
 
-    const [similarSnippets, relativeDefinitions, ragCode] = await Promise.all([
-      (async () => {
-        const result = await this.getSimilarSnippets(
-          document,
-          position,
-          functionPrefix,
-          functionSuffix,
-          recentFiles,
-        );
-        getService(ServiceType.STATISTICS).completionUpdateSimilarSnippetsTime(
-          actionId,
-        );
-        return result;
-      })(),
-      (async () => {
-        const relativeDefinitions = await inputs.getRelativeDefinitions();
-        getService(
-          ServiceType.STATISTICS,
-        ).completionUpdateRelativeDefinitionsTime(actionId);
-        return relativeDefinitions;
-      })(),
-      (async () => {
-        const ragCode = await this.getRagCode(
-          functionPrefix,
-          functionSuffix,
-          document.fileName,
-        );
-        getService(ServiceType.STATISTICS).completionUpdateRagCodeTime(
-          actionId,
-        );
-        return ragCode;
-      })(),
-    ]);
+    this._getFrequentFunctions(inputs).then((frequentFunctions) => {
+      this._frequentFunctions = frequentFunctions;
+    });
+    inputs.getGlobals().then((globals) => {
+      this._globals = globals;
+    });
+    inputs.getIncludes().then((includes) => {
+      this._includes = includes;
+    });
 
-    const similarSnippetsSliced = similarSnippets
+    if (position.line != this._lastCaretPosition.line) {
+      const [ragCode, relativeDefinitions, similarSnippets] = await Promise.all(
+        [
+          (async () => {
+            const ragCode = await this._getRagCode(
+              queryPrefix,
+              querySuffix,
+              document.fileName,
+            );
+            getService(ServiceType.STATISTICS).completionUpdateRagCodeTime(
+              actionId,
+            );
+            return ragCode;
+          })(),
+          (async () => {
+            const relativeDefinitions = await inputs.getRelativeDefinitions();
+            getService(
+              ServiceType.STATISTICS,
+            ).completionUpdateRelativeDefinitionsTime(actionId);
+            return relativeDefinitions;
+          })(),
+          (async () => {
+            const result = await this.getSimilarSnippets(
+              document,
+              position,
+              queryPrefix,
+              querySuffix,
+              recentFiles,
+            );
+            getService(
+              ServiceType.STATISTICS,
+            ).completionUpdateSimilarSnippetsTime(actionId);
+            return result;
+          })(),
+        ],
+      );
+      this._ragCode = ragCode;
+      this._relativeDefinitions = relativeDefinitions;
+      this._similarSnippets = similarSnippets;
+      this._lastCaretPosition = position;
+    }
+
+    if (extname(elements.file ?? '') === '.h') {
+      elements.frequentFunctions = '';
+      elements.globals = '';
+      elements.includes = '';
+    } else {
+      elements.frequentFunctions = this._frequentFunctions;
+      elements.globals = this._globals;
+      elements.includes = this._includes;
+    }
+    elements.ragCode = this._ragCode;
+
+    console.log('PromptExtractor.getPromptComponents', {
+      frequentFunctions: elements.frequentFunctions,
+      globals: elements.globals,
+      includes: elements.includes,
+      ragCode: this._ragCode,
+    });
+
+    const similarSnippetsSliced = this._similarSnippets
       .filter(
         (similarSnippet) =>
           similarSnippet.score > this._similarSnippetConfig.minScore,
@@ -88,10 +121,7 @@ export class PromptExtractor {
       mostSimilarSnippets: similarSnippetsSliced,
     });
 
-    completionLog.debug('PromptExtractor.getPromptComponents.ragCode', {
-      ragCode,
-    });
-
+    // 拼接 neighborSnippet currentFilePrefix
     if (similarSnippetsSliced.length) {
       elements.similarSnippet = similarSnippetsSliced
         .map((similarSnippet) => similarSnippet.content)
@@ -126,17 +156,17 @@ export class PromptExtractor {
       }
     }
 
-    if (relativeDefinitions.length) {
-      elements.symbols = relativeDefinitions
+    if (this._relativeDefinitions.length) {
+      elements.symbols = this._relativeDefinitions
         .map((relativeDefinition) => relativeDefinition.content)
         .join('\n');
 
-      const selfFileRelativeDefinitions = relativeDefinitions.filter(
+      const selfFileRelativeDefinitions = this._relativeDefinitions.filter(
         (item) =>
           item.path.toLocaleLowerCase() ===
           document.fileName.toLocaleLowerCase(),
       );
-      const otherFileRelativeDefinitions = relativeDefinitions.filter(
+      const otherFileRelativeDefinitions = this._relativeDefinitions.filter(
         (item) =>
           item.path.toLocaleLowerCase() !==
           document.fileName.toLocaleLowerCase(),
@@ -157,9 +187,22 @@ export class PromptExtractor {
           )
           .join('\n');
       }
+      // 本文件全局变量
+      if (elements.globals) {
+        elements.currentFilePrefix =
+          elements.globals + '\n' + elements.currentFilePrefix;
+      }
+      // 本文件高频接口的函数声明
+      if (elements.frequentFunctions) {
+        elements.currentFilePrefix =
+          elements.frequentFunctions + '\n' + elements.currentFilePrefix;
+      }
+      // 本文件 include 块
+      if (elements.includes) {
+        elements.currentFilePrefix =
+          elements.includes + '\n' + elements.currentFilePrefix;
+      }
     }
-
-    elements.ragCode = ragCode;
 
     return elements;
   }
@@ -184,7 +227,31 @@ export class PromptExtractor {
     );
   }
 
-  async getRagCode(prefix: string, suffix: string, filePath: string) {
+  private async _getFrequentFunctions(inputs: RawInputs): Promise<string> {
+    const calledFunctionIdentifiers =
+      await inputs.getCalledFunctionIdentifiers();
+    const frequencyMap = new Map<string, number>();
+    for (const identifier of calledFunctionIdentifiers) {
+      const count = frequencyMap.get(identifier) ?? 0;
+      frequencyMap.set(identifier, count + 1);
+    }
+    const calledFunctionIdentifiersSorted = Array.from(frequencyMap.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map((item) => item[0]);
+    return (
+      await this._getRagFunctionDeclaration(
+        calledFunctionIdentifiersSorted.slice(
+          0,
+          Math.ceil(calledFunctionIdentifiersSorted.length * 0.3),
+        ),
+        inputs.document.fileName.substring(
+          inputs.document.fileName.indexOf(inputs.elements.repo ?? ''),
+        ),
+      )
+    ).join('\n');
+  }
+
+  private async _getRagCode(prefix: string, suffix: string, filePath: string) {
     const configService = container.get<ConfigService>(ServiceType.CONFIG);
     const networkZone = await configService.getConfig('networkZone');
     if (networkZone !== NetworkZone.Normal) {
@@ -205,11 +272,7 @@ export class PromptExtractor {
     );
     inputLines.push(...suffixInputLines);
     const inputString = inputLines.join('\n').slice(0, 512).trim();
-    completionLog.debug(
-      'PromptExtractor.getRagCode.api_code_rag.input',
-      inputString,
-    );
-    const { output } = await api_code_rag(inputString);
+    const { output } = await this._memoizedApiRagCode(inputString);
     const filteredOutput = output.filter(
       (item) => basename(item.filePath) !== basename(filePath),
     );
@@ -218,5 +281,45 @@ export class PromptExtractor {
         return `<file_sep>${item.filePath}\n${item.similarCode}`;
       })
       .join('\n');
+  }
+
+  private async _getRagFunctionDeclaration(
+    identifiers: string[],
+    currentRepoPath: string,
+  ) {
+    const configService = container.get<ConfigService>(ServiceType.CONFIG);
+    const networkZone = await configService.getConfig('networkZone');
+    if (networkZone !== NetworkZone.Normal) {
+      return [];
+    }
+    const inputString = identifiers
+      .slice(
+        0,
+        identifiers.findIndex(
+          (_, i) => identifiers.slice(0, i).join('\n').trim().length >= 512,
+        ),
+      )
+      .join('\n')
+      .trim();
+    const functionDeclarations = await apiRagFunctionDeclaration(inputString);
+    completionLog.debug('getRagFunctionDeclaration', {
+      functionDeclarations,
+    });
+    return functionDeclarations.map(({ functionDeclarations }) => {
+      let longestPathPrefixContent = '';
+      let longestPathPrefixCount = -2;
+
+      functionDeclarations.forEach(({ content, path }) => {
+        const mismatchIndex = path
+          .split('')
+          .findIndex((char, index) => char !== currentRepoPath[index]);
+        if (mismatchIndex > longestPathPrefixCount) {
+          longestPathPrefixCount = mismatchIndex;
+          longestPathPrefixContent = content;
+        }
+      });
+
+      return longestPathPrefixContent;
+    });
   }
 }

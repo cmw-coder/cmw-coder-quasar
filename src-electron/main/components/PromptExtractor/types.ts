@@ -2,30 +2,39 @@ import { readFile } from 'fs/promises';
 import { decode } from 'iconv-lite';
 import { basename, dirname } from 'path';
 
+import completionLog from 'main/components/Loggers/completionLog';
 import { MODULE_PATH } from 'main/components/PromptExtractor/constants';
 import {
-  getBoundingPrefix,
-  getBoundingSuffix,
+  getFunctionPrefix,
+  getFunctionSuffix,
   removeFunctionHeader,
 } from 'main/components/PromptExtractor/utils';
 import { getService } from 'main/services';
 import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
+import { deleteComments } from 'main/utils/common';
 import { NEW_LINE_REGEX } from 'shared/constants/common';
 import { CompletionType, SymbolInfo } from 'shared/types/common';
 import { CompletionGenerateClientMessage } from 'shared/types/WsMessage';
 import { ServiceType } from 'shared/types/service';
-import completionLog from 'main/components/Loggers/completionLog';
 
 export class PromptElements {
-  // NearCode
-  prefix: string;
-  // SuffixCode
-  suffix: string;
-  // Language
+  // 全上文
+  fullPrefix: string;
+  slicedPrefix: string;
+  // 全下文
+  fullSuffix: string;
+  slicedSuffix: string;
+  // 函数内部时上文
+  functionPrefix: string;
+  // 函数内部时下文
+  functionSuffix: string;
   language?: string;
   file?: string;
   folder?: string;
+  frequentFunctions?: string;
+  globals?: string;
+  includes?: string;
   repo?: string;
   // SimilarSnippet
   similarSnippet?: string;
@@ -41,11 +50,23 @@ export class PromptElements {
   currentFilePrefix: string;
   // RagCode
   ragCode?: string;
+  // 是否在函数内部
+  insideFunction: boolean;
 
-  constructor(prefix: string, suffix: string) {
-    this.prefix = prefix.trimStart();
-    this.suffix = suffix.trimEnd();
-    this.currentFilePrefix = getBoundingPrefix(this.prefix) ?? this.prefix;
+  constructor(fullPrefix: string, fullSuffix: string) {
+    this.fullPrefix = fullPrefix.trimStart();
+    this.slicedPrefix = this.fullPrefix.substring(
+      this.fullPrefix.length - 1000,
+    );
+    this.fullSuffix = fullSuffix.trimEnd();
+    this.slicedSuffix = this.fullSuffix.substring(0, 100);
+    this.functionPrefix = getFunctionPrefix(this.fullPrefix) || '';
+    this.functionSuffix = getFunctionSuffix(this.fullSuffix) || '';
+    this.insideFunction = !!this.functionPrefix;
+
+    this.currentFilePrefix = this.insideFunction
+      ? this.functionPrefix
+      : this.slicedPrefix;
   }
 
   async stringify(completionType: CompletionType) {
@@ -67,16 +88,18 @@ export class PromptElements {
     question = question.replaceAll(
       '%{NearCode}%',
       removeFunctionHeader(
-        getBoundingPrefix(this.prefix) ?? this.prefix,
+        this.insideFunction ? this.functionPrefix : this.slicedPrefix,
         completionType,
       ),
     );
     question = question.replaceAll(
       '%{SuffixCode}%',
-      removeFunctionHeader(
-        getBoundingSuffix(this.suffix) ?? this.suffix,
-        completionType,
-      ),
+      completionType === CompletionType.Function
+        ? ''
+        : removeFunctionHeader(
+            this.insideFunction ? this.functionSuffix : this.slicedSuffix,
+            completionType,
+          ),
     );
     question = question.replaceAll('%{Language}%', this.language || '');
     question = question.replaceAll('%{FilePath}%', this.file || '');
@@ -96,12 +119,15 @@ export class PromptElements {
       ragCode: this.ragCode?.length,
       symbols: this.symbols?.length,
       similarSnippet: this.similarSnippet?.length,
-      prefix: this.prefix.length,
-      suffix: this.suffix.length,
+      slicedPrefix: this.slicedPrefix.length,
+      slicedSuffix: this.slicedSuffix.length,
       currentFilePrefix: this.currentFilePrefix.length,
       neighborSnippet: this.neighborSnippet?.length,
+      globals: this.globals?.length,
+      includes: this.includes?.length,
+      frequentFunctions: this.frequentFunctions?.length,
     });
-    return question;
+    return question.trim();
   }
 }
 
@@ -122,8 +148,10 @@ export class RawInputs {
     project: string,
   ) {
     const { caret, path, prefix, recentFiles, suffix, symbols } = rawData;
-    this.document = new TextDocument(path);
-    this.elements = new PromptElements(prefix, suffix);
+    const decodedPrefix = decode(Buffer.from(prefix, 'base64'), 'utf-8');
+    const decodedSuffix = decode(Buffer.from(suffix, 'base64'), 'utf-8');
+    this.document = new TextDocument(path, decodedPrefix + decodedSuffix);
+    this.elements = new PromptElements(decodedPrefix, decodedSuffix);
     this.position = new Position(caret.line, caret.character);
     this.project = project;
     this.recentFiles = recentFiles.filter(
@@ -140,6 +168,69 @@ export class RawInputs {
         break;
       }
     }
+  }
+
+  async getCalledFunctionIdentifiers(): Promise<string[]> {
+    const appService = getService(ServiceType.App);
+    const fileContent = this.document.getText();
+    const tree = await appService.parseTree(fileContent);
+    return (
+      await appService.createQuery(
+        '(call_expression (identifier) @function_identifier)',
+      )
+    )
+      .matches(tree.rootNode)
+      .map(({ captures }) =>
+        fileContent.substring(
+          captures[0].node.startIndex,
+          captures[0].node.endIndex,
+        ),
+      );
+  }
+
+  async getGlobals(): Promise<string> {
+    const appService = getService(ServiceType.App);
+    const fileContent = this.document.getText();
+    const tree = await appService.parseTree(fileContent);
+    const functionDefinitionIndices = (
+      await appService.createQuery('(function_definition) @definition')
+    )
+      .matches(tree.rootNode)
+      .map(({ captures }) => ({
+        begin: captures[0].node.startIndex,
+        end: captures[0].node.endIndex,
+      }));
+    const includeIndices = (
+      await appService.createQuery('(preproc_include) @include')
+    )
+      .matches(tree.rootNode)
+      .map(({ captures }) => ({
+        begin: captures[0].node.startIndex,
+        end: captures[0].node.endIndex,
+      }));
+    return deleteComments(
+      this.document.getTruncatedContents([
+        ...functionDefinitionIndices,
+        ...includeIndices,
+      ]),
+    )
+      .split(NEW_LINE_REGEX)
+      .filter((line) => line.trim().length > 0)
+      .join('\n');
+  }
+
+  async getIncludes(): Promise<string> {
+    const appService = getService(ServiceType.App);
+    const fileContent = deleteComments(this.document.getText());
+    const tree = await appService.parseTree(fileContent);
+    return (await appService.createQuery('(preproc_include) @include'))
+      .matches(tree.rootNode)
+      .map(({ captures }) =>
+        fileContent
+          .substring(captures[0].node.startIndex, captures[0].node.endIndex)
+          .replaceAll('\n', ''),
+      )
+      .join('\n');
   }
 
   async getRelativeDefinitions() {

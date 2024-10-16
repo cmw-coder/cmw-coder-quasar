@@ -111,7 +111,6 @@ export class WebsocketService implements WebsocketServiceTrait {
           suffix: string;
         }>();
         const { character, folder, line, path, prefix, suffix } = body;
-        this._promptExtractor.enableSimilarSnippet();
         const similarSnippets = await this.getSimilarSnippets(
           character,
           folder,
@@ -162,7 +161,6 @@ export class WebsocketService implements WebsocketServiceTrait {
     )
       .map((fileName) => fileName.split(sep).join(posix.sep))
       .filter((fileName) => fileName !== document.fileName);
-    this._promptExtractor.enableSimilarSnippet();
     const similarSnippets = this._promptExtractor.getSimilarSnippets(
       document,
       position,
@@ -313,7 +311,6 @@ export class WebsocketService implements WebsocketServiceTrait {
           );
 
           completionLog.debug('WsAction.CompletionGenerate', data);
-
           const promptElements =
             await this._promptExtractor.getPromptComponents(
               actionId,
@@ -347,6 +344,7 @@ export class WebsocketService implements WebsocketServiceTrait {
 
           this._statisticsReporterService.completionAbort(actionId);
         } catch (e) {
+          console.log(e);
           const error = <Error>e;
           let result: StandardResult['result'] = 'error';
           switch (error.cause) {
@@ -366,6 +364,9 @@ export class WebsocketService implements WebsocketServiceTrait {
                 .getWindow(WindowType.ProjectId)
                 .setProject(project);
               break;
+            }
+            default: {
+              completionLog.error('WsAction.CompletionGenerate.error', error);
             }
           }
 
