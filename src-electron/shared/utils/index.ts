@@ -13,11 +13,9 @@ export function syncMemoizeWithLimit<T extends (...args: any[]) => any>(
       const result = cache.get(key)!;
       cache.delete(key);
       cache.set(key, result);
-      console.log(`Fetching from cache for args: ${key}`);
       return result;
     }
 
-    console.log(`Computing result for args: ${key}`);
     const result = fn(...args);
 
     // 若缓存达到限制，移除最早的条目
