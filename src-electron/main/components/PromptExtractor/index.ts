@@ -1,4 +1,4 @@
-import { basename } from 'path';
+import { basename, extname } from 'path';
 import {
   PromptElements,
   RawInputs,
@@ -92,9 +92,15 @@ export class PromptExtractor {
       this._lastCaretPosition = position;
     }
 
-    elements.frequentFunctions = this._frequentFunctions;
-    elements.globals = this._globals;
-    elements.includes = this._includes;
+    if (extname(elements.file ?? '') === '.h') {
+      elements.frequentFunctions = '';
+      elements.globals = '';
+      elements.includes = '';
+    } else {
+      elements.frequentFunctions = this._frequentFunctions;
+      elements.globals = this._globals;
+      elements.includes = this._includes;
+    }
     elements.ragCode = this._ragCode;
 
     console.log('PromptExtractor.getPromptComponents', {
