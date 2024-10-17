@@ -238,7 +238,7 @@ export class PromptExtractor {
       await this._getRagFunctionDeclaration(
         calledFunctionIdentifiersSorted.slice(
           0,
-          Math.min(Math.ceil(calledFunctionIdentifiersSorted.length * 0.3), 10),
+          Math.min(Math.ceil(calledFunctionIdentifiersSorted.length * 0.3), 15),
         ),
         inputs.document.fileName.substring(
           inputs.document.fileName.indexOf(inputs.elements.repo ?? ''),
