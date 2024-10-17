@@ -40,15 +40,15 @@ export class PromptExtractor {
     const queryPrefix = elements.functionPrefix ?? elements.slicedPrefix;
     const querySuffix = elements.functionSuffix ?? elements.slicedSuffix;
 
-    this._getFrequentFunctions(inputs).then((frequentFunctions) => {
-      this._frequentFunctions = frequentFunctions;
-    });
-    inputs.getGlobals().then((globals) => {
-      this._globals = globals;
-    });
-    inputs.getIncludes(1024).then((includes) => {
-      this._includes = includes;
-    });
+    // this._getFrequentFunctions(inputs).then((frequentFunctions) => {
+    //   this._frequentFunctions = frequentFunctions;
+    // });
+    // inputs.getGlobals().then((globals) => {
+    //   this._globals = globals;
+    // });
+    // inputs.getIncludes(1024).then((includes) => {
+    //   this._includes = includes;
+    // });
 
     if (position.line != this._lastCaretPosition.line) {
       const [ragCode, relativeDefinitions, similarSnippets] = await Promise.all(
