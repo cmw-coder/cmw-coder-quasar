@@ -52,6 +52,16 @@ export class ConfigService implements ConfigServiceTrait {
           store.set('baseServerUrl', 'http://10.113.36.121');
         }
       },
+      '1.4.0': (store) => {
+        log.info('Upgrading "appConfig" store to 1.4.0 ...');
+        const configData = store.store;
+        if (
+          configData.baseServerUrl === 'http://10.113.36.113' ||
+          configData.baseServerUrl === 'http://10.113.36.121/internal-beta'
+        ) {
+          store.set('baseServerUrl', 'http://10.113.36.121');
+        }
+      },
     },
   });
 
