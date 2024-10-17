@@ -13,10 +13,12 @@ export interface RagCode {
 }
 
 export interface RagFunctionDeclaration {
-  functionName: string;
-  functionDeclarations: {
-    content: string;
-    path: string;
+  output: {
+    functionName: string;
+    functionDeclarations: {
+      content: string;
+      path: string;
+    }[];
   }[];
 }
 
@@ -58,7 +60,7 @@ export const apiRagFunctionDeclaration = async (identifiers: string[]) => {
   completionLog.debug('apiRagFunctionDeclaration.identifiers', identifiers);
   const startTime = Date.now();
   try {
-    const declarations = await request<RagFunctionDeclaration[]>({
+    const { output } = await request<RagFunctionDeclaration>({
       url: '/kong/RdTestAiService/v1/chatgpt/question/rag/function-declarations',
       method: 'post',
       data: {
@@ -70,7 +72,7 @@ export const apiRagFunctionDeclaration = async (identifiers: string[]) => {
       'apiRagFunctionDeclaration.success',
       Date.now() - startTime,
     );
-    return declarations;
+    return output;
   } catch (e) {
     completionLog.error('apiRagFunctionDeclaration.error', e);
     return [];
