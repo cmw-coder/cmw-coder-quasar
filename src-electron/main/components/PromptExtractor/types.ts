@@ -219,18 +219,28 @@ export class RawInputs {
       .join('\n');
   }
 
-  async getIncludes(): Promise<string> {
+  async getIncludes(maxLength: number): Promise<string> {
     const appService = getService(ServiceType.App);
     const fileContent = deleteComments(this.document.getText());
     const tree = await appService.parseTree(fileContent);
-    return (await appService.createQuery('(preproc_include) @include'))
+    const includes = (
+      await appService.createQuery('(preproc_include) @include')
+    )
       .matches(tree.rootNode)
       .map(({ captures }) =>
         fileContent
           .substring(captures[0].node.startIndex, captures[0].node.endIndex)
           .replaceAll('\n', ''),
+      );
+    return includes
+      .slice(
+        0,
+        includes.findIndex(
+          (_, i) => includes.slice(0, i).join('\n').trim().length >= maxLength,
+        ),
       )
-      .join('\n');
+      .join('\n')
+      .trim();
   }
 
   async getRelativeDefinitions() {

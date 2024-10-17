@@ -46,7 +46,7 @@ export class PromptExtractor {
     inputs.getGlobals().then((globals) => {
       this._globals = globals;
     });
-    inputs.getIncludes().then((includes) => {
+    inputs.getIncludes(1024).then((includes) => {
       this._includes = includes;
     });
 
@@ -92,13 +92,9 @@ export class PromptExtractor {
       this._lastCaretPosition = position;
     }
 
-    if (extname(elements.file ?? '') === '.h') {
-      elements.frequentFunctions = '';
-      elements.globals = '';
-      elements.includes = '';
-    } else {
+    if (extname(elements.file ?? '') !== '.h') {
       elements.frequentFunctions = this._frequentFunctions;
-      elements.globals = this._globals;
+      elements.globals = this._globals.length > 512 ? '' : this._globals;
       elements.includes = this._includes;
     }
     elements.ragCode = this._ragCode;
@@ -292,16 +288,14 @@ export class PromptExtractor {
     if (networkZone !== NetworkZone.Normal) {
       return [];
     }
-    const inputString = identifiers
-      .slice(
-        0,
-        identifiers.findIndex(
-          (_, i) => identifiers.slice(0, i).join('\n').trim().length >= 512,
-        ),
-      )
-      .join('\n')
-      .trim();
-    const functionDeclarations = await apiRagFunctionDeclaration(inputString);
+    const trimmedIdentifiers = identifiers.slice(
+      0,
+      identifiers.findIndex(
+        (_, i) => identifiers.slice(0, i).join('\n').trim().length >= 512,
+      ),
+    );
+    const functionDeclarations =
+      await apiRagFunctionDeclaration(trimmedIdentifiers);
     completionLog.debug('getRagFunctionDeclaration', {
       functionDeclarations,
     });

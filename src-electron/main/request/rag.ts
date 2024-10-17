@@ -4,7 +4,6 @@ import {
   MAX_RAG_FUNCTION_DECLARATION_QUERY_TIME,
 } from 'main/components/PromptExtractor/constants';
 import completionLog from 'main/components/Loggers/completionLog';
-import axios from 'axios';
 
 export interface RagCode {
   similarCode: string;
@@ -14,12 +13,10 @@ export interface RagCode {
 }
 
 export interface RagFunctionDeclaration {
-  output: {
-    functionName: string;
-    functionDeclarations: {
-      content: string;
-      path: string;
-    }[];
+  functionName: string;
+  functionDeclarations: {
+    content: string;
+    path: string;
   }[];
 }
 
@@ -53,36 +50,27 @@ export const apiRagCode = async (input: string) => {
   }
 };
 
-export const apiRagFunctionDeclaration = async (input: string) => {
-  if (!input.length) {
-    completionLog.debug('apiRagFunctionDeclaration.input.empty');
+export const apiRagFunctionDeclaration = async (identifiers: string[]) => {
+  if (!identifiers.length) {
+    completionLog.debug('apiRagFunctionDeclaration.identifiers.empty');
     return [];
   }
-  completionLog.debug('apiRagFunctionDeclaration.input', input);
+  completionLog.debug('apiRagFunctionDeclaration.identifiers', identifiers);
   const startTime = Date.now();
   try {
-    // const result = await request<RagFunctionDeclaration[]>({
-    //   url: '/kong/RdTestAiService/v1/chatgpt/question/rag/function-declarations',
-    //   method: 'post',
-    //   data: {
-    //     input,
-    //   },
-    //   timeout: MAX_RAG_FUNCTION_DECLARATION_QUERY_TIME,
-    // });
-    const { data } = await axios.post<RagFunctionDeclaration>(
-      'http://10.113.36.104:9306/func_name_declaration/invoke',
-      {
-        input,
+    const declarations = await request<RagFunctionDeclaration[]>({
+      url: '/kong/RdTestAiService/v1/chatgpt/question/rag/function-declarations',
+      method: 'post',
+      data: {
+        identifiers,
       },
-      {
-        timeout: MAX_RAG_FUNCTION_DECLARATION_QUERY_TIME,
-      },
-    );
+      timeout: MAX_RAG_FUNCTION_DECLARATION_QUERY_TIME,
+    });
     completionLog.debug(
       'apiRagFunctionDeclaration.success',
       Date.now() - startTime,
     );
-    return data.output;
+    return declarations;
   } catch (e) {
     completionLog.error('apiRagFunctionDeclaration.error', e);
     return [];
