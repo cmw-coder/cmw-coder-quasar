@@ -243,7 +243,7 @@ export class PromptExtractor {
     );
   }
 
-  private async _getFrequentFunctions(inputs: RawInputs): Promise<string> {
+  private async _getFrequentFunctions(inputs: RawInputs): Promise<string | undefined> {
     const windowService = container.get<WindowService>(ServiceType.WINDOW);
     const fileStructureAnalysisProcessSubprocess = windowService.getWindow(
       WindowType.Completions,
@@ -252,6 +252,9 @@ export class PromptExtractor {
       await fileStructureAnalysisProcessSubprocess.proxyFn.getCalledFunctionIdentifiers(
         inputs.document.fileName,
       );
+    if (calledFunctionIdentifiers === undefined) {
+      return undefined;
+    }
     const frequencyMap = new Map<string, number>();
     for (const identifier of calledFunctionIdentifiers) {
       const count = frequencyMap.get(identifier) ?? 0;
