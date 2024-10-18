@@ -159,32 +159,23 @@ export class PromptExtractor {
         .map((relativeDefinition) => relativeDefinition.content)
         .join('\n');
 
-      const selfFileRelativeDefinitions = this._relativeDefinitions.filter(
-        (item) =>
-          item.path.toLocaleLowerCase() ===
-          document.fileName.toLocaleLowerCase(),
-      );
-      const otherFileRelativeDefinitions = this._relativeDefinitions.filter(
-        (item) =>
-          item.path.toLocaleLowerCase() !==
-          document.fileName.toLocaleLowerCase(),
-      );
-      if (selfFileRelativeDefinitions.length) {
-        elements.currentFilePrefix =
-          selfFileRelativeDefinitions
-            .map((relativeDefinition) => relativeDefinition.content)
-            .join('\n') +
-          '\n' +
-          elements.currentFilePrefix;
-      }
-      if (otherFileRelativeDefinitions.length) {
-        elements.neighborSnippet = otherFileRelativeDefinitions
-          .map(
-            (relativeDefinition) =>
-              `<file_sep>${basename(relativeDefinition.path)}\n${relativeDefinition.content}`,
-          )
-          .join('\n');
-      }
+      // const selfFileRelativeDefinitions = this._relativeDefinitions.filter(
+      //   (item) =>
+      //     item.path.toLocaleLowerCase() ===
+      //     document.fileName.toLocaleLowerCase(),
+      // );
+      // const otherFileRelativeDefinitions = this._relativeDefinitions.filter(
+      //   (item) =>
+      //     item.path.toLocaleLowerCase() !==
+      //     document.fileName.toLocaleLowerCase(),
+      // );
+      elements.currentFilePrefix =
+        this._relativeDefinitions
+          .map((relativeDefinition) => relativeDefinition.content)
+          .join('\n') +
+        '\n' +
+        elements.currentFilePrefix;
+
       // 本文件全局变量
       if (elements.globals) {
         elements.currentFilePrefix =

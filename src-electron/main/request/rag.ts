@@ -43,7 +43,9 @@ export const apiRagCode = async (input: string) => {
       timeout: MAX_RAG_CODE_QUERY_TIME,
     });
     completionLog.debug('apiRagCode.success', Date.now() - startTime);
-    return result;
+    return {
+      output: result.output.slice(0, 2),
+    };
   } catch (e) {
     completionLog.error('apiRagCode.error', e);
     return {
