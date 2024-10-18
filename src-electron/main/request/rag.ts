@@ -44,7 +44,7 @@ export const apiRagCode = async (input: string) => {
     });
     completionLog.debug('apiRagCode.success', Date.now() - startTime);
     return {
-      output: result.output.splice(0, 2),
+      output: result.output.slice(0, 2),
     };
   } catch (e) {
     completionLog.error('apiRagCode.error', e);
