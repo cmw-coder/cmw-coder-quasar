@@ -145,7 +145,7 @@ export class RawInputs {
     const { caret, path, prefix, recentFiles, suffix, symbols } = rawData;
     const decodedPrefix = decode(Buffer.from(prefix, 'base64'), 'utf-8');
     const decodedSuffix = decode(Buffer.from(suffix, 'base64'), 'utf-8');
-    this.document = new TextDocument(path, decodedPrefix + decodedSuffix);
+    this.document = new TextDocument(path);
     this.elements = new PromptElements(decodedPrefix, decodedSuffix);
     this.position = new Position(caret.line, caret.character);
     this.project = project;
