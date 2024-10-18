@@ -15,15 +15,22 @@ import { ServiceType } from 'shared/types/service';
 import { WindowType } from 'shared/types/WindowType';
 import { timeout } from 'main/utils/common';
 import { SimilarSnippetsProcess } from 'main/services/WindowService/types/CompletionsWindow/SimilarSnippetsSubprocess';
+import { FileStructureAnalysisProcess } from './FileStructureAnalysisProcessSubprocess';
 
 const RE_CREATE_TIME = 1000 * 60 * 30;
 
 export class CompletionsWindow extends BaseWindow {
   private _reCreateTimer?: NodeJS.Timeout;
   private _similarSnippetsSubprocess = new SimilarSnippetsProcess();
+  private _fileStructureAnalysisProcessSubprocess =
+    new FileStructureAnalysisProcess();
 
   get similarSnippetsSubprocess() {
     return this._similarSnippetsSubprocess;
+  }
+
+  get fileStructureAnalysisProcessSubprocess() {
+    return this._fileStructureAnalysisProcessSubprocess;
   }
 
   constructor() {
