@@ -315,11 +315,12 @@ export class PromptExtractor {
     if (networkZone !== NetworkZone.Normal) {
       return [];
     }
+    const sliceIndex = identifiers.findIndex(
+      (_, i) => identifiers.slice(0, i).join('\n').trim().length >= 512,
+    );
     const trimmedIdentifiers = identifiers.slice(
       0,
-      identifiers.findIndex(
-        (_, i) => identifiers.slice(0, i).join('\n').trim().length >= 512,
-      ),
+      sliceIndex === -1 ? identifiers.length : sliceIndex,
     );
     const functionDeclarations =
       await apiRagFunctionDeclaration(trimmedIdentifiers);
