@@ -237,10 +237,6 @@ module.exports = configure((/* ctx */) => ({
           from: 'src-electron/assets/svn',
           to: 'svn',
         },
-        {
-          from: 'src-electron/assets/tree-sitter',
-          to: 'tree-sitter',
-        },
       ],
     },
     unPackagedInstallParams: ['install', '--prod', '--no-frozen-lockfile'],

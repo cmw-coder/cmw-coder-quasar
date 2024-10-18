@@ -5,10 +5,8 @@ import { inject, injectable } from 'inversify';
 import { DateTime } from 'luxon';
 import { scheduleJob } from 'node-schedule';
 import { release, version } from 'os';
-import Parser, { Query, Tree } from 'web-tree-sitter';
 
 import { container } from 'main/services';
-import { treeSitterCPath } from 'main/services/AppService/constants';
 import { ConfigService } from 'main/services/ConfigService';
 import { DataStoreService } from 'main/services/DataStoreService';
 import { UpdaterService } from 'main/services/UpdaterService';
@@ -28,7 +26,6 @@ import { WindowType } from 'shared/types/WindowType';
 import { AppServiceTrait } from 'shared/types/service/AppServiceTrait';
 import * as process from 'node:process';
 import * as Electron from 'electron';
-import Logger from 'electron-log';
 
 interface AbstractServicePort {
   [key: string]: ((...args: unknown[]) => Promise<unknown>) | undefined;
@@ -36,10 +33,6 @@ interface AbstractServicePort {
 
 @injectable()
 export class AppService implements AppServiceTrait {
-  private _parser?: Parser;
-  private _parserInitialized = false;
-  private _parserLanguage?: Parser.Language;
-
   constructor(
     @inject(ServiceType.WINDOW)
     private _windowService: WindowService,
@@ -65,35 +58,8 @@ export class AppService implements AppServiceTrait {
     log.info('AppService init');
     this._initApplication();
     this._initIpc();
-    this._initTreeSitter()
-      .then(() => {
-        Logger.info('_initTreeSitter.success');
-      })
-      .catch((e) => {
-        Logger.error('_initTreeSitter.error', e);
-      });
     this._initScheduler();
     this._initShortcutHandler();
-  }
-
-  async createQuery(queryString: string): Promise<Query> {
-    if (!this._parserInitialized || !this._parserLanguage) {
-      await this._initTreeSitter();
-    }
-    if (!this._parserLanguage) {
-      throw new Error('Tree-sitter cannot be initialized');
-    }
-    return this._parserLanguage.query(queryString);
-  }
-
-  async parseTree(content: string): Promise<Tree> {
-    if (!this._parserInitialized || !this._parserLanguage) {
-      await this._initTreeSitter();
-    }
-    if (!this._parser) {
-      throw new Error('Tree-sitter cannot be initialized');
-    }
-    return this._parser.parse(content);
   }
 
   private _initApplication() {
@@ -227,33 +193,7 @@ export class AppService implements AppServiceTrait {
     );
   }
 
-  private async _initTreeSitter() {
-    await Parser.init();
-    this._parserInitialized = true;
-    this._parserLanguage = await Parser.Language.load(treeSitterCPath);
-    const parser = new Parser();
-    parser.setLanguage(this._parserLanguage);
-    this._parser = parser;
-  }
-
   private _initShortcutHandler() {
-    // app.on('browser-window-blur', () => {
-    //   globalShortcut.unregisterAll();
-    // });
-    // app.on('browser-window-focus', () => {
-    //   globalShortcut.register('CommandOrControl+R', () => {
-    //     log.debug('CommandOrControl+R is pressed: Shortcut Disabled');
-    //   });
-    //   globalShortcut.register('CommandOrControl+Shift+R', () => {
-    //     log.debug('CommandOrControl+Shift+R is pressed: Shortcut Disabled');
-    //   });
-    //   globalShortcut.register('F5', () => {
-    //     log.debug('F5 is pressed: Shortcut Disabled');
-    //   });
-    //   globalShortcut.register('Shift+F5', () => {
-    //     log.debug('Shift+F5 is pressed: Shortcut Disabled');
-    //   });
-    // });
     app.whenReady().then(() => {
       // 注册选中代码快捷键
       globalShortcut.register('CommandOrControl+Alt+I', async () => {

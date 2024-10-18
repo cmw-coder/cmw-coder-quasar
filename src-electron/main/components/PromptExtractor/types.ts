@@ -1,4 +1,3 @@
-import { readFile } from 'fs/promises';
 import { decode } from 'iconv-lite';
 import { basename, dirname } from 'path';
 
@@ -12,8 +11,6 @@ import {
 import { getService } from 'main/services';
 import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
-import { deleteComments } from 'main/utils/common';
-import { NEW_LINE_REGEX } from 'shared/constants/common';
 import { CompletionType, SymbolInfo } from 'shared/types/common';
 import { CompletionGenerateClientMessage } from 'shared/types/WsMessage';
 import { ServiceType } from 'shared/types/service';
@@ -168,110 +165,5 @@ export class RawInputs {
         break;
       }
     }
-  }
-
-  async getCalledFunctionIdentifiers(): Promise<string[]> {
-    const appService = getService(ServiceType.App);
-    const fileContent = this.document.getText();
-    const tree = await appService.parseTree(fileContent);
-    return (
-      await appService.createQuery(
-        '(call_expression (identifier) @function_identifier)',
-      )
-    )
-      .matches(tree.rootNode)
-      .map(({ captures }) =>
-        fileContent.substring(
-          captures[0].node.startIndex,
-          captures[0].node.endIndex,
-        ),
-      );
-  }
-
-  async getGlobals(): Promise<string> {
-    const appService = getService(ServiceType.App);
-    const fileContent = this.document.getText();
-    const tree = await appService.parseTree(fileContent);
-    const functionDefinitionIndices = (
-      await appService.createQuery('(function_definition) @definition')
-    )
-      .matches(tree.rootNode)
-      .map(({ captures }) => ({
-        begin: captures[0].node.startIndex,
-        end: captures[0].node.endIndex,
-      }));
-    const includeIndices = (
-      await appService.createQuery('(preproc_include) @include')
-    )
-      .matches(tree.rootNode)
-      .map(({ captures }) => ({
-        begin: captures[0].node.startIndex,
-        end: captures[0].node.endIndex,
-      }));
-    return deleteComments(
-      this.document.getTruncatedContents([
-        ...functionDefinitionIndices,
-        ...includeIndices,
-      ]),
-    )
-      .split(NEW_LINE_REGEX)
-      .filter((line) => line.trim().length > 0)
-      .join('\n');
-  }
-
-  async getIncludes(maxLength: number): Promise<string> {
-    const appService = getService(ServiceType.App);
-    const fileContent = deleteComments(this.document.getText());
-    const tree = await appService.parseTree(fileContent);
-    const includes = (
-      await appService.createQuery('(preproc_include) @include')
-    )
-      .matches(tree.rootNode)
-      .map(({ captures }) =>
-        fileContent
-          .substring(captures[0].node.startIndex, captures[0].node.endIndex)
-          .replaceAll('\n', ''),
-      );
-    return includes
-      .slice(
-        0,
-        includes.findIndex(
-          (_, i) => includes.slice(0, i).join('\n').trim().length >= maxLength,
-        ),
-      )
-      .join('\n')
-      .trim();
-  }
-
-  async getRelativeDefinitions() {
-    const result = await Promise.all(
-      this.symbols.map(async ({ path, startLine, endLine }) => {
-        try {
-          return {
-            path,
-            content: decode(
-              await readFile(path, {
-                flag: 'r',
-              }),
-              'gb2312',
-            )
-              .split(NEW_LINE_REGEX)
-              .slice(startLine, endLine + 1)
-              .join('\n'),
-          };
-        } catch (e) {
-          completionLog.error('getRelativeDefinitions', e);
-          return {
-            path,
-            content: '',
-          };
-        }
-      }),
-    );
-
-    return result.filter(
-      ({ content }) =>
-        content.split('\n').length <= 100 && content.length <= 1024,
-    );
   }
 }

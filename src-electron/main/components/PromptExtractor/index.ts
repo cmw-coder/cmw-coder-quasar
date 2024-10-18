@@ -43,10 +43,11 @@ export class PromptExtractor {
     this._getFrequentFunctions(inputs).then((frequentFunctions) => {
       this._frequentFunctions = frequentFunctions;
     });
-    inputs.getGlobals().then((globals) => {
+    this._getGlobals(inputs.document.fileName).then((globals) => {
       this._globals = globals;
     });
-    inputs.getIncludes(1024).then((includes) => {
+
+    this._getIncludes(inputs.document.fileName).then((includes) => {
       this._includes = includes;
     });
 
@@ -65,7 +66,8 @@ export class PromptExtractor {
             return ragCode;
           })(),
           (async () => {
-            const relativeDefinitions = await inputs.getRelativeDefinitions();
+            const relativeDefinitions =
+              await this._getRelativeDefinitions(inputs);
             getService(
               ServiceType.STATISTICS,
             ).completionUpdateRelativeDefinitionsTime(actionId);
@@ -223,9 +225,34 @@ export class PromptExtractor {
     );
   }
 
+  private async _getGlobals(filePath: string) {
+    const windowService = container.get<WindowService>(ServiceType.WINDOW);
+    const fileStructureAnalysisProcessSubprocess = windowService.getWindow(
+      WindowType.Completions,
+    ).fileStructureAnalysisProcessSubprocess;
+    return fileStructureAnalysisProcessSubprocess.proxyFn.getGlobals(filePath);
+  }
+
+  private async _getIncludes(filePath: string) {
+    const windowService = container.get<WindowService>(ServiceType.WINDOW);
+    const fileStructureAnalysisProcessSubprocess = windowService.getWindow(
+      WindowType.Completions,
+    ).fileStructureAnalysisProcessSubprocess;
+    return fileStructureAnalysisProcessSubprocess.proxyFn.getIncludes(
+      filePath,
+      1024,
+    );
+  }
+
   private async _getFrequentFunctions(inputs: RawInputs): Promise<string> {
+    const windowService = container.get<WindowService>(ServiceType.WINDOW);
+    const fileStructureAnalysisProcessSubprocess = windowService.getWindow(
+      WindowType.Completions,
+    ).fileStructureAnalysisProcessSubprocess;
     const calledFunctionIdentifiers =
-      await inputs.getCalledFunctionIdentifiers();
+      await fileStructureAnalysisProcessSubprocess.proxyFn.getCalledFunctionIdentifiers(
+        inputs.document.fileName,
+      );
     const frequencyMap = new Map<string, number>();
     for (const identifier of calledFunctionIdentifiers) {
       const count = frequencyMap.get(identifier) ?? 0;
@@ -315,5 +342,15 @@ export class PromptExtractor {
 
       return longestPathPrefixContent;
     });
+  }
+
+  private async _getRelativeDefinitions(inputs: RawInputs) {
+    const windowService = container.get<WindowService>(ServiceType.WINDOW);
+    const fileStructureAnalysisProcessSubprocess = windowService.getWindow(
+      WindowType.Completions,
+    ).fileStructureAnalysisProcessSubprocess;
+    return fileStructureAnalysisProcessSubprocess.proxyFn.getRelativeDefinitions(
+      inputs.symbols,
+    );
   }
 }
