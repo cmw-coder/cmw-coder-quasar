@@ -40,18 +40,24 @@ export class PromptExtractor {
     const queryPrefix = elements.functionPrefix ?? elements.slicedPrefix;
     const querySuffix = elements.functionSuffix ?? elements.slicedSuffix;
 
-    this._getFrequentFunctions(inputs).then((frequentFunctions) => {
-      this._frequentFunctions = frequentFunctions;
-    });
-    this._getGlobals(inputs.document.fileName).then((globals) => {
-      this._globals = globals;
-    });
-
-    this._getIncludes(inputs.document.fileName).then((includes) => {
-      this._includes = includes;
-    });
-
     if (position.line != this._lastCaretPosition.line) {
+      this._getFrequentFunctions(inputs).then((frequentFunctions) => {
+        if (frequentFunctions !== undefined) {
+          this._frequentFunctions = frequentFunctions;
+        }
+      });
+      this._getGlobals(inputs.document.fileName).then((globals) => {
+        if (globals !== undefined) {
+          this._globals = globals;
+        }
+      });
+
+      this._getIncludes(inputs.document.fileName).then((includes) => {
+        if (includes !== undefined) {
+          this._includes = includes;
+        }
+      });
+
       const [ragCode, relativeDefinitions, similarSnippets] = await Promise.all(
         [
           (async () => {
@@ -89,7 +95,9 @@ export class PromptExtractor {
         ],
       );
       this._ragCode = ragCode;
-      this._relativeDefinitions = relativeDefinitions;
+      if (relativeDefinitions !== undefined) {
+        this._relativeDefinitions = relativeDefinitions;
+      }
       this._similarSnippets = similarSnippets;
       this._lastCaretPosition = position;
     }
