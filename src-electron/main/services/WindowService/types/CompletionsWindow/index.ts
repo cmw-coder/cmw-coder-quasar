@@ -15,7 +15,9 @@ import { ServiceType } from 'shared/types/service';
 import { WindowType } from 'shared/types/WindowType';
 import { timeout } from 'main/utils/common';
 import { SimilarSnippetsProcess } from 'main/services/WindowService/types/CompletionsWindow/SimilarSnippetsSubprocess';
-import { FileStructureAnalysisProcess } from './FileStructureAnalysisProcessSubprocess';
+import { FileStructureAnalysisProcess } from 'main/services/WindowService/types/CompletionsWindow/FileStructureAnalysisProcessSubprocess';
+import { DiffSubprocess } from 'main/services/WindowService/types/CompletionsWindow/DiffSubprocess';
+import { text1, text2 } from './temp';
 
 const RE_CREATE_TIME = 1000 * 60 * 30;
 
@@ -24,6 +26,7 @@ export class CompletionsWindow extends BaseWindow {
   private _similarSnippetsSubprocess = new SimilarSnippetsProcess();
   private _fileStructureAnalysisProcessSubprocess =
     new FileStructureAnalysisProcess();
+  private _diffSubprocess = new DiffSubprocess();
 
   get similarSnippetsSubprocess() {
     return this._similarSnippetsSubprocess;
@@ -31,6 +34,10 @@ export class CompletionsWindow extends BaseWindow {
 
   get fileStructureAnalysisProcessSubprocess() {
     return this._fileStructureAnalysisProcessSubprocess;
+  }
+
+  get diffSubprocess() {
+    return this._diffSubprocess;
   }
 
   constructor() {
@@ -60,6 +67,19 @@ export class CompletionsWindow extends BaseWindow {
         preload: resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD),
       },
     });
+
+    this.testHandle();
+  }
+
+  async testHandle() {
+    await timeout(4000);
+    const startTime = Date.now();
+    const lineResult = await this.diffSubprocess.proxyFn.diffLine(text1, text2);
+    const charResult = await this.diffSubprocess.proxyFn.diffChar(text1, text2);
+    const endTime = Date.now();
+    console.log('lineResult', lineResult);
+    console.log('charResult', charResult);
+    console.log('time', endTime - startTime);
   }
 
   initReCreateTimer() {
