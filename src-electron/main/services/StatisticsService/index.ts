@@ -29,11 +29,13 @@ import { NEW_LINE_REGEX } from 'shared/constants/common';
 import { CaretPosition } from 'shared/types/common';
 import { StatisticsServiceTrait } from 'shared/types/service/StatisticsServiceTrait';
 import statisticsLog from 'main/components/Loggers/statisticsLog';
+import { FileRecorderManager } from 'main/services/StatisticsService/FileRecorderManager';
 
 @injectable()
 export class StatisticsService implements StatisticsServiceTrait {
   private _lastCursorPosition: CaretPosition = { character: -1, line: -1 };
   private _recentCompletion = new Map<string, CompletionData>();
+  private _fileRecorderManager = new FileRecorderManager();
 
   constructor() {
     setInterval(() => {
@@ -46,6 +48,10 @@ export class StatisticsService implements StatisticsServiceTrait {
         }
       }
     }, 1000 * 60);
+  }
+
+  get fileRecorderManager() {
+    return this._fileRecorderManager;
   }
 
   completionAbort(actionId: string) {
@@ -390,6 +396,9 @@ export class StatisticsService implements StatisticsServiceTrait {
     }
   }
 
+  /**
+   * @deprecated
+   */
   async incrementLines(
     count: number,
     startTime: number,

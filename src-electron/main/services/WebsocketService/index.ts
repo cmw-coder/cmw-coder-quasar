@@ -305,6 +305,10 @@ export class WebsocketService implements WebsocketServiceTrait {
 
         try {
           const { id: projectId } = getProjectData(project);
+          this._statisticsReporterService.fileRecorderManager.addFileRecorder(
+            data.path,
+            projectId,
+          );
           this._statisticsReporterService.completionUpdateProjectId(
             actionId,
             projectId,

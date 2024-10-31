@@ -17,7 +17,6 @@ import { timeout } from 'main/utils/common';
 import { SimilarSnippetsProcess } from 'main/services/WindowService/types/CompletionsWindow/SimilarSnippetsSubprocess';
 import { FileStructureAnalysisProcess } from 'main/services/WindowService/types/CompletionsWindow/FileStructureAnalysisProcessSubprocess';
 import { DiffSubprocess } from 'main/services/WindowService/types/CompletionsWindow/DiffSubprocess';
-import { text1, text2 } from './temp';
 
 const RE_CREATE_TIME = 1000 * 60 * 30;
 
@@ -67,19 +66,6 @@ export class CompletionsWindow extends BaseWindow {
         preload: resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD),
       },
     });
-
-    this.testHandle();
-  }
-
-  async testHandle() {
-    await timeout(4000);
-    const startTime = Date.now();
-    const lineResult = await this.diffSubprocess.proxyFn.diffLine(text1, text2);
-    const charResult = await this.diffSubprocess.proxyFn.diffChar(text1, text2);
-    const endTime = Date.now();
-    console.log('lineResult', lineResult);
-    console.log('charResult', charResult);
-    console.log('time', endTime - startTime);
   }
 
   initReCreateTimer() {
