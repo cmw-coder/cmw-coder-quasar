@@ -62,7 +62,6 @@ export class FileRecorderManager {
 
   async report() {
     const projectIdResultMap = new Map<string, RecordResult>();
-    console.log('report', this.recordResultMap);
     for (const [, [projectId, recordResult]] of this.recordResultMap) {
       const projectIdResult = projectIdResultMap.get(projectId);
       if (projectIdResult) {
@@ -72,7 +71,6 @@ export class FileRecorderManager {
         projectIdResultMap.set(projectId, recordResult);
       }
     }
-    console.log('projectIdResultMap', projectIdResultMap);
     this.recordResultMap.clear();
     const reportDataList: ReportSkuDto[] = [];
     for (const [projectId, recordResult] of projectIdResultMap) {
@@ -89,6 +87,8 @@ export class FileRecorderManager {
         reportDataList.push(...reportData);
       }
     }
-    await api_reportSKU(reportDataList);
+    if (reportDataList.length > 0) {
+      await api_reportSKU(reportDataList);
+    }
   }
 }
