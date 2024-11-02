@@ -115,6 +115,8 @@ export default {
           title: '代码补全',
           productLine: '产品线',
           model: 'AI 模型',
+          debounceDelay: '触发消抖延迟',
+          debounceDelayDescription: '范围：{lower}ms ~ {upper}ms'
         },
       },
       GeneralCard: {

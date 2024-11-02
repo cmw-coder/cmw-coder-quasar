@@ -62,6 +62,18 @@ export class ConfigService implements ConfigServiceTrait {
           store.set('baseServerUrl', 'http://10.113.36.121');
         }
       },
+      '1.4.4': (store) => {
+        log.info('Upgrading "appConfig" store to 1.4.4 ...');
+        const locale = store.get('locale');
+        if (locale === 'ZH-CN') {
+          store.set('locale', 'zh-CN');
+        }
+        store.set('completion', {
+          debounceDelay: 100,
+          prefixLineCount: 200,
+          suffixLineCount: 80,
+        });
+      }
     },
   });
 

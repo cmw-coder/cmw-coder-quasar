@@ -115,6 +115,8 @@ export default {
           title: 'Code Completion',
           productLine: 'Product Line',
           model: 'Model',
+          debounceDelay: 'Trigger Debounce Delay',
+          debounceDelayDescription: 'Range: {lower}ms ~ {upper}ms'
         },
       },
       GeneralCard: {

@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+
+import { ServiceType } from 'shared/types/service';
+import { SettingSyncServerMessage } from 'shared/types/WsMessage';
 import {
   api_getProductLineQuestionTemplateFile,
   api_getUserTemplateList,
 } from 'src/request/api';
 import { useService } from 'utils/common';
-import { ServiceType } from 'shared/types/service';
 
 const baseName = 'components.SettingCards.CompletionCard.';
 
@@ -22,6 +24,12 @@ const i18n = (relativePath: string, data?: Record<string, unknown>) => {
 
 const configService = useService(ServiceType.CONFIG);
 const dataStoreService = useService(ServiceType.DATA_STORE);
+const websocketService = useService(ServiceType.WEBSOCKET);
+
+const COMPLETION_DEBOUNCE_DELAY_LIMIT = {
+  lower: 25,
+  upper: 150,
+};
 
 const productLineList = ref<string[]>([]);
 const modelList = ref<
@@ -39,6 +47,11 @@ const selectedModel = ref<{
   value: string;
   modelKey: string;
 }>();
+const completionConfig = reactive({
+  debounceDelay: 100,
+  prefixLineCount: 200,
+  suffixLineCount: 80,
+});
 
 const refreshProductLineList = async () => {
   try {
@@ -106,6 +119,30 @@ const updateProductLine = async (value: string) => {
   await configService.setConfig('activeTemplate', value);
   await dataStoreService.getActiveModelContent();
   await refreshModelList();
+};
+
+const updateCompletionDebounceDelay = async (value: string | number | null) => {
+  if (value === null) {
+    completionConfig.debounceDelay = COMPLETION_DEBOUNCE_DELAY_LIMIT.lower;
+  } else {
+    value = Number(value);
+    if (value < COMPLETION_DEBOUNCE_DELAY_LIMIT.lower) {
+      completionConfig.debounceDelay = COMPLETION_DEBOUNCE_DELAY_LIMIT.lower;
+    } else if (value > COMPLETION_DEBOUNCE_DELAY_LIMIT.upper) {
+      completionConfig.debounceDelay = COMPLETION_DEBOUNCE_DELAY_LIMIT.upper;
+    } else if (!isNaN(value)) {
+      completionConfig.debounceDelay = value;
+    }
+  }
+  websocketService.send(
+    JSON.stringify(
+      new SettingSyncServerMessage({
+        result: 'success',
+        completionConfig,
+      }),
+    ),
+  );
+  await configService.setConfig('completion', completionConfig);
 };
 
 onMounted(async () => {
@@ -177,6 +214,31 @@ onMounted(async () => {
           </q-item>
         </q-list>
       </q-expansion-item>
+      <q-item>
+        <q-item-section>
+          <q-item-label>
+            {{ i18n('labels.debounceDelay') }}
+          </q-item-label>
+          <q-item-label caption>
+            {{
+              i18n('labels.debounceDelayDescription', {
+                lower: COMPLETION_DEBOUNCE_DELAY_LIMIT.lower,
+                upper: COMPLETION_DEBOUNCE_DELAY_LIMIT.upper,
+              })
+            }}
+          </q-item-label>
+        </q-item-section>
+        <q-item-section side>
+          <q-input
+            input-class="text-right"
+            maxlength="3"
+            suffix="ms"
+            style="max-width: 3rem"
+            :model-value="completionConfig.debounceDelay"
+            @change="updateCompletionDebounceDelay"
+          />
+        </q-item-section>
+      </q-item>
     </q-list>
   </q-card>
 </template>
