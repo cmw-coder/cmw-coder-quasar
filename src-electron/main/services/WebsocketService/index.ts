@@ -39,6 +39,7 @@ import {
   CompletionGenerateServerMessage,
   HandShakeClientMessage,
   ReviewRequestServerMessage,
+  SettingSyncServerMessage,
   StandardResult,
   WsAction,
   WsMessageMapping,
@@ -51,6 +52,7 @@ import reviewLog from 'main/components/Loggers/reviewLog';
 import { NEW_LINE_REGEX } from 'shared/constants/common';
 import { MODULE_PATH } from 'main/components/PromptExtractor/constants';
 import { getService } from 'main/services';
+import { ConfigService } from 'main/services/ConfigService';
 
 @injectable()
 export class WebsocketService implements WebsocketServiceTrait {
@@ -74,6 +76,8 @@ export class WebsocketService implements WebsocketServiceTrait {
   >();
 
   constructor(
+    @inject(ServiceType.CONFIG)
+    private _configService: ConfigService,
     @inject(ServiceType.DATA_STORE)
     private _dataStoreService: DataStoreService,
     @inject(ServiceType.STATISTICS)
@@ -214,6 +218,15 @@ export class WebsocketService implements WebsocketServiceTrait {
           });
           this._lastActivePid = pid;
           log.info(`Websocket client verified, pid: ${pid}`);
+          client.send(
+            JSON.stringify(
+              new SettingSyncServerMessage({
+                result: 'success',
+                completionConfig:
+                  await this._configService.getConfig('completion'),
+              }),
+            ),
+          );
         } else {
           if (!pid) {
             log.info('Websocket client not verified');

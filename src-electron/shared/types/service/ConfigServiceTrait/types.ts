@@ -28,7 +28,7 @@ export interface AppConfig {
     debounceDelay: number;
     prefixLineCount: number;
     suffixLineCount: number;
-  }
+  },
   completionConfigs: {
     function: CompletionConfigType;
     line: CompletionConfigType;
