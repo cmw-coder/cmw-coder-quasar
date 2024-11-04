@@ -100,6 +100,15 @@ const refreshModelList = async () => {
   }
 };
 
+const refreshCompletionDebounceDelay = async () => {
+  try {
+    completionConfig.debounceDelay =
+      (await configService.getConfig('completion'))?.debounceDelay ?? 100;
+  } catch (error) {
+    console.error('refreshCompletionDebounceDelay', error);
+  }
+};
+
 const updateModel = async (model: {
   label: string;
   value: string;
@@ -145,9 +154,10 @@ const updateCompletionDebounceDelay = async (value: string | number | null) => {
   await configService.setConfig('completion', completionConfig);
 };
 
-onMounted(async () => {
-  await refreshProductLineList();
-  await refreshModelList();
+onMounted(() => {
+  refreshProductLineList().catch();
+  refreshModelList().catch();
+  refreshCompletionDebounceDelay().catch();
 });
 </script>
 
