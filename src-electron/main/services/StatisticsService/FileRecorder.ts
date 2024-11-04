@@ -28,6 +28,8 @@ export class FileRecorder {
   }
 
   async calculate() {
+    // TODO
+    // 通过读取文件更改时间判断文件是否发生变化
     const newFileContent = await this.readFileContent();
     if (newFileContent === this.fileContent) {
       // 文件内容没有变化
