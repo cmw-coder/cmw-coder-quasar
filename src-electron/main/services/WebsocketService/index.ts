@@ -428,6 +428,7 @@ export class WebsocketService implements WebsocketServiceTrait {
     });
     this._registerWsAction(WsAction.EditorPaste, async ({ data }, pid) => {
       const clientInfo = this._clientInfoMap.get(pid);
+      statisticsLog.log('粘贴操作记录', clientInfo?.currentFile);
       if (
         clientInfo &&
         clientInfo.currentFile?.length &&
@@ -444,7 +445,6 @@ export class WebsocketService implements WebsocketServiceTrait {
             )
             .catch();
           if (clientInfo.currentFile) {
-            statisticsLog.log('粘贴操作记录', clientInfo.currentFile);
             this._statisticsReporterService.fileRecorderManager.addFileRecorder(
               clientInfo.currentFile,
               projectId,
@@ -552,6 +552,7 @@ export class WebsocketService implements WebsocketServiceTrait {
     this._registerWsAction(
       WsAction.EditorSwitchFile,
       async ({ data: filePath }, pid) => {
+        statisticsLog.log('切换文件', filePath);
         const clientInfo = this._clientInfoMap.get(pid);
         if (clientInfo) {
           clientInfo.currentFile = filePath;
