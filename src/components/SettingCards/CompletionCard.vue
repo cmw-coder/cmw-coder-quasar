@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue';
+import { onMounted, reactive, ref, toRaw } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { ServiceType } from 'shared/types/service';
@@ -151,7 +151,7 @@ const updateCompletionDebounceDelay = async (value: string | number | null) => {
       }),
     ),
   );
-  await configService.setConfig('completion', completionConfig);
+  await configService.setConfig('completion', toRaw(completionConfig));
 };
 
 onMounted(() => {

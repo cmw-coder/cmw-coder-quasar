@@ -356,6 +356,11 @@ export class WebsocketService implements WebsocketServiceTrait {
           }
 
           this._statisticsReporterService.completionAbort(actionId);
+
+          return new CompletionGenerateServerMessage({
+            message: 'No completion',
+            result: 'failure',
+          });
         } catch (e) {
           console.log(e);
           const error = <Error>e;
