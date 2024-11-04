@@ -26,6 +26,7 @@ export interface AppConfig {
   showSelectedTipsWindow: boolean;
   completion: {
     debounceDelay: number;
+    interactionUnlockDelay: number;
     prefixLineCount: number;
     suffixLineCount: number;
   },

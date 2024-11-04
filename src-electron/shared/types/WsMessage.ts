@@ -240,6 +240,7 @@ export class SettingSyncServerMessage implements WsMessage {
   data: StandardResult<{
     completionConfig?: {
       debounceDelay?: number;
+      interactionUnlockDelay?: number;
       prefixLineCount?: number;
       suffixLineCount?: number;
     };
@@ -251,6 +252,7 @@ export class SettingSyncServerMessage implements WsMessage {
     data: StandardResult<{
       completionConfig?: {
         debounceDelay?: number;
+        interactionUnlockDelay?: number;
         prefixLineCount?: number;
         suffixLineCount?: number;
       };
