@@ -51,6 +51,7 @@ import reviewLog from 'main/components/Loggers/reviewLog';
 import { NEW_LINE_REGEX } from 'shared/constants/common';
 import { MODULE_PATH } from 'main/components/PromptExtractor/constants';
 import { getService } from 'main/services';
+import statisticsLog from 'main/components/Loggers/statisticsLog';
 
 @injectable()
 export class WebsocketService implements WebsocketServiceTrait {
@@ -442,6 +443,13 @@ export class WebsocketService implements WebsocketServiceTrait {
               getClientVersion(pid),
             )
             .catch();
+          if (clientInfo.currentFile) {
+            statisticsLog.log('粘贴操作记录', clientInfo.currentFile);
+            this._statisticsReporterService.fileRecorderManager.addFileRecorder(
+              clientInfo.currentFile,
+              projectId,
+            );
+          }
           const document = new TextDocument(clientInfo.currentFile);
           let repo = '';
           for (const [key, value] of Object.entries(MODULE_PATH)) {

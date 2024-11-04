@@ -387,7 +387,7 @@ export class StatisticsService implements StatisticsServiceTrait {
           Date.now(),
           projectId,
           version,
-          'INC_CHAR',
+          'COPY',
           '',
         ),
       );
