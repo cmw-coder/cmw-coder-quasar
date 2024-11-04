@@ -116,8 +116,14 @@ export default {
           productLine: 'Product Line',
           model: 'Model',
           debounceDelay: 'Trigger Debounce Delay',
-          debounceDelayDescription: 'Range: {lower}ms ~ {upper}ms'
+          interactionUnlockDelay: 'Interaction Unlock Delay',
+          prefixLineCount: 'Prefix Line Count',
+          suffixLineCount: 'Suffix Line Count',
+          rangeHint: 'Range: {min} ~ {max}',
         },
+        tooltips: {
+          resetToDefault: 'Reset to default',
+        }
       },
       GeneralCard: {
         labels: {

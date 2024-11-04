@@ -116,8 +116,14 @@ export default {
           productLine: '产品线',
           model: 'AI 模型',
           debounceDelay: '触发消抖延迟',
-          debounceDelayDescription: '范围：{lower}ms ~ {upper}ms'
+          interactionUnlockDelay: '交互解锁延迟',
+          prefixLineCount: '上下文前缀行数',
+          suffixLineCount: '上下文后缀行数',
+          rangeHint: '范围：{min} - {max}',
         },
+        tooltips: {
+          resetToDefault: '重置为默认值',
+        }
       },
       GeneralCard: {
         labels: {
