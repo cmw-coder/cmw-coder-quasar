@@ -1,3 +1,4 @@
+import log from 'electron-log/main';
 import ElectronStore from 'electron-store';
 import { injectable } from 'inversify';
 import { userInfo } from 'os';
@@ -7,6 +8,7 @@ import { container } from 'main/services';
 import { WindowService } from 'main/services/WindowService';
 import { LinseerConfigStore } from 'main/stores/config';
 import { NetworkZone, defaultAppConfigNetworkZoneMap } from 'shared/config';
+import { COMPLETION_CONFIG_CONSTANTS } from 'shared/constants/config';
 import {
   SwitchLocaleActionMessage,
   ToggleDarkModeActionMessage,
@@ -14,7 +16,6 @@ import {
 import { ServiceType } from 'shared/types/service';
 import { ConfigServiceTrait } from 'shared/types/service/ConfigServiceTrait';
 import { AppConfig } from 'shared/types/service/ConfigServiceTrait/types';
-import log from 'electron-log/main';
 
 const defaultStoreData = extend<AppConfig>(
   true,
@@ -62,6 +63,19 @@ export class ConfigService implements ConfigServiceTrait {
           store.set('baseServerUrl', 'http://10.113.36.121');
         }
       },
+      '1.4.4': (store) => {
+        log.info('Upgrading "appConfig" store to 1.4.4 ...');
+        const locale = store.get('locale');
+        if (locale === 'ZH-CN') {
+          store.set('locale', 'zh-CN');
+        }
+        store.set('completion', {
+          debounceDelay: COMPLETION_CONFIG_CONSTANTS.debounceDelay.default,
+          interactionUnlockDelay: COMPLETION_CONFIG_CONSTANTS.interactionUnlockDelay.default,
+          prefixLineCount: COMPLETION_CONFIG_CONSTANTS.prefixLineCount.default,
+          suffixLineCount: COMPLETION_CONFIG_CONSTANTS.suffixLineCount.default,
+        });
+      }
     },
   });
 

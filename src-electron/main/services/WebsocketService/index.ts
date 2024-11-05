@@ -39,6 +39,7 @@ import {
   CompletionGenerateServerMessage,
   HandShakeClientMessage,
   ReviewRequestServerMessage,
+  SettingSyncServerMessage,
   StandardResult,
   WsAction,
   WsMessageMapping,
@@ -51,6 +52,7 @@ import reviewLog from 'main/components/Loggers/reviewLog';
 import { NEW_LINE_REGEX } from 'shared/constants/common';
 import { MODULE_PATH } from 'main/components/PromptExtractor/constants';
 import { getService } from 'main/services';
+import { ConfigService } from 'main/services/ConfigService';
 import statisticsLog from 'main/components/Loggers/statisticsLog';
 
 @injectable()
@@ -75,6 +77,8 @@ export class WebsocketService implements WebsocketServiceTrait {
   >();
 
   constructor(
+    @inject(ServiceType.CONFIG)
+    private _configService: ConfigService,
     @inject(ServiceType.DATA_STORE)
     private _dataStoreService: DataStoreService,
     @inject(ServiceType.STATISTICS)
@@ -215,6 +219,15 @@ export class WebsocketService implements WebsocketServiceTrait {
           });
           this._lastActivePid = pid;
           log.info(`Websocket client verified, pid: ${pid}`);
+          client.send(
+            JSON.stringify(
+              new SettingSyncServerMessage({
+                result: 'success',
+                completionConfig:
+                  await this._configService.getConfig('completion'),
+              }),
+            ),
+          );
         } else {
           if (!pid) {
             log.info('Websocket client not verified');
@@ -347,7 +360,14 @@ export class WebsocketService implements WebsocketServiceTrait {
             });
           }
 
-          this._statisticsReporterService.completionAbort(actionId);
+          this._statisticsReporterService
+            .completionNoResults(actionId)
+            .catch((e) => completionLog.error(e));
+
+          return new CompletionGenerateServerMessage({
+            message: 'No completion',
+            result: 'failure',
+          });
         } catch (e) {
           console.log(e);
           const error = <Error>e;
@@ -537,17 +557,19 @@ export class WebsocketService implements WebsocketServiceTrait {
         language: 'c',
       };
       const { id: projectId } = getProjectData(project);
-      selectionTipsWindow.trigger(
-        {
-          x: data.dimensions.x,
-          y: data.dimensions.y - 30,
-        },
-        selection,
-        {
-          projectId: projectId,
-          version: getClientVersion(this._lastActivePid),
-        },
-      );
+      selectionTipsWindow
+        .trigger(
+          {
+            x: data.dimensions.x,
+            y: data.dimensions.y - 30,
+          },
+          selection,
+          {
+            projectId: projectId,
+            version: getClientVersion(this._lastActivePid),
+          },
+        )
+        .catch((e) => completionLog.error('EditorSelection', e));
     });
     this._registerWsAction(
       WsAction.EditorSwitchFile,

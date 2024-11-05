@@ -1,7 +1,9 @@
-import { Completions } from 'main/components/PromptProcessor/types';
-import { CaretPosition, SymbolInfo } from 'shared/types/common';
-import { KeptRatio } from 'main/services/StatisticsService/types';
 import { Reference } from 'cmw-coder-subprocess';
+
+import { Completions } from 'main/components/PromptProcessor/types';
+import { KeptRatio } from 'main/services/StatisticsService/types';
+import { CaretPosition, SymbolInfo } from 'shared/types/common';
+import { ShortcutConfig } from 'shared/types/keys';
 
 export enum WsAction {
   ChatInsert = 'ChatInsert',
@@ -19,6 +21,7 @@ export enum WsAction {
   EditorSwitchProject = 'EditorSwitchProject',
   HandShake = 'HandShake',
   ReviewRequest = 'ReviewRequest',
+  SettingSync = 'SettingSync',
 }
 
 export interface WsMessage {
@@ -232,6 +235,34 @@ export class ReviewRequestServerMessage implements WsMessage {
   }
 }
 
+export class SettingSyncServerMessage implements WsMessage {
+  action = WsAction.SettingSync;
+  data: StandardResult<{
+    completionConfig?: {
+      debounceDelay?: number;
+      interactionUnlockDelay?: number;
+      prefixLineCount?: number;
+      suffixLineCount?: number;
+    };
+    shortcutConfig?: ShortcutConfig;
+  }>;
+  timestamp = Date.now();
+
+  constructor(
+    data: StandardResult<{
+      completionConfig?: {
+        debounceDelay?: number;
+        interactionUnlockDelay?: number;
+        prefixLineCount?: number;
+        suffixLineCount?: number;
+      };
+      shortcutConfig?: ShortcutConfig;
+    }>,
+  ) {
+    this.data = data;
+  }
+}
+
 export interface WsMessageMapping {
   [WsAction.CompletionAccept]: {
     client: CompletionAcceptClientMessage;
@@ -284,5 +315,9 @@ export interface WsMessageMapping {
   [WsAction.ReviewRequest]: {
     client: ReviewRequestClientMessage;
     server: void;
+  };
+  [WsAction.SettingSync]: {
+    client: void;
+    server: SettingSyncServerMessage;
   };
 }

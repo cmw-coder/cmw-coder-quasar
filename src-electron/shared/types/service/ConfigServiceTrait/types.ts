@@ -24,6 +24,12 @@ export interface AppConfig {
   darkMode: boolean;
   developerMode: boolean;
   showSelectedTipsWindow: boolean;
+  completion: {
+    debounceDelay: number;
+    interactionUnlockDelay: number;
+    prefixLineCount: number;
+    suffixLineCount: number;
+  },
   completionConfigs: {
     function: CompletionConfigType;
     line: CompletionConfigType;

@@ -1,12 +1,17 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, reactive, ref, toRaw } from 'vue';
 import { useI18n } from 'vue-i18n';
+
+import { COMPLETION_CONFIG_CONSTANTS } from 'shared/constants/config';
+import { ServiceType } from 'shared/types/service';
+import { AppConfig } from 'shared/types/service/ConfigServiceTrait/types';
+import { SettingSyncServerMessage } from 'shared/types/WsMessage';
 import {
   api_getProductLineQuestionTemplateFile,
   api_getUserTemplateList,
 } from 'src/request/api';
 import { useService } from 'utils/common';
-import { ServiceType } from 'shared/types/service';
+import { sleep } from '@volar/language-server/lib/register/registerLanguageFeatures';
 
 const baseName = 'components.SettingCards.CompletionCard.';
 
@@ -22,6 +27,7 @@ const i18n = (relativePath: string, data?: Record<string, unknown>) => {
 
 const configService = useService(ServiceType.CONFIG);
 const dataStoreService = useService(ServiceType.DATA_STORE);
+const websocketService = useService(ServiceType.WEBSOCKET);
 
 const productLineList = ref<string[]>([]);
 const modelList = ref<
@@ -39,6 +45,19 @@ const selectedModel = ref<{
   value: string;
   modelKey: string;
 }>();
+const completionConfig = reactive({
+  debounceDelay: COMPLETION_CONFIG_CONSTANTS.debounceDelay.default,
+  interactionUnlockDelay:
+    COMPLETION_CONFIG_CONSTANTS.interactionUnlockDelay.default,
+  prefixLineCount: COMPLETION_CONFIG_CONSTANTS.prefixLineCount.default,
+  suffixLineCount: COMPLETION_CONFIG_CONSTANTS.suffixLineCount.default,
+});
+const completionConfigLoading = reactive({
+  debounceDelay: false,
+  interactionUnlockDelay: false,
+  prefixLineCount: false,
+  suffixLineCount: false,
+});
 
 const refreshProductLineList = async () => {
   try {
@@ -87,6 +106,27 @@ const refreshModelList = async () => {
   }
 };
 
+const refreshCompletionConfig = async () => {
+  try {
+    const completion = await configService.getConfig('completion');
+    if (completion?.debounceDelay !== undefined) {
+      completionConfig.debounceDelay = completion.debounceDelay;
+    }
+    if (completion?.interactionUnlockDelay !== undefined) {
+      completionConfig.interactionUnlockDelay =
+        completion.interactionUnlockDelay;
+    }
+    if (completion?.prefixLineCount !== undefined) {
+      completionConfig.prefixLineCount = completion.prefixLineCount;
+    }
+    if (completion?.suffixLineCount !== undefined) {
+      completionConfig.suffixLineCount = completion.suffixLineCount;
+    }
+  } catch (error) {
+    console.error('refreshCompletionConfig', error);
+  }
+};
+
 const updateModel = async (model: {
   label: string;
   value: string;
@@ -108,9 +148,90 @@ const updateProductLine = async (value: string) => {
   await refreshModelList();
 };
 
-onMounted(async () => {
-  await refreshProductLineList();
-  await refreshModelList();
+const updateCompletionConfig = async (
+  key: keyof AppConfig['completion'],
+  value: string | number | null,
+) => {
+  let configSetter: (data: number) => void;
+  let configLoadingSetter: () => void;
+  let constants: {
+    default: number;
+    min: number;
+    max: number;
+  };
+  switch (key) {
+    case 'debounceDelay': {
+      completionConfigLoading.debounceDelay = true;
+      configSetter = (data: number) => (completionConfig.debounceDelay = data);
+      configLoadingSetter = () =>
+        (completionConfigLoading.debounceDelay = false);
+      constants = COMPLETION_CONFIG_CONSTANTS.debounceDelay;
+      break;
+    }
+    case 'interactionUnlockDelay': {
+      completionConfigLoading.interactionUnlockDelay = true;
+      configSetter = (data: number) =>
+        (completionConfig.interactionUnlockDelay = data);
+      configLoadingSetter = () =>
+        (completionConfigLoading.interactionUnlockDelay = false);
+      constants = COMPLETION_CONFIG_CONSTANTS.interactionUnlockDelay;
+      break;
+    }
+    case 'prefixLineCount': {
+      completionConfigLoading.prefixLineCount = true;
+      configSetter = (data: number) =>
+        (completionConfig.prefixLineCount = data);
+      configLoadingSetter = () =>
+        (completionConfigLoading.prefixLineCount = false);
+      constants = COMPLETION_CONFIG_CONSTANTS.prefixLineCount;
+      break;
+    }
+    case 'suffixLineCount': {
+      completionConfigLoading.suffixLineCount = true;
+      configSetter = (data: number) =>
+        (completionConfig.suffixLineCount = data);
+      configLoadingSetter = () =>
+        (completionConfigLoading.suffixLineCount = false);
+      constants = COMPLETION_CONFIG_CONSTANTS.suffixLineCount;
+      break;
+    }
+    default: {
+      console.warn('updateCompletionConfig', 'key not found', key);
+      return;
+    }
+  }
+  if (value === null) {
+    configSetter(constants.min);
+  } else {
+    value = Number(value);
+    if (value < constants.min) {
+      configSetter(constants.min);
+    } else if (value > COMPLETION_CONFIG_CONSTANTS.debounceDelay.max) {
+      configSetter(constants.max);
+    } else if (!isNaN(value)) {
+      configSetter(value);
+    } else {
+      console.warn('updateCompletionConfig', 'value is not a number', value);
+      return;
+    }
+  }
+  websocketService.send(
+    JSON.stringify(
+      new SettingSyncServerMessage({
+        result: 'success',
+        completionConfig: { [key]: completionConfig[key] },
+      }),
+    ),
+  );
+  await configService.setConfig('completion', toRaw(completionConfig));
+  await sleep(Math.floor(200 + Math.random() * 300));
+  configLoadingSetter();
+};
+
+onMounted(() => {
+  refreshProductLineList().catch();
+  refreshModelList().catch();
+  refreshCompletionConfig().catch();
 });
 </script>
 
@@ -177,6 +298,61 @@ onMounted(async () => {
           </q-item>
         </q-list>
       </q-expansion-item>
+      <q-item v-for="(value, key, index) in completionConfig" :key="index">
+        <q-item-section>
+          <div class="row items-baseline q-gutter-x-lg">
+            <q-item-label>
+              {{ i18n(`labels.${key}`) }}
+            </q-item-label>
+            <q-item-label caption>
+              {{
+                i18n('labels.rangeHint', {
+                  min: COMPLETION_CONFIG_CONSTANTS[key].min,
+                  max: COMPLETION_CONFIG_CONSTANTS[key].max,
+                })
+              }}
+            </q-item-label>
+          </div>
+        </q-item-section>
+        <div class="self-center">
+          <q-btn
+            v-show="value !== COMPLETION_CONFIG_CONSTANTS[key].default"
+            flat
+            icon="refresh"
+            round
+            size="sm"
+            @click="
+              updateCompletionConfig(
+                key,
+                COMPLETION_CONFIG_CONSTANTS[key].default,
+              )
+            "
+          >
+            <q-tooltip
+              anchor="center left"
+              self="center right"
+              transition-show="jump-left"
+              transition-hide="jump-right"
+            >
+              {{ i18n('tooltips.resetToDefault') }}
+            </q-tooltip>
+          </q-btn>
+        </div>
+        <q-item-section side>
+          <q-input
+            dense
+            input-class="text-right"
+            maxlength="3"
+            suffix="ms"
+            style="max-width: 3.5rem"
+            :model-value="value"
+            @change="updateCompletionConfig(key, $event)"
+          />
+        </q-item-section>
+        <q-inner-loading :showing="completionConfigLoading[key]">
+          <q-spinner-gears size="lg" color="grey" />
+        </q-inner-loading>
+      </q-item>
     </q-list>
   </q-card>
 </template>

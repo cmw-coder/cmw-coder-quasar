@@ -1,6 +1,5 @@
 import { injectable } from 'inversify';
 import { DateTime } from 'luxon';
-import { extname, basename, join } from 'path';
 import { uid } from 'quasar';
 
 import { PromptElements } from 'main/components/PromptExtractor/types';
@@ -16,7 +15,6 @@ import {
   skuNameKeptMapping,
 } from 'main/services/StatisticsService/constants';
 import {
-  CollectionData,
   CompletionData,
   CopyPasteData,
   KeptRatio,
@@ -26,7 +24,7 @@ import {
   formatTimelines,
 } from 'main/services/StatisticsService/utils';
 import { NEW_LINE_REGEX } from 'shared/constants/common';
-import { CaretPosition } from 'shared/types/common';
+import { CaretPosition, CompletionType } from 'shared/types/common';
 import { StatisticsServiceTrait } from 'shared/types/service/StatisticsServiceTrait';
 import statisticsLog from 'main/components/Loggers/statisticsLog';
 import { FileRecorderManager } from 'main/services/StatisticsService/FileRecorderManager';
@@ -62,10 +60,11 @@ export class StatisticsService implements StatisticsServiceTrait {
     const data = this._recentCompletion.get(actionId);
     const candidate = data?.select(index);
     if (!data || !data.completions || !data.projectId || !candidate) {
+      this.completionAbort(actionId);
       return;
     }
 
-    statisticsLog.debug('StatisticsReporter.completionAccept', {
+    statisticsLog.debug('completionAccept', {
       completions: data.completions,
       position: data.position,
       projectId: data.projectId,
@@ -90,7 +89,7 @@ export class StatisticsService implements StatisticsServiceTrait {
         ),
       );
     } catch (e) {
-      statisticsLog.error('StatisticsReporter.completionAccept.failed', e);
+      statisticsLog.error('completionAccept.failed', e);
     }
   }
 
@@ -121,7 +120,7 @@ export class StatisticsService implements StatisticsServiceTrait {
     ) {
       // TODO: Check if this works
       this._lastCursorPosition = data.position;
-      statisticsLog.debug('StatisticsReporter.completionCancel', {
+      statisticsLog.debug('completionCancel', {
         position: data.position,
         projectId: data.projectId,
         timelines: formatTimelines(data.timelines),
@@ -144,68 +143,19 @@ export class StatisticsService implements StatisticsServiceTrait {
     version: string,
   ) {
     const data = this._recentCompletion.get(actionId);
-    if (!data || !data.completions || !data.elements || !data.projectId) {
+    const requestData = data?.serialize(
+      ratio === KeptRatio.None ? 0 : 1,
+      editedContent,
+    );
+    if (!data || !data.projectId || !requestData) {
+      this.completionAbort(actionId);
       return;
     }
 
     statisticsLog.debug('completionEdit', {
+      requestData,
       timelines: formatTimelines(data.timelines),
     });
-
-    const requestData: CollectionData = {
-      createTime: data.timelines.proxyEndEditorInfo.toFormat(
-        'yyyy-MM-dd HH:mm:ss',
-      ),
-      prefix: data.elements.slicedPrefix,
-      suffix: data.elements.slicedSuffix,
-      repo: data.elements.repo ?? '',
-      path: join(data.elements.folder ?? '', data.elements.file ?? ''),
-      fileSuffix: data.elements.file
-        ? extname(basename(data.elements.file))
-        : '',
-      similarSnippet: data.elements.similarSnippet ?? '',
-      symbolList: data.elements.symbols ? [data.elements.symbols] : [],
-      model: data.model ?? '',
-      templateName: data.templateName ?? '',
-      answer: data.completions.candidates,
-      acceptAnswerIndex: data.lastChecked,
-      accept: ratio === KeptRatio.None ? 0 : 1,
-      afterCode: editedContent,
-      plugin: 'SI',
-      projectId: data.projectId,
-      latency: {
-        editorInfo: data.timelines.proxyStartSymbolInfo.diff(
-          data.timelines.proxyStartEditorInfo,
-        ).milliseconds,
-        symbolLocation: data.timelines.proxyEndEditorInfo.diff(
-          data.timelines.proxyStartSymbolInfo,
-        ).milliseconds,
-        similarSnippets: data.timelines.coderEndSimilarSnippets.isValid
-          ? data.timelines.coderEndSimilarSnippets.diff(
-              data.timelines.proxyEndEditorInfo,
-            ).milliseconds
-          : 0,
-        symbolData: data.timelines.coderEndRelativeDefinitions.isValid
-          ? data.timelines.coderEndRelativeDefinitions.diff(
-              data.timelines.proxyEndEditorInfo,
-            ).milliseconds
-          : 0,
-        prompt: data.timelines.coderEndConstructPrompt.diff(
-          data.timelines.proxyEndEditorInfo,
-        ).milliseconds,
-        request: data.timelines.coderEndRequest.diff(
-          data.timelines.coderEndConstructPrompt,
-        ).milliseconds,
-        postProcess: data.timelines.coderEndPostProcess.diff(
-          data.timelines.coderEndRequest,
-        ).milliseconds,
-        total: data.timelines.coderStartAccept.diff(
-          data.timelines.proxyStartEditorInfo,
-        ).milliseconds,
-      },
-    };
-
-    statisticsLog.debug('StatisticsReporter.completionKept', { requestData });
 
     try {
       await Promise.all([
@@ -225,7 +175,7 @@ export class StatisticsService implements StatisticsServiceTrait {
             ),
       ]);
     } catch (e) {
-      statisticsLog.error('StatisticsReporter.completionKept.failed', e);
+      statisticsLog.error('completionEdit.failed', e);
     }
     this.completionAbort(actionId);
   }
@@ -239,6 +189,33 @@ export class StatisticsService implements StatisticsServiceTrait {
     if (data.timelines) {
       data.timelines.coderEndPostProcess = DateTime.now();
     }
+  }
+
+  async completionNoResults(actionId: string) {
+    const data = this._recentCompletion.get(actionId);
+    if (!data || !data.projectId || !data.timelines) {
+      this.completionAbort(actionId);
+      return;
+    }
+    data.completions = { candidates: [], type: CompletionType.Line };
+    data.timelines.coderEndPostProcess = DateTime.now();
+
+    const requestData = data?.serialize(-1, '');
+    if (!requestData) {
+      this.completionAbort(actionId);
+      return;
+    }
+
+    statisticsLog.debug('completionNoResults', {
+      timelines: formatTimelines(data.timelines),
+    });
+
+    try {
+      await api_collection_code_v2([requestData]);
+    } catch (e) {
+      statisticsLog.error('completionNoResults.failed', e);
+    }
+    this.completionAbort(actionId);
   }
 
   completionSelected(
@@ -258,7 +235,7 @@ export class StatisticsService implements StatisticsServiceTrait {
       data.position.line >= 0 &&
       data.position.line != this._lastCursorPosition.line
     ) {
-      statisticsLog.debug('StatisticsReporter.completionSelected', {
+      statisticsLog.debug('completionSelected', {
         completions: data.completions,
         position: data.position,
         projectId: data.projectId,
@@ -365,16 +342,16 @@ export class StatisticsService implements StatisticsServiceTrait {
   }
 
   async copiedContents(data: CopyPasteData) {
-    statisticsLog.debug('StatisticsReporter.copiedContents', data);
+    statisticsLog.debug('copiedContents', data);
     try {
       await api_collection_copy(data);
     } catch (e) {
-      statisticsLog.error('StatisticsReporter.copiedContents.failed', e);
+      statisticsLog.error('copiedContents.failed', e);
     }
   }
 
   async copiedLines(count: number, projectId: string, version: string) {
-    statisticsLog.debug('StatisticsReporter.copiedLines', {
+    statisticsLog.debug('copiedLines', {
       count,
       projectId,
       version,
@@ -392,7 +369,7 @@ export class StatisticsService implements StatisticsServiceTrait {
         ),
       );
     } catch (e) {
-      statisticsLog.error('StatisticsReporter.copiedLines.failed', e);
+      statisticsLog.error('copiedLines.failed', e);
     }
   }
 
@@ -406,7 +383,7 @@ export class StatisticsService implements StatisticsServiceTrait {
     projectId: string,
     version: string,
   ) {
-    statisticsLog.debug('StatisticsReporter.incrementLines', {
+    statisticsLog.debug('incrementLines', {
       count,
       startTime,
       endTime,
@@ -426,7 +403,7 @@ export class StatisticsService implements StatisticsServiceTrait {
         ),
       );
     } catch (e) {
-      statisticsLog.error('StatisticsReporter.incrementLinesFailed', e);
+      statisticsLog.error('incrementLinesFailed', e);
     }
   }
 }
