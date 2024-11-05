@@ -12,7 +12,7 @@
     "publish": "quasar build -m electron --publish"
   },
   "dependencies": {
-    "@git-diff-view/vue": "^0.0.20",
+    "@git-diff-view/vue": "^0.0.13",
     "@quasar/extras": "^1.16.11",
     "axios": "^1.7.4",
     "cmw-coder-subprocess": "github:cmw-coder/cmw-coder-subprocess",
