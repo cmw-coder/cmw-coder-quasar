@@ -1,4 +1,6 @@
 import { DateTime } from 'luxon';
+import { basename, extname, join } from 'path';
+
 import { PromptElements } from 'main/components/PromptExtractor/types';
 import { Completions } from 'main/components/PromptProcessor/types';
 import { CaretPosition } from 'shared/types/common';
@@ -16,7 +18,7 @@ export interface CollectionData {
   templateName: string;
   answer: string[];
   acceptAnswerIndex: number;
-  accept: 0 | 1;
+  accept: -1 | 0 | 1;
   afterCode: string;
   plugin: 'SI';
   projectId: string;
@@ -96,6 +98,64 @@ export class CompletionData {
       coderEndRequest: DateTime.invalid('Uninitialized'),
       coderEndPostProcess: DateTime.invalid('Uninitialized'),
       coderStartAccept: DateTime.invalid('Uninitialized'),
+    };
+  }
+
+  serialize(accept: -1 | 0 | 1, editedContent: string): CollectionData {
+    if (!this.elements || !this.completions || !this.projectId) {
+      throw new Error('Invalid completion data');
+    }
+    return {
+      createTime: this.timelines.proxyEndEditorInfo.toFormat(
+        'yyyy-MM-dd HH:mm:ss',
+      ),
+      prefix: this.elements.slicedPrefix,
+      suffix: this.elements.slicedSuffix,
+      repo: this.elements.repo ?? '',
+      path: join(this.elements.folder ?? '', this.elements.file ?? ''),
+      fileSuffix: this.elements.file
+        ? extname(basename(this.elements.file))
+        : '',
+      similarSnippet: this.elements.similarSnippet ?? '',
+      symbolList: this.elements.symbols ? [this.elements.symbols] : [],
+      model: this.model ?? '',
+      templateName: this.templateName ?? '',
+      answer: this.completions.candidates,
+      acceptAnswerIndex: this.lastChecked,
+      accept: accept,
+      afterCode: editedContent,
+      plugin: 'SI',
+      projectId: this.projectId,
+      latency: {
+        editorInfo: this.timelines.proxyStartSymbolInfo.diff(
+          this.timelines.proxyStartEditorInfo,
+        ).milliseconds,
+        symbolLocation: this.timelines.proxyEndEditorInfo.diff(
+          this.timelines.proxyStartSymbolInfo,
+        ).milliseconds,
+        similarSnippets: this.timelines.coderEndSimilarSnippets.isValid
+          ? this.timelines.coderEndSimilarSnippets.diff(
+              this.timelines.proxyEndEditorInfo,
+            ).milliseconds
+          : 0,
+        symbolData: this.timelines.coderEndRelativeDefinitions.isValid
+          ? this.timelines.coderEndRelativeDefinitions.diff(
+              this.timelines.proxyEndEditorInfo,
+            ).milliseconds
+          : 0,
+        prompt: this.timelines.coderEndConstructPrompt.diff(
+          this.timelines.proxyEndEditorInfo,
+        ).milliseconds,
+        request: this.timelines.coderEndRequest.diff(
+          this.timelines.coderEndConstructPrompt,
+        ).milliseconds,
+        postProcess: this.timelines.coderEndPostProcess.diff(
+          this.timelines.coderEndRequest,
+        ).milliseconds,
+        total: this.timelines.coderStartAccept.diff(
+          this.timelines.proxyStartEditorInfo,
+        ).milliseconds,
+      },
     };
   }
 

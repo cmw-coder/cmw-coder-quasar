@@ -355,7 +355,9 @@ export class WebsocketService implements WebsocketServiceTrait {
             });
           }
 
-          this._statisticsReporterService.completionAbort(actionId);
+          this._statisticsReporterService
+            .completionNoResults(actionId)
+            .catch((e) => completionLog.error(e));
 
           return new CompletionGenerateServerMessage({
             message: 'No completion',
@@ -543,17 +545,19 @@ export class WebsocketService implements WebsocketServiceTrait {
         language: 'c',
       };
       const { id: projectId } = getProjectData(project);
-      selectionTipsWindow.trigger(
-        {
-          x: data.dimensions.x,
-          y: data.dimensions.y - 30,
-        },
-        selection,
-        {
-          projectId: projectId,
-          version: getClientVersion(this._lastActivePid),
-        },
-      );
+      selectionTipsWindow
+        .trigger(
+          {
+            x: data.dimensions.x,
+            y: data.dimensions.y - 30,
+          },
+          selection,
+          {
+            projectId: projectId,
+            version: getClientVersion(this._lastActivePid),
+          },
+        )
+        .catch((e) => completionLog.error('EditorSelection', e));
     });
     this._registerWsAction(
       WsAction.EditorSwitchFile,
