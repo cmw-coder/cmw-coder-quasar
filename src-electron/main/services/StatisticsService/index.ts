@@ -152,7 +152,15 @@ export class StatisticsService implements StatisticsServiceTrait {
       return;
     }
 
-    statisticsLog.debug('completionEdit', {
+    statisticsLog.debug('completionEdit.rawData', {
+      actionId,
+      count,
+      editedContent,
+      ratio,
+      version
+    });
+
+    statisticsLog.debug('completionEdit.requestData', {
       requestData,
       timelines: formatTimelines(data.timelines),
     });
