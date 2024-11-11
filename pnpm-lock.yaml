@@ -19,7 +19,7 @@ importers:
         version: 1.7.7
       cmw-coder-subprocess:
         specifier: github:cmw-coder/cmw-coder-subprocess
-        version: https://codeload.github.com/cmw-coder/cmw-coder-subprocess/tar.gz/c66790e6cb243cd46ab9f8b16935cdf3f819a91c
+        version: https://codeload.github.com/cmw-coder/cmw-coder-subprocess/tar.gz/e33a48eb8edd0c7576367077e36c17c0a8d1a6ef
       electron-log:
         specifier: ^5.1.4
         version: 5.1.7
@@ -954,8 +954,8 @@ packages:
     resolution: {integrity: sha512-JQHZ2QMW6l3aH/j6xCqQThY/9OH4D/9ls34cgkUBiEeocRTU04tHfKPBsUK1PqZCUQM7GiA0IIXJSuXHI64Kbg==}
     engines: {node: '>=0.8'}
 
-  cmw-coder-subprocess@https://codeload.github.com/cmw-coder/cmw-coder-subprocess/tar.gz/c66790e6cb243cd46ab9f8b16935cdf3f819a91c:
-    resolution: {tarball: https://codeload.github.com/cmw-coder/cmw-coder-subprocess/tar.gz/c66790e6cb243cd46ab9f8b16935cdf3f819a91c}
+  cmw-coder-subprocess@https://codeload.github.com/cmw-coder/cmw-coder-subprocess/tar.gz/e33a48eb8edd0c7576367077e36c17c0a8d1a6ef:
+    resolution: {tarball: https://codeload.github.com/cmw-coder/cmw-coder-subprocess/tar.gz/e33a48eb8edd0c7576367077e36c17c0a8d1a6ef}
     version: 0.0.1
 
   color-convert@2.0.1:
@@ -1129,6 +1129,9 @@ packages:
 
   devlop@1.1.0:
     resolution: {integrity: sha512-RWmIqhcFf1lRYBvNmr7qTNuyCt/7/ns2jbpp1+PalgE/rDQcBT0fioSMUpJ93irlUhC5hrg4cYqe6U+0ImW0rA==}
+
+  diff-match-patch-wasm-node@1.0.0:
+    resolution: {integrity: sha512-TkdjnPPzsOiObvWrE+dZQpeHenk9/PelwF6xdJzrSEoWvCPs/2nPoL6qasSVdQU3PfaDZgiJy7gs8XYKtcNrbw==, tarball: https://registry.npmjs.org/diff-match-patch-wasm-node/-/diff-match-patch-wasm-node-1.0.0.tgz}
 
   diff-match-patch@1.0.5:
     resolution: {integrity: sha512-IayShXAgj/QMXgB0IWmKx+rOPuGMhqm5w6jvFxmVenXKIzRqTAAsbBPT3kWQeGANj3jGgvcvv4yK6SxqYmikgw==}
@@ -4160,9 +4163,10 @@ snapshots:
 
   clone@1.0.4: {}
 
-  cmw-coder-subprocess@https://codeload.github.com/cmw-coder/cmw-coder-subprocess/tar.gz/c66790e6cb243cd46ab9f8b16935cdf3f819a91c:
+  cmw-coder-subprocess@https://codeload.github.com/cmw-coder/cmw-coder-subprocess/tar.gz/e33a48eb8edd0c7576367077e36c17c0a8d1a6ef:
     dependencies:
       diff-match-patch: 1.0.5
+      diff-match-patch-wasm-node: 1.0.0
       iconv-lite: 0.6.3
       luxon: 3.5.0
       uuid: 10.0.0
@@ -4328,6 +4332,8 @@ snapshots:
   devlop@1.1.0:
     dependencies:
       dequal: 2.0.3
+
+  diff-match-patch-wasm-node@1.0.0: {}
 
   diff-match-patch@1.0.5: {}
 

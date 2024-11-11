@@ -25,6 +25,9 @@ export const getRevision = async (path: string): Promise<number> => {
   return -1;
 };
 
+/**
+ * @deprecated
+ */
 export const getAddedLines = async (path: string, revision: number) => {
   const { stdout, stderr } = await executeCommand(
     `${svnPath} diff -r ${revision}`,
@@ -44,6 +47,9 @@ export const getAddedLines = async (path: string, revision: number) => {
   );
 };
 
+/**
+ * @deprecated
+ */
 export const reportProjectAdditions = async () => {
   const dataStoreService = container.get<DataStoreService>(
     ServiceType.DATA_STORE,

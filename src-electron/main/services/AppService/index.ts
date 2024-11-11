@@ -12,7 +12,6 @@ import { DataStoreService } from 'main/services/DataStoreService';
 import { UpdaterService } from 'main/services/UpdaterService';
 import { WebsocketService } from 'main/services/WebsocketService';
 import { WindowService } from 'main/services/WindowService';
-import { reportProjectAdditions } from 'main/utils/svn';
 import { registerAction, triggerAction } from 'preload/types/ActionApi';
 import {
   ControlMessage,
@@ -223,12 +222,12 @@ export class AppService implements AppServiceTrait {
         this._updaterService.checkUpdate().catch();
       },
     );
-    scheduleJob(
-      {
-        hour: 3,
-        minute: 0,
-      },
-      reportProjectAdditions,
-    );
+    // scheduleJob(
+    //   {
+    //     hour: 3,
+    //     minute: 0,
+    //   },
+    //   reportProjectAdditions,
+    // );
   }
 }

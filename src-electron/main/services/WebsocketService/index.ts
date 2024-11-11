@@ -53,6 +53,7 @@ import { NEW_LINE_REGEX } from 'shared/constants/common';
 import { MODULE_PATH } from 'main/components/PromptExtractor/constants';
 import { getService } from 'main/services';
 import { ConfigService } from 'main/services/ConfigService';
+import statisticsLog from 'main/components/Loggers/statisticsLog';
 
 @injectable()
 export class WebsocketService implements WebsocketServiceTrait {
@@ -318,6 +319,10 @@ export class WebsocketService implements WebsocketServiceTrait {
 
         try {
           const { id: projectId } = getProjectData(project);
+          this._statisticsReporterService.fileRecorderManager.addFileRecorder(
+            data.path,
+            projectId,
+          );
           this._statisticsReporterService.completionUpdateProjectId(
             actionId,
             projectId,
@@ -443,6 +448,7 @@ export class WebsocketService implements WebsocketServiceTrait {
     });
     this._registerWsAction(WsAction.EditorPaste, async ({ data }, pid) => {
       const clientInfo = this._clientInfoMap.get(pid);
+      statisticsLog.log('粘贴操作记录', clientInfo?.currentFile);
       if (
         clientInfo &&
         clientInfo.currentFile?.length &&
@@ -458,6 +464,12 @@ export class WebsocketService implements WebsocketServiceTrait {
               getClientVersion(pid),
             )
             .catch();
+          if (clientInfo.currentFile) {
+            this._statisticsReporterService.fileRecorderManager.addFileRecorder(
+              clientInfo.currentFile,
+              projectId,
+            );
+          }
           const document = new TextDocument(clientInfo.currentFile);
           let repo = '';
           for (const [key, value] of Object.entries(MODULE_PATH)) {
@@ -562,6 +574,7 @@ export class WebsocketService implements WebsocketServiceTrait {
     this._registerWsAction(
       WsAction.EditorSwitchFile,
       async ({ data: filePath }, pid) => {
+        statisticsLog.log('切换文件', filePath);
         const clientInfo = this._clientInfoMap.get(pid);
         if (clientInfo) {
           clientInfo.currentFile = filePath;
