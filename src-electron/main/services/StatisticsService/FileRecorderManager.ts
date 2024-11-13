@@ -1,3 +1,4 @@
+import statisticsLog from 'main/components/Loggers/statisticsLog';
 import { api_reportSKU, ReportSkuDto } from 'main/request/sku';
 import { FileRecorder } from 'main/services/StatisticsService/FileRecorder';
 import { constructData } from 'main/services/StatisticsService/utils';
@@ -31,6 +32,7 @@ export class FileRecorderManager {
       data[0] = projectId;
       return;
     }
+    statisticsLog.log(`addFileRecorder ${filePath}`);
     const fileRecorder = new FileRecorder(filePath, projectId);
     fileRecorder.onDestroy = () => {
       this.fileRecorders = this.fileRecorders.filter(
