@@ -2,7 +2,7 @@ import {
   DiffMasterHandler,
   MessageToDiffChildProxy,
 } from 'cmw-coder-subprocess';
-import statisticsLog from 'main/components/Loggers/statisticsLog';
+import diffLog from 'main/components/Loggers/diffLog';
 import { cmwCoderSubprocessPath } from 'main/services/WindowService/constants';
 
 export class DiffSubprocess
@@ -14,6 +14,6 @@ export class DiffSubprocess
   }
 
   async log(...payloads: never[]): Promise<void> {
-    statisticsLog.log('[FileStructureAnalysisProcess]', ...payloads);
+    diffLog.log('[FileStructureAnalysisProcess]', ...payloads);
   }
 }

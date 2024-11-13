@@ -4,7 +4,7 @@ import { container } from 'main/services';
 import { ServiceType } from 'shared/types/service';
 import { WindowService } from 'main/services/WindowService';
 import { WindowType } from 'shared/types/WindowType';
-import statisticsLog from 'main/components/Loggers/statisticsLog';
+import diffLog from 'main/components/Loggers/diffLog';
 
 const DESTROY_TIME = 1000 * 60 * 30;
 
@@ -52,7 +52,7 @@ export class FileRecorder {
       const diffSubprocess = container
         .get<WindowService>(ServiceType.WINDOW)
         .getWindow(WindowType.Completions).diffSubprocess;
-      statisticsLog.log('diffLine', {
+      diffLog.log('diffLine', {
         lastLength: this.lastFileContent.length,
         newLength: newFileContent.length,
         filePath: this.filePath,
