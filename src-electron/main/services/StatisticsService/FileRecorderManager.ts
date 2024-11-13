@@ -32,6 +32,13 @@ export class FileRecorderManager {
       data[0] = projectId;
       return;
     }
+    if (
+      this.fileRecorders.find(
+        (fileRecorder) => fileRecorder.filePath === filePath,
+      )
+    ) {
+      return;
+    }
     statisticsLog.log(`addFileRecorder ${filePath}`);
     const fileRecorder = new FileRecorder(filePath, projectId);
     fileRecorder.onDestroy = () => {
