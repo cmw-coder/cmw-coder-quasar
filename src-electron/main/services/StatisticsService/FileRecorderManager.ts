@@ -41,6 +41,7 @@ export class FileRecorderManager {
       try {
         const diffResult = await fileRecorder.calculate();
         if (diffResult) {
+          diffLog.log(`${fileRecorder.filePath} 变更: ${diffResult.added}`);
           const { projectId } = fileRecorder;
           const currentRecord = projectIdResultMap.get(projectId) || {
             added: 0,
