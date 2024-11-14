@@ -15,14 +15,14 @@ export const COMPLETION_CONFIG_CONSTANTS: Record<
     default: true,
   },
   debounceDelay: {
-    default: 100,
+    default: 50,
     min: 0,
     max: 150,
   },
   interactionUnlockDelay: {
-    default: 150,
+    default: 50,
     min: 0,
-    max: 200,
+    max: 150,
   },
   prefixLineCount: {
     default: 200,
