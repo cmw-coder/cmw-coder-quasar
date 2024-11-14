@@ -175,6 +175,7 @@ const updateCompletionBooleanConfig = async (
   key: keyof AppCompletionBooleanConfig,
   value: boolean,
 ) => {
+  completionConfigLoading[key] = true;
   completionBooleanConfig[key] = value;
   websocketService.send(
     JSON.stringify(
@@ -229,6 +230,15 @@ const updateCompletionNumberConfig = async (
       configLoadingSetter = () =>
         (completionConfigLoading.prefixLineCount = false);
       constants = COMPLETION_CONFIG_NUMBER_CONSTANTS.prefixLineCount;
+      break;
+    }
+    case 'recentFileCount': {
+      completionConfigLoading.recentFileCount = true;
+      configSetter = (data: number) =>
+        (completionNumberConfig.recentFileCount = data);
+      configLoadingSetter = () =>
+        (completionConfigLoading.recentFileCount = false);
+      constants = COMPLETION_CONFIG_NUMBER_CONSTANTS.recentFileCount;
       break;
     }
     case 'suffixLineCount': {
@@ -384,7 +394,7 @@ onMounted(() => {
         <q-item-section side>
           <q-toggle
             :model-value="value"
-            @change="updateCompletionBooleanConfig(key, $event)"
+            @update:model-value="updateCompletionBooleanConfig(key, $event)"
           />
         </q-item-section>
         <q-inner-loading :showing="completionConfigLoading[key]">
