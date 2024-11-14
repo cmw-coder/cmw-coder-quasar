@@ -9,6 +9,18 @@ export enum CompletionType {
   Snippet = 'Snippet',
 }
 
+export interface Completions {
+  candidates: string[];
+  type: CompletionType;
+}
+
+export enum KeptRatio {
+  All = 'All',
+  Few = 'Few',
+  Most = 'Most',
+  None = 'None',
+}
+
 export interface SimilarSnippet {
   path: string;
   score: number;

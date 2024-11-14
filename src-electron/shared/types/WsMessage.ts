@@ -1,9 +1,8 @@
 import { Reference } from 'cmw-coder-subprocess';
 
-import { Completions } from 'main/components/PromptProcessor/types';
-import { KeptRatio } from 'main/services/StatisticsService/types';
-import { CaretPosition, SymbolInfo } from 'shared/types/common';
+import { CaretPosition, Completions, KeptRatio, SymbolInfo } from 'shared/types/common';
 import { ShortcutConfig } from 'shared/types/keys';
+import { AppConfig } from 'shared/types/service/ConfigServiceTrait/types';
 
 export enum WsAction {
   ChatInsert = 'ChatInsert',
@@ -238,24 +237,14 @@ export class ReviewRequestServerMessage implements WsMessage {
 export class SettingSyncServerMessage implements WsMessage {
   action = WsAction.SettingSync;
   data: StandardResult<{
-    completionConfig?: {
-      debounceDelay?: number;
-      interactionUnlockDelay?: number;
-      prefixLineCount?: number;
-      suffixLineCount?: number;
-    };
+    completionConfig?: Partial<AppConfig['completion']>;
     shortcutConfig?: ShortcutConfig;
   }>;
   timestamp = Date.now();
 
   constructor(
     data: StandardResult<{
-      completionConfig?: {
-        debounceDelay?: number;
-        interactionUnlockDelay?: number;
-        prefixLineCount?: number;
-        suffixLineCount?: number;
-      };
+      completionConfig?: Partial<AppConfig['completion']>;
       shortcutConfig?: ShortcutConfig;
     }>,
   ) {

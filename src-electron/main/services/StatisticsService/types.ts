@@ -2,8 +2,7 @@ import { DateTime } from 'luxon';
 import { basename, extname, join } from 'path';
 
 import { PromptElements } from 'main/components/PromptExtractor/types';
-import { Completions } from 'main/components/PromptProcessor/types';
-import { CaretPosition } from 'shared/types/common';
+import { CaretPosition, Completions } from 'shared/types/common';
 
 export interface CollectionData {
   createTime: string;
@@ -175,11 +174,4 @@ export class CompletionData {
   get lastChecked(): number {
     return this._lastChecked;
   }
-}
-
-export enum KeptRatio {
-  All = 'All',
-  Few = 'Few',
-  Most = 'Most',
-  None = 'None',
 }

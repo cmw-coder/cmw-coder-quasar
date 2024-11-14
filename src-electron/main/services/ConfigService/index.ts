@@ -69,13 +69,17 @@ export class ConfigService implements ConfigServiceTrait {
         if (locale === 'ZH-CN') {
           store.set('locale', 'zh-CN');
         }
-        store.set('completion', {
-          debounceDelay: COMPLETION_CONFIG_CONSTANTS.debounceDelay.default,
-          interactionUnlockDelay: COMPLETION_CONFIG_CONSTANTS.interactionUnlockDelay.default,
-          prefixLineCount: COMPLETION_CONFIG_CONSTANTS.prefixLineCount.default,
-          suffixLineCount: COMPLETION_CONFIG_CONSTANTS.suffixLineCount.default,
-        });
-      }
+
+        store.set(
+          'completion',
+          Object.fromEntries(
+            Object.entries(COMPLETION_CONFIG_CONSTANTS).map(([key, value]) => [
+              key,
+              value.default,
+            ]),
+          ),
+        );
+      },
     },
   });
 

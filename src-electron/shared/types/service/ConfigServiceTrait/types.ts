@@ -25,9 +25,11 @@ export interface AppConfig {
   developerMode: boolean;
   showSelectedTipsWindow: boolean;
   completion: {
+    completionOnPaste: boolean;
     debounceDelay: number;
     interactionUnlockDelay: number;
     prefixLineCount: number;
+    recentFileCount: number;
     suffixLineCount: number;
   },
   completionConfigs: {
