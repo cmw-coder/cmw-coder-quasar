@@ -31,10 +31,23 @@ export interface AppConfig {
     prefixLineCount: number;
     recentFileCount: number;
     suffixLineCount: number;
-  },
+  };
   completionConfigs: {
     function: CompletionConfigType;
     line: CompletionConfigType;
     snippet: CompletionConfigType;
   };
 }
+
+export type AppCompletionBooleanConfig = Pick<
+  AppConfig['completion'],
+  'completionOnPaste'
+>;
+export type AppCompletionNumberConfig = Pick<
+  AppConfig['completion'],
+  | 'debounceDelay'
+  | 'interactionUnlockDelay'
+  | 'prefixLineCount'
+  | 'recentFileCount'
+  | 'suffixLineCount'
+>;

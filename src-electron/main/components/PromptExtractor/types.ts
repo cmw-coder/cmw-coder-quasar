@@ -55,8 +55,10 @@ export class PromptElements {
     this.slicedPrefix = this.fullPrefix;
     this.fullSuffix = fullSuffix.trimEnd();
     this.slicedSuffix = this.fullSuffix;
-    this.functionPrefix = getFunctionPrefix(this.fullPrefix) ?? this.slicedPrefix;
-    this.functionSuffix = getFunctionSuffix(this.fullSuffix) ?? this.slicedSuffix;
+    this.functionPrefix =
+      getFunctionPrefix(this.fullPrefix) ?? this.slicedPrefix;
+    this.functionSuffix =
+      getFunctionSuffix(this.fullSuffix) ?? this.slicedSuffix;
     this.insideFunction = !!this.functionPrefix;
 
     this.currentFilePrefix = this.insideFunction

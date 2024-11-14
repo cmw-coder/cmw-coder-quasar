@@ -1,6 +1,11 @@
 import { Reference } from 'cmw-coder-subprocess';
 
-import { CaretPosition, Completions, KeptRatio, SymbolInfo } from 'shared/types/common';
+import {
+  CaretPosition,
+  Completions,
+  KeptRatio,
+  SymbolInfo,
+} from 'shared/types/common';
 import { ShortcutConfig } from 'shared/types/keys';
 import { AppConfig } from 'shared/types/service/ConfigServiceTrait/types';
 

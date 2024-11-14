@@ -22,7 +22,12 @@ import {
   formatTimelines,
 } from 'main/services/StatisticsService/utils';
 import { NEW_LINE_REGEX } from 'shared/constants/common';
-import { CaretPosition, Completions, CompletionType, KeptRatio } from 'shared/types/common';
+import {
+  CaretPosition,
+  Completions,
+  CompletionType,
+  KeptRatio,
+} from 'shared/types/common';
 import { StatisticsServiceTrait } from 'shared/types/service/StatisticsServiceTrait';
 import statisticsLog from 'main/components/Loggers/statisticsLog';
 import { FileRecorderManager } from 'main/services/StatisticsService/FileRecorderManager';
@@ -155,7 +160,7 @@ export class StatisticsService implements StatisticsServiceTrait {
       count,
       editedContent,
       ratio,
-      version
+      version,
     });
 
     statisticsLog.debug('completionEdit.requestData', {

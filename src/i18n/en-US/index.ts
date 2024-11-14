@@ -115,15 +115,17 @@ export default {
           title: 'Code Completion',
           productLine: 'Product Line',
           model: 'Model',
+          completionOnPaste: 'Trigger Completion On Paste',
           debounceDelay: 'Trigger Debounce Delay',
           interactionUnlockDelay: 'Interaction Unlock Delay',
           prefixLineCount: 'Prefix Line Count',
+          recentFileCount: 'Recent File Count',
           suffixLineCount: 'Suffix Line Count',
           rangeHint: 'Range: {min} ~ {max}',
         },
         tooltips: {
           resetToDefault: 'Reset to default',
-        }
+        },
       },
       GeneralCard: {
         labels: {

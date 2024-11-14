@@ -1,19 +1,21 @@
-import { AppConfig } from 'shared/types/service/ConfigServiceTrait/types';
+import {
+  AppCompletionBooleanConfig,
+  AppCompletionNumberConfig,
+} from 'shared/types/service/ConfigServiceTrait/types';
 
-export const COMPLETION_CONFIG_CONSTANTS: Record<
-  keyof AppConfig['completion'],
-  | {
-      default: boolean;
-    }
-  | {
-      default: number;
-      min: number;
-      max: number;
-    }
+export const COMPLETION_CONFIG_BOOLEAN_CONSTANTS: Record<
+  keyof AppCompletionBooleanConfig,
+  { default: boolean }
 > = {
   completionOnPaste: {
     default: true,
   },
+};
+
+export const COMPLETION_CONFIG_NUMBER_CONSTANTS: Record<
+  keyof AppCompletionNumberConfig,
+  { default: number; min: number; max: number }
+> = {
   debounceDelay: {
     default: 50,
     min: 0,
