@@ -53,9 +53,9 @@
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-vue": "^9.26.0",
-    "prettier": "^3.2.5",
-    "tree-sitter-c": "^0.21.4",
-    "tree-sitter-cli": "^0.22.6",
+    "prettier": "^3.3.3",
+    "tree-sitter-c": "^0.23.1",
+    "tree-sitter-cli": "^0.24.4",
     "typescript": "^5.4.5"
   },
   "engines": {

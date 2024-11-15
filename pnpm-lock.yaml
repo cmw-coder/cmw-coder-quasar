@@ -127,14 +127,14 @@ importers:
         specifier: ^9.26.0
         version: 9.27.0(eslint@8.57.0)
       prettier:
-        specifier: ^3.2.5
+        specifier: ^3.3.3
         version: 3.3.3
       tree-sitter-c:
-        specifier: ^0.21.4
-        version: 0.21.4(tree-sitter@0.21.1)
+        specifier: ^0.23.1
+        version: 0.23.1(tree-sitter@0.21.1)
       tree-sitter-cli:
-        specifier: ^0.22.6
-        version: 0.22.6
+        specifier: ^0.24.4
+        version: 0.24.4
       typescript:
         specifier: ^5.4.5
         version: 5.5.4
@@ -2057,6 +2057,10 @@ packages:
     resolution: {integrity: sha512-OSs33Z9yWr148JZcbZd5WiAXhh/n9z8TxQcdMhIOlpN9AhWpLfvVFO73+m77bBABQMaY9XSvIa+qk0jlI7Gcaw==}
     hasBin: true
 
+  node-gyp-build@4.8.3:
+    resolution: {integrity: sha512-EMS95CMJzdoSKoIiXo8pxKoL8DYxwIZXYlLmgPb8KUv794abpnLK6ynsCAWNliOjREKruYKdzbh76HHYUHX7nw==}
+    hasBin: true
+
   node-releases@2.0.18:
     resolution: {integrity: sha512-d9VeXT4SJ7ZeOqGX6R5EM022wpL+eWPooLI+5UpWn2jCT1aosUQEhQP214x33Wkwx3JQMvIm+tIoVOdodFS40g==}
 
@@ -2634,17 +2638,17 @@ packages:
     resolution: {integrity: sha512-o5sSPKEkg/DIQNmH43V0/uerLrpzVedkUh8tGNvaeXpfpuwjKenlSox/2O/BTlZUtEe+JG7s5YhEz608PlAHRA==}
     engines: {node: '>=0.6'}
 
-  tree-sitter-c@0.21.4:
-    resolution: {integrity: sha512-IahxFIhXiY15SUlrt2upBiKSBGdOaE1fjKLK1Ik5zxqGHf6T1rvr3IJrovbsE5sXhypx7Hnmf50gshsppaIihA==}
+  tree-sitter-c@0.23.1:
+    resolution: {integrity: sha512-cBNEz/LF0CdIPDqEiAgFnH8CZTZ/CLgaOVzG5m5g1BXD6w2eCAgPva1A2SzkTK5gvnPdEigcQbzpfRwntrbrcQ==}
     peerDependencies:
       tree-sitter: ^0.21.0
-      tree_sitter: '*'
     peerDependenciesMeta:
-      tree_sitter:
+      tree-sitter:
         optional: true
 
-  tree-sitter-cli@0.22.6:
-    resolution: {integrity: sha512-s7mYOJXi8sIFkt/nLJSqlYZP96VmKTc3BAwIX0rrrlRxWjWuCwixFqwzxWZBQz4R8Hx01iP7z3cT3ih58BUmZQ==}
+  tree-sitter-cli@0.24.4:
+    resolution: {integrity: sha512-I4sdtDidnujYL0tR0Re9q0UJt5KrITf2m+GMHjT4LH6IC6kpM6eLzSR7RS36Z4t5ZQBjDHvg2QUJHAWQi3P2TA==}
+    engines: {node: '>=12.0.0'}
     hasBin: true
 
   tree-sitter@0.21.1:
@@ -5105,7 +5109,10 @@ snapshots:
 
   node-addon-api@8.1.0: {}
 
-  node-gyp-build@4.8.1: {}
+  node-gyp-build@4.8.1:
+    optional: true
+
+  node-gyp-build@4.8.3: {}
 
   node-releases@2.0.18: {}
 
@@ -5685,18 +5692,20 @@ snapshots:
 
   toidentifier@1.0.1: {}
 
-  tree-sitter-c@0.21.4(tree-sitter@0.21.1):
+  tree-sitter-c@0.23.1(tree-sitter@0.21.1):
     dependencies:
       node-addon-api: 8.1.0
-      node-gyp-build: 4.8.1
+      node-gyp-build: 4.8.3
+    optionalDependencies:
       tree-sitter: 0.21.1
 
-  tree-sitter-cli@0.22.6: {}
+  tree-sitter-cli@0.24.4: {}
 
   tree-sitter@0.21.1:
     dependencies:
       node-addon-api: 8.1.0
       node-gyp-build: 4.8.1
+    optional: true
 
   truncate-utf8-bytes@1.0.2:
     dependencies:
