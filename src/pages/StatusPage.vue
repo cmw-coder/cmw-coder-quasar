@@ -55,9 +55,12 @@ onBeforeUnmount(() => {
         size="2em"
         v-if="statusData.status === Status.ERROR"
       />
-      <div class="app-img-icon" v-if="statusData.status === Status.READY">
-        <img src="/icons/favicon-32x32.png" alt="app-icons" />
-      </div>
+      <q-icon
+        name="mdi-robot"
+        color="green"
+        size="2em"
+        v-if="statusData.status === Status.READY"
+      />
     </div>
     <div class="status-content" :title="statusData.detail" @click="onClick">
       <div class="text">
