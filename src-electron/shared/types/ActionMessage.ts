@@ -1,6 +1,7 @@
 import { CompletionCacheClientMessage } from 'shared/types/WsMessage';
 import { Selection } from 'shared/types/Selection';
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
+import { StatusData } from 'shared/types/service/WindowServiceTrait/StatusWindowType';
 
 export enum ActionType {
   CompletionClear = 'CompletionClear',
@@ -17,6 +18,7 @@ export enum ActionType {
   SwitchLocale = 'SwitchLocale',
   MainWindowActivePage = 'MainWindowActivePage',
   MainWindowCheckPageReady = 'MainWindowCheckPageReady',
+  UpdateStatus = 'UpdateStatus',
 }
 
 export interface ActionMessage {
@@ -153,6 +155,14 @@ export class MainWindowCheckPageReadyActionMessage implements ActionMessage {
   }
 }
 
+export class UpdateStatusActionMessage implements ActionMessage {
+  type = ActionType.UpdateStatus;
+  data: StatusData;
+  constructor(data: StatusData) {
+    this.data = data;
+  }
+}
+
 export interface ActionMessageMapping {
   [ActionType.CompletionClear]: CompletionClearActionMessage;
   [ActionType.CompletionSet]: CompletionSetActionMessage;
@@ -168,4 +178,5 @@ export interface ActionMessageMapping {
   [ActionType.SwitchLocale]: SwitchLocaleActionMessage;
   [ActionType.MainWindowActivePage]: MainWindowActivePageActionMessage;
   [ActionType.MainWindowCheckPageReady]: MainWindowCheckPageReadyActionMessage;
+  [ActionType.UpdateStatus]: UpdateStatusActionMessage;
 }

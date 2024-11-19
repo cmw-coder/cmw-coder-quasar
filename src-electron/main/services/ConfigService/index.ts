@@ -3,7 +3,6 @@ import ElectronStore from 'electron-store';
 import { injectable } from 'inversify';
 import { userInfo } from 'os';
 import { extend } from 'quasar';
-
 import { container } from 'main/services';
 import { WindowService } from 'main/services/WindowService';
 import { LinseerConfigStore } from 'main/stores/config';
@@ -71,11 +70,12 @@ export class ConfigService implements ConfigServiceTrait {
         }
         store.set('completion', {
           debounceDelay: COMPLETION_CONFIG_CONSTANTS.debounceDelay.default,
-          interactionUnlockDelay: COMPLETION_CONFIG_CONSTANTS.interactionUnlockDelay.default,
+          interactionUnlockDelay:
+            COMPLETION_CONFIG_CONSTANTS.interactionUnlockDelay.default,
           prefixLineCount: COMPLETION_CONFIG_CONSTANTS.prefixLineCount.default,
           suffixLineCount: COMPLETION_CONFIG_CONSTANTS.suffixLineCount.default,
         });
-      }
+      },
     },
   });
 

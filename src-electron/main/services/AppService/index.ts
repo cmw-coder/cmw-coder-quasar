@@ -63,6 +63,7 @@ export class AppService implements AppServiceTrait {
 
   private _initApplication() {
     log.info(`OS version: ${version()} (${release()})`);
+    app.disableHardwareAcceleration();
     Menu.setApplicationMenu(null);
     if (!app.requestSingleInstanceLock()) {
       app.quit();
@@ -122,6 +123,10 @@ export class AppService implements AppServiceTrait {
       // 创建代码窗口
       this._windowService.getWindow(WindowType.Completions).create();
       this._windowService.getWindow(WindowType.Completions).initReCreateTimer();
+
+      // 创建状态窗口
+      this._windowService.getWindow(WindowType.Status).create();
+      this._windowService.getWindow(WindowType.Status).show();
 
       // 创建代码选中提示窗口
       this._windowService.getWindow(WindowType.SelectionTips).create();

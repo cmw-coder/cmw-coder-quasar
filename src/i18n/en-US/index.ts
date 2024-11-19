@@ -123,7 +123,7 @@ export default {
         },
         tooltips: {
           resetToDefault: 'Reset to default',
-        }
+        },
       },
       GeneralCard: {
         labels: {
@@ -447,6 +447,13 @@ export default {
       labels: {
         addToChat: 'Add to chat (Ctrl + Alt + I)',
         review: 'Review highlight code (Ctrl + Alt + L)',
+      },
+    },
+    StatusPage: {
+      labels: {
+        ERROR: 'Error',
+        GENERATING: 'Generating...',
+        READY: 'Ready',
       },
     },
   },

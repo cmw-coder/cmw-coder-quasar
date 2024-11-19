@@ -54,6 +54,8 @@ import { MODULE_PATH } from 'main/components/PromptExtractor/constants';
 import { getService } from 'main/services';
 import { ConfigService } from 'main/services/ConfigService';
 import statisticsLog from 'main/components/Loggers/statisticsLog';
+import { UpdateStatusActionMessage } from 'shared/types/ActionMessage';
+import { Status } from 'shared/types/service/WindowServiceTrait/StatusWindowType';
 
 @injectable()
 export class WebsocketService implements WebsocketServiceTrait {
@@ -329,6 +331,13 @@ export class WebsocketService implements WebsocketServiceTrait {
           );
 
           completionLog.debug('WsAction.CompletionGenerate', data);
+          const statusWindow = this._windowService.getWindow(WindowType.Status);
+          statusWindow.sendMessageToRenderer(
+            new UpdateStatusActionMessage({
+              status: Status.GENERATING,
+              detail: '触发生成...',
+            }),
+          );
           const promptElements =
             await this._promptExtractor.getPromptComponents(
               actionId,
@@ -352,6 +361,12 @@ export class WebsocketService implements WebsocketServiceTrait {
               actionId,
               completions,
             );
+            statusWindow.sendMessageToRenderer(
+              new UpdateStatusActionMessage({
+                status: Status.READY,
+                detail: '就绪',
+              }),
+            );
 
             return new CompletionGenerateServerMessage({
               actionId,
@@ -363,6 +378,13 @@ export class WebsocketService implements WebsocketServiceTrait {
           this._statisticsReporterService
             .completionNoResults(actionId)
             .catch((e) => completionLog.error(e));
+
+          statusWindow.sendMessageToRenderer(
+            new UpdateStatusActionMessage({
+              status: Status.ERROR,
+              detail: '生成失败',
+            }),
+          );
 
           return new CompletionGenerateServerMessage({
             message: 'No completion',

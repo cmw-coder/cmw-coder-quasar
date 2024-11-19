@@ -36,6 +36,7 @@ export const WINDOW_URL_MAPPING: Record<WindowType, string> = {
   [WindowType.ProjectId]: '/floating/project-id',
   [WindowType.Update]: '/floating/update',
   [WindowType.Welcome]: '/floating/welcome',
+  [WindowType.Status]: '/floating/status',
 };
 
 export const MAIN_WINDOW_PAGE_URL_MAPPING: Record<MainWindowPageType, string> =

@@ -19,7 +19,7 @@ importers:
         version: 1.7.7
       cmw-coder-subprocess:
         specifier: github:cmw-coder/cmw-coder-subprocess
-        version: https://codeload.github.com/cmw-coder/cmw-coder-subprocess/tar.gz/3721333d8a3aaa6738808a9e751b7c2fabdc3d2a
+        version: https://codeload.github.com/cmw-coder/cmw-coder-subprocess/tar.gz/76827dff3661a4bf8ce6faa90f261f6584035865
       electron-log:
         specifier: ^5.1.4
         version: 5.1.7
@@ -954,8 +954,8 @@ packages:
     resolution: {integrity: sha512-JQHZ2QMW6l3aH/j6xCqQThY/9OH4D/9ls34cgkUBiEeocRTU04tHfKPBsUK1PqZCUQM7GiA0IIXJSuXHI64Kbg==}
     engines: {node: '>=0.8'}
 
-  cmw-coder-subprocess@https://codeload.github.com/cmw-coder/cmw-coder-subprocess/tar.gz/3721333d8a3aaa6738808a9e751b7c2fabdc3d2a:
-    resolution: {tarball: https://codeload.github.com/cmw-coder/cmw-coder-subprocess/tar.gz/3721333d8a3aaa6738808a9e751b7c2fabdc3d2a}
+  cmw-coder-subprocess@https://codeload.github.com/cmw-coder/cmw-coder-subprocess/tar.gz/76827dff3661a4bf8ce6faa90f261f6584035865:
+    resolution: {tarball: https://codeload.github.com/cmw-coder/cmw-coder-subprocess/tar.gz/76827dff3661a4bf8ce6faa90f261f6584035865}
     version: 0.0.1
 
   color-convert@2.0.1:
@@ -4163,7 +4163,7 @@ snapshots:
 
   clone@1.0.4: {}
 
-  cmw-coder-subprocess@https://codeload.github.com/cmw-coder/cmw-coder-subprocess/tar.gz/3721333d8a3aaa6738808a9e751b7c2fabdc3d2a:
+  cmw-coder-subprocess@https://codeload.github.com/cmw-coder/cmw-coder-subprocess/tar.gz/76827dff3661a4bf8ce6faa90f261f6584035865:
     dependencies:
       diff-match-patch: 1.0.5
       diff-match-patch-wasm-node: 1.0.0

@@ -8,4 +8,5 @@ export enum WindowType {
   ProjectId = 'ProjectId',
   Update = 'Update',
   Welcome = 'Welcome',
+  Status = 'Status',
 }

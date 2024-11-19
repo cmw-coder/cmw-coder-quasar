@@ -243,7 +243,9 @@ export class PromptExtractor {
     );
   }
 
-  private async _getFrequentFunctions(inputs: RawInputs): Promise<string | undefined> {
+  private async _getFrequentFunctions(
+    inputs: RawInputs,
+  ): Promise<string | undefined> {
     const windowService = container.get<WindowService>(ServiceType.WINDOW);
     const fileStructureAnalysisProcessSubprocess = windowService.getWindow(
       WindowType.Completions,

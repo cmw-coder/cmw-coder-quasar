@@ -123,7 +123,7 @@ export default {
         },
         tooltips: {
           resetToDefault: '重置为默认值',
-        }
+        },
       },
       GeneralCard: {
         labels: {
@@ -443,6 +443,13 @@ export default {
       labels: {
         addToChat: '添加到聊天中 (Ctrl + Alt + I)',
         review: '评审选中代码 (Ctrl + Alt + L)',
+      },
+    },
+    StatusPage: {
+      labels: {
+        ERROR: '错误',
+        GENERATING: '生成中...',
+        READY: '准备就绪',
       },
     },
   },

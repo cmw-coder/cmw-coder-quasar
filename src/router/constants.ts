@@ -100,6 +100,17 @@ export const routes: RouteRecordRaw[] = [
           },
         },
       },
+      {
+        path: 'status',
+        components: {
+          default: () => import('pages/StatusPage.vue'),
+        },
+        props: {
+          header: {
+            windowType: WindowType.Status,
+          },
+        },
+      },
     ],
   },
   {
