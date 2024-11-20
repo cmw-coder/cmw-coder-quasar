@@ -31,6 +31,7 @@ const onClick = () => {
 
 onMounted(() => {
   actionApi.register(ActionType.UpdateStatus, (data) => {
+    console.log('UpdateStatus', data);
     statusData.value = data;
   });
 });
