@@ -8,13 +8,20 @@ import {
 import { ServiceType } from 'shared/types/service';
 import { api_question } from 'main/request/api';
 import { CompletionType } from 'shared/types/common';
-import { getService } from 'main/services';
+import { container, getService } from 'main/services';
 import completionLog from 'main/components/Loggers/completionLog';
 import completionQuestionLog from 'main/components/Loggers/completionQuestionLog';
+import { WindowService } from 'main/services/WindowService';
+import { WindowType } from 'shared/types/WindowType';
+import { UpdateStatusActionMessage } from 'shared/types/ActionMessage';
+import { Status } from 'shared/types/service/WindowServiceTrait/StatusWindowType';
 
 export class PromptProcessor {
   private _abortController?: AbortController;
   private _cache = new LRUCache<Completions>(100);
+  private _statusWindow = container
+    .get<WindowService>(ServiceType.WINDOW)
+    .getWindow(WindowType.Status);
 
   async process(
     actionId: string,
@@ -22,11 +29,16 @@ export class PromptProcessor {
     projectId: string,
   ): Promise<Completions | undefined> {
     const appConfig = await getService(ServiceType.CONFIG).getConfigs();
-
     const cacheKey = createHash('sha1')
       .update(promptElements.fullPrefix.trimEnd())
       .digest('base64');
     const completionCached = this._cache.get(cacheKey);
+    this._statusWindow.sendMessageToRenderer(
+      new UpdateStatusActionMessage({
+        status: Status.READY,
+        detail: 'PromptProcessor.process.cacheHit',
+      }),
+    );
     if (completionCached) {
       completionLog.debug('PromptProcessor.process.cacheHit', completionCached);
       return completionCached;
@@ -50,6 +62,12 @@ export class PromptProcessor {
         : appConfig.completionConfigs.snippet;
 
     try {
+      this._statusWindow.sendMessageToRenderer(
+        new UpdateStatusActionMessage({
+          status: Status.GENERATING,
+          detail: 'PromptProcessor.process.requesting',
+        }),
+      );
       const questionParams = {
         question: await promptElements.stringify(completionType),
         maxTokens: completionConfig.maxTokenCount,
@@ -99,7 +117,20 @@ export class PromptProcessor {
           type: completionType,
         };
       }
+      this._statusWindow.sendMessageToRenderer(
+        new UpdateStatusActionMessage({
+          status: Status.ERROR,
+          detail: '生成为空',
+        }),
+      );
+      return undefined;
     } catch (e) {
+      this._statusWindow.sendMessageToRenderer(
+        new UpdateStatusActionMessage({
+          status: Status.ERROR,
+          detail: `Error: ${e}`,
+        }),
+      );
       completionLog.error('PromptProcessor.process.error', e);
       return undefined;
     }

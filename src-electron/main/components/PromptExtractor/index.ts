@@ -17,6 +17,8 @@ import { WindowService } from 'main/services/WindowService';
 import { WindowType } from 'shared/types/WindowType';
 import completionLog from 'main/components/Loggers/completionLog';
 import { asyncMemoizeWithLimit } from 'shared/utils';
+import { UpdateStatusActionMessage } from 'shared/types/ActionMessage';
+import { Status } from 'shared/types/service/WindowServiceTrait/StatusWindowType';
 
 export class PromptExtractor {
   private _globals: string = '';
@@ -30,6 +32,9 @@ export class PromptExtractor {
     minScore: 0.5,
   };
   private _memoizedApiRagCode = asyncMemoizeWithLimit(apiRagCode, 50);
+  private _statusWindow = container
+    .get<WindowService>(ServiceType.WINDOW)
+    .getWindow(WindowType.Status);
 
   async getPromptComponents(
     actionId: string,
@@ -57,7 +62,12 @@ export class PromptExtractor {
           this._includes = includes;
         }
       });
-
+      this._statusWindow.sendMessageToRenderer(
+        new UpdateStatusActionMessage({
+          status: Status.GENERATING,
+          detail: 'Generating prompt components...',
+        }),
+      );
       const [ragCode, relativeDefinitions, similarSnippets] = await Promise.all(
         [
           (async () => {
@@ -108,13 +118,6 @@ export class PromptExtractor {
       elements.includes = this._includes;
     }
     elements.ragCode = this._ragCode;
-
-    console.log('PromptExtractor.getPromptComponents', {
-      frequentFunctions: elements.frequentFunctions,
-      globals: elements.globals,
-      includes: elements.includes,
-      ragCode: this._ragCode,
-    });
 
     const similarSnippetsSliced = this._similarSnippets
       .filter(

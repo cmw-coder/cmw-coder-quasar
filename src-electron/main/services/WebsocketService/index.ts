@@ -304,6 +304,7 @@ export class WebsocketService implements WebsocketServiceTrait {
     this._registerWsAction(
       WsAction.CompletionGenerate,
       async ({ data }, pid) => {
+        const statusWindow = this._windowService.getWindow(WindowType.Status);
         const { caret, times } = data;
         const actionId = this._statisticsReporterService.completionBegin(
           caret,
@@ -313,6 +314,12 @@ export class WebsocketService implements WebsocketServiceTrait {
         );
         const project = this.getClientInfo(pid)?.currentProject;
         if (!project || !project.length) {
+          statusWindow.sendMessageToRenderer(
+            new UpdateStatusActionMessage({
+              status: Status.ERROR,
+              detail: 'Invalid project path',
+            }),
+          );
           return new CompletionGenerateServerMessage({
             result: 'failure',
             message: 'Invalid project path',
@@ -330,8 +337,11 @@ export class WebsocketService implements WebsocketServiceTrait {
             projectId,
           );
 
-          completionLog.debug('WsAction.CompletionGenerate', data);
-          const statusWindow = this._windowService.getWindow(WindowType.Status);
+          completionLog.debug('WsAction.CompletionGenerate', {
+            ...data,
+            prefix: 'Removed',
+            suffix: 'Removed',
+          });
           statusWindow.sendMessageToRenderer(
             new UpdateStatusActionMessage({
               status: Status.GENERATING,
@@ -378,20 +388,11 @@ export class WebsocketService implements WebsocketServiceTrait {
           this._statisticsReporterService
             .completionNoResults(actionId)
             .catch((e) => completionLog.error(e));
-
-          statusWindow.sendMessageToRenderer(
-            new UpdateStatusActionMessage({
-              status: Status.ERROR,
-              detail: '生成失败',
-            }),
-          );
-
           return new CompletionGenerateServerMessage({
             message: 'No completion',
             result: 'failure',
           });
         } catch (e) {
-          console.log(e);
           const error = <Error>e;
           let result: StandardResult['result'] = 'error';
           switch (error.cause) {

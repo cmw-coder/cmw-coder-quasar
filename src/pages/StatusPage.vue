@@ -78,7 +78,7 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  background-color: #4b5a5ca4;
+  background-color: #2c2c2ca4;
   opacity: 0.8;
   &.READY {
     border-top: 1px solid green;
