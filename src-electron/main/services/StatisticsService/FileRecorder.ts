@@ -5,6 +5,7 @@ import { ServiceType } from 'shared/types/service';
 import { WindowService } from 'main/services/WindowService';
 import { WindowType } from 'shared/types/WindowType';
 import diffLog from 'main/components/Loggers/diffLog';
+import { existsSync } from 'fs';
 
 const DESTROY_TIME = 1000 * 60 * 30;
 
@@ -37,7 +38,13 @@ export class FileRecorder {
   }
 
   async calculate() {
-    // TODO
+    // 如果文件已经不存在，则销毁
+    const isExisted = existsSync(this.filePath);
+    if (!isExisted) {
+      this.onDestroy();
+      return undefined;
+    }
+
     // 通过读取文件更改时间判断文件是否发生变化
     const newModifiedTime = await this.getFileModifiedTime();
     if (newModifiedTime.getTime() === this.lastModifiedTime.getTime()) {
