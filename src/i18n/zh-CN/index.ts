@@ -141,6 +141,9 @@ export default {
           hideSelectedTipsWindow: '隐藏选中提示窗口',
           hideSelectedTipsWindowNotice:
             '隐藏窗口后，选中提示窗口将不在选中代码后出现，后续操作可直接通过 CTRL + I/L 触发。',
+          hideStatusWindow: '隐藏状态窗口',
+          hideStatusWindowNotice:
+            '隐藏窗口后，应用启动后将不再显示悬浮状态窗口',
           baseServerUrl: '服务地址',
         },
       },

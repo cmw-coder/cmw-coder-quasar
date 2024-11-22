@@ -16,7 +16,7 @@ export class StatusWindow extends FloatingBaseWindow {
       width: 116,
       x: 200,
       y: 0,
-      show: true,
+      show: false,
       transparent: true,
     });
   }

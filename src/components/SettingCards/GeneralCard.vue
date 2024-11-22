@@ -75,6 +75,20 @@ const updateShowSelectedTipsWindow = async (value: boolean) => {
   showSelectedTipsWindowUpdating.value = false;
 };
 
+const showStatusWindow = ref(true);
+const showStatusWindowUpdating = ref(false);
+const updateShowStatusWindow = async (value: boolean) => {
+  showStatusWindowUpdating.value = true;
+  await configService.setConfig('showStatusWindow', value);
+  showStatusWindow.value = value;
+  showStatusWindowUpdating.value = false;
+  if (value) {
+    windowService.activeWindow(WindowType.Status);
+  } else {
+    windowService.hideWindow(WindowType.Status);
+  }
+};
+
 const updateLocale = async (value: Locale) => {
   locale.value = value.isoName;
   await configService.setLocale(value.isoName);
@@ -123,6 +137,10 @@ onMounted(async () => {
     (await configService.getConfig('locale')) ?? lang.getLocale() ?? 'en-US';
   theme.value = themes.find((t) => t.darkMode === darkMode) ?? theme.value;
   baseServerUrl.value = (await configService.getConfig('baseServerUrl')) || '';
+
+  const configs = await configService.getConfigs();
+  showSelectedTipsWindow.value = configs.showSelectedTipsWindow ?? true;
+  showStatusWindow.value = configs.showStatusWindow ?? true;
 });
 </script>
 
@@ -253,6 +271,27 @@ onMounted(async () => {
           </div>
         </q-item-section>
       </q-item>
+
+      <q-item
+        :disable="zoomFixUpdating"
+        tag="label"
+        :title="i18n('labels.hideStatusWindowNotice')"
+      >
+        <q-item-section>
+          {{ i18n('labels.hideStatusWindow') }}
+        </q-item-section>
+        <q-item-section side>
+          <div class="row items-center">
+            <q-spinner v-show="showStatusWindowUpdating" size="sm" />
+            <q-toggle
+              :disable="showStatusWindowUpdating"
+              :model-value="!showStatusWindow"
+              @update:model-value="updateShowStatusWindow(!$event)"
+            />
+          </div>
+        </q-item-section>
+      </q-item>
+
       <q-item v-show="developerMode" clickable @click="push('developer')">
         <q-item-section>
           {{ i18n('labels.developerOptions') }}

@@ -126,14 +126,12 @@ export class AppService implements AppServiceTrait {
 
       // 创建状态窗口
       this._windowService.getWindow(WindowType.Status).create();
-      this._windowService.getWindow(WindowType.Status).show();
 
       // 创建代码选中提示窗口
       this._windowService.getWindow(WindowType.SelectionTips).create();
-      // for dev
-      // setTimeout(() => {
-      //   this._windowService.getWindow(WindowType.SelectionTips).show();
-      // }, 3000);
+      if (await this._configService.getConfig('showStatusWindow')) {
+        this._windowService.getWindow(WindowType.Status).show();
+      }
 
       // 引导配置基础环境（黄、绿区 | 红区 | 路由红区）
       if (config.networkZone === NetworkZone.Unknown) {

@@ -76,6 +76,10 @@ export class ConfigService implements ConfigServiceTrait {
           suffixLineCount: COMPLETION_CONFIG_CONSTANTS.suffixLineCount.default,
         });
       },
+      '1.4.5': (store) => {
+        log.info('Upgrading "appConfig" store to 1.4.5 ...');
+        store.set('showStatusWindow', true);
+      },
     },
   });
 

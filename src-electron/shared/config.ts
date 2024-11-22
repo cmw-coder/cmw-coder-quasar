@@ -58,6 +58,13 @@ export const defaultAppConfigNetworkZoneMap: Record<NetworkZone, AppConfig> = {
         temperature: 0.2,
       },
     },
+    completion: {
+      debounceDelay: 100,
+      interactionUnlockDelay: 150,
+      prefixLineCount: 200,
+      suffixLineCount: 80,
+    },
+    showStatusWindow: true,
   },
   [NetworkZone.Public]: {
     locale: 'ZH-CN',
@@ -98,6 +105,13 @@ export const defaultAppConfigNetworkZoneMap: Record<NetworkZone, AppConfig> = {
         temperature: 0.2,
       },
     },
+    completion: {
+      debounceDelay: 100,
+      interactionUnlockDelay: 150,
+      prefixLineCount: 200,
+      suffixLineCount: 80,
+    },
+    showStatusWindow: true,
   },
   [NetworkZone.Secure]: {
     locale: 'ZH-CN',
@@ -138,6 +152,13 @@ export const defaultAppConfigNetworkZoneMap: Record<NetworkZone, AppConfig> = {
         temperature: 0.2,
       },
     },
+    completion: {
+      debounceDelay: 100,
+      interactionUnlockDelay: 150,
+      prefixLineCount: 200,
+      suffixLineCount: 80,
+    },
+    showStatusWindow: true,
   },
   [NetworkZone.Unknown]: {
     locale: 'ZH-CN',
@@ -178,5 +199,12 @@ export const defaultAppConfigNetworkZoneMap: Record<NetworkZone, AppConfig> = {
         temperature: 0.2,
       },
     },
+    completion: {
+      debounceDelay: 100,
+      interactionUnlockDelay: 150,
+      prefixLineCount: 200,
+      suffixLineCount: 80,
+    },
+    showStatusWindow: true,
   },
 };
