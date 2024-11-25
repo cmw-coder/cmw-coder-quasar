@@ -78,7 +78,7 @@ export class ConfigService implements ConfigServiceTrait {
       },
       '1.4.5': (store) => {
         log.info('Upgrading "appConfig" store to 1.4.5 ...');
-        store.set('showStatusWindow', true);
+        store.set('showStatusWindow', false);
       },
     },
   });
