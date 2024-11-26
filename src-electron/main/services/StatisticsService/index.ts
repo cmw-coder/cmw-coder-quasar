@@ -246,7 +246,7 @@ export class StatisticsService implements StatisticsServiceTrait {
       data.position.line >= 0 &&
       data.position.line != this._lastCursorPosition.line
     ) {
-      statisticsLog.debug('completionSelected', {
+      statisticsLog.debug('completionSelected.success', {
         completions: data.completions,
         position: data.position,
         projectId: data.projectId,
@@ -265,6 +265,14 @@ export class StatisticsService implements StatisticsServiceTrait {
       )
         .then((data) => api_reportSKU(data))
         .catch((e) => statisticsLog.warn(e));
+    } else {
+      statisticsLog.debug('completionSelected.filtered', {
+        completions: data.completions,
+        position: data.position,
+        lastPosition: this._lastCursorPosition,
+        projectId: data.projectId,
+        version,
+      });
     }
     return candidate;
   }
