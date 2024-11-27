@@ -7,7 +7,10 @@ import { container } from 'main/services';
 import { WindowService } from 'main/services/WindowService';
 import { LinseerConfigStore } from 'main/stores/config';
 import { NetworkZone, defaultAppConfigNetworkZoneMap } from 'shared/config';
-import { COMPLETION_CONFIG_CONSTANTS } from 'shared/constants/config';
+import {
+  COMPLETION_CONFIG_BOOLEAN_CONSTANTS,
+  COMPLETION_CONFIG_NUMBER_CONSTANTS,
+} from 'shared/constants/config';
 import {
   SwitchLocaleActionMessage,
   ToggleDarkModeActionMessage,
@@ -68,13 +71,17 @@ export class ConfigService implements ConfigServiceTrait {
         if (locale === 'ZH-CN') {
           store.set('locale', 'zh-CN');
         }
-        store.set('completion', {
-          debounceDelay: COMPLETION_CONFIG_CONSTANTS.debounceDelay.default,
-          interactionUnlockDelay:
-            COMPLETION_CONFIG_CONSTANTS.interactionUnlockDelay.default,
-          prefixLineCount: COMPLETION_CONFIG_CONSTANTS.prefixLineCount.default,
-          suffixLineCount: COMPLETION_CONFIG_CONSTANTS.suffixLineCount.default,
-        });
+        store.set(
+          'completion',
+          Object.fromEntries([
+            ...Object.entries(COMPLETION_CONFIG_BOOLEAN_CONSTANTS).map(
+              ([key, value]) => [key, value.default],
+            ),
+            ...Object.entries(COMPLETION_CONFIG_NUMBER_CONSTANTS).map(
+              ([key, value]) => [key, value.default],
+            ),
+          ]),
+        );
       },
       '1.4.5': (store) => {
         log.info('Upgrading "appConfig" store to 1.4.5 ...');
@@ -107,7 +114,7 @@ export class ConfigService implements ConfigServiceTrait {
 
   async setDarkMode(dark: boolean) {
     this.appConfigStore.set('darkMode', dark);
-    // Notify other window that theme has changed
+    // Notify other windows that theme has changed
     const windowService = container.get<WindowService>(ServiceType.WINDOW);
     windowService.windowMap.forEach((baseWindow) => {
       baseWindow.sendMessageToRenderer(new ToggleDarkModeActionMessage(dark));
@@ -116,7 +123,7 @@ export class ConfigService implements ConfigServiceTrait {
 
   async setLocale(locale: string): Promise<void> {
     this.appConfigStore.set('locale', locale);
-    // Notify other window that locale has changed
+    // Notify other windows that locale has changed
     const windowService = container.get<WindowService>(ServiceType.WINDOW);
     windowService.windowMap.forEach((baseWindow) => {
       baseWindow.sendMessageToRenderer(new SwitchLocaleActionMessage(locale));

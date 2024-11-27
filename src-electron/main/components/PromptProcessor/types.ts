@@ -1,5 +1,3 @@
-import { CompletionType } from 'shared/types/common';
-
 class ListNode<T> {
   public prev: ListNode<T> | null = null;
   public next: ListNode<T> | null = null;
@@ -75,9 +73,4 @@ export class LRUCache<T> {
       this.tail = node;
     }
   }
-}
-
-export interface Completions {
-  candidates: string[];
-  type: CompletionType;
 }

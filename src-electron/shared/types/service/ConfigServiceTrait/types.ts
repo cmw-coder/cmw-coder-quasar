@@ -26,9 +26,11 @@ export interface AppConfig {
   showSelectedTipsWindow: boolean;
   showStatusWindow: boolean;
   completion: {
+    completionOnPaste: boolean;
     debounceDelay: number;
     interactionUnlockDelay: number;
     prefixLineCount: number;
+    recentFileCount: number;
     suffixLineCount: number;
   };
   completionConfigs: {
@@ -37,3 +39,16 @@ export interface AppConfig {
     snippet: CompletionConfigType;
   };
 }
+
+export type AppCompletionBooleanConfig = Pick<
+  AppConfig['completion'],
+  'completionOnPaste'
+>;
+export type AppCompletionNumberConfig = Pick<
+  AppConfig['completion'],
+  | 'debounceDelay'
+  | 'interactionUnlockDelay'
+  | 'prefixLineCount'
+  | 'recentFileCount'
+  | 'suffixLineCount'
+>;

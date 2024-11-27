@@ -3,7 +3,6 @@ import { DateTime } from 'luxon';
 import { uid } from 'quasar';
 
 import { PromptElements } from 'main/components/PromptExtractor/types';
-import { Completions } from 'main/components/PromptProcessor/types';
 import {
   api_collection_code_v2,
   api_collection_copy,
@@ -17,14 +16,18 @@ import {
 import {
   CompletionData,
   CopyPasteData,
-  KeptRatio,
 } from 'main/services/StatisticsService/types';
 import {
   constructData,
   formatTimelines,
 } from 'main/services/StatisticsService/utils';
 import { NEW_LINE_REGEX } from 'shared/constants/common';
-import { CaretPosition, CompletionType } from 'shared/types/common';
+import {
+  CaretPosition,
+  Completions,
+  CompletionType,
+  KeptRatio,
+} from 'shared/types/common';
 import { StatisticsServiceTrait } from 'shared/types/service/StatisticsServiceTrait';
 import statisticsLog from 'main/components/Loggers/statisticsLog';
 import { FileRecorderManager } from 'main/services/StatisticsService/FileRecorderManager';
@@ -157,7 +160,7 @@ export class StatisticsService implements StatisticsServiceTrait {
       count,
       editedContent,
       ratio,
-      version
+      version,
     });
 
     statisticsLog.debug('completionEdit.requestData', {
@@ -243,7 +246,7 @@ export class StatisticsService implements StatisticsServiceTrait {
       data.position.line >= 0 &&
       data.position.line != this._lastCursorPosition.line
     ) {
-      statisticsLog.debug('completionSelected', {
+      statisticsLog.debug('completionSelected.success', {
         completions: data.completions,
         position: data.position,
         projectId: data.projectId,
@@ -262,6 +265,14 @@ export class StatisticsService implements StatisticsServiceTrait {
       )
         .then((data) => api_reportSKU(data))
         .catch((e) => statisticsLog.warn(e));
+    } else {
+      statisticsLog.debug('completionSelected.filtered', {
+        completions: data.completions,
+        position: data.position,
+        lastPosition: this._lastCursorPosition,
+        projectId: data.projectId,
+        version,
+      });
     }
     return candidate;
   }

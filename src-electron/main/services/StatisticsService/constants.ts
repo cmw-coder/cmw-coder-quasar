@@ -1,5 +1,4 @@
-import { CompletionType } from 'shared/types/common';
-import { KeptRatio } from 'main/services/StatisticsService/types';
+import { CompletionType, KeptRatio } from 'shared/types/common';
 
 export const skuNameAcceptMapping: Record<CompletionType, string> = {
   [CompletionType.Function]: 'KEEP_MULTI',

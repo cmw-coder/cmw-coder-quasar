@@ -28,7 +28,7 @@ const init = async () => {
   const iframeDom = document.getElementById(
     'iframeAiAssistant',
   ) as HTMLIFrameElement;
-  iframeDom.src = `${baseUrl}/h3c-ai-assistant/ui-v2/`;
+  iframeDom.src = `${baseUrl}/h3c-ai-assistant/ui-v3/`;
   if (iframeDom.contentWindow) {
     aiAssistantIframe.init(iframeDom.contentWindow, baseUrl, refreshHandle);
   }

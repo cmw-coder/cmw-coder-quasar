@@ -4,7 +4,7 @@ import { FileRecorder } from 'main/services/StatisticsService/FileRecorder';
 import { constructData } from 'main/services/StatisticsService/utils';
 import packageJson from 'root/package.json';
 
-const CALCULATE_TIME = 1000 * 60 * 1;
+const CALCULATE_TIME = 1000 * 60;
 
 interface RecordResult {
   added: number;
