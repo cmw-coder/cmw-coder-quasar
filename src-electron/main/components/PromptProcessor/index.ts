@@ -8,7 +8,7 @@ import {
 import { ServiceType } from 'shared/types/service';
 import { api_question } from 'main/request/api';
 import { Completions, CompletionType } from 'shared/types/common';
-import { getService } from 'main/services';
+import { container, getService } from 'main/services';
 import completionLog from 'main/components/Loggers/completionLog';
 import completionQuestionLog from 'main/components/Loggers/completionQuestionLog';
 import { WindowService } from 'main/services/WindowService';
