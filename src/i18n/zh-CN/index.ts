@@ -143,6 +143,9 @@ export default {
           hideSelectedTipsWindow: '隐藏选中提示窗口',
           hideSelectedTipsWindowNotice:
             '隐藏窗口后，选中提示窗口将不在选中代码后出现，后续操作可直接通过 CTRL + I/L 触发。',
+          hideStatusWindow: '隐藏状态窗口',
+          hideStatusWindowNotice:
+            '隐藏窗口后，应用启动后将不再显示悬浮状态窗口',
           baseServerUrl: '服务地址',
         },
       },
@@ -445,6 +448,13 @@ export default {
       labels: {
         addToChat: '添加到聊天中 (Ctrl + Alt + I)',
         review: '评审选中代码 (Ctrl + Alt + L)',
+      },
+    },
+    StatusPage: {
+      labels: {
+        ERROR: '错误',
+        GENERATING: '生成中...',
+        READY: '准备就绪',
       },
     },
   },

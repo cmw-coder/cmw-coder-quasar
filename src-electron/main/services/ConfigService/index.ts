@@ -3,7 +3,6 @@ import ElectronStore from 'electron-store';
 import { injectable } from 'inversify';
 import { userInfo } from 'os';
 import { extend } from 'quasar';
-
 import { container } from 'main/services';
 import { WindowService } from 'main/services/WindowService';
 import { LinseerConfigStore } from 'main/stores/config';
@@ -72,7 +71,6 @@ export class ConfigService implements ConfigServiceTrait {
         if (locale === 'ZH-CN') {
           store.set('locale', 'zh-CN');
         }
-
         store.set(
           'completion',
           Object.fromEntries([
@@ -84,6 +82,10 @@ export class ConfigService implements ConfigServiceTrait {
             ),
           ]),
         );
+      },
+      '1.4.5': (store) => {
+        log.info('Upgrading "appConfig" store to 1.4.5 ...');
+        store.set('showStatusWindow', false);
       },
     },
   });

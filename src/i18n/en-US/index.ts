@@ -143,6 +143,9 @@ export default {
           hideSelectedTipsWindow: 'Hide Selected Tips Window',
           hideSelectedTipsWindowNotice:
             'After hiding the window, the selected prompt window will no longer appear after selecting the code, and subsequent operations can be triggered directly by pressing CTRL + I/L.',
+          hideStatusWindow: 'Hide App Status Window',
+          hideStatusWindowNotice:
+            'After hiding the window, the floating status window will no longer appear when the application is launched',
           baseServerUrl: 'Base Server Address',
         },
       },
@@ -449,6 +452,13 @@ export default {
       labels: {
         addToChat: 'Add to chat (Ctrl + Alt + I)',
         review: 'Review highlight code (Ctrl + Alt + L)',
+      },
+    },
+    StatusPage: {
+      labels: {
+        ERROR: 'Error',
+        GENERATING: 'Generating...',
+        READY: 'Ready',
       },
     },
   },

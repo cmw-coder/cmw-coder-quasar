@@ -54,6 +54,8 @@ import { MODULE_PATH } from 'main/components/PromptExtractor/constants';
 import { getService } from 'main/services';
 import { ConfigService } from 'main/services/ConfigService';
 import statisticsLog from 'main/components/Loggers/statisticsLog';
+import { UpdateStatusActionMessage } from 'shared/types/ActionMessage';
+import { Status } from 'shared/types/service/WindowServiceTrait/StatusWindowType';
 
 @injectable()
 export class WebsocketService implements WebsocketServiceTrait {
@@ -302,6 +304,7 @@ export class WebsocketService implements WebsocketServiceTrait {
     this._registerWsAction(
       WsAction.CompletionGenerate,
       async ({ data }, pid) => {
+        const statusWindow = this._windowService.getWindow(WindowType.Status);
         const { caret, times } = data;
         const actionId = this._statisticsReporterService.completionBegin(
           caret,
@@ -311,6 +314,12 @@ export class WebsocketService implements WebsocketServiceTrait {
         );
         const project = this.getClientInfo(pid)?.currentProject;
         if (!project || !project.length) {
+          statusWindow.sendMessageToRenderer(
+            new UpdateStatusActionMessage({
+              status: Status.ERROR,
+              detail: 'Invalid project path',
+            }),
+          );
           return new CompletionGenerateServerMessage({
             result: 'failure',
             message: 'Invalid project path',
@@ -328,7 +337,17 @@ export class WebsocketService implements WebsocketServiceTrait {
             projectId,
           );
 
-          completionLog.debug('WsAction.CompletionGenerate', data);
+          completionLog.debug('WsAction.CompletionGenerate', {
+            ...data,
+            prefix: 'Removed',
+            suffix: 'Removed',
+          });
+          statusWindow.sendMessageToRenderer(
+            new UpdateStatusActionMessage({
+              status: Status.GENERATING,
+              detail: '触发生成...',
+            }),
+          );
           const promptElements =
             await this._promptExtractor.getPromptComponents(
               actionId,
@@ -352,6 +371,12 @@ export class WebsocketService implements WebsocketServiceTrait {
               actionId,
               completions,
             );
+            statusWindow.sendMessageToRenderer(
+              new UpdateStatusActionMessage({
+                status: Status.READY,
+                detail: '就绪',
+              }),
+            );
 
             return new CompletionGenerateServerMessage({
               actionId,
@@ -363,13 +388,11 @@ export class WebsocketService implements WebsocketServiceTrait {
           this._statisticsReporterService
             .completionNoResults(actionId)
             .catch((e) => completionLog.error(e));
-
           return new CompletionGenerateServerMessage({
             message: 'No completion',
             result: 'failure',
           });
         } catch (e) {
-          console.log(e);
           const error = <Error>e;
           let result: StandardResult['result'] = 'error';
           switch (error.cause) {

@@ -19,8 +19,8 @@ import { BaseWindow } from 'main/services/WindowService/types/BaseWindow';
 import { ConfigService } from 'main/services/ConfigService';
 import { DataStoreService } from 'main/services/DataStoreService';
 import { WebsocketService } from 'main/services/WebsocketService';
-
 import { SelectionTipsWindow } from 'main/services/WindowService/types/SelectionTipsWindow';
+import { StatusWindow } from 'main/services/WindowService/types/StatusWindow';
 import { ExtraData, Selection } from 'shared/types/Selection';
 import { Feedback, ReviewData } from 'cmw-coder-subprocess';
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
@@ -39,6 +39,7 @@ interface WindowMap {
   [WindowType.Update]: UpdateWindow;
   [WindowType.Welcome]: WelcomeWindow;
   [WindowType.SelectionTips]: SelectionTipsWindow;
+  [WindowType.Status]: StatusWindow;
 }
 
 @injectable()
@@ -63,6 +64,7 @@ export class WindowService implements WindowServiceTrait {
     // this.windowMap.set(WindowType.Quake, new MainWindow());
     this.windowMap.set(WindowType.Update, new UpdateWindow());
     this.windowMap.set(WindowType.SelectionTips, new SelectionTipsWindow());
+    this.windowMap.set(WindowType.Status, new StatusWindow());
 
     this.trayIcon = new TrayIcon();
 
@@ -91,7 +93,6 @@ export class WindowService implements WindowServiceTrait {
       window = BrowserWindow.getFocusedWindow();
     }
     if (window) {
-      console.log('setWindowSize', type, size);
       window.setSize(size.width, size.height);
     }
   }

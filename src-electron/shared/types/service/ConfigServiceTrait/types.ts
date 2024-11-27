@@ -24,6 +24,7 @@ export interface AppConfig {
   darkMode: boolean;
   developerMode: boolean;
   showSelectedTipsWindow: boolean;
+  showStatusWindow: boolean;
   completion: {
     completionOnPaste: boolean;
     debounceDelay: number;

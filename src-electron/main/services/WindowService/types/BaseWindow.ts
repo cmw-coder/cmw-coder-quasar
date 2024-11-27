@@ -170,8 +170,8 @@ export abstract class BaseWindow {
       ...storedWindowData,
       ..._windowData,
     };
-    const _y = (y || 0) <= 0 ? 0 : y || 0;
-    const _x = (x || 0) <= 0 ? 0 : x || 0;
+    const _y = (y || 0) < 0 ? 0 : y || 0;
+    const _x = (x || 0) < 0 ? 0 : x || 0;
     // 设置窗口尺寸
     if (height && width) {
       this._window.setSize(width, height);
