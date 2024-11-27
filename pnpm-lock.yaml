@@ -2053,10 +2053,6 @@ packages:
     resolution: {integrity: sha512-yBY+qqWSv3dWKGODD6OGE6GnTX7Q2r+4+DfpqxHSHh8x0B4EKP9+wVGLS6U/AM1vxSNNmUEuIV5EGhYwPpfOwQ==}
     engines: {node: ^18 || ^20 || >= 21}
 
-  node-gyp-build@4.8.1:
-    resolution: {integrity: sha512-OSs33Z9yWr148JZcbZd5WiAXhh/n9z8TxQcdMhIOlpN9AhWpLfvVFO73+m77bBABQMaY9XSvIa+qk0jlI7Gcaw==}
-    hasBin: true
-
   node-gyp-build@4.8.3:
     resolution: {integrity: sha512-EMS95CMJzdoSKoIiXo8pxKoL8DYxwIZXYlLmgPb8KUv794abpnLK6ynsCAWNliOjREKruYKdzbh76HHYUHX7nw==}
     hasBin: true
@@ -5109,9 +5105,6 @@ snapshots:
 
   node-addon-api@8.1.0: {}
 
-  node-gyp-build@4.8.1:
-    optional: true
-
   node-gyp-build@4.8.3: {}
 
   node-releases@2.0.18: {}
@@ -5704,7 +5697,7 @@ snapshots:
   tree-sitter@0.21.1:
     dependencies:
       node-addon-api: 8.1.0
-      node-gyp-build: 4.8.1
+      node-gyp-build: 4.8.3
     optional: true
 
   truncate-utf8-bytes@1.0.2:
