@@ -10,7 +10,7 @@ export class TrayIcon {
     resolve(
       __dirname,
       process.env.PROD
-        ? 'favicon.ico'
+        ? 'favicons/light.ico'
         : '../../src-electron/assets/icons/icon.ico',
     ),
   );
