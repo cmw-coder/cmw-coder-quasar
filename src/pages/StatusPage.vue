@@ -51,7 +51,7 @@ onBeforeUnmount(() => {
         : 'rgba(127,127,127,0.3)',
       borderColor: colorMap[statusData.status],
     }"
-    style="border-width: 2px;border-style: solid"
+    style="border-width: 2px; border-style: solid"
   >
     <q-img
       v-if="statusData.status == Status.READY"
