@@ -11,7 +11,7 @@ export class TrayIcon {
       __dirname,
       process.env.PROD
         ? 'favicons/light.ico'
-        : '../../src-electron/assets/icons/icon.ico',
+        : '../../public/favicons/light.ico',
     ),
   );
   private _menuEntryMap = new Map<MenuEntry, () => void>();

@@ -11,44 +11,34 @@ import {
 import { getService } from 'main/services';
 import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
-import { CompletionType, SymbolInfo } from 'shared/types/common';
-import { CompletionGenerateClientMessage } from 'shared/types/WsMessage';
+import { CaretPosition, CompletionType, SymbolInfo } from 'shared/types/common';
 import { ServiceType } from 'shared/types/service';
 
 export class PromptElements {
-  // 全上文
-  fullPrefix: string;
-  slicedPrefix: string;
-  // 全下文
-  fullSuffix: string;
-  slicedSuffix: string;
-  // 函数内部时上文
+  private readonly _isInsideFunction: boolean;
+
   functionPrefix: string;
-  // 函数内部时下文
   functionSuffix: string;
-  language?: string;
+  fullPrefix: string;
+  fullSuffix: string;
+  slicedPrefix: string;
+  slicedSuffix: string;
+  // Optionals
+  comment?: string;
+  currentFilePrefix: string;
   file?: string;
   folder?: string;
   frequentFunctions?: string;
   globals?: string;
-  includes?: string;
-  repo?: string;
-  // SimilarSnippet
-  similarSnippet?: string;
-  // RelativeDefinition
-  symbols?: string;
-  // ImportList
   importList?: string;
-  // Comment
-  comment?: string;
-  // NeighborSnippet
+  includes?: string;
+  language?: string;
   neighborSnippet?: string;
-  // CurrentFilePrefix
-  currentFilePrefix: string;
-  // RagCode
+  pasteContent?: string;
   ragCode?: string;
-  // 是否在函数内部
-  insideFunction: boolean;
+  relativeDefinition?: string;
+  repo?: string;
+  similarSnippet?: string;
 
   constructor(fullPrefix: string, fullSuffix: string) {
     this.fullPrefix = fullPrefix.trimStart();
@@ -59,62 +49,31 @@ export class PromptElements {
       getFunctionPrefix(this.fullPrefix) ?? this.slicedPrefix;
     this.functionSuffix =
       getFunctionSuffix(this.fullSuffix) ?? this.slicedSuffix;
-    this.insideFunction = !!this.functionPrefix;
+    this._isInsideFunction = !!this.functionPrefix;
 
-    this.currentFilePrefix = this.insideFunction
+    this.currentFilePrefix = this._isInsideFunction
       ? this.functionPrefix
       : this.slicedPrefix;
   }
 
   async stringify(completionType: CompletionType) {
     const dataStoreService = getService(ServiceType.DATA_STORE);
-    const { common, commonMulti } = (
-      await dataStoreService.getActiveModelContent()
-    ).prompt['c'].other.code;
+    let promptString: string;
+    if (this.pasteContent?.length) {
+      promptString = (await dataStoreService.getActiveModelContent()).template[
+        'PasteFix'
+      ];
+    } else {
+      const { common, commonMulti } = (
+        await dataStoreService.getActiveModelContent()
+      ).prompt['c'].other.code;
+      promptString =
+        completionType === CompletionType.Line ? common : commonMulti;
+    }
 
-    let question =
-      completionType === CompletionType.Line ? common : commonMulti;
-    question = question.replaceAll(
-      '%{NeighborSnippet}%',
-      this.neighborSnippet || '',
-    );
-    question = question.replaceAll(
-      '%{CurrentFilePrefix}%',
-      removeFunctionHeader(this.currentFilePrefix, completionType),
-    );
-    question = question.replaceAll(
-      '%{NearCode}%',
-      removeFunctionHeader(
-        this.insideFunction ? this.functionPrefix : this.slicedPrefix,
-        completionType,
-      ),
-    );
-    question = question.replaceAll(
-      '%{SuffixCode}%',
-      completionType === CompletionType.Function
-        ? ''
-        : removeFunctionHeader(
-            this.insideFunction ? this.functionSuffix : this.slicedSuffix,
-            completionType,
-          ),
-    );
-    question = question.replaceAll('%{Language}%', this.language || '');
-    question = question.replaceAll('%{FilePath}%', this.file || '');
-    question = question.replaceAll('%{RepoName}%', this.folder || '');
-    question = question.replaceAll(
-      '%{SimilarSnippet}%',
-      this.similarSnippet || '',
-    );
-    question = question.replaceAll(
-      '%{RelativeDefinition}%',
-      this.symbols || '',
-    );
-    question = question.replaceAll('%{ImportList}%', this.importList || '');
-    question = question.replaceAll('%{Comment}%', this.comment || '');
-    question = question.replaceAll('%{RagCode}%', this.ragCode || '');
     completionLog.info('Template Length: ', {
       ragCode: this.ragCode?.length,
-      symbols: this.symbols?.length,
+      symbols: this.relativeDefinition?.length,
       similarSnippet: this.similarSnippet?.length,
       slicedPrefix: this.slicedPrefix.length,
       slicedSuffix: this.slicedSuffix.length,
@@ -124,7 +83,38 @@ export class PromptElements {
       includes: this.includes?.length,
       frequentFunctions: this.frequentFunctions?.length,
     });
-    return question.trim();
+    return promptString
+      .replaceAll('%{Comment}%', this.comment ?? '')
+      .replaceAll(
+        '%{CurrentFilePrefix}%',
+        removeFunctionHeader(this.currentFilePrefix, completionType),
+      )
+      .replaceAll('%{FilePath}%', this.file ?? '')
+      .replaceAll('%{ImportList}%', this.importList ?? '')
+      .replaceAll('%{Language}%', this.language ?? '')
+      .replaceAll(
+        '%{NearCode}%',
+        removeFunctionHeader(
+          this._isInsideFunction ? this.functionPrefix : this.slicedPrefix,
+          completionType,
+        ),
+      )
+      .replaceAll('%{NeighborSnippet}%', this.neighborSnippet ?? '')
+      .replaceAll('%{PasteContent}%', this.pasteContent ?? '')
+      .replaceAll('%{RagCode}%', this.ragCode ?? '')
+      .replaceAll('%{RelativeDefinition}%', this.relativeDefinition ?? '')
+      .replaceAll('%{RepoName}%', this.folder ?? '')
+      .replaceAll('%{SimilarSnippet}%', this.similarSnippet ?? '')
+      .replaceAll(
+        '%{SuffixCode}%',
+        completionType === CompletionType.Function
+          ? ''
+          : removeFunctionHeader(
+              this._isInsideFunction ? this.functionSuffix : this.slicedSuffix,
+              completionType,
+            ),
+      )
+      .trim();
   }
 }
 
@@ -141,14 +131,25 @@ export class RawInputs {
   symbols: SymbolInfo[];
 
   constructor(
-    rawData: CompletionGenerateClientMessage['data'],
+    rawData: {
+      caret: CaretPosition;
+      content?: string;
+      path: string;
+      prefix: string;
+      recentFiles: string[];
+      suffix: string;
+      symbols: SymbolInfo[];
+    },
     project: string,
   ) {
-    const { caret, path, prefix, recentFiles, suffix, symbols } = rawData;
+    const { content, caret, path, prefix, recentFiles, suffix, symbols } = rawData;
     const decodedPrefix = decode(Buffer.from(prefix, 'base64'), 'utf-8');
     const decodedSuffix = decode(Buffer.from(suffix, 'base64'), 'utf-8');
     this.document = new TextDocument(path);
     this.elements = new PromptElements(decodedPrefix, decodedSuffix);
+    if (content?.length) {
+      this.elements.pasteContent = content;
+    }
     this.position = new Position(caret.line, caret.character);
     this.project = project;
     this.recentFiles = recentFiles.filter(

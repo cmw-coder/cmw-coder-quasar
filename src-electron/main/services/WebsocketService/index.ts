@@ -36,13 +36,13 @@ import { ServiceType } from 'shared/types/service';
 import { WebsocketServiceTrait } from 'shared/types/service/WebsocketServiceTrait';
 import { WindowType } from 'shared/types/WindowType';
 import {
-  CompletionGenerateServerMessage,
+  CompletionGenerateServerMessage, EditorPasteServerMessage,
   HandShakeClientMessage,
   ReviewRequestServerMessage,
   SettingSyncServerMessage,
   StandardResult,
   WsAction,
-  WsMessageMapping,
+  WsMessageMapping
 } from 'shared/types/WsMessage';
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import { Selection } from 'shared/types/Selection';
@@ -50,7 +50,6 @@ import { Reference } from 'cmw-coder-subprocess';
 import completionLog from 'main/components/Loggers/completionLog';
 import reviewLog from 'main/components/Loggers/reviewLog';
 import { NEW_LINE_REGEX } from 'shared/constants/common';
-import { MODULE_PATH } from 'main/components/PromptExtractor/constants';
 import { getService } from 'main/services';
 import { ConfigService } from 'main/services/ConfigService';
 import statisticsLog from 'main/components/Loggers/statisticsLog';
@@ -470,85 +469,126 @@ export class WebsocketService implements WebsocketServiceTrait {
       }
     });
     this._registerWsAction(WsAction.EditorPaste, async ({ data }, pid) => {
-      const clientInfo = this._clientInfoMap.get(pid);
-      statisticsLog.log('粘贴操作记录', clientInfo?.currentFile);
-      if (
-        clientInfo &&
-        clientInfo.currentFile?.length &&
-        clientInfo.currentProject?.length
-      ) {
-        try {
-          const { content, position, recentFiles } = data;
-          const { id: projectId } = getProjectData(clientInfo.currentProject);
-          this._statisticsReporterService
-            .copiedLines(
-              content.split(NEW_LINE_REGEX).length,
-              projectId,
-              getClientVersion(pid),
-            )
-            .catch();
-          if (clientInfo.currentFile) {
-            this._statisticsReporterService.fileRecorderManager.addFileRecorder(
-              clientInfo.currentFile,
-              projectId,
-            );
+      const statusWindow = this._windowService.getWindow(WindowType.Status);
+      const { caret, content, times, recentFiles } = data;
+      const actionId = this._statisticsReporterService.completionBegin(
+        caret,
+        times.start,
+        times.symbol,
+        times.end,
+      );
+      const project = this.getClientInfo(pid)?.currentProject;
+      if (!project || !project.length) {
+        statusWindow.sendMessageToRenderer(
+          new UpdateStatusActionMessage({
+            status: Status.ERROR,
+            detail: 'Invalid project path',
+          }),
+        );
+        return new EditorPasteServerMessage({
+          result: 'failure',
+          message: 'Invalid project path',
+        });
+      }
+      try {
+        const { id: projectId } = getProjectData(project);
+        const rawInputs = new RawInputs(data, project);
+
+        this._statisticsReporterService
+          .copiedContents({
+            content,
+            context: {
+              prefix: rawInputs.elements.fullPrefix,
+              suffix: rawInputs.elements.fullSuffix,
+            },
+            path: rawInputs.document.fileName,
+            position: caret,
+            projectId,
+            recentFiles,
+            repo:rawInputs.elements.repo ?? '',
+            svn: (
+              this._dataStoreService.getAppdata().project[projectId]?.svn ??
+              []
+            ).map(({ directory }) => directory),
+            userId: (await getService(ServiceType.CONFIG).getConfigs())
+              .username,
+          })
+          .catch();
+        this._statisticsReporterService
+          .copiedLines(
+            content.split(NEW_LINE_REGEX).length,
+            projectId,
+            getClientVersion(pid),
+          )
+          .catch();
+        this._statisticsReporterService.fileRecorderManager.addFileRecorder(
+          rawInputs.document.fileName,
+          projectId,
+        );
+
+        statusWindow.sendMessageToRenderer(
+          new UpdateStatusActionMessage({
+            status: Status.GENERATING,
+            detail: '触发生成...',
+          }),
+        );
+        const promptElements =
+          await this._promptExtractor.getPromptComponents(
+            actionId,
+            new RawInputs(data, project),
+          );
+        this._statisticsReporterService.completionUpdateEndGetPromptComponentsTime(
+          actionId,
+        );
+        this._statisticsReporterService.completionUpdatePromptElements(
+          actionId,
+          promptElements,
+        );
+
+        const completions = await this._promptProcessor.process(
+          actionId,
+          promptElements,
+          projectId,
+        );
+        if (completions) {
+          this._statisticsReporterService.completionGenerated(
+            actionId,
+            completions,
+          );
+          statusWindow.sendMessageToRenderer(
+            new UpdateStatusActionMessage({
+              status: Status.READY,
+              detail: '就绪',
+            }),
+          );
+
+          return new EditorPasteServerMessage({
+            actionId,
+            completions,
+            result: 'success',
+          });
+        }
+
+        this._statisticsReporterService
+          .completionNoResults(actionId)
+          .catch((e) => completionLog.error(e));
+        return new EditorPasteServerMessage({
+          message: 'No completion',
+          result: 'failure',
+        });
+      } catch (e) {
+        const error = <Error>e;
+        switch (error.cause) {
+          case CompletionErrorCause.projectData: {
+            console.log('CompletionErrorCause.projectData', error);
+            this._windowService.getWindow(WindowType.ProjectId).show();
+            this._windowService
+              .getWindow(WindowType.ProjectId)
+              .setProject(project);
+            break;
           }
-          const document = new TextDocument(clientInfo.currentFile);
-          let repo = '';
-          for (const [key, value] of Object.entries(MODULE_PATH)) {
-            if (document.fileName.includes(value)) {
-              repo = key;
-              break;
-            }
-          }
-          this._statisticsReporterService
-            .copiedContents({
-              content,
-              context: {
-                prefix: document.getText(
-                  new Range(
-                    Math.max(position.line - 30, 0),
-                    0,
-                    position.line,
-                    position.character,
-                  ),
-                ),
-                suffix: document.getText(
-                  new Range(
-                    position.line,
-                    position.character,
-                    Math.min(position.line + 31, document.lineCount),
-                    0,
-                  ),
-                ),
-              },
-              path: document.fileName,
-              position,
-              projectId,
-              recentFiles,
-              repo,
-              svn: (
-                this._dataStoreService.getAppdata().project[projectId]?.svn ??
-                []
-              ).map(({ directory }) => directory),
-              userId: (await getService(ServiceType.CONFIG).getConfigs())
-                .username,
-            })
-            .catch();
-        } catch (e) {
-          const error = <Error>e;
-          switch (error.cause) {
-            case CompletionErrorCause.projectData: {
-              console.log('CompletionErrorCause.projectData', error);
-              this._windowService.getWindow(WindowType.ProjectId).show();
-              this._windowService
-                .getWindow(WindowType.ProjectId)
-                .setProject(clientInfo.currentProject);
-              break;
-            }
-            default: {
-              break;
-            }
+          default: {
+            break;
           }
         }
       }

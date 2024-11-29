@@ -14,6 +14,7 @@ enum TemplateType {
   SecurityIssues = 'SecurityIssues',
   ShortLineCode = 'ShortLineCode',
   StyleIssues = 'StyleIssues',
+  PasteFix = 'PasteFix',
 }
 
 interface PromptTemplate {

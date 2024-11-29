@@ -26,6 +26,13 @@ export const defaultModelConfig: ModelConfig = {
     ShortLineCode: '%{code}%',
     GenerateCommitMessage:
       '我想让你充当一个提交信息生成器。我将为你提供此次变更的详情内容，我希望你能用常规的提交格式生成一条合适的提交信息，提交信息尽量不要超过100字符。不要写任何解释或其他文字，只需回复提交信息。如下是变更详情：\n%{diffText}%',
+    PasteFix:
+      '%{RagCode}%\n%{NeighborSnippet}%\n' +
+      '<fim_prefix>基于参考待补全代码片段（可以选择修正或保留该段代码）完成函数的补全\n' +
+      '参考待补全代码:\n' +
+      '%{PasteContent}%\n' +
+      '\n' +
+      '%{CurrentFilePrefix}%<fim_suffix>%{SuffixCode}%<fim_middle>'
   },
   config: {
     modelKey: 'LS13B',

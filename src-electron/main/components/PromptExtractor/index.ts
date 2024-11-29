@@ -166,7 +166,7 @@ export class PromptExtractor {
     }
 
     if (this._relativeDefinitions.length) {
-      elements.symbols = this._relativeDefinitions
+      elements.relativeDefinition = this._relativeDefinitions
         .map((relativeDefinition) => relativeDefinition.content)
         .join('\n');
 
