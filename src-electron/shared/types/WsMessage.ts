@@ -160,11 +160,14 @@ export interface EditorFocusStateClientMessage extends WsMessage {
 
 export interface EditorPasteClientMessage extends WsMessage {
   action: WsAction.EditorPaste;
-  data: CompletionGenerateClientMessage['data'] & { content: string };
-}
-
-export class EditorPasteServerMessage extends CompletionGenerateServerMessage{
-  action = WsAction.EditorPaste;
+  data: {
+    content: string;
+    position: {
+      character: number;
+      line: number;
+    };
+    recentFiles: string[];
+  };
 }
 
 export interface EditorSelectionClientMessage extends WsMessage {
