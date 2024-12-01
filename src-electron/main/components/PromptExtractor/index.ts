@@ -42,8 +42,8 @@ export class PromptExtractor {
     similarSnippetCount: number = 1,
   ): Promise<PromptElements> {
     const { elements, document, position, recentFiles } = inputs;
-    const queryPrefix = elements.functionPrefix ?? elements.slicedPrefix;
-    const querySuffix = elements.functionSuffix ?? elements.slicedSuffix;
+    const queryPrefix = elements.functionPrefix;
+    const querySuffix = elements.functionSuffix;
 
     if (position.line != this._lastCaretPosition.line) {
       this._getFrequentFunctions(inputs).then((frequentFunctions) => {
@@ -132,76 +132,32 @@ export class PromptExtractor {
 
     // 拼接 neighborSnippet currentFilePrefix
     if (similarSnippetsSliced.length) {
-      elements.similarSnippet = similarSnippetsSliced
+      elements.similarSnippetSelf = similarSnippetsSliced
+        .filter(
+          (item) =>
+            item.path.toLocaleLowerCase() ===
+            document.fileName.toLocaleLowerCase(),
+        )
         .map((similarSnippet) => similarSnippet.content)
         .join('\n');
 
-      const selfFileSimilarSnippets = similarSnippetsSliced.filter(
-        (item) =>
-          item.path.toLocaleLowerCase() ===
-          document.fileName.toLocaleLowerCase(),
-      );
-      const otherFileSimilarSnippets = similarSnippetsSliced.filter(
-        (item) =>
-          item.path.toLocaleLowerCase() !==
-          document.fileName.toLocaleLowerCase(),
-      );
-
-      if (selfFileSimilarSnippets.length) {
-        elements.currentFilePrefix =
-          selfFileSimilarSnippets
-            .map((similarSnippet) => similarSnippet.content)
-            .join('\n') +
-          '\n' +
-          elements.currentFilePrefix;
-      }
-      if (otherFileSimilarSnippets.length) {
-        elements.neighborSnippet = otherFileSimilarSnippets
-          .map(
-            (similarSnippet) =>
-              `<file_sep>${basename(similarSnippet.path)}\n${similarSnippet.content}`,
-          )
-          .join('\n');
-      }
+      elements.similarSnippetNeighbor = similarSnippetsSliced
+        .filter(
+          (item) =>
+            item.path.toLocaleLowerCase() !==
+            document.fileName.toLocaleLowerCase(),
+        )
+        .map(
+          (similarSnippet) =>
+            `<file_sep>${basename(similarSnippet.path)}\n${similarSnippet.content}`,
+        )
+        .join('\n');
     }
 
     if (this._relativeDefinitions.length) {
       elements.relativeDefinition = this._relativeDefinitions
         .map((relativeDefinition) => relativeDefinition.content)
         .join('\n');
-
-      // const selfFileRelativeDefinitions = this._relativeDefinitions.filter(
-      //   (item) =>
-      //     item.path.toLocaleLowerCase() ===
-      //     document.fileName.toLocaleLowerCase(),
-      // );
-      // const otherFileRelativeDefinitions = this._relativeDefinitions.filter(
-      //   (item) =>
-      //     item.path.toLocaleLowerCase() !==
-      //     document.fileName.toLocaleLowerCase(),
-      // );
-      elements.currentFilePrefix =
-        this._relativeDefinitions
-          .map((relativeDefinition) => relativeDefinition.content)
-          .join('\n') +
-        '\n' +
-        elements.currentFilePrefix;
-
-      // 本文件全局变量
-      if (elements.globals) {
-        elements.currentFilePrefix =
-          elements.globals + '\n' + elements.currentFilePrefix;
-      }
-      // 本文件高频接口的函数声明
-      if (elements.frequentFunctions) {
-        elements.currentFilePrefix =
-          elements.frequentFunctions + '\n' + elements.currentFilePrefix;
-      }
-      // 本文件 include 块
-      if (elements.includes) {
-        elements.currentFilePrefix =
-          elements.includes + '\n' + elements.currentFilePrefix;
-      }
     }
 
     return elements;

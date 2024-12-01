@@ -4,29 +4,29 @@ import { basename, dirname } from 'path';
 import completionLog from 'main/components/Loggers/completionLog';
 import { MODULE_PATH } from 'main/components/PromptExtractor/constants';
 import {
-  getFunctionPrefix,
-  getFunctionSuffix,
+  calculateFunctionPrefix,
+  calculateFunctionSuffix,
   removeFunctionHeader,
 } from 'main/components/PromptExtractor/utils';
 import { getService } from 'main/services';
 import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
-import { CompletionType, SymbolInfo } from 'shared/types/common';
+import { CompletionType, GenerateType, SymbolInfo } from 'shared/types/common';
 import { ServiceType } from 'shared/types/service';
 import { CompletionGenerateClientMessage } from 'shared/types/WsMessage';
+import { TemplateType } from 'shared/types/service/DataStoreServiceTrait/types';
 
 export class PromptElements {
   private readonly _isInsideFunction: boolean;
 
   functionPrefix: string;
   functionSuffix: string;
+  fullInfix: string;
   fullPrefix: string;
   fullSuffix: string;
-  slicedPrefix: string;
-  slicedSuffix: string;
+  generateType: GenerateType;
   // Optionals
   comment?: string;
-  currentFilePrefix: string;
   file?: string;
   folder?: string;
   frequentFunctions?: string;
@@ -34,88 +34,128 @@ export class PromptElements {
   importList?: string;
   includes?: string;
   language?: string;
-  neighborSnippet?: string;
-  pasteContent?: string;
   ragCode?: string;
   relativeDefinition?: string;
   repo?: string;
-  similarSnippet?: string;
+  similarSnippetNeighbor?: string;
+  similarSnippetSelf?: string;
 
-  constructor(fullPrefix: string, fullSuffix: string) {
-    this.fullPrefix = fullPrefix.trimStart();
-    this.slicedPrefix = this.fullPrefix;
-    this.fullSuffix = fullSuffix.trimEnd();
-    this.slicedSuffix = this.fullSuffix;
-    this.functionPrefix =
-      getFunctionPrefix(this.fullPrefix) ?? this.slicedPrefix;
-    this.functionSuffix =
-      getFunctionSuffix(this.fullSuffix) ?? this.slicedSuffix;
+  constructor(
+    generateType: GenerateType,
+    context: CompletionGenerateClientMessage['data']['context'],
+  ) {
+    this.generateType = generateType;
+    this.fullInfix = context.infix;
+    this.fullPrefix = context.prefix.trimStart();
+    this.fullSuffix = context.suffix.trimEnd();
+    this.functionPrefix = calculateFunctionPrefix(this.fullPrefix);
+    this.functionSuffix = calculateFunctionSuffix(this.fullSuffix);
     this._isInsideFunction = !!this.functionPrefix;
-
-    this.currentFilePrefix = this._isInsideFunction
-      ? this.functionPrefix
-      : this.slicedPrefix;
   }
 
   async stringify(completionType: CompletionType) {
-    const dataStoreService = getService(ServiceType.DATA_STORE);
+    const activeModelContent = await getService(
+      ServiceType.DATA_STORE,
+    ).getActiveModelContent();
     let promptString: string;
-    if (this.pasteContent?.length) {
-      promptString = (await dataStoreService.getActiveModelContent()).template[
-        'PasteFix'
-      ];
-    } else {
-      const { common, commonMulti } = (
-        await dataStoreService.getActiveModelContent()
-      ).prompt['c'].other.code;
-      promptString =
-        completionType === CompletionType.Line ? common : commonMulti;
+    switch (this.generateType) {
+      case GenerateType.Common: {
+        const { common, commonMulti } =
+          activeModelContent.prompt['c'].other.code;
+        promptString =
+          completionType === CompletionType.Line ? common : commonMulti;
+        break;
+      }
+      case GenerateType.PasteReplace: {
+        promptString = activeModelContent.template[
+          TemplateType.PasteFix
+        ].replaceAll('%{PasteContent}%', this.fullInfix ?? '');
+        break;
+      }
+      default: {
+        throw new Error('Invalid generate type');
+      }
     }
 
-    completionLog.info('Template Length: ', {
-      ragCode: this.ragCode?.length,
-      symbols: this.relativeDefinition?.length,
-      similarSnippet: this.similarSnippet?.length,
-      slicedPrefix: this.slicedPrefix.length,
-      slicedSuffix: this.slicedSuffix.length,
-      currentFilePrefix: this.currentFilePrefix.length,
-      neighborSnippet: this.neighborSnippet?.length,
-      globals: this.globals?.length,
-      includes: this.includes?.length,
-      frequentFunctions: this.frequentFunctions?.length,
+    const currentFilePrefix = removeFunctionHeader(
+      this._calculateCurrentFilePrefix(),
+      completionType,
+    );
+    const nearCode = removeFunctionHeader(
+      this._isInsideFunction ? this.functionPrefix : this.fullPrefix,
+      completionType,
+    );
+    const suffixCode =
+      completionType === CompletionType.Function
+        ? ''
+        : removeFunctionHeader(
+            this._isInsideFunction ? this.functionSuffix : this.fullSuffix,
+            completionType,
+          );
+
+    completionLog.info('Template elements length: ', {
+      Comment: this.comment?.length,
+      CurrentFilePrefix: currentFilePrefix.length,
+      FilePath: this.file?.length,
+      ImportList: this.importList?.length,
+      Language: this.language?.length,
+      NearCode: nearCode.length,
+      NeighborSnippet: this.similarSnippetNeighbor?.length,
+      RagCode: this.ragCode?.length,
+      RelativeDefinition: this.relativeDefinition?.length,
+      RepoName: this.repo?.length,
+      SimilarSnippet: this.similarSnippetSelf?.length,
+      SuffixCode: suffixCode.length,
     });
+
     return promptString
       .replaceAll('%{Comment}%', this.comment ?? '')
-      .replaceAll(
-        '%{CurrentFilePrefix}%',
-        removeFunctionHeader(this.currentFilePrefix, completionType),
-      )
+      .replaceAll('%{CurrentFilePrefix}%', currentFilePrefix)
       .replaceAll('%{FilePath}%', this.file ?? '')
       .replaceAll('%{ImportList}%', this.importList ?? '')
       .replaceAll('%{Language}%', this.language ?? '')
-      .replaceAll(
-        '%{NearCode}%',
-        removeFunctionHeader(
-          this._isInsideFunction ? this.functionPrefix : this.slicedPrefix,
-          completionType,
-        ),
-      )
-      .replaceAll('%{NeighborSnippet}%', this.neighborSnippet ?? '')
-      .replaceAll('%{PasteContent}%', this.pasteContent ?? '')
+      .replaceAll('%{NearCode}%', nearCode)
+      .replaceAll('%{NeighborSnippet}%', this.similarSnippetNeighbor ?? '')
       .replaceAll('%{RagCode}%', this.ragCode ?? '')
       .replaceAll('%{RelativeDefinition}%', this.relativeDefinition ?? '')
-      .replaceAll('%{RepoName}%', this.folder ?? '')
-      .replaceAll('%{SimilarSnippet}%', this.similarSnippet ?? '')
-      .replaceAll(
-        '%{SuffixCode}%',
-        completionType === CompletionType.Function
-          ? ''
-          : removeFunctionHeader(
-              this._isInsideFunction ? this.functionSuffix : this.slicedSuffix,
-              completionType,
-            ),
-      )
+      .replaceAll('%{RepoName}%', this.repo ?? '')
+      .replaceAll('%{SimilarSnippet}%', this.similarSnippetSelf ?? '')
+      .replaceAll('%{SuffixCode}%', suffixCode)
       .trim();
+  }
+
+  private _calculateCurrentFilePrefix() {
+    const currentFilePrefixList: string[] = [];
+    const prefix = this._isInsideFunction
+      ? this.functionPrefix
+      : this.fullPrefix;
+
+    completionLog.debug('CurrentFilePrefix elements length: ', {
+      includes: this.includes?.length,
+      frequentFunctions: this.frequentFunctions?.length,
+      globals: this.globals?.length,
+      relativeDefinition: this.relativeDefinition?.length,
+      selfSimilarSnippet: this.similarSnippetSelf?.length,
+      prefix,
+    });
+
+    if (this.includes?.length) {
+      currentFilePrefixList.push(this.includes);
+    }
+    if (this.frequentFunctions?.length) {
+      currentFilePrefixList.push(this.frequentFunctions);
+    }
+    if (this.globals?.length) {
+      currentFilePrefixList.push(this.globals);
+    }
+    if (this.relativeDefinition?.length) {
+      currentFilePrefixList.push(this.relativeDefinition);
+    }
+    if (this.similarSnippetSelf?.length) {
+      currentFilePrefixList.push(this.similarSnippetSelf);
+    }
+    currentFilePrefixList.push(prefix);
+    return currentFilePrefixList.join('\n');
   }
 }
 
@@ -135,11 +175,13 @@ export class RawInputs {
     rawData: CompletionGenerateClientMessage['data'],
     project: string,
   ) {
-    const { caret, path, prefix, recentFiles, suffix, symbols } = rawData;
-    const decodedPrefix = decode(Buffer.from(prefix, 'base64'), 'utf-8');
-    const decodedSuffix = decode(Buffer.from(suffix, 'base64'), 'utf-8');
+    const { type, caret, path, context, recentFiles, symbols } = rawData;
     this.document = new TextDocument(path);
-    this.elements = new PromptElements(decodedPrefix, decodedSuffix);
+    this.elements = new PromptElements(type, {
+      infix: decode(Buffer.from(context.infix, 'base64'), 'utf-8'),
+      prefix: decode(Buffer.from(context.prefix, 'base64'), 'utf-8'),
+      suffix: decode(Buffer.from(context.suffix, 'base64'), 'utf-8'),
+    });
     this.position = new Position(caret.line, caret.character);
     this.project = project;
     this.recentFiles = recentFiles.filter(

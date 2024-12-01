@@ -108,14 +108,14 @@ export class CompletionData {
       createTime: this.timelines.proxyEndEditorInfo.toFormat(
         'yyyy-MM-dd HH:mm:ss',
       ),
-      prefix: this.elements.slicedPrefix,
-      suffix: this.elements.slicedSuffix,
+      prefix: this.elements.fullPrefix,
+      suffix: this.elements.fullSuffix,
       repo: this.elements.repo ?? '',
       path: join(this.elements.folder ?? '', this.elements.file ?? ''),
       fileSuffix: this.elements.file
         ? extname(basename(this.elements.file))
         : '',
-      similarSnippet: this.elements.similarSnippet ?? '',
+      similarSnippet: this.elements.similarSnippetSelf ?? '',
       symbolList: this.elements.relativeDefinition ? [this.elements.relativeDefinition] : [],
       model: this.model ?? '',
       templateName: this.templateName ?? '',

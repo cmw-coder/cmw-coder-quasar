@@ -1,3 +1,4 @@
+import { Reference } from 'cmw-coder-subprocess';
 import log from 'electron-log/main';
 import { sync } from 'fast-glob';
 import { createServer } from 'http';
@@ -9,8 +10,8 @@ import { WebSocketServer } from 'ws';
 import { PromptExtractor } from 'main/components/PromptExtractor';
 import { RawInputs } from 'main/components/PromptExtractor/types';
 import {
-  getFunctionPrefix,
-  getFunctionSuffix,
+  calculateFunctionPrefix,
+  calculateFunctionSuffix,
 } from 'main/components/PromptExtractor/utils';
 import { PromptProcessor } from 'main/components/PromptProcessor';
 import { DataStoreService } from 'main/services/DataStoreService';
@@ -32,8 +33,20 @@ import {
   getClientVersion,
   getProjectData,
 } from 'main/utils/completion';
+import completionLog from 'main/components/Loggers/completionLog';
+import reviewLog from 'main/components/Loggers/reviewLog';
+import { NEW_LINE_REGEX } from 'shared/constants/common';
+import { MODULE_PATH } from 'main/components/PromptExtractor/constants';
+import { getService } from 'main/services';
+import { ConfigService } from 'main/services/ConfigService';
+import statisticsLog from 'main/components/Loggers/statisticsLog';
+import { UpdateStatusActionMessage } from 'shared/types/ActionMessage';
+import { GenerateType } from 'shared/types/common';
+import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import { ServiceType } from 'shared/types/service';
+import { Selection } from 'shared/types/Selection';
 import { WebsocketServiceTrait } from 'shared/types/service/WebsocketServiceTrait';
+import { Status } from 'shared/types/service/WindowServiceTrait/StatusWindowType';
 import { WindowType } from 'shared/types/WindowType';
 import {
   CompletionGenerateServerMessage,
@@ -44,18 +57,6 @@ import {
   WsAction,
   WsMessageMapping,
 } from 'shared/types/WsMessage';
-import { MainWindowPageType } from 'shared/types/MainWindowPageType';
-import { Selection } from 'shared/types/Selection';
-import { Reference } from 'cmw-coder-subprocess';
-import completionLog from 'main/components/Loggers/completionLog';
-import reviewLog from 'main/components/Loggers/reviewLog';
-import { NEW_LINE_REGEX } from 'shared/constants/common';
-import { MODULE_PATH } from 'main/components/PromptExtractor/constants';
-import { getService } from 'main/services';
-import { ConfigService } from 'main/services/ConfigService';
-import statisticsLog from 'main/components/Loggers/statisticsLog';
-import { UpdateStatusActionMessage } from 'shared/types/ActionMessage';
-import { Status } from 'shared/types/service/WindowServiceTrait/StatusWindowType';
 
 @injectable()
 export class WebsocketService implements WebsocketServiceTrait {
@@ -171,8 +172,8 @@ export class WebsocketService implements WebsocketServiceTrait {
     const similarSnippets = this._promptExtractor.getSimilarSnippets(
       document,
       position,
-      getFunctionPrefix(prefix) ?? prefix,
-      getFunctionSuffix(suffix) ?? suffix,
+      calculateFunctionPrefix(prefix),
+      calculateFunctionSuffix(suffix),
       recentFiles,
     );
     completionLog.debug('WebsocketService.getSimilarSnippets', {
@@ -380,6 +381,7 @@ export class WebsocketService implements WebsocketServiceTrait {
 
             return new CompletionGenerateServerMessage({
               actionId,
+              type: GenerateType.Common,
               completions,
               result: 'success',
             });

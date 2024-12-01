@@ -2,7 +2,7 @@ import { deleteComments } from 'main/utils/common';
 import { NEW_LINE_REGEX } from 'shared/constants/common';
 import { CompletionType } from 'shared/types/common';
 
-export const getFunctionPrefix = (input: string): string | undefined => {
+export const calculateFunctionPrefix = (input: string): string => {
   const lines = input.split(NEW_LINE_REGEX);
   const lastCommentEndLine = lines.findLastIndex((line) =>
     /^\/\/.*|^\S+.*?\*\/\s*$/.test(line),
@@ -10,9 +10,10 @@ export const getFunctionPrefix = (input: string): string | undefined => {
   if (lastCommentEndLine !== -1) {
     return lines.slice(lastCommentEndLine + 1).join('\n');
   }
+  return input;
 };
 
-export const getFunctionSuffix = (input: string): string | undefined => {
+export const calculateFunctionSuffix = (input: string): string => {
   const lines = input.split(NEW_LINE_REGEX);
   const firstFunctionEndLine = lines.findIndex((line) => /^}\S*/.test(line));
   if (firstFunctionEndLine !== -1) {
@@ -22,6 +23,7 @@ export const getFunctionSuffix = (input: string): string | undefined => {
   if (firstCommentStartLine !== -1) {
     return lines.slice(0, firstCommentStartLine).join('\n');
   }
+  return input;
 };
 
 export const removeFunctionHeader = (

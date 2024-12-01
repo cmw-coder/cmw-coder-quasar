@@ -36,7 +36,7 @@ export const getCompletionType = (
 
   if (
     pureCommentRegex.test(lastNonEmptyLine) ||
-    promptElements.similarSnippet
+    promptElements.similarSnippetSelf
   ) {
     return CompletionType.Snippet;
   }
