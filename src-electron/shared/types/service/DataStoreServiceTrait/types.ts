@@ -1,6 +1,6 @@
 import { WindowType } from 'shared/types/WindowType';
 
-enum TemplateType {
+export enum TemplateType {
   CodeAddComment = 'CodeAddComment',
   CodeExplanation = 'CodeExplanation',
   CodeGenerate = 'CodeGenerate',
