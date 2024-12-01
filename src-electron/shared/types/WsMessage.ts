@@ -3,6 +3,7 @@ import { Reference } from 'cmw-coder-subprocess';
 import {
   CaretPosition,
   Completions,
+  GenerateType,
   KeptRatio,
   SymbolInfo,
 } from 'shared/types/common';
@@ -46,7 +47,7 @@ export class ChatInsertServerMessage implements WsMessage {
   data: StandardResult<{ content: string }>;
   timestamp = Date.now();
 
-  constructor(data: StandardResult<{ content: string }>) {
+  constructor(data: ChatInsertServerMessage['data']) {
     this.data = data;
   }
 }
@@ -75,14 +76,20 @@ export interface CompletionCancelClientMessage extends WsMessage {
 export interface CompletionGenerateClientMessage extends WsMessage {
   action: WsAction.CompletionGenerate;
   data: {
+    type: GenerateType;
     caret: CaretPosition;
     path: string;
-    prefix: string;
+    context: {
+      infix: string;
+      prefix: string;
+      suffix: string;
+    };
     recentFiles: string[];
-    suffix: string;
     symbols: SymbolInfo[];
     times: {
       start: number;
+      context: number;
+      recentFiles: number;
       symbol: number;
       end: number;
     };
@@ -91,12 +98,14 @@ export interface CompletionGenerateClientMessage extends WsMessage {
 
 export class CompletionGenerateServerMessage implements WsMessage {
   action = WsAction.CompletionGenerate;
-  data: StandardResult<{ actionId: string; completions: Completions }>;
+  data: StandardResult<{
+    actionId: string;
+    type: GenerateType;
+    completions: Completions;
+  }>;
   timestamp = Date.now();
 
-  constructor(
-    data: StandardResult<{ actionId: string; completions: Completions }>,
-  ) {
+  constructor(data: CompletionGenerateServerMessage['data']) {
     this.data = data;
   }
 }
@@ -112,7 +121,7 @@ export interface CompletionEditClientMessage extends WsMessage {
 }
 
 export interface CompletionSelectClientMessage extends WsMessage {
-  action: WsAction.CompletionGenerate;
+  action: WsAction.CompletionSelect;
   data: {
     actionId: string;
     index: number;
@@ -226,15 +235,7 @@ export class ReviewRequestServerMessage implements WsMessage {
   }>;
   timestamp = Date.now();
 
-  constructor(
-    data: StandardResult<{
-      id: string;
-      content: string;
-      path: string;
-      beginLine: number;
-      endLine: number;
-    }>,
-  ) {
+  constructor(data: ReviewRequestServerMessage['data']) {
     this.data = data;
   }
 }
@@ -247,12 +248,7 @@ export class SettingSyncServerMessage implements WsMessage {
   }>;
   timestamp = Date.now();
 
-  constructor(
-    data: StandardResult<{
-      completionConfig?: Partial<AppConfig['completion']>;
-      shortcutConfig?: ShortcutConfig;
-    }>,
-  ) {
+  constructor(data: SettingSyncServerMessage['data']) {
     this.data = data;
   }
 }
