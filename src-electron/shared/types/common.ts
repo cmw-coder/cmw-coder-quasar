@@ -14,6 +14,11 @@ export interface Completions {
   type: CompletionType;
 }
 
+export enum GenerateType {
+  Common = 'Common',
+  PasteReplace = 'PasteReplace',
+}
+
 export enum KeptRatio {
   All = 'All',
   Few = 'Few',
