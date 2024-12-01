@@ -11,8 +11,9 @@ import {
 import { getService } from 'main/services';
 import { TextDocument } from 'main/types/TextDocument';
 import { Position } from 'main/types/vscode/position';
-import { CaretPosition, CompletionType, SymbolInfo } from 'shared/types/common';
+import { CompletionType, SymbolInfo } from 'shared/types/common';
 import { ServiceType } from 'shared/types/service';
+import { CompletionGenerateClientMessage } from 'shared/types/WsMessage';
 
 export class PromptElements {
   private readonly _isInsideFunction: boolean;
@@ -131,25 +132,14 @@ export class RawInputs {
   symbols: SymbolInfo[];
 
   constructor(
-    rawData: {
-      caret: CaretPosition;
-      content?: string;
-      path: string;
-      prefix: string;
-      recentFiles: string[];
-      suffix: string;
-      symbols: SymbolInfo[];
-    },
+    rawData: CompletionGenerateClientMessage['data'],
     project: string,
   ) {
-    const { content, caret, path, prefix, recentFiles, suffix, symbols } = rawData;
+    const { caret, path, prefix, recentFiles, suffix, symbols } = rawData;
     const decodedPrefix = decode(Buffer.from(prefix, 'base64'), 'utf-8');
     const decodedSuffix = decode(Buffer.from(suffix, 'base64'), 'utf-8');
     this.document = new TextDocument(path);
     this.elements = new PromptElements(decodedPrefix, decodedSuffix);
-    if (content?.length) {
-      this.elements.pasteContent = content;
-    }
     this.position = new Position(caret.line, caret.character);
     this.project = project;
     this.recentFiles = recentFiles.filter(
