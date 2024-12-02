@@ -1,5 +1,6 @@
+import { SelectionData } from 'cmw-coder-subprocess';
+
 import { CompletionCacheClientMessage } from 'shared/types/WsMessage';
-import { Selection } from 'shared/types/Selection';
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import { StatusData } from 'shared/types/service/WindowServiceTrait/StatusWindowType';
 
@@ -109,8 +110,8 @@ export class UpdateDownloadActionMessage implements ActionMessage {
 
 export class AddSelectionToChatActionMessage implements ActionMessage {
   type = ActionType.AddSelectionToChat;
-  data: Selection;
-  constructor(data: Selection) {
+  data: SelectionData;
+  constructor(data: SelectionData) {
     this.data = data;
   }
 }

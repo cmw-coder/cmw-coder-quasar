@@ -1,6 +1,8 @@
+import { ExtraData, Feedback, ReviewData, SelectionData } from 'cmw-coder-subprocess';
 import { BrowserWindow, app, dialog, screen } from 'electron';
 import log from 'electron-log/main';
 import { inject, injectable } from 'inversify';
+
 import { TrayIcon } from 'main/components/TrayIcon';
 import { MenuEntry } from 'main/components/TrayIcon/types';
 import { WindowServiceTrait } from 'shared/types/service/WindowServiceTrait';
@@ -21,8 +23,6 @@ import { DataStoreService } from 'main/services/DataStoreService';
 import { WebsocketService } from 'main/services/WebsocketService';
 import { SelectionTipsWindow } from 'main/services/WindowService/types/SelectionTipsWindow';
 import { StatusWindow } from 'main/services/WindowService/types/StatusWindow';
-import { ExtraData, Selection } from 'shared/types/Selection';
-import { Feedback, ReviewData } from 'cmw-coder-subprocess';
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import { container, getService } from 'main/services';
 import { DateTime } from 'luxon';
@@ -240,18 +240,18 @@ export class WindowService implements WindowServiceTrait {
     page._readyResolveHandler();
   }
 
-  async addSelectionToChat(selection?: Selection) {
-    if (!selection) {
-      selection = this.getWindow(WindowType.SelectionTips).selection;
+  async addSelectionToChat(selectionData?: SelectionData) {
+    if (!selectionData) {
+      selectionData = this.getWindow(WindowType.SelectionTips).selectionData;
     }
-    if (!selection) {
+    if (!selectionData) {
       return;
     }
-    console.log('addSelectionToChat', selection);
+    console.log('addSelectionToChat', selectionData);
     const mainWindow = this.getWindow(WindowType.Main);
     const chatPage = mainWindow.getPage(MainWindowPageType.Chat);
     await chatPage.active();
-    chatPage.addSelectionToChat(selection);
+    await chatPage.addSelectionToChat(selectionData);
   }
 
   async reviewProject(filePath?: string) {
@@ -310,7 +310,7 @@ export class WindowService implements WindowServiceTrait {
     reviewPage.reviewSubProcess.proxyFn.reviewProject({
       projectDirPath: targetDirPath,
       extraData,
-    });
+    }).catch();
   }
 
   async reviewFile(path: string, reportSku = true) {
@@ -362,19 +362,19 @@ export class WindowService implements WindowServiceTrait {
     reviewPage.reviewSubProcess.proxyFn.reviewFile({
       filePath: path,
       extraData,
-    });
+    }).catch();
   }
 
-  async reviewSelection(selection?: Selection) {
+  async reviewSelection(selectionData?: SelectionData) {
     const selectionTipsWindow = this.getWindow(WindowType.SelectionTips);
     const extraData = selectionTipsWindow.extraData;
     if (!extraData) {
       return;
     }
-    if (!selection) {
-      selection = selectionTipsWindow.selection;
+    if (!selectionData) {
+      selectionData = selectionTipsWindow.selectionData;
     }
-    if (!selection) {
+    if (!selectionData) {
       return;
     }
     // 上报一次 CODE_REVIEW 使用
@@ -402,10 +402,10 @@ export class WindowService implements WindowServiceTrait {
     const mainWindow = this.getWindow(WindowType.Main);
     const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
     reviewPage.reviewSubProcess.proxyFn.addReview({
-      selection,
+      selectionData,
       extraData,
-    });
-    reviewPage.active();
+    }).catch();
+    reviewPage.active().catch();
   }
 
   async getReviewData(): Promise<ReviewData[]> {

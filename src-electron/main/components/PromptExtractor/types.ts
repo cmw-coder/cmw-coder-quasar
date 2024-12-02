@@ -10,8 +10,13 @@ import {
 } from 'main/components/PromptExtractor/utils';
 import { getService } from 'main/services';
 import { TextDocument } from 'main/types/TextDocument';
-import { Position } from 'main/types/vscode/position';
-import { CompletionType, GenerateType, SymbolInfo } from 'shared/types/common';
+import {
+  CaretPosition,
+  CompletionType,
+  GenerateType,
+  Selection,
+  SymbolInfo,
+} from 'shared/types/common';
 import { ServiceType } from 'shared/types/service';
 import { CompletionGenerateClientMessage } from 'shared/types/WsMessage';
 import { TemplateType } from 'shared/types/service/DataStoreServiceTrait/types';
@@ -166,7 +171,7 @@ export interface SimilarSnippetConfig {
 export class RawInputs {
   document: TextDocument;
   elements: PromptElements;
-  position: Position;
+  selection: Selection;
   project: string;
   recentFiles: string[];
   symbols: SymbolInfo[];
@@ -182,7 +187,31 @@ export class RawInputs {
       prefix: decode(Buffer.from(context.prefix, 'base64'), 'utf-8'),
       suffix: decode(Buffer.from(context.suffix, 'base64'), 'utf-8'),
     });
-    this.position = new Position(caret.line, caret.character);
+
+    switch (type) {
+      case GenerateType.Common: {
+        this.selection = new Selection(
+          new CaretPosition(caret.line, caret.character),
+          new CaretPosition(caret.line, caret.character),
+        );
+        break;
+      }
+      case GenerateType.PasteReplace: {
+        const infixLines = this.elements.fullInfix.split('\n');
+        this.selection = new Selection(
+          new CaretPosition(caret.line, caret.character),
+          new CaretPosition(
+            caret.line + infixLines.length - 1,
+            infixLines[infixLines.length - 1].length,
+          ),
+        );
+        break;
+      }
+      default: {
+        throw new Error('Invalid generate type');
+      }
+    }
+
     this.project = project;
     this.recentFiles = recentFiles.filter(
       (fileName) => fileName !== this.document.fileName,

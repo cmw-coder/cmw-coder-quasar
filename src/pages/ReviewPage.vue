@@ -1,33 +1,34 @@
 <script lang="ts" setup>
-import { onBeforeUnmount, onMounted, Ref, ref, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useService } from 'utils/common';
-import { ServiceType } from 'shared/types/service';
 import {
   Feedback,
   ReviewData,
   ReviewFileItem,
   ReviewState,
   reviewStateIconMap,
+  SelectionData
 } from 'cmw-coder-subprocess';
-import { ActionApi } from 'types/ActionApi';
+import { DateTime } from 'luxon';
+import { QVirtualScroll, throttle, useQuasar } from 'quasar';
+import { onBeforeUnmount, onMounted, Ref, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+import FunctionPanel from 'components/ReviewPanels/FunctionPanel.vue';
+import { useService } from 'utils/common';
 import { ActionType } from 'shared/types/ActionMessage';
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
-import FunctionPanel from 'components/ReviewPanels/FunctionPanel.vue';
-import { Selection } from 'shared/types/Selection';
-import { QVirtualScroll, throttle, useQuasar } from 'quasar';
-import { DateTime } from 'luxon';
+import { ServiceType } from 'shared/types/service';
+import { ActionApi } from 'types/ActionApi';
 
 const { dialog } = useQuasar();
 const expandedMap = ref({} as Record<string, boolean>);
 
-const formatSelection = (selection: Selection) => {
-  const filePathArr = selection.file.split(/\\|\//);
+const formatSelection = (selectionData: SelectionData) => {
+  const filePathArr = selectionData.file.split(/\\|\//);
   const fileName = filePathArr[filePathArr.length - 1];
   return {
     fileName,
-    rangeStr: `${selection.range.start.line} - ${selection.range.end.line}`,
-    ...selection,
+    rangeStr: `${selectionData.range.begin.line} - ${selectionData.range.end.line}`,
+    ...selectionData,
   };
 };
 
@@ -430,7 +431,7 @@ const clearReview = () => {
 
                 <q-item-section>
                   {{
-                    `${formatSelection(item.selection).fileName}  ${formatSelection(item.selection).rangeStr}`
+                    `${formatSelection(item.selectionData).fileName}  ${formatSelection(item.selectionData).rangeStr}`
                   }}</q-item-section
                 >
                 <q-item-section side>

@@ -7,8 +7,7 @@ import {
 import { separateTextByLine } from 'main/components/PromptExtractor/utils';
 import { container, getService } from 'main/services';
 import { TextDocument } from 'main/types/TextDocument';
-import { Position } from 'main/types/vscode/position';
-import { SimilarSnippet } from 'shared/types/common';
+import { CaretPosition, SimilarSnippet } from 'shared/types/common';
 import { ServiceType } from 'shared/types/service';
 import { apiRagCode, apiRagFunctionDeclaration } from 'main/request/rag';
 import { ConfigService } from 'main/services/ConfigService';
@@ -23,7 +22,7 @@ import { Status } from 'shared/types/service/WindowServiceTrait/StatusWindowType
 export class PromptExtractor {
   private _globals: string = '';
   private _includes: string = '';
-  private _lastCaretPosition: Position = new Position(-1, -1);
+  private _lastCaretPosition = new CaretPosition();
   private _frequentFunctions: string = '';
   private _ragCode: string = '';
   private _relativeDefinitions: { path: string; content: string }[] = [];
@@ -41,11 +40,11 @@ export class PromptExtractor {
     inputs: RawInputs,
     similarSnippetCount: number = 1,
   ): Promise<PromptElements> {
-    const { elements, document, position, recentFiles } = inputs;
+    const { elements, document, selection, recentFiles } = inputs;
     const queryPrefix = elements.functionPrefix;
     const querySuffix = elements.functionSuffix;
 
-    if (position.line != this._lastCaretPosition.line) {
+    if (selection.begin.line != this._lastCaretPosition.line) {
       this._getFrequentFunctions(inputs).then((frequentFunctions) => {
         if (frequentFunctions !== undefined) {
           this._frequentFunctions = frequentFunctions;
@@ -92,7 +91,7 @@ export class PromptExtractor {
           (async () => {
             const result = await this.getSimilarSnippets(
               document,
-              position,
+              selection.begin,
               queryPrefix,
               querySuffix,
               recentFiles,
@@ -109,7 +108,7 @@ export class PromptExtractor {
         this._relativeDefinitions = relativeDefinitions;
       }
       this._similarSnippets = similarSnippets;
-      this._lastCaretPosition = position;
+      this._lastCaretPosition = selection.begin;
     }
 
     if (extname(elements.file ?? '') !== '.h') {
@@ -165,7 +164,7 @@ export class PromptExtractor {
 
   async getSimilarSnippets(
     document: TextDocument,
-    position: Position,
+    position: CaretPosition,
     functionPrefix: string,
     functionSuffix: string,
     recentFiles: string[],

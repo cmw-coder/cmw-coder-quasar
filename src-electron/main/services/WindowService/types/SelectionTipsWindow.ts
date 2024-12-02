@@ -1,16 +1,17 @@
-import { WindowType } from 'shared/types/WindowType';
-import { BaseWindow } from 'main/services/WindowService/types/BaseWindow';
+import { SelectionData, ExtraData } from 'cmw-coder-subprocess';
+
 import { container } from 'main/services';
-import { DataStoreService } from 'main/services/DataStoreService';
-import { ServiceType } from 'shared/types/service';
-import { ExtraData, Selection, TriggerPosition } from 'shared/types/Selection';
 import { ConfigService } from 'main/services/ConfigService';
+import { DataStoreService } from 'main/services/DataStoreService';
+import { BaseWindow } from 'main/services/WindowService/types/BaseWindow';
+import { ServiceType } from 'shared/types/service';
+import { WindowType } from 'shared/types/WindowType';
 
 const WINDOW_HEIGHT = 34;
 const WINDOW_WIDTH = 540;
 
 export class SelectionTipsWindow extends BaseWindow {
-  selection?: Selection;
+  selectionData?: SelectionData;
   extraData?: ExtraData;
 
   constructor() {
@@ -36,11 +37,14 @@ export class SelectionTipsWindow extends BaseWindow {
   }
 
   async trigger(
-    position: TriggerPosition,
-    selection: Selection,
+    position: {
+      x: number;
+      y: number;
+    },
+    selectionData: SelectionData,
     extraData: ExtraData,
   ) {
-    this.selection = selection;
+    this.selectionData = selectionData;
     this.extraData = extraData;
     const configService = container.get<ConfigService>(ServiceType.CONFIG);
     let showSelectedTipsWindow = await configService.getConfig(

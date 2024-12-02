@@ -1,28 +1,27 @@
 <script lang="ts" setup>
-import { computed, onMounted, ref, watch } from 'vue';
-import { useService } from 'utils/common';
-import { ServiceType } from 'shared/types/service';
 import {
   Feedback,
   ReviewData,
   ReviewState,
   reviewStateIconMap,
+  SelectionData
 } from 'cmw-coder-subprocess';
-import { Selection } from 'shared/types/Selection';
+import { computed, onMounted, ref, watch } from 'vue';
+
 import FunctionPanel from 'components/ReviewPanels/FunctionPanel.vue';
-// import { useRouter } from 'vue-router';
+import { ServiceType } from 'shared/types/service';
+import { useService } from 'utils/common';
 
 const windowService = useService(ServiceType.WINDOW);
-// const router = useRouter();
 const expandedMap = ref({} as Record<string, boolean>);
 
-const formatSelection = (selection: Selection) => {
-  const filePathArr = selection.file.split(/\\|\//);
+const formatSelection = (selectionData: SelectionData) => {
+  const filePathArr = selectionData.file.split(/\\|\//);
   const fileName = filePathArr[filePathArr.length - 1];
   return {
     fileName,
-    rangeStr: `${selection.range.start.line} - ${selection.range.end.line}`,
-    ...selection,
+    rangeStr: `${selectionData.range.begin.line} - ${selectionData.range.end.line}`,
+    ...selectionData,
   };
 };
 
@@ -61,13 +60,13 @@ const getReviewDateList = async () => {
 
 const activeFile = ref<string>('');
 const fileList = computed(() => {
-  const data = reviewList.value.map((item) => item.selection.file);
+  const data = reviewList.value.map((item) => item.selectionData.file);
   return [...new Set(data)];
 });
 
 const activeFileReviewList = computed(() => {
   return reviewList.value.filter(
-    (item) => item.selection.file === activeFile.value,
+    (item) => item.selectionData.file === activeFile.value,
   );
 });
 
@@ -204,7 +203,7 @@ onMounted(() => {
 
                 <q-item-section>
                   {{
-                    `${formatSelection(item.selection).fileName}  ${formatSelection(item.selection).rangeStr}`
+                    `${formatSelection(item.selectionData).fileName}  ${formatSelection(item.selectionData).rangeStr}`
                   }}</q-item-section
                 >
                 <q-item-section side>

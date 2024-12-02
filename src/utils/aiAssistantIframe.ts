@@ -1,9 +1,8 @@
+import { SelectionData } from 'cmw-coder-subprocess';
 import { extend, uid } from 'quasar';
-import { useService } from 'utils/common';
 
 import { NetworkZone } from 'shared/config';
 import { NEW_LINE_REGEX } from 'shared/constants/common';
-import { ServiceType } from 'shared/types/service';
 import {
   Commands,
   ExtensionToUiCommand,
@@ -15,8 +14,9 @@ import {
   UiToExtensionCommandExecResultMap,
 } from 'shared/types/ExtensionMessage';
 import { ExtensionConfig } from 'shared/types/ExtensionMessageDetails';
+import { ServiceType } from 'shared/types/service';
 import { ChatInsertServerMessage } from 'shared/types/WsMessage';
-import { Selection } from 'shared/types/Selection';
+import { useService } from 'utils/common';
 
 export class AiAssistantIframe {
   private promiseMap = new Map<
@@ -40,7 +40,7 @@ export class AiAssistantIframe {
     this.refreshHandle = refreshHandle;
     this.messageEventListener = (event: MessageEvent) => {
       if (this.iframeUrl.includes(event.origin)) {
-        this.receiveMessage(<never>event.data);
+        this.receiveMessage(<never>event.data).catch();
       }
     };
     window.addEventListener('message', this.messageEventListener);
@@ -76,7 +76,7 @@ export class AiAssistantIframe {
     const resolveFn = this.promiseMap.get(message.id);
     if (resolveFn) {
       // promiseMap 存在值 ===> 插件回馈消息
-      resolveFn(message.content);
+      resolveFn(message.content).catch();
       this.promiseMap.delete(message.id);
     } else {
       // promiseMap 不存在值 ===> 插件执行消息
@@ -85,7 +85,7 @@ export class AiAssistantIframe {
       const data = await this.execCommand(message.command, message.content);
       const sendMessage = extend({}, message) as unknown as SendMessage<T>;
       sendMessage.content = data;
-      this.sendMessage(sendMessage);
+      this.sendMessage(sendMessage).catch();
     }
   }
 
@@ -230,14 +230,14 @@ export class AiAssistantIframe {
     throw new Error('Unknown command');
   }
 
-  async customQuestion(selection: Selection) {
+  async customQuestion(selectionData: SelectionData) {
     const message = {
       command: ExtensionToUiCommand.CUSTOM_QUESTION,
       content: {
-        code: selection.content,
+        code: selectionData.content,
         language: 'c',
-        file: selection.file,
-        position: [selection.range.start.line, selection.range.end.line, 0, 0],
+        file: selectionData.file,
+        position: [selectionData.range.begin.line, selectionData.range.end.line, 0, 0],
       },
     } as ExtensionToUiCommandExecMessage<ExtensionToUiCommand.CUSTOM_QUESTION>;
     await this.sendMessage(message);

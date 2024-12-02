@@ -1,8 +1,7 @@
+import { CaretPosition, Selection } from 'cmw-coder-subprocess';
 import { readFileSync } from 'fs';
 import { decode } from 'iconv-lite';
 
-import { Position } from 'main/types/vscode/position';
-import { Range } from 'main/types/vscode/range';
 import { NEW_LINE_REGEX } from 'shared/constants/common';
 
 export class TextDocument {
@@ -21,7 +20,7 @@ export class TextDocument {
     this.lineCount = this._content.split(NEW_LINE_REGEX).length;
   }
 
-  offsetAt(position: Position): number {
+  offsetAt(position: CaretPosition): number {
     return (
       this._content.split('\n').slice(0, position.line).join('\n').length +
       position.character +
@@ -44,12 +43,12 @@ export class TextDocument {
     return content;
   }
 
-  getText(range?: Range): string {
+  getText(range?: Selection): string {
     if (!range) {
       return this._content;
     }
     return this._content.substring(
-      this.offsetAt(range.start),
+      this.offsetAt(range.begin),
       this.offsetAt(range.end),
     );
   }

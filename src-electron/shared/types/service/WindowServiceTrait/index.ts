@@ -1,7 +1,7 @@
+import { Feedback, ReviewData, ReviewFileItem,SelectionData} from 'cmw-coder-subprocess';
+
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
-import { Selection } from 'shared/types/Selection';
 import { WindowType } from 'shared/types/WindowType';
-import { Feedback, ReviewData, ReviewFileItem } from 'cmw-coder-subprocess';
 
 export interface WindowServiceTrait {
   finishLogin(): Promise<void>;
@@ -24,9 +24,9 @@ export interface WindowServiceTrait {
   openDevTools(type?: WindowType): Promise<void>;
   mouseMoveInOrOutWindow(type: WindowType): Promise<void>;
   setMainWindowPageReady(type: MainWindowPageType): Promise<void>;
-  addSelectionToChat(selection?: Selection): Promise<void>;
+  addSelectionToChat(selectionData?: SelectionData): Promise<void>;
   reviewFile(path: string): Promise<void>;
-  reviewSelection(selection?: Selection): Promise<void>;
+  reviewSelection(selectionData?: SelectionData): Promise<void>;
   getWindowIsFixed(windowType: WindowType): Promise<boolean>;
   toggleWindowFixed(windowType: WindowType): Promise<void>;
   getReviewData(): Promise<ReviewData[]>;

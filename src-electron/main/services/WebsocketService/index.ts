@@ -1,4 +1,4 @@
-import { Reference } from 'cmw-coder-subprocess';
+import { Reference, SelectionData } from 'cmw-coder-subprocess';
 import log from 'electron-log/main';
 import { sync } from 'fast-glob';
 import { createServer } from 'http';
@@ -26,8 +26,6 @@ import { findSvnPath } from 'main/services/WebsocketService/utils';
 import { WindowService } from 'main/services/WindowService';
 import { DataProjectType } from 'main/stores/data/types';
 import { TextDocument } from 'main/types/TextDocument';
-import { Position } from 'main/types/vscode/position';
-import { Range } from 'main/types/vscode/range';
 import {
   CompletionErrorCause,
   getClientVersion,
@@ -41,10 +39,9 @@ import { getService } from 'main/services';
 import { ConfigService } from 'main/services/ConfigService';
 import statisticsLog from 'main/components/Loggers/statisticsLog';
 import { UpdateStatusActionMessage } from 'shared/types/ActionMessage';
-import { GenerateType } from 'shared/types/common';
+import { CaretPosition, GenerateType, Selection } from 'shared/types/common';
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import { ServiceType } from 'shared/types/service';
-import { Selection } from 'shared/types/Selection';
 import { WebsocketServiceTrait } from 'shared/types/service/WebsocketServiceTrait';
 import { Status } from 'shared/types/service/WindowServiceTrait/StatusWindowType';
 import { WindowType } from 'shared/types/WindowType';
@@ -159,7 +156,7 @@ export class WebsocketService implements WebsocketServiceTrait {
   ) {
     path = path.split(sep).join(posix.sep);
     const document = new TextDocument(path);
-    const position = new Position(line, character);
+    const position = new CaretPosition(line, character);
     const recentFiles = sync(
       ['**/*.c', '**/*.cc', '**/*.cpp', '**/*.h', '**/*.hpp'],
       {
@@ -349,10 +346,11 @@ export class WebsocketService implements WebsocketServiceTrait {
               detail: '触发生成...',
             }),
           );
+          const rawInputs = new RawInputs(data, project);
           const promptElements =
             await this._promptExtractor.getPromptComponents(
               actionId,
-              new RawInputs(data, project),
+              rawInputs,
             );
           this._statisticsReporterService.completionUpdateEndGetPromptComponentsTime(
             actionId,
@@ -383,6 +381,7 @@ export class WebsocketService implements WebsocketServiceTrait {
               actionId,
               type: GenerateType.Common,
               completions,
+              selection: rawInputs.selection,
               result: 'success',
             });
           }
@@ -480,11 +479,11 @@ export class WebsocketService implements WebsocketServiceTrait {
         clientInfo.currentProject?.length
       ) {
         try {
-          const { content, position, recentFiles } = data;
+          const { caret, context, recentFiles } = data;
           const { id: projectId } = getProjectData(clientInfo.currentProject);
           this._statisticsReporterService
             .copiedLines(
-              content.split(NEW_LINE_REGEX).length,
+              context.infix.split(NEW_LINE_REGEX).length,
               projectId,
               getClientVersion(pid),
             )
@@ -505,27 +504,13 @@ export class WebsocketService implements WebsocketServiceTrait {
           }
           this._statisticsReporterService
             .copiedContents({
-              content,
+              content: context.infix,
               context: {
-                prefix: document.getText(
-                  new Range(
-                    Math.max(position.line - 30, 0),
-                    0,
-                    position.line,
-                    position.character,
-                  ),
-                ),
-                suffix: document.getText(
-                  new Range(
-                    position.line,
-                    position.character,
-                    Math.min(position.line + 31, document.lineCount),
-                    0,
-                  ),
-                ),
+                prefix: context.prefix,
+                suffix: context.suffix,
               },
               path: document.fileName,
-              position,
+              position: caret,
               projectId,
               recentFiles,
               repo,
@@ -569,15 +554,13 @@ export class WebsocketService implements WebsocketServiceTrait {
       const selectionTipsWindow = this._windowService.getWindow(
         WindowType.SelectionTips,
       );
-      const selection: Selection = {
+      const selectionData: SelectionData = {
         block: data.block,
         file: data.path,
         content: data.content,
-        range: new Range(
-          data.begin.line,
-          data.begin.character,
-          data.end.line,
-          data.end.character,
+        range: new Selection(
+          new CaretPosition(data.begin.line, data.begin.character),
+          new CaretPosition(data.end.line, data.end.character),
         ),
         language: 'c',
       };
@@ -588,7 +571,7 @@ export class WebsocketService implements WebsocketServiceTrait {
             x: data.dimensions.x,
             y: data.dimensions.y - 30,
           },
-          selection,
+          selectionData,
           {
             projectId: projectId,
             version: getClientVersion(this._lastActivePid),
@@ -647,7 +630,7 @@ export class WebsocketService implements WebsocketServiceTrait {
     this._handlers.set(wsAction, callback);
   }
 
-  async getCodeReviewReferences(selection: Selection) {
+  async getCodeReviewReferences(selectionData: SelectionData) {
     const successPromise = new Promise<Reference[]>((resolve) => {
       const id = uid();
       this.send(
@@ -655,15 +638,13 @@ export class WebsocketService implements WebsocketServiceTrait {
           new ReviewRequestServerMessage({
             id,
             result: 'success',
-            content: selection.block || selection.content,
-            path: selection.file,
-            beginLine: selection.range.start.line,
-            endLine: selection.range.end.line,
+            content: selectionData.block || selectionData.content,
+            path: selectionData.file,
+            beginLine: selectionData.range.begin.line,
+            endLine: selectionData.range.end.line,
           }),
         ),
       );
-      // log.info('getCodeReviewReferences', selection);
-      // this.referencesResolveHandle = resolve;
       this.referencesResolveHandleMap.set(id, resolve);
     });
 

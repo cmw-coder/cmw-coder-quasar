@@ -1,27 +1,25 @@
 <script lang="ts" setup>
-import { onMounted, PropType, ref } from 'vue';
-import { Selection } from 'shared/types/Selection';
-import { useHighlighter } from 'stores/highlighter';
-import { useService } from 'utils/common';
-import { ServiceType } from 'shared/types/service';
-import { useI18n } from 'vue-i18n';
-import { DateTime } from 'luxon';
 import {
   ReviewData,
   Feedback,
   Reference,
   ReviewState,
+  SelectionData,
 } from 'cmw-coder-subprocess';
+import { DateTime } from 'luxon';
+import { BundledLanguage } from 'shiki';
+import { onMounted, PropType, ref, withDefaults } from 'vue';
+import { useI18n } from 'vue-i18n';
 
-const props = defineProps({
-  reviewData: {
-    type: Object as PropType<ReviewData>,
-    required: true,
-  },
-  feedbackEnabled: {
-    type: Boolean,
-    default: true,
-  },
+import { ServiceType } from 'shared/types/service';
+import { useHighlighter } from 'stores/highlighter';
+import { useService } from 'utils/common';
+
+const props = withDefaults(defineProps<{
+  reviewData: ReviewData;
+  feedbackEnabled?: boolean;
+}>(), {
+  feedbackEnabled: true,
 });
 
 const emit = defineEmits<{
@@ -36,17 +34,16 @@ const baseName = 'components.ReviewPanels.FunctionPanel.';
 const i18n = (relativePath: string, data?: Record<string, unknown>) => {
   return data ? t(baseName + relativePath, data) : t(baseName + relativePath);
 };
-// const appService = useService(ServiceType.App);
 const windowService = useService(ServiceType.WINDOW);
 const { codeToHtml } = useHighlighter();
 
-const formatSelection = (selection: Selection) => {
-  const filePathArr = selection.file.split('\\');
+const formatSelection = (selectionData: SelectionData) => {
+  const filePathArr = selectionData.file.split('\\');
   const fileName = filePathArr[filePathArr.length - 1];
   return {
     fileName,
-    rangeStr: `${selection.range.start.line} - ${selection.range.end.line}`,
-    ...selection,
+    rangeStr: `${selectionData.range.begin.line} - ${selectionData.range.end.line}`,
+    ...selectionData,
   };
 };
 
@@ -104,9 +101,9 @@ onMounted(() => {
         >
           <div class="file-full-path">
             <div>
-              <span>{{ reviewData.selection.file }}</span>
+              <span>{{ reviewData.selectionData.file }}</span>
               <span style="padding-left: 10px">
-                {{ formatSelection(reviewData.selection).rangeStr }}
+                {{ formatSelection(reviewData.selectionData).rangeStr }}
               </span>
             </div>
             <div>
@@ -120,8 +117,8 @@ onMounted(() => {
                 "
                 >{{
                   isShowCode ? i18n('labels.collapse') : i18n('labels.expand')
-                }}</q-btn
-              >
+                }}
+              </q-btn>
             </div>
           </div>
           <div
@@ -129,8 +126,8 @@ onMounted(() => {
             class="review-file-content"
             v-html="
               codeToHtml(
-                reviewData.selection.content,
-                reviewData.selection.language as any,
+                reviewData.selectionData.content,
+                reviewData.selectionData.language as any,
               )
             "
           />
@@ -188,16 +185,16 @@ onMounted(() => {
                               depth: reference.depth,
                             })
                           "
-                          >{{ reference.depth }}</q-chip
-                        >
+                          >{{ reference.depth }}
+                        </q-chip>
                         <q-chip
                           :title="
                             i18n('labels.typeTitle', {
                               type: reference.type,
                             })
                           "
-                          >{{ reference.type }}</q-chip
-                        >
+                          >{{ reference.type }}
+                        </q-chip>
                         <span :title="reference.name">{{
                           reference.name
                         }}</span>
@@ -219,8 +216,8 @@ onMounted(() => {
                           size="sm"
                           @click="() => viewReferenceHandle(reference)"
                           :title="i18n('labels.viewReferenceCodeTitle')"
-                          >{{ i18n('labels.viewReferenceCode') }}</q-btn
-                        >
+                          >{{ i18n('labels.viewReferenceCode') }}
+                        </q-btn>
                       </q-item-label>
                     </q-item-section>
                   </q-item>
@@ -265,9 +262,9 @@ onMounted(() => {
                   />
                 </q-item-section>
                 <!-- <q-item-section>1/3 AI 正在review</q-item-section> -->
-                <q-item-section>{{
-                  i18n('labels.reviewStepOne')
-                }}</q-item-section>
+                <q-item-section
+                  >{{ i18n('labels.reviewStepOne') }}
+                </q-item-section>
                 <q-item-section avatar>
                   <q-btn
                     :label="i18n('labels.stop')"
@@ -291,9 +288,9 @@ onMounted(() => {
                 <!-- <q-item-section
                   >2/3 Reviewer 和 Coder 正在激烈交锋</q-item-section
                 > -->
-                <q-item-section>{{
-                  i18n('labels.reviewStepTwo')
-                }}</q-item-section>
+                <q-item-section
+                  >{{ i18n('labels.reviewStepTwo') }}
+                </q-item-section>
                 <q-item-section avatar>
                   <q-btn
                     :label="i18n('labels.stop')"
@@ -315,9 +312,9 @@ onMounted(() => {
                   />
                 </q-item-section>
                 <!-- <q-item-section>3/3 AI 正在总结</q-item-section> -->
-                <q-item-section>{{
-                  i18n('labels.reviewStepThree')
-                }}</q-item-section>
+                <q-item-section
+                  >{{ i18n('labels.reviewStepThree') }}
+                </q-item-section>
                 <q-item-section avatar>
                   <q-btn
                     :label="i18n('labels.stop')"
@@ -340,9 +337,9 @@ onMounted(() => {
         >
           <q-card v-if="!reviewData.result.parsed">
             <q-card-section style="padding: 4px" class="parsed-error">
-              <q-chip color="red-8" class="text-white">{{
-                i18n('labels.parsedFailed')
-              }}</q-chip>
+              <q-chip color="red-8" class="text-white"
+                >{{ i18n('labels.parsedFailed') }}
+              </q-chip>
               <div>{{ reviewData.result.originData }}</div>
             </q-card-section>
           </q-card>
@@ -365,9 +362,9 @@ onMounted(() => {
                 style="margin-bottom: 10px"
               >
                 <q-card-section style="padding: 2px">
-                  <q-chip color="red-8" class="text-white">{{
-                    resultItem.Type
-                  }}</q-chip>
+                  <q-chip color="red-8" class="text-white"
+                    >{{ resultItem.Type }}
+                  </q-chip>
                 </q-card-section>
                 <q-card-section style="padding: 2px">
                   <div
@@ -380,14 +377,14 @@ onMounted(() => {
                     v-html="
                       codeToHtml(
                         resultItem.ProblemCodeSnippet,
-                        reviewData.selection.language as any,
+                        <BundledLanguage>reviewData.selectionData.language,
                       )
                     "
                   />
                 </q-card-section>
-                <q-card-section style="padding: 2px">{{
-                  resultItem.Description
-                }}</q-card-section>
+                <q-card-section style="padding: 2px"
+                  >{{ resultItem.Description }}
+                </q-card-section>
               </q-card>
             </template>
           </template>
@@ -453,9 +450,9 @@ onMounted(() => {
         <q-separator dark />
 
         <q-card-actions>
-          <q-btn flat @click="() => retryHandle()">{{
-            i18n('labels.retry')
-          }}</q-btn>
+          <q-btn flat @click="() => retryHandle()"
+            >{{ i18n('labels.retry') }}
+          </q-btn>
         </q-card-actions>
       </q-card>
     </div>
@@ -475,7 +472,7 @@ onMounted(() => {
             v-html="
               codeToHtml(
                 activeReference.content,
-                reviewData.selection.language as any,
+                <BundledLanguage>reviewData.selectionData.language,
               )
             "
           />
@@ -515,6 +512,7 @@ onMounted(() => {
   width: 100%;
   overflow: auto;
   padding: 10px;
+
   .review-file-wrapper {
     .file-full-path {
       width: 100%;
@@ -522,24 +520,29 @@ onMounted(() => {
       align-items: center;
       justify-content: space-between;
     }
+
     .review-file-name-wrapper {
       height: 40px;
       display: flex;
       align-items: center;
+
       .review-file-range {
         margin-left: 10px;
       }
+
       .file-operation {
         padding-left: 10px;
       }
     }
   }
+
   .review-file-content-wrapper {
     .selection-content-card {
       max-height: 400px;
       overflow-y: auto;
     }
   }
+
   .feed-back-wrapper {
     display: flex;
     align-items: center;

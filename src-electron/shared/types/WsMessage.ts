@@ -5,6 +5,7 @@ import {
   Completions,
   GenerateType,
   KeptRatio,
+  Selection,
   SymbolInfo,
 } from 'shared/types/common';
 import { ShortcutConfig } from 'shared/types/keys';
@@ -102,6 +103,7 @@ export class CompletionGenerateServerMessage implements WsMessage {
     actionId: string;
     type: GenerateType;
     completions: Completions;
+    selection: Selection;
   }>;
   timestamp = Date.now();
 
@@ -170,10 +172,11 @@ export interface EditorFocusStateClientMessage extends WsMessage {
 export interface EditorPasteClientMessage extends WsMessage {
   action: WsAction.EditorPaste;
   data: {
-    content: string;
-    position: {
-      character: number;
-      line: number;
+    caret: CaretPosition;
+    context: {
+      infix: string;
+      prefix: string;
+      suffix: string;
     };
     recentFiles: string[];
   };
