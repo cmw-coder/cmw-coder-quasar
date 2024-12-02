@@ -11,6 +11,7 @@ import {
   CompletionSetActionMessage,
   CompletionUpdateActionMessage,
 } from 'shared/types/ActionMessage';
+import { GenerateType } from 'shared/types/common';
 import { ServiceType } from 'shared/types/service';
 import { WindowType } from 'shared/types/WindowType';
 import { timeout } from 'main/utils/common';
@@ -94,6 +95,7 @@ export class CompletionsWindow extends BaseWindow {
   }
 
   async completionSelect(
+    type: GenerateType,
     completion: string,
     count: { index: number; total: number },
     height: number,
@@ -140,6 +142,7 @@ export class CompletionsWindow extends BaseWindow {
           count,
           fontHeight,
           fontSize,
+          type
         }),
       );
       this._window.show();

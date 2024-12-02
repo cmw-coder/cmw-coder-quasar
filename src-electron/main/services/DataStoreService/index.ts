@@ -81,7 +81,7 @@ export class DataStoreService implements DataStoreServiceTrait {
     // 定时重新获取模板内容
     setInterval(
       () => {
-        this.scheduleJobUpdateActiveModelContent();
+        this.scheduleJobUpdateActiveModelContent().catch();
       },
       60 * 60 * 1000,
     );

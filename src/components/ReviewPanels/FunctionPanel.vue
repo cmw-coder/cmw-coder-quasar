@@ -8,19 +8,22 @@ import {
 } from 'cmw-coder-subprocess';
 import { DateTime } from 'luxon';
 import { BundledLanguage } from 'shiki';
-import { onMounted, PropType, ref, withDefaults } from 'vue';
+import { onMounted, ref, withDefaults } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { ServiceType } from 'shared/types/service';
 import { useHighlighter } from 'stores/highlighter';
 import { useService } from 'utils/common';
 
-const props = withDefaults(defineProps<{
-  reviewData: ReviewData;
-  feedbackEnabled?: boolean;
-}>(), {
-  feedbackEnabled: true,
-});
+const props = withDefaults(
+  defineProps<{
+    reviewData: ReviewData;
+    feedbackEnabled?: boolean;
+  }>(),
+  {
+    feedbackEnabled: true,
+  },
+);
 
 const emit = defineEmits<{
   (e: 'retry'): void;

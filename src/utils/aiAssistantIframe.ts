@@ -237,7 +237,12 @@ export class AiAssistantIframe {
         code: selectionData.content,
         language: 'c',
         file: selectionData.file,
-        position: [selectionData.range.begin.line, selectionData.range.end.line, 0, 0],
+        position: [
+          selectionData.range.begin.line,
+          selectionData.range.end.line,
+          0,
+          0,
+        ],
       },
     } as ExtensionToUiCommandExecMessage<ExtensionToUiCommand.CUSTOM_QUESTION>;
     await this.sendMessage(message);

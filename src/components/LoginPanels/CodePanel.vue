@@ -71,14 +71,24 @@ const login = async () => {
       code.value.trim(),
     );
     if (error) {
-      throw new Error(error);
+      notify({
+        type: 'negative',
+        message: i18n('notifications.loginFailed'),
+        caption: error,
+      });
     }
     await configService.setConfigs({
       username: userId,
       token,
       refreshToken,
     });
-    windowService.finishLogin();
+    windowService.finishLogin().catch((error) => {
+      notify({
+        type: 'negative',
+        message: i18n('notifications.loginFailed'),
+        caption: error.message,
+      });
+    });
   } catch (error) {
     notify({
       type: 'negative',

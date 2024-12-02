@@ -3,6 +3,7 @@ import { SelectionData } from 'cmw-coder-subprocess';
 import { CompletionCacheClientMessage } from 'shared/types/WsMessage';
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import { StatusData } from 'shared/types/service/WindowServiceTrait/StatusWindowType';
+import { GenerateType } from 'shared/types/common';
 
 export enum ActionType {
   CompletionClear = 'CompletionClear',
@@ -30,6 +31,7 @@ export interface ActionMessage {
 export class ToggleDarkModeActionMessage implements ActionMessage {
   type = ActionType.ToggleDarkMode;
   data: boolean;
+
   constructor(data: boolean) {
     this.data = data;
   }
@@ -47,14 +49,10 @@ export class CompletionSetActionMessage implements ActionMessage {
     count: { index: number; total: number };
     fontHeight: number;
     fontSize: number;
+    type: GenerateType;
   };
 
-  constructor(data: {
-    completion: string;
-    count: { index: number; total: number };
-    fontHeight: number;
-    fontSize: number;
-  }) {
+  constructor(data: CompletionSetActionMessage['data']) {
     this.data = data;
   }
 }
@@ -111,6 +109,7 @@ export class UpdateDownloadActionMessage implements ActionMessage {
 export class AddSelectionToChatActionMessage implements ActionMessage {
   type = ActionType.AddSelectionToChat;
   data: SelectionData;
+
   constructor(data: SelectionData) {
     this.data = data;
   }
@@ -128,6 +127,7 @@ export class ReviewDataUpdateActionMessage implements ActionMessage {
 export class ReviewFileListUpdateActionMessage implements ActionMessage {
   type = ActionType.ReviewFileListUpdate;
   data: undefined;
+
   constructor() {}
 }
 
@@ -143,6 +143,7 @@ export class SwitchLocaleActionMessage implements ActionMessage {
 export class MainWindowActivePageActionMessage implements ActionMessage {
   type = ActionType.MainWindowActivePage;
   data: MainWindowPageType;
+
   constructor(data: MainWindowPageType) {
     this.data = data;
   }
@@ -151,6 +152,7 @@ export class MainWindowActivePageActionMessage implements ActionMessage {
 export class MainWindowCheckPageReadyActionMessage implements ActionMessage {
   type = ActionType.MainWindowCheckPageReady;
   data: MainWindowPageType;
+
   constructor(data: MainWindowPageType) {
     this.data = data;
   }
@@ -159,6 +161,7 @@ export class MainWindowCheckPageReadyActionMessage implements ActionMessage {
 export class UpdateStatusActionMessage implements ActionMessage {
   type = ActionType.UpdateStatus;
   data: StatusData;
+
   constructor(data: StatusData) {
     this.data = data;
   }

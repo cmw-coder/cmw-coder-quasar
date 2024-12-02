@@ -1,4 +1,15 @@
+import { globalI18n } from 'boot/i18n';
 import { Service, ServiceType } from 'shared/types/service';
+
+export const i18nSubPath =
+  (baseName: string) =>
+  (relativePath: string, data?: Record<string, unknown>) => {
+    if (data) {
+      return globalI18n.t(`${baseName}.${relativePath}`, data);
+    } else {
+      return globalI18n.t(`${baseName}.${relativePath}`);
+    }
+  };
 
 export const getLastDirName = (path: string) => {
   const pathArr = path.split('\\');

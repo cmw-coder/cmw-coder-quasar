@@ -430,6 +430,7 @@ export class WebsocketService implements WebsocketServiceTrait {
     this._registerWsAction(WsAction.CompletionSelect, ({ data }, pid) => {
       const {
         actionId,
+        type,
         index,
         dimensions: { height, x, y },
       } = data;
@@ -443,6 +444,7 @@ export class WebsocketService implements WebsocketServiceTrait {
           this._windowService
             .getWindow(WindowType.Completions)
             .completionSelect(
+              type,
               candidate,
               {
                 index,

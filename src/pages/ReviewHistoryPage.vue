@@ -4,48 +4,18 @@ import {
   ReviewData,
   ReviewState,
   reviewStateIconMap,
-  SelectionData
 } from 'cmw-coder-subprocess';
 import { computed, onMounted, ref, watch } from 'vue';
 
 import FunctionPanel from 'components/ReviewPanels/FunctionPanel.vue';
 import { ServiceType } from 'shared/types/service';
 import { useService } from 'utils/common';
+import { formatSelection, getFileName, getProblemNumber } from 'utils/review';
 
 const windowService = useService(ServiceType.WINDOW);
+
 const expandedMap = ref({} as Record<string, boolean>);
-
-const formatSelection = (selectionData: SelectionData) => {
-  const filePathArr = selectionData.file.split(/\\|\//);
-  const fileName = filePathArr[filePathArr.length - 1];
-  return {
-    fileName,
-    rangeStr: `${selectionData.range.begin.line} - ${selectionData.range.end.line}`,
-    ...selectionData,
-  };
-};
-
-const getProblemNumber = (review: ReviewData) => {
-  let result = 0;
-  if (review.state === ReviewState.Finished) {
-    if (review?.result?.parsed) {
-      review.result.data.forEach((item) => {
-        if (item.IsProblem) {
-          result += 1;
-        }
-      });
-    }
-  }
-  return result;
-};
-
-const getFileName = (filePath: string) => {
-  const filePathArr = filePath.split(/\\|\//);
-  return filePathArr[filePathArr.length - 1];
-};
-
 const splitterModel = ref<number>(20);
-
 const selectedDate = ref('');
 const dateList = ref<string[]>([]);
 const reviewList = ref<ReviewData[]>([]);
@@ -144,7 +114,7 @@ onMounted(() => {
                 }
               "
               :key="item"
-              style="padding-left: 6px; padding-right: 0px"
+              style="padding-left: 6px; padding-right: 0"
             >
               <q-item-section>
                 <div class="file-wrapper">
@@ -258,7 +228,7 @@ onMounted(() => {
   .del-btn-wrapper {
     display: none;
     position: absolute;
-    right: 0px;
+    right: 0;
     top: -8px;
     height: 100%;
   }

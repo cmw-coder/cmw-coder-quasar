@@ -56,7 +56,6 @@ const reviewHandle = () => {
   overflow: hidden;
   flex-wrap: nowrap;
   display: flex;
-  flex-wrap: nowrap;
   .btn-wrapper {
     background-color: hsla(0, 0%, 0%, 0.4);
   }

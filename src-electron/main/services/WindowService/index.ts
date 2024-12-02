@@ -1,4 +1,9 @@
-import { ExtraData, Feedback, ReviewData, SelectionData } from 'cmw-coder-subprocess';
+import {
+  ExtraData,
+  Feedback,
+  ReviewData,
+  SelectionData,
+} from 'cmw-coder-subprocess';
 import { BrowserWindow, app, dialog, screen } from 'electron';
 import log from 'electron-log/main';
 import { inject, injectable } from 'inversify';
@@ -307,10 +312,12 @@ export class WindowService implements WindowServiceTrait {
       log.error('reportReviewUsage.failed', e);
     }
     const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
-    reviewPage.reviewSubProcess.proxyFn.reviewProject({
-      projectDirPath: targetDirPath,
-      extraData,
-    }).catch();
+    reviewPage.reviewSubProcess.proxyFn
+      .reviewProject({
+        projectDirPath: targetDirPath,
+        extraData,
+      })
+      .catch();
   }
 
   async reviewFile(path: string, reportSku = true) {
@@ -359,10 +366,12 @@ export class WindowService implements WindowServiceTrait {
 
     const mainWindow = this.getWindow(WindowType.Main);
     const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
-    reviewPage.reviewSubProcess.proxyFn.reviewFile({
-      filePath: path,
-      extraData,
-    }).catch();
+    reviewPage.reviewSubProcess.proxyFn
+      .reviewFile({
+        filePath: path,
+        extraData,
+      })
+      .catch();
   }
 
   async reviewSelection(selectionData?: SelectionData) {
@@ -401,10 +410,12 @@ export class WindowService implements WindowServiceTrait {
     }
     const mainWindow = this.getWindow(WindowType.Main);
     const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
-    reviewPage.reviewSubProcess.proxyFn.addReview({
-      selectionData,
-      extraData,
-    }).catch();
+    reviewPage.reviewSubProcess.proxyFn
+      .addReview({
+        selectionData,
+        extraData,
+      })
+      .catch();
     reviewPage.active().catch();
   }
 

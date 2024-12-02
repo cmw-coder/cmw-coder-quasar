@@ -85,7 +85,7 @@ export class HttpRequest {
 }
 
 export class HttpResponse {
-  constructor(private _response: ServerResponse<IncomingMessage>) {}
+  constructor(private _response: ServerResponse) {}
 
   setStatusCode(statusCode: number) {
     this._response.statusCode = statusCode;
@@ -129,10 +129,7 @@ export class HttpRouter {
     }
   }
 
-  async handleRequest(
-    req: IncomingMessage,
-    res: ServerResponse<IncomingMessage>,
-  ) {
+  async handleRequest(req: IncomingMessage, res: ServerResponse) {
     const request = new HttpRequest(req);
     const response = new HttpResponse(res);
     const methodMap = this._routes.get(request.url ?? '');

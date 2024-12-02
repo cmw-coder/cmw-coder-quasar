@@ -76,7 +76,7 @@ _request.interceptors.response.use(
       error.config?.url?.includes('token/refresh')
     ) {
       // refreshToken 失败, 重新进行登录
-      windowService.activeWindow(WindowType.Login);
+      await windowService.activeWindow(WindowType.Login);
     }
     return Promise.reject(
       new Error(error?.response?.data?.message || error?.message || 'Error'),

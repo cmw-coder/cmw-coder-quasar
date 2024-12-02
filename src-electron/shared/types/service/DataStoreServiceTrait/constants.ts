@@ -32,7 +32,7 @@ export const defaultModelConfig: ModelConfig = {
       '参考待补全代码:\n' +
       '%{PasteContent}%\n' +
       '\n' +
-      '%{CurrentFilePrefix}%<fim_suffix>%{SuffixCode}%<fim_middle>'
+      '%{CurrentFilePrefix}%<fim_suffix>%{SuffixCode}%<fim_middle>',
   },
   config: {
     modelKey: 'LS13B',

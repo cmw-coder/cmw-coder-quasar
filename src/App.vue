@@ -74,8 +74,4 @@ onBeforeUnmount(() => {
 ::-webkit-scrollbar-thumb:hover {
   background: #555; /* 悬停时的滑块颜色 */
 }
-
-body.body--dark .bg-blue-grey-2 {
-  background-color: #3c515a !important;
-}
 </style>

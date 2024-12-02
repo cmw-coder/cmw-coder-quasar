@@ -102,10 +102,12 @@ export class SvnService implements SvnServiceTrait {
     const svnDirPath = targetDirPathList[0];
     const svnExistDir = path.join(svnDirPath, '.svn');
     if (!fs.existsSync(svnExistDir)) {
-      dialog.showMessageBox(mainWindow._window, {
-        message: '该目录下不存在 .svn 目录，请选择 svn 项目目录',
-        type: 'error',
-      });
+      dialog
+        .showMessageBox(mainWindow._window, {
+          message: '该目录下不存在 .svn 目录，请选择 svn 项目目录',
+          type: 'error',
+        })
+        .catch();
       return;
     }
     const revision = await getRevision(svnDirPath);

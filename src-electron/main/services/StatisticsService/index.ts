@@ -34,7 +34,7 @@ import { FileRecorderManager } from 'main/services/StatisticsService/FileRecorde
 
 @injectable()
 export class StatisticsService implements StatisticsServiceTrait {
-  private _lastCursorPosition: CaretPosition = { character: -1, line: -1 };
+  private _lastCursorPosition = new CaretPosition();
   private _recentCompletion = new Map<string, CompletionData>();
   private _fileRecorderManager = new FileRecorderManager();
 
@@ -75,8 +75,7 @@ export class StatisticsService implements StatisticsServiceTrait {
       version,
     });
 
-    this._lastCursorPosition.character = -1;
-    this._lastCursorPosition.line = -1;
+    this._lastCursorPosition = new CaretPosition();
 
     const lineLength = candidate.split(NEW_LINE_REGEX).length;
     try {
@@ -117,8 +116,7 @@ export class StatisticsService implements StatisticsServiceTrait {
     }
 
     if (
-      data.position.character >= 0 &&
-      data.position.line >= 0 &&
+      data.position.isValid &&
       data.position.line != this._lastCursorPosition.line
     ) {
       // TODO: Check if this works
@@ -242,8 +240,7 @@ export class StatisticsService implements StatisticsServiceTrait {
 
     if (
       data.projectId &&
-      data.position.character >= 0 &&
-      data.position.line >= 0 &&
+      data.position.isValid &&
       data.position.line != this._lastCursorPosition.line
     ) {
       statisticsLog.debug('completionSelected.success', {

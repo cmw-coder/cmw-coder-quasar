@@ -11,6 +11,7 @@
 const { configure } = require('quasar/wrappers');
 const path = require('path');
 
+// noinspection JSCheckFunctionSignatures
 module.exports = configure((/* ctx */) => ({
   eslint: {
     // fix: true,

@@ -5,7 +5,6 @@ import {
   ReviewFileItem,
   ReviewState,
   reviewStateIconMap,
-  SelectionData
 } from 'cmw-coder-subprocess';
 import { DateTime } from 'luxon';
 import { QVirtualScroll, throttle, useQuasar } from 'quasar';
@@ -13,38 +12,15 @@ import { onBeforeUnmount, onMounted, Ref, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import FunctionPanel from 'components/ReviewPanels/FunctionPanel.vue';
-import { useService } from 'utils/common';
 import { ActionType } from 'shared/types/ActionMessage';
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import { ServiceType } from 'shared/types/service';
 import { ActionApi } from 'types/ActionApi';
+import { useService } from 'utils/common';
+import { formatSelection, getFileName, getProblemNumber } from 'utils/review';
 
 const { dialog } = useQuasar();
 const expandedMap = ref({} as Record<string, boolean>);
-
-const formatSelection = (selectionData: SelectionData) => {
-  const filePathArr = selectionData.file.split(/\\|\//);
-  const fileName = filePathArr[filePathArr.length - 1];
-  return {
-    fileName,
-    rangeStr: `${selectionData.range.begin.line} - ${selectionData.range.end.line}`,
-    ...selectionData,
-  };
-};
-
-const getProblemNumber = (review: ReviewData) => {
-  let result = 0;
-  if (review.state === ReviewState.Finished) {
-    if (review?.result?.parsed) {
-      review.result.data.forEach((item) => {
-        if (item.IsProblem) {
-          result += 1;
-        }
-      });
-    }
-  }
-  return result;
-};
 
 const baseName = 'pages.ReviewPage.';
 const { t } = useI18n();
@@ -66,7 +42,7 @@ const startCurrentFileReview = async () => {
   if (!currentFilePath.value) {
     return;
   }
-  windowService.reviewFile(currentFilePath.value);
+  windowService.reviewFile(currentFilePath.value).catch();
 };
 let getCurrentPathInterval: NodeJS.Timer | undefined = undefined;
 
@@ -149,7 +125,7 @@ onMounted(async () => {
     currentFilePath.value = await websocketService.getCurrentFile();
   }, 500);
 
-  updateFileList();
+  updateFileList().catch();
   actionApi.register(ActionType.ReviewFileListUpdate, () => {
     throttleUpdateFileList();
   });
@@ -164,11 +140,6 @@ onMounted(async () => {
     }
   });
 });
-
-const getFileName = (filePath: string) => {
-  const filePathArr = filePath.split(/\\|\//);
-  return filePathArr[filePathArr.length - 1];
-};
 
 onBeforeUnmount(() => {
   if (getCurrentPathInterval) {
@@ -195,11 +166,11 @@ const delFile = async (fileItem: ReviewFileItem) => {
       cancel: i18n('dialog.delFileDialog.cancel'),
     }).onOk(async () => {
       await windowService.delReviewByFile(fileItem.path);
-      updateFileList();
+      updateFileList().catch();
     });
   } else {
     await windowService.delReviewByFile(fileItem.path);
-    updateFileList();
+    updateFileList().catch();
   }
 };
 
@@ -222,7 +193,7 @@ const delReviewItem = async (review: ReviewData) => {
       if (delReviewIndex !== -1) {
         activeFileReviewList.value.splice(delReviewIndex, 1);
       }
-      updateFileList();
+      updateFileList().catch();
     });
   } else {
     await windowService.delReview(review.reviewId);
@@ -232,7 +203,7 @@ const delReviewItem = async (review: ReviewData) => {
     if (delReviewIndex !== -1) {
       activeFileReviewList.value.splice(delReviewIndex, 1);
     }
-    updateFileList();
+    updateFileList().catch();
   }
 };
 
@@ -250,13 +221,15 @@ const feedBackHandle = async (
     comment: comment || '',
     timestamp: DateTime.now().valueOf() / 1000,
   });
-  windowService.setReviewFeedback({
-    serverTaskId: review.serverTaskId,
-    userId: username || 'NONE',
-    feedback,
-    comment: comment || '',
-    timestamp: DateTime.now().valueOf() / 1000,
-  });
+  windowService
+    .setReviewFeedback({
+      serverTaskId: review.serverTaskId,
+      userId: username || 'NONE',
+      feedback,
+      comment: comment || '',
+      timestamp: DateTime.now().valueOf() / 1000,
+    })
+    .catch();
 };
 
 const retryHandle = (review: ReviewData) => {
@@ -352,7 +325,7 @@ const clearReview = () => {
                 }
               "
               :key="item.path"
-              style="padding-left: 6px; padding-right: 0px"
+              style="padding-left: 6px; padding-right: 0"
             >
               <q-item-section>
                 <div class="file-wrapper">
@@ -505,7 +478,7 @@ const clearReview = () => {
   .del-btn-wrapper {
     display: none;
     position: absolute;
-    right: 0px;
+    right: 0;
     top: -8px;
     height: 100%;
   }

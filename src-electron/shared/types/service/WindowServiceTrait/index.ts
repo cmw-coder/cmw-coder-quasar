@@ -1,4 +1,9 @@
-import { Feedback, ReviewData, ReviewFileItem,SelectionData} from 'cmw-coder-subprocess';
+import {
+  Feedback,
+  ReviewData,
+  ReviewFileItem,
+  SelectionData,
+} from 'cmw-coder-subprocess';
 
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import { WindowType } from 'shared/types/WindowType';

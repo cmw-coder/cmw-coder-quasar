@@ -339,6 +339,14 @@ export default {
         invalidProject: '项目无效',
       },
     },
+    CompletionsPage: {
+      labels: {
+        title: {
+          Common: '代码补全',
+          PasteReplace: '修复粘贴内容',
+        }
+      }
+    },
     DeveloperPage: {
       labels: {
         currentFile: '当前文件',

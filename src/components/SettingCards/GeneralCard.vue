@@ -83,9 +83,9 @@ const updateShowStatusWindow = async (value: boolean) => {
   showStatusWindow.value = value;
   showStatusWindowUpdating.value = false;
   if (value) {
-    windowService.activeWindow(WindowType.Status);
+    await windowService.activeWindow(WindowType.Status);
   } else {
-    windowService.hideWindow(WindowType.Status);
+    await windowService.hideWindow(WindowType.Status);
   }
 };
 

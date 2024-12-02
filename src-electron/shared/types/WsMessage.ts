@@ -126,6 +126,7 @@ export interface CompletionSelectClientMessage extends WsMessage {
   action: WsAction.CompletionSelect;
   data: {
     actionId: string;
+    type: GenerateType;
     index: number;
     dimensions: {
       height: number;

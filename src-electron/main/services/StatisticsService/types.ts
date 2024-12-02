@@ -116,7 +116,9 @@ export class CompletionData {
         ? extname(basename(this.elements.file))
         : '',
       similarSnippet: this.elements.similarSnippetSelf ?? '',
-      symbolList: this.elements.relativeDefinition ? [this.elements.relativeDefinition] : [],
+      symbolList: this.elements.relativeDefinition
+        ? [this.elements.relativeDefinition]
+        : [],
       model: this.model ?? '',
       templateName: this.templateName ?? '',
       answer: this.completions.candidates,

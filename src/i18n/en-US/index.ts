@@ -342,6 +342,14 @@ export default {
         invalidProject: 'Invalid project',
       },
     },
+    CompletionsPage: {
+      labels: {
+        title: {
+          Common: 'Common Completion',
+          PasteReplace: 'Fix Paste Content',
+        }
+      }
+    },
     DeveloperPage: {
       labels: {
         currentFile: 'Current File',

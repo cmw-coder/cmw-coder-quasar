@@ -17,7 +17,7 @@ export const routes: RouteRecordRaw[] = [
       {
         path: 'completions',
         components: {
-          default: () => import('pages/CompletionImmersivePage.vue'),
+          default: () => import('pages/CompletionsPage.vue'),
         },
         props: {
           header: {
