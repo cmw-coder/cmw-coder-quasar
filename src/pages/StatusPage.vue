@@ -4,7 +4,10 @@ import { onBeforeUnmount, onMounted, ref } from 'vue';
 
 import { ActionType } from 'shared/types/ActionMessage';
 import { ServiceType } from 'shared/types/service';
-import { Status, StatusData } from 'shared/types/service/WindowServiceTrait/StatusWindowType';
+import {
+  Status,
+  StatusData,
+} from 'shared/types/service/WindowServiceTrait/StatusWindowType';
 import { ActionApi } from 'types/ActionApi';
 import { i18nSubPath, useService } from 'utils/common';
 import { WindowType } from 'shared/types/WindowType';
@@ -35,7 +38,7 @@ onMounted(() => {
       await windowService.setWindowSize(
         {
           width: 200,
-          height: 32 + statusData.value.detail.split('\n').length * 16
+          height: 32 + statusData.value.detail.split('\n').length * 16,
         },
         WindowType.Status,
       );

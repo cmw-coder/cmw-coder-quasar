@@ -261,7 +261,7 @@ const updateCompletionNumberConfig = async (
     value = Number(value);
     if (value < constants.min) {
       configSetter(constants.min);
-    } else if (value > COMPLETION_CONFIG_NUMBER_CONSTANTS.debounceDelay.max) {
+    } else if (value > constants.max) {
       configSetter(constants.max);
     } else if (!isNaN(value)) {
       configSetter(value);
