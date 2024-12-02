@@ -15,7 +15,7 @@ export class StatusWindow extends FloatingBaseWindow {
       height: 32,
       width: 200,
       x: 200,
-      y: 0,
+      y: 100,
       show: false,
       transparent: true,
       skipTaskbar: true,

@@ -12,7 +12,7 @@ import { ActionApi } from 'types/ActionApi';
 import { i18nSubPath, useService } from 'utils/common';
 import { WindowType } from 'shared/types/WindowType';
 
-const baseName = 'pages.StatusPage.';
+const baseName = 'pages.StatusPage';
 const colorMap = {
   [Status.READY]: 'transparent',
   [Status.GENERATING]: 'rgba(25, 118, 210, 0.5)',

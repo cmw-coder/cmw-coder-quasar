@@ -11,7 +11,7 @@ import { i18nSubPath, useService } from 'utils/common';
 import SingleLine from 'components/CompletionCodes/SingleLine.vue';
 import MultiLine from 'components/CompletionCodes/MultiLine.vue';
 
-const baseName = 'pages.CompletionsPage.';
+const baseName = 'pages.CompletionsPage';
 
 const dataStoreService = useService(ServiceType.DATA_STORE);
 const windowService = useService(ServiceType.WINDOW);
