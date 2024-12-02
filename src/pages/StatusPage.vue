@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-
-import { ActionApi } from 'types/ActionApi';
-import { ActionType } from 'shared/types/ActionMessage';
-import {
-  Status,
-  StatusData,
-} from 'shared/types/service/WindowServiceTrait/StatusWindowType';
 import { useQuasar } from 'quasar';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
+
+import { ActionType } from 'shared/types/ActionMessage';
+import { ServiceType } from 'shared/types/service';
+import { Status, StatusData } from 'shared/types/service/WindowServiceTrait/StatusWindowType';
+import { ActionApi } from 'types/ActionApi';
+import { i18nSubPath, useService } from 'utils/common';
+import { WindowType } from 'shared/types/WindowType';
 
 const baseName = 'pages.StatusPage.';
 const colorMap = {
@@ -17,23 +16,30 @@ const colorMap = {
   [Status.ERROR]: 'rgba(193, 0, 21, 0.5)',
 };
 
-const { t } = useI18n();
 const { dark } = useQuasar();
+const windowService = useService(ServiceType.WINDOW);
 const actionApi = new ActionApi(baseName);
-
-const i18n = (relativePath: string) => {
-  return t(baseName + relativePath);
-};
 
 const statusData = ref<StatusData>({
   status: Status.READY,
   detail: 'I AM READY FOR GENERATING CODE',
 });
 
+const i18n = i18nSubPath(baseName);
+
 onMounted(() => {
-  actionApi.register(ActionType.UpdateStatus, (data) => {
+  actionApi.register(ActionType.UpdateStatus, async (data) => {
     console.log('UpdateStatus', data);
     statusData.value = data;
+    if (statusData.value.status === Status.ERROR) {
+      await windowService.setWindowSize(
+        {
+          width: 200,
+          height: 32 + statusData.value.detail.split('\n').length * 16
+        },
+        WindowType.Status,
+      );
+    }
   });
 });
 

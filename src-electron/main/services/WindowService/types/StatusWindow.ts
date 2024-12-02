@@ -13,7 +13,7 @@ export class StatusWindow extends FloatingBaseWindow {
       closable: false,
       fullscreenable: false,
       height: 32,
-      width: 150,
+      width: 200,
       x: 200,
       y: 0,
       show: false,
