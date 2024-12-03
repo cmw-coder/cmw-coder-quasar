@@ -39,7 +39,7 @@ import { getService } from 'main/services';
 import { ConfigService } from 'main/services/ConfigService';
 import statisticsLog from 'main/components/Loggers/statisticsLog';
 import { UpdateStatusActionMessage } from 'shared/types/ActionMessage';
-import { CaretPosition, GenerateType, Selection } from 'shared/types/common';
+import { CaretPosition, Selection } from 'shared/types/common';
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import { ServiceType } from 'shared/types/service';
 import { WebsocketServiceTrait } from 'shared/types/service/WebsocketServiceTrait';
@@ -246,6 +246,11 @@ export class WebsocketService implements WebsocketServiceTrait {
       });
 
       client.on('close', () => {
+        if (this._lastActivePid === pid) {
+          this._lastActivePid = -1;
+          this._windowService.hideWindow(WindowType.Completions).catch();
+          this._windowService.hideWindow(WindowType.Status).catch();
+        }
         log.info(`Client (${pid}) disconnected`);
       });
     });
@@ -379,7 +384,7 @@ export class WebsocketService implements WebsocketServiceTrait {
 
             return new CompletionGenerateServerMessage({
               actionId,
-              type: GenerateType.Common,
+              type: rawInputs.elements.generateType,
               completions,
               selection: rawInputs.selection,
               result: 'success',
@@ -466,11 +471,6 @@ export class WebsocketService implements WebsocketServiceTrait {
       const mainWindowPage = mainWindow.getPage(MainWindowPageType.Commit);
       mainWindowPage.setCurrentFile(currentFile);
       mainWindowPage.active().catch();
-    });
-    this._registerWsAction(WsAction.EditorFocusState, ({ data: isFocused }) => {
-      if (!isFocused) {
-        this._windowService.getWindow(WindowType.Completions).hide();
-      }
     });
     this._registerWsAction(WsAction.EditorPaste, async ({ data }, pid) => {
       const clientInfo = this._clientInfoMap.get(pid);
@@ -581,6 +581,26 @@ export class WebsocketService implements WebsocketServiceTrait {
         )
         .catch((e) => completionLog.error('EditorSelection', e));
     });
+    this._registerWsAction(
+      WsAction.EditorState,
+      ({ data: { dimensions, isFocused } }) => {
+        const completionsWindow = this._windowService.getWindow(
+          WindowType.Completions,
+        );
+        const statusWindow = this._windowService.getWindow(WindowType.Status);
+        if (dimensions) {
+          statusWindow.move(dimensions);
+        }
+        if (isFocused !== undefined) {
+          if (isFocused) {
+            statusWindow.show(undefined, false);
+          } else {
+            completionsWindow.hide();
+            statusWindow.hide();
+          }
+        }
+      },
+    );
     this._registerWsAction(
       WsAction.EditorSwitchFile,
       async ({ data: filePath }, pid) => {

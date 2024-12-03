@@ -14,6 +14,7 @@ defineProps<{
 <template>
   <q-card
     bordered
+    flat
     style="font-family: Consolas, monospace, serif; opacity: 80%"
     :style="{
       fontSize: `${fontSize}px`,

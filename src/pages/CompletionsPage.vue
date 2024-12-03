@@ -16,8 +16,6 @@ const baseName = 'pages.CompletionsPage';
 const dataStoreService = useService(ServiceType.DATA_STORE);
 const windowService = useService(ServiceType.WINDOW);
 
-const multiLineDom = ref<HTMLDivElement>();
-const singleLineDom = ref<HTMLDivElement>();
 const cacheOffset = ref(0);
 const completionCount = reactive({
   index: 0,
@@ -51,39 +49,30 @@ onMounted(async () => {
       height.value = fontHeight;
       generateType.value = type;
       await nextTick();
+      const lines = completion.split(NEW_LINE_REGEX);
+      const maxLineLength = Math.max(
+        ...lines.map((line) => line.length),
+      );
       switch (generateType.value) {
         case GenerateType.Common: {
-          const lines = completion.split(NEW_LINE_REGEX);
-          isMultiLine.value = lines.length > 1;
-          if (isMultiLine.value && multiLineDom.value) {
-            await windowService.setWindowSize(
-              {
-                width: multiLineDom.value.offsetWidth,
-                height: multiLineDom.value.offsetHeight,
-              },
-              WindowType.Completions,
-            );
-          } else if (!isMultiLine.value && singleLineDom.value) {
-            await windowService.setWindowSize(
-              {
-                width: singleLineDom.value.offsetWidth,
-                height: singleLineDom.value.offsetHeight,
-              },
-              WindowType.Completions,
-            );
-          }
+          isMultiLine.value = completion.split(NEW_LINE_REGEX).length > 1;
+          await windowService.setWindowSize(
+            {
+              width: Math.round(maxLineLength * fontSize.value * 0.5 + 3),
+              height: Math.round(lines.length * height.value + 6),
+            },
+            WindowType.Completions,
+          );
           break;
         }
         case GenerateType.PasteReplace: {
-          if (multiLineDom.value) {
-            await windowService.setWindowSize(
-              {
-                width: multiLineDom.value.offsetWidth,
-                height: multiLineDom.value.offsetHeight + 50,
-              },
-              WindowType.Completions,
-            );
-          }
+          await windowService.setWindowSize(
+            {
+              width: Math.round(maxLineLength * fontSize.value * 0.5 + 36),
+              height: Math.round(lines.length * height.value + 87),
+            },
+            WindowType.Completions,
+          );
           break;
         }
       }
@@ -112,7 +101,6 @@ onBeforeUnmount(() => {
       <template v-if="generateType == GenerateType.Common">
         <multi-line
           v-show="isMultiLine"
-          ref="multiLineDom"
           :cache-offset="cacheOffset"
           :current-completion="currentCompletion"
           :font-size="fontSize"
@@ -120,7 +108,6 @@ onBeforeUnmount(() => {
         />
         <single-line
           v-show="!isMultiLine"
-          ref="singleLineDom"
           class="q-ma-none"
           :cache-offset="cacheOffset"
           :current-completion="currentCompletion"
@@ -129,16 +116,12 @@ onBeforeUnmount(() => {
           :transparent-fallback="transparentFallback"
         />
       </template>
-      <q-card v-else-if="generateType == GenerateType.PasteReplace">
-        <q-card-section>
-          <div>
+      <q-card v-else-if="generateType == GenerateType.PasteReplace" bordered flat>
+        <q-card-section class="column q-gutter-md">
+          <div class="text-h6">
             {{ i18n(`labels.title.${generateType}`) }}
           </div>
-        </q-card-section>
-        <q-card-section>
           <multi-line
-            v-show="isMultiLine"
-            ref="multiLineDom"
             :cache-offset="cacheOffset"
             :current-completion="currentCompletion"
             :font-size="fontSize"
