@@ -151,7 +151,7 @@ export abstract class BaseWindow {
     y?: number;
     height?: number;
     width?: number;
-  }) {
+  }, focus = true) {
     Logger.log(`Show window: ${this._type} ${this._url}`);
 
     if (!this._window) {
@@ -191,7 +191,9 @@ export abstract class BaseWindow {
     }
     this._window.show();
     this._window.moveTop();
-    this._window.focus();
+    if (focus) {
+      this._window.focus();
+    }
     this.moveHandler();
   }
 
