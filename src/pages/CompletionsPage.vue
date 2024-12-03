@@ -50,9 +50,7 @@ onMounted(async () => {
       generateType.value = type;
       await nextTick();
       const lines = completion.split(NEW_LINE_REGEX);
-      const maxLineLength = Math.max(
-        ...lines.map((line) => line.length),
-      );
+      const maxLineLength = Math.max(...lines.map((line) => line.length));
       switch (generateType.value) {
         case GenerateType.Common: {
           isMultiLine.value = completion.split(NEW_LINE_REGEX).length > 1;
@@ -116,7 +114,11 @@ onBeforeUnmount(() => {
           :transparent-fallback="transparentFallback"
         />
       </template>
-      <q-card v-else-if="generateType == GenerateType.PasteReplace" bordered flat>
+      <q-card
+        v-else-if="generateType == GenerateType.PasteReplace"
+        bordered
+        flat
+      >
         <q-card-section class="column q-gutter-md">
           <div class="text-h6">
             {{ i18n(`labels.title.${generateType}`) }}

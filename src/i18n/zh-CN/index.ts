@@ -344,8 +344,8 @@ export default {
         title: {
           Common: '代码补全',
           PasteReplace: '修复粘贴内容',
-        }
-      }
+        },
+      },
     },
     DeveloperPage: {
       labels: {

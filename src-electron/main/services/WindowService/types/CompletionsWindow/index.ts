@@ -142,7 +142,7 @@ export class CompletionsWindow extends BaseWindow {
           count,
           fontHeight,
           fontSize,
-          type
+          type,
         }),
       );
       this._window.show();

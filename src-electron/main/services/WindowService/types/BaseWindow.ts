@@ -146,12 +146,15 @@ export abstract class BaseWindow {
     }
   }
 
-  show(_windowData?: {
-    x?: number;
-    y?: number;
-    height?: number;
-    width?: number;
-  }, focus = true) {
+  show(
+    _windowData?: {
+      x?: number;
+      y?: number;
+      height?: number;
+      width?: number;
+    },
+    focus = true,
+  ) {
     Logger.log(`Show window: ${this._type} ${this._url}`);
 
     if (!this._window) {

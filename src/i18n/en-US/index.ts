@@ -347,8 +347,8 @@ export default {
         title: {
           Common: 'Common Completion',
           PasteReplace: 'Fix Paste Content',
-        }
-      }
+        },
+      },
     },
     DeveloperPage: {
       labels: {

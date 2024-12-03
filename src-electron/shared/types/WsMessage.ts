@@ -210,7 +210,7 @@ export interface EditorStateClientMessage extends WsMessage {
       y: number;
     };
     isFocused?: boolean;
-  }
+  };
 }
 
 export interface EditorSwitchFileClientMessage extends WsMessage {
