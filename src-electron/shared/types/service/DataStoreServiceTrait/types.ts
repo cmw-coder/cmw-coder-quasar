@@ -113,9 +113,9 @@ export const defaultAppData: AppData = {
       show: false,
     },
     [WindowType.Status]: {
-      height: 34,
-      width: 116,
-      show: true,
+      height: 32,
+      width: 200,
+      show: false,
       x: 200,
       y: 0,
     },

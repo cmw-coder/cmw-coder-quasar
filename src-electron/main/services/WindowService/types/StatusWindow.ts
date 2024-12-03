@@ -1,5 +1,8 @@
-import { WindowType } from 'shared/types/WindowType';
 import { FloatingBaseWindow } from 'main/services/WindowService/types/FloatingBaseWindow';
+import { defaultAppData } from 'shared/types/service/DataStoreServiceTrait/types';
+import { WindowType } from 'shared/types/WindowType';
+
+const defaultData = defaultAppData.window[WindowType.Status];
 
 export class StatusWindow extends FloatingBaseWindow {
   constructor() {
@@ -11,14 +14,33 @@ export class StatusWindow extends FloatingBaseWindow {
       maximizable: false,
       resizable: false,
       closable: false,
+      focusable: false,
       fullscreenable: false,
-      height: 32,
-      width: 200,
-      x: 200,
-      y: 100,
-      show: false,
+      height: defaultData.height,
+      width: defaultData.width,
+      x: defaultData.x,
+      y: defaultData.y,
+      show: defaultData.show,
       transparent: true,
       skipTaskbar: true,
     });
+  }
+
+  move(
+    dimensions: { height: number; width: number; x: number; y: number },
+    animate = false,
+  ) {
+    if (this._window) {
+      const [width, height] = this._window.getContentSize();
+      this._window?.setBounds(
+        {
+          x: Math.round(dimensions.x + dimensions.width / 2),
+          y: Math.round(dimensions.y + 1),
+          height,
+          width,
+        },
+        animate,
+      );
+    }
   }
 }

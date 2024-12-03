@@ -20,9 +20,9 @@ export enum WsAction {
   CompletionGenerate = 'CompletionGenerate',
   CompletionSelect = 'CompletionSelect',
   EditorCommit = 'EditorCommit',
-  EditorFocusState = 'EditorFocusState',
   EditorPaste = 'EditorPaste',
   EditorSelection = 'EditorSelection',
+  EditorState = 'EditorState',
   EditorSwitchFile = 'EditorSwitchFile',
   EditorSwitchProject = 'EditorSwitchProject',
   HandShake = 'HandShake',
@@ -165,11 +165,6 @@ export interface EditorCommitClientMessage extends WsMessage {
   data: string;
 }
 
-export interface EditorFocusStateClientMessage extends WsMessage {
-  action: WsAction.EditorFocusState;
-  data: boolean;
-}
-
 export interface EditorPasteClientMessage extends WsMessage {
   action: WsAction.EditorPaste;
   data: {
@@ -203,6 +198,19 @@ export interface EditorSelectionClientMessage extends WsMessage {
       y: number;
     };
   };
+}
+
+export interface EditorStateClientMessage extends WsMessage {
+  action: WsAction.EditorState;
+  data: {
+    dimensions?: {
+      height: number;
+      width: number;
+      x: number;
+      y: number;
+    };
+    isFocused?: boolean;
+  }
 }
 
 export interface EditorSwitchFileClientMessage extends WsMessage {
@@ -286,16 +294,16 @@ export interface WsMessageMapping {
     client: EditorCommitClientMessage;
     server: void;
   };
-  [WsAction.EditorFocusState]: {
-    client: EditorFocusStateClientMessage;
-    server: void;
-  };
   [WsAction.EditorPaste]: {
     client: EditorPasteClientMessage;
     server: void;
   };
   [WsAction.EditorSelection]: {
     client: EditorSelectionClientMessage;
+    server: void;
+  };
+  [WsAction.EditorState]: {
+    client: EditorStateClientMessage;
     server: void;
   };
   [WsAction.EditorSwitchFile]: {
