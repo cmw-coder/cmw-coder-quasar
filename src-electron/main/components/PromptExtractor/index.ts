@@ -129,7 +129,6 @@ export class PromptExtractor {
       mostSimilarSnippets: similarSnippetsSliced,
     });
 
-    // 拼接 neighborSnippet currentFilePrefix
     if (similarSnippetsSliced.length) {
       elements.similarSnippetSelf = similarSnippetsSliced
         .filter(

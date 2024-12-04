@@ -50,14 +50,17 @@ onMounted(async () => {
       generateType.value = type;
       await nextTick();
       const lines = completion.split(NEW_LINE_REGEX);
-      const maxLineLength = Math.max(...lines.map((line) => line.length));
+      const codeHeight = lines.length * height.value + 6;
+      const codeWidth =
+        Math.max(...lines.map((line) => line.length)) * fontSize.value * 0.5 +
+        3;
       switch (generateType.value) {
         case GenerateType.Common: {
           isMultiLine.value = completion.split(NEW_LINE_REGEX).length > 1;
           await windowService.setWindowSize(
             {
-              width: Math.round(maxLineLength * fontSize.value * 0.5 + 3),
-              height: Math.round(lines.length * height.value + 6),
+              width: Math.round(codeWidth),
+              height: Math.round(codeHeight),
             },
             WindowType.Completions,
           );
@@ -66,8 +69,8 @@ onMounted(async () => {
         case GenerateType.PasteReplace: {
           await windowService.setWindowSize(
             {
-              width: Math.round(maxLineLength * fontSize.value * 0.5 + 36),
-              height: Math.round(lines.length * height.value + 87),
+              width: Math.max(180, Math.round(codeWidth + 33)),
+              height: Math.round(codeHeight + 81),
             },
             WindowType.Completions,
           );
