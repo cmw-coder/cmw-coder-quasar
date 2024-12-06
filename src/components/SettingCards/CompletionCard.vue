@@ -86,6 +86,8 @@ const refreshProductLineList = async () => {
   try {
     productLineLoading.value = true;
     const { username, activeTemplate } = await configService.getConfigs();
+    console.log('username', username);
+    console.log('activeTemplate', activeTemplate);
 
     productLineList.value = await api_getUserTemplateList(username);
     selectedProductLine.value = activeTemplate;
@@ -286,10 +288,14 @@ const updateCompletionNumberConfig = async (
   configLoadingSetter();
 };
 
-onMounted(() => {
-  refreshProductLineList().catch();
-  refreshModelList().catch();
-  refreshCompletionConfig().catch();
+onMounted(async () => {
+  try {
+    await refreshProductLineList();
+    refreshModelList();
+    refreshCompletionConfig();
+  } catch (error) {
+    console.error('onMounted error', error);
+  }
 });
 </script>
 
