@@ -1,4 +1,5 @@
 import { Reference, SelectionData } from 'cmw-coder-subprocess';
+import { Notification } from 'electron';
 import log from 'electron-log/main';
 import { sync } from 'fast-glob';
 import { createServer } from 'http';
@@ -245,13 +246,17 @@ export class WebsocketService implements WebsocketServiceTrait {
         }
       });
 
-      client.on('close', () => {
+      client.on('close', (code) => {
         if (this._lastActivePid === pid) {
           this._lastActivePid = -1;
           this._windowService.hideWindow(WindowType.Completions).catch();
           this._windowService.hideWindow(WindowType.Status).catch();
         }
-        log.info(`Client (${pid}) disconnected`);
+
+        new Notification({
+          title: 'Source Insight Disconnected',
+          body: `PID: ${pid}, code: ${code}`,
+        }).show();
       });
     });
     httpServer.listen(3000, '127.0.0.1');
