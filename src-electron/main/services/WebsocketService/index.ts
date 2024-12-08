@@ -253,10 +253,12 @@ export class WebsocketService implements WebsocketServiceTrait {
           this._windowService.hideWindow(WindowType.Status).catch();
         }
 
-        new Notification({
-          title: 'Source Insight Disconnected',
-          body: `PID: ${pid}, code: ${code}`,
-        }).show();
+        if (code !== 1000) {
+          new Notification({
+            title: 'Source Insight Exited Unexpectedly',
+            body: `PID: ${pid}, code: ${code}`,
+          }).show();
+        }
       });
     });
     httpServer.listen(3000, '127.0.0.1');
