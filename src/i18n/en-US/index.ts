@@ -129,6 +129,10 @@ export default {
       },
       GeneralCard: {
         labels: {
+          backupInterval: 'Backup Interval',
+          backupIntervalNotice:
+            'Range: 0 - 1140. The interval of auto backup, set to 0 to disable auto backup',
+          baseServerUrl: 'Base Server Address',
           developerOptions: 'Developer Options',
           displayTheme: 'Display Theme',
           displayThemeOptions: {
@@ -137,17 +141,21 @@ export default {
             light: 'Light',
           },
           locale: 'Language',
+          minutes: 'minutes',
+          showSelectActionWindow: 'Show Selection Action Window',
+          showSelectActionWindowNotice:
+            'Disable this option to prevent the action window from appearing when you select the code.\n' +
+            'You can still use CTRL + I or CTRL + L for relevant operations.',
+          showStatusWindow: 'Show Generate Status Window',
+          showStatusWindowNotice:
+            'Disable this option to stop the status window from appearing when the editor launches.',
           title: 'General',
           transparentFallback: 'Transparent fallback (Windows 7)',
           zoomFix: 'Fix window zoom',
-          hideSelectedTipsWindow: 'Hide Selected Tips Window',
-          hideSelectedTipsWindowNotice:
-            'After hiding the window, the selected prompt window will no longer appear after selecting the code, and subsequent operations can be triggered directly by pressing CTRL + I/L.',
-          hideStatusWindow: 'Hide App Status Window',
-          hideStatusWindowNotice:
-            'After hiding the window, the floating status window will no longer appear when the application is launched',
-          baseServerUrl: 'Base Server Address',
         },
+        tooltips: {
+          resetToDefault: 'Reset to default',
+        }
       },
       UpdateCard: {
         labels: {

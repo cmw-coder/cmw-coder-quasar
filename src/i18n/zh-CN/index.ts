@@ -129,6 +129,10 @@ export default {
       },
       GeneralCard: {
         labels: {
+          backupInterval: '自动备份间隔',
+          backupIntervalNotice:
+            '范围：0 - 1140。备份当前编码文件的时间间隔，设置为 0 将禁用自动备份。',
+          baseServerUrl: '服务地址',
           developerOptions: '开发者选项',
           displayTheme: '界面主题',
           displayThemeOptions: {
@@ -137,16 +141,18 @@ export default {
             light: '亮色',
           },
           locale: '界面语言',
+          minutes: '分钟',
+          showSelectActionWindow: '显示选中操作窗口',
+          showSelectActionWindowNotice:
+            '禁用此选项可防止在选中代码时出现操作窗口。\n您仍然可以使用 CTRL+I 或 CTRL+L 进行相关操作。',
+          showStatusWindow: '显示补全状态窗口',
+          showStatusWindowNotice: '禁用此选项以在编辑器启动时不再显示状态窗口',
           title: '通用',
           transparentFallback: '透明窗口兼容模式（Windows 7）',
           zoomFix: '窗口缩放修复',
-          hideSelectedTipsWindow: '隐藏选中提示窗口',
-          hideSelectedTipsWindowNotice:
-            '隐藏窗口后，选中提示窗口将不在选中代码后出现，后续操作可直接通过 CTRL + I/L 触发。',
-          hideStatusWindow: '隐藏状态窗口',
-          hideStatusWindowNotice:
-            '隐藏窗口后，应用启动后将不再显示悬浮状态窗口',
-          baseServerUrl: '服务地址',
+        },
+        tooltips: {
+          resetToDefault: '重置为默认值',
         },
       },
       UpdateCard: {

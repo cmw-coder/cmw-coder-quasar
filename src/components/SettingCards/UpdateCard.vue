@@ -1,30 +1,21 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia';
 import { useQuasar } from 'quasar';
-import { ref } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import packageJson from 'app/package.json';
 import { ServiceType } from 'shared/types/service';
-import { useSettingsStore } from 'stores/settings';
-import { useService } from 'utils/common';
+import { i18nSubPath, useService } from 'utils/common';
 
-const { developerMode } = storeToRefs(useSettingsStore());
-const { t } = useI18n();
 const { notify } = useQuasar();
 const { push } = useRouter();
+const configService = useService(ServiceType.CONFIG);
 const updaterService = useService(ServiceType.UPDATER);
 
-const i18n = (relativePath: string, data?: Record<string, unknown>) => {
-  if (data) {
-    return t('components.SettingCards.UpdateCard.' + relativePath, data);
-  } else {
-    return t('components.SettingCards.UpdateCard.' + relativePath);
-  }
-};
+const i18n = i18nSubPath('components.SettingCards.UpdateCard');
 
 const checkForUpdateLoading = ref(false);
+const developerMode = ref(false);
 const developerModeCounter = ref(0);
 const version = ref(packageJson.version);
 
@@ -35,6 +26,9 @@ const checkForUpdate = async () => {
 };
 
 const tryEnableDeveloperMode = () => {
+  if (developerMode.value) {
+    return;
+  }
   developerModeCounter.value++;
   if (developerModeCounter.value >= 3 && developerModeCounter.value < 7) {
     notify({
@@ -53,9 +47,15 @@ const tryEnableDeveloperMode = () => {
       message: i18n('notifications.developerModeEnabled'),
       icon: 'mdi-dev-to',
     });
+    configService.setConfig('developerMode', developerMode.value);
     push('developer');
   }
 };
+
+onMounted(async () => {
+  developerMode.value =
+    (await configService.getConfig('developerMode')) ?? false;
+});
 </script>
 
 <template>

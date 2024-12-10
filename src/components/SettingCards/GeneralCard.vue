@@ -4,10 +4,15 @@ import allLanguages from 'quasar/lang/index.json';
 import { onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+
+import ItemToggle, { Props as ToggleProps } from 'components/ItemToggle.vue';
+import ItemNumber, { Props as NumberProps } from 'components/ItemNumber.vue';
 import { WindowType } from 'shared/types/WindowType';
 import { ServiceType } from 'shared/types/service';
 import messages from 'src/i18n';
-import { useService } from 'utils/common';
+import { sleep, useService } from 'utils/common';
+import { defaultAppData } from 'shared/types/service/DataStoreServiceTrait/types';
+import { APPDATA_NUMBER_CONSTANTS } from 'shared/constants/config';
 
 interface Locale {
   isoName: string;
@@ -41,12 +46,10 @@ const themes: Theme[] = [
 
 const baseName = 'components.SettingCards.GeneralCard.';
 
-const theme = ref(themes[0]);
-const developerMode = ref(false);
-
+const appService = useService(ServiceType.App);
+const configService = useService(ServiceType.CONFIG);
 const dataStoreService = useService(ServiceType.DATA_STORE);
 const windowService = useService(ServiceType.WINDOW);
-const configService = useService(ServiceType.CONFIG);
 
 const { locale, t } = useI18n({ useScope: 'global' });
 const { lang } = useQuasar();
@@ -60,58 +63,118 @@ const i18n = (relativePath: string, data?: Record<string, unknown>) => {
   }
 };
 
-const transparentFallback = ref<boolean>();
-const transparentFallbackUpdating = ref(false);
-const zoomFix = ref<boolean>();
-const zoomFixUpdating = ref(false);
+const numberSettings: NumberProps[] = [
+  {
+    label: i18n('labels.backupInterval'),
+    caption: i18n('labels.backupIntervalNotice'),
+    suffix: i18n('labels.minutes'),
+    defaultValue: defaultAppData.backup.intervalMinutes,
+    resetTooltip: i18n('tooltips.resetToDefault'),
+    initializer: async () => {
+      const { backup } = await dataStoreService.getAppDataAsync();
+      return backup.intervalMinutes;
+    },
+    updateHandler: async (
+      oldValue: number,
+      newValue: number,
+    ): Promise<number> => {
+      newValue = Math.round(newValue);
+      if (newValue < APPDATA_NUMBER_CONSTANTS.backupInterval.min) {
+        newValue = APPDATA_NUMBER_CONSTANTS.backupInterval.min;
+      } else if (newValue > APPDATA_NUMBER_CONSTANTS.backupInterval.max) {
+        newValue = APPDATA_NUMBER_CONSTANTS.backupInterval.max;
+      } else if (isNaN(newValue)) {
+        console.warn(
+          'Update backupInterval: Value is not a number',
+          newValue,
+        );
+        return oldValue;
+      }
+
+      const { backup } = await dataStoreService.getAppDataAsync();
+      backup.intervalMinutes = newValue;
+      await appService.updateBackupIntervalMinutes(newValue);
+      await sleep(Math.floor(200 + Math.random() * 300));
+      return newValue;
+    },
+  },
+];
+
+const toggleSettings: ToggleProps[] = [
+  {
+    label: i18n('labels.showSelectActionWindow'),
+    caption: i18n('labels.showSelectActionWindowNotice'),
+    initializer: async () => {
+      const configs = await configService.getConfigs();
+      return configs.showSelectedTipsWindow;
+    },
+    updateHandler: async (value: boolean) => {
+      await configService.setConfig('showSelectedTipsWindow', value);
+      await sleep(Math.floor(200 + Math.random() * 300));
+      return true;
+    },
+  },
+  {
+    label: i18n('labels.showStatusWindow'),
+    caption: i18n('labels.showStatusWindowNotice'),
+    initializer: async () => {
+      const configs = await configService.getConfigs();
+      return configs.showStatusWindow;
+    },
+    updateHandler: async (value: boolean) => {
+      await configService.setConfig('showStatusWindow', value);
+      if (value) {
+        await windowService.activeWindow(WindowType.Status);
+      } else {
+        await windowService.hideWindow(WindowType.Status);
+      }
+      await sleep(Math.floor(200 + Math.random() * 300));
+      return true;
+    },
+  },
+  {
+    label: i18n('labels.transparentFallback'),
+    initializer: async () => {
+      const { compatibility } = await dataStoreService.getAppDataAsync();
+      return compatibility.transparentFallback;
+    },
+    updateHandler: async (value: boolean) => {
+      const { compatibility } = await dataStoreService.getAppDataAsync();
+      compatibility.transparentFallback = value;
+      await dataStoreService.setAppDataAsync('compatibility', compatibility);
+      await windowService.closeWindow(WindowType.Completions);
+      await windowService.closeWindow(WindowType.Status);
+      await windowService.closeWindow(WindowType.SelectionTips);
+      setTimeout(() => {
+        windowService.activeWindow(WindowType.Completions);
+      }, 500);
+      await sleep(Math.floor(200 + Math.random() * 300));
+      return true;
+    },
+  },
+  {
+    label: i18n('labels.zoomFix'),
+    initializer: async () => {
+      const { compatibility } = await dataStoreService.getAppDataAsync();
+      return compatibility.zoomFix;
+    },
+    updateHandler: async (value: boolean) => {
+      const { compatibility } = await dataStoreService.getAppDataAsync();
+      compatibility.zoomFix = value;
+      await dataStoreService.setAppDataAsync('compatibility', compatibility);
+      await sleep(Math.floor(200 + Math.random() * 300));
+      return true;
+    },
+  },
+];
+
 const baseServerUrl = ref('');
-const showSelectedTipsWindow = ref(true);
-const showSelectedTipsWindowUpdating = ref(false);
-
-const updateShowSelectedTipsWindow = async (value: boolean) => {
-  showSelectedTipsWindowUpdating.value = true;
-  await configService.setConfig('showSelectedTipsWindow', value);
-  showSelectedTipsWindow.value = value;
-  showSelectedTipsWindowUpdating.value = false;
-};
-
-const showStatusWindow = ref(true);
-const showStatusWindowUpdating = ref(false);
-const updateShowStatusWindow = async (value: boolean) => {
-  showStatusWindowUpdating.value = true;
-  await configService.setConfig('showStatusWindow', value);
-  showStatusWindow.value = value;
-  showStatusWindowUpdating.value = false;
-  if (value) {
-    await windowService.activeWindow(WindowType.Status);
-  } else {
-    await windowService.hideWindow(WindowType.Status);
-  }
-};
+const developerMode = ref(false);
+const theme = ref(themes[0]);
 
 const updateLocale = async (value: Locale) => {
   locale.value = value.isoName;
   await configService.setLocale(value.isoName);
-};
-
-const updateTransparentFallback = async (value: boolean) => {
-  transparentFallbackUpdating.value = true;
-  const { compatibility } = await dataStoreService.getAppDataAsync();
-  compatibility.transparentFallback = value;
-  await dataStoreService.setAppDataAsync('compatibility', compatibility);
-  transparentFallback.value = value;
-  await windowService.closeWindow(WindowType.Completions);
-  setTimeout(() => windowService.activeWindow(WindowType.Completions), 500);
-  transparentFallbackUpdating.value = false;
-};
-
-const updateZoomFix = async (value: boolean) => {
-  zoomFixUpdating.value = true;
-  const { compatibility } = await dataStoreService.getAppDataAsync();
-  compatibility.zoomFix = value;
-  await dataStoreService.setAppDataAsync('compatibility', compatibility);
-  zoomFix.value = value;
-  zoomFixUpdating.value = false;
 };
 
 const updateTheme = async (value: Theme) => {
@@ -127,20 +190,13 @@ watch(
 );
 
 onMounted(async () => {
-  const { compatibility } = await dataStoreService.getAppDataAsync();
   developerMode.value =
     (await configService.getConfig('developerMode')) ?? false;
-  transparentFallback.value = compatibility.transparentFallback;
-  zoomFix.value = compatibility.zoomFix;
   const darkMode = await configService.getConfig('darkMode');
   locale.value =
     (await configService.getConfig('locale')) ?? lang.getLocale() ?? 'en-US';
   theme.value = themes.find((t) => t.darkMode === darkMode) ?? theme.value;
   baseServerUrl.value = (await configService.getConfig('baseServerUrl')) || '';
-
-  const configs = await configService.getConfigs();
-  showSelectedTipsWindow.value = configs.showSelectedTipsWindow ?? true;
-  showStatusWindow.value = configs.showStatusWindow ?? true;
 });
 </script>
 
@@ -156,7 +212,11 @@ onMounted(async () => {
         </q-item-section>
         <q-item-section side>
           <div class="row items-center">
-            <q-input v-model.trim="baseServerUrl" />
+            <q-input
+              dense
+              input-class="text-right"
+              v-model.trim="baseServerUrl"
+            />
           </div>
         </q-item-section>
       </q-item>
@@ -222,76 +282,25 @@ onMounted(async () => {
           </q-item>
         </q-list>
       </q-expansion-item>
-      <q-item :disable="transparentFallbackUpdating" tag="label">
-        <q-item-section>
-          {{ i18n('labels.transparentFallback') }}
-        </q-item-section>
-        <q-item-section side>
-          <div class="row items-center">
-            <q-spinner v-show="transparentFallbackUpdating" size="sm" />
-            <q-toggle
-              :disable="transparentFallbackUpdating"
-              :model-value="transparentFallback"
-              @update:model-value="updateTransparentFallback($event)"
-            />
-          </div>
-        </q-item-section>
-      </q-item>
-      <q-item :disable="zoomFixUpdating" tag="label">
-        <q-item-section>
-          {{ i18n('labels.zoomFix') }}
-        </q-item-section>
-        <q-item-section side>
-          <div class="row items-center">
-            <q-spinner v-show="zoomFixUpdating" size="sm" />
-            <q-toggle
-              :disable="zoomFixUpdating"
-              :model-value="zoomFix"
-              @update:model-value="updateZoomFix($event)"
-            />
-          </div>
-        </q-item-section>
-      </q-item>
-      <q-item
-        :disable="zoomFixUpdating"
-        tag="label"
-        :title="i18n('labels.hideSelectedTipsWindowNotice')"
-      >
-        <q-item-section>
-          {{ i18n('labels.hideSelectedTipsWindow') }}
-        </q-item-section>
-        <q-item-section side>
-          <div class="row items-center">
-            <q-spinner v-show="showSelectedTipsWindowUpdating" size="sm" />
-            <q-toggle
-              :disable="showSelectedTipsWindowUpdating"
-              :model-value="!showSelectedTipsWindow"
-              @update:model-value="updateShowSelectedTipsWindow(!$event)"
-            />
-          </div>
-        </q-item-section>
-      </q-item>
-
-      <q-item
-        :disable="zoomFixUpdating"
-        tag="label"
-        :title="i18n('labels.hideStatusWindowNotice')"
-      >
-        <q-item-section>
-          {{ i18n('labels.hideStatusWindow') }}
-        </q-item-section>
-        <q-item-section side>
-          <div class="row items-center">
-            <q-spinner v-show="showStatusWindowUpdating" size="sm" />
-            <q-toggle
-              :disable="showStatusWindowUpdating"
-              :model-value="!showStatusWindow"
-              @update:model-value="updateShowStatusWindow(!$event)"
-            />
-          </div>
-        </q-item-section>
-      </q-item>
-
+      <item-toggle
+        v-for="(toggleSetting, index) in toggleSettings"
+        :key="index"
+        :caption="toggleSetting.caption"
+        :initializer="toggleSetting.initializer"
+        :label="toggleSetting.label"
+        :update-handler="toggleSetting.updateHandler"
+      />
+      <item-number
+        v-for="(numberSetting, index) in numberSettings"
+        :key="index"
+        :label="numberSetting.label"
+        :caption="numberSetting.caption"
+        :suffix="numberSetting.suffix"
+        :default-value="numberSetting.defaultValue"
+        :reset-tooltip="numberSetting.resetTooltip"
+        :initializer="numberSetting.initializer"
+        :update-handler="numberSetting.updateHandler"
+      />
       <q-item v-show="developerMode" clickable @click="push('developer')">
         <q-item-section>
           {{ i18n('labels.developerOptions') }}
