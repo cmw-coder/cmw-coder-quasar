@@ -3,7 +3,7 @@ import { globalShortcut } from 'electron/main';
 import log from 'electron-log/main';
 import { inject, injectable } from 'inversify';
 import { DateTime } from 'luxon';
-import { scheduleJob } from 'node-schedule';
+import { Job, scheduleJob } from 'node-schedule';
 import { release, version } from 'os';
 
 import { container } from 'main/services';
@@ -25,6 +25,7 @@ import { WindowType } from 'shared/types/WindowType';
 import { AppServiceTrait } from 'shared/types/service/AppServiceTrait';
 import * as process from 'node:process';
 import * as Electron from 'electron';
+import { getProjectData } from 'main/utils/completion';
 
 interface AbstractServicePort {
   [key: string]: ((...args: unknown[]) => Promise<unknown>) | undefined;
@@ -32,6 +33,8 @@ interface AbstractServicePort {
 
 @injectable()
 export class AppService implements AppServiceTrait {
+  private _backupScheduler?: Job;
+
   constructor(
     @inject(ServiceType.WINDOW)
     private _windowService: WindowService,
@@ -56,9 +59,23 @@ export class AppService implements AppServiceTrait {
     });
     log.info('AppService init');
     this._initApplication();
+    this._initBackupScheduler();
     this._initIpc();
-    this._initScheduler();
+    this._initUpdateScheduler();
     this._initShortcutHandler();
+  }
+
+  async updateBackupIntervalMinutes(intervalMinutes: number) {
+    const backupData = this._dataStoreService.getAppdata().backup;
+    backupData.intervalMinutes = intervalMinutes;
+    this._dataStoreService.setAppData('backup', backupData);
+    if (this._backupScheduler) {
+      if (intervalMinutes <= 0) {
+        this._backupScheduler.cancel();
+      } else {
+        this._backupScheduler.reschedule(`*/${intervalMinutes} * * * *`);
+      }
+    }
   }
 
   private _initApplication() {
@@ -116,10 +133,9 @@ export class AppService implements AppServiceTrait {
 
       const config = await this._configService.getConfigs();
 
-      this._windowService.trayIcon.notify('正在检查更新……');
-      this._updaterService.checkUpdate().catch();
-
       this._windowService.trayIcon.activate();
+      this._triggerUpdate();
+
       // 创建代码窗口
       this._windowService.getWindow(WindowType.Completions).create();
       this._windowService.getWindow(WindowType.Completions).initReCreateTimer();
@@ -155,6 +171,23 @@ export class AppService implements AppServiceTrait {
         this._windowService.getWindow(WindowType.Main).show();
       }
     });
+  }
+
+  private _initBackupScheduler() {
+    // Trigger backup every 5 minutes
+    this._backupScheduler = scheduleJob(
+      `*/${this._dataStoreService.getAppdata().backup.intervalMinutes} * * * *`,
+      () => {
+        const clientInfo = this._websocketService.getClientInfo();
+        if (clientInfo && clientInfo.currentFile?.length) {
+          const { id: projectId } = getProjectData(clientInfo.currentProject);
+          log.debug(`Creating backup for '${clientInfo.currentFile}'`);
+          this._dataStoreService
+            .saveBackup(clientInfo.currentFile, projectId)
+            .catch();
+        }
+      },
+    );
   }
 
   private _initIpc() {
@@ -214,23 +247,21 @@ export class AppService implements AppServiceTrait {
     });
   }
 
-  private _initScheduler() {
+  private _initUpdateScheduler() {
     scheduleJob(
       {
         hour: [1, 13],
         minute: 0,
       },
-      () => {
-        this._windowService.trayIcon.notify('正在检查更新……');
-        this._updaterService.checkUpdate().catch();
-      },
+      this._triggerUpdate,
     );
-    // scheduleJob(
-    //   {
-    //     hour: 3,
-    //     minute: 0,
-    //   },
-    //   reportProjectAdditions,
-    // );
+  }
+
+  private _triggerUpdate() {
+    this._windowService.trayIcon.notify({
+      title: '自动更新',
+      content: '正在检查是否有新版本……',
+    });
+    this._updaterService.checkUpdate().catch();
   }
 }
