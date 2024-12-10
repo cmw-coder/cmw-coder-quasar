@@ -1,3 +1,4 @@
+import { APPDATA_NUMBER_CONSTANTS } from 'shared/constants/config';
 import { WindowType } from 'shared/types/WindowType';
 
 export enum TemplateType {
@@ -54,13 +55,27 @@ export interface WindowData {
 
 export type WindowDataMap = Record<WindowType, WindowData>;
 
+export interface BackupData {
+  backupPathList: string[];
+  originalPath: string;
+  projectId: string;
+}
+
 export interface AppData {
+  backup: {
+    current?: BackupData,
+    intervalMinutes: number,
+    previous?: BackupData,
+  }
   compatibility: DataCompatibilityType;
   project: Record<string, DataProjectType>;
   window: WindowDataMap;
 }
 
 export const defaultAppData: AppData = {
+  backup: {
+    intervalMinutes: APPDATA_NUMBER_CONSTANTS.backupInterval.default,
+  },
   compatibility: {
     transparentFallback: false,
     zoomFix: false,

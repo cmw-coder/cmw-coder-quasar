@@ -3,6 +3,17 @@ import {
   AppCompletionNumberConfig,
 } from 'shared/types/service/ConfigServiceTrait/types';
 
+export const APPDATA_NUMBER_CONSTANTS: Record<
+  string,
+  { default: number; min: number; max: number }
+> = {
+  backupInterval: {
+    default: 5,
+    min: 0,
+    max: 1440,
+  },
+};
+
 export const COMPLETION_CONFIG_BOOLEAN_CONSTANTS: Record<
   keyof AppCompletionBooleanConfig,
   { default: boolean }
