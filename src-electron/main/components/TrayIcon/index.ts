@@ -1,4 +1,10 @@
-import { Menu, MenuItemConstructorOptions, nativeImage, Tray } from 'electron';
+import {
+  DisplayBalloonOptions,
+  Menu,
+  MenuItemConstructorOptions,
+  nativeImage,
+  Tray,
+} from 'electron';
 import log from 'electron-log/main';
 import { resolve } from 'path';
 
@@ -15,7 +21,6 @@ export class TrayIcon {
     ),
   );
   private _menuEntryMap = new Map<MenuEntry, () => void>();
-  private readonly _title = `Comware Coder v${packageJson.version}`;
   private _tray: Tray | undefined;
   private _trayClickCallback: () => void = () => log.info('Tray clicked');
 
@@ -25,11 +30,10 @@ export class TrayIcon {
     }
   }
 
-  notify(content: string) {
+  notify(options: DisplayBalloonOptions) {
     this._tray?.displayBalloon({
+      ...options,
       icon: this._icon,
-      title: this._title,
-      content,
     });
   }
 
@@ -52,7 +56,7 @@ export class TrayIcon {
     ]);
     this._tray.displayBalloon({
       icon: this._icon,
-      title: this._title,
+      title: `Comware Coder v${packageJson.version}`,
       content: 'Click tray icon to open main window',
     });
     this._tray.setContextMenu(contextMenu);
