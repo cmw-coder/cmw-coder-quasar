@@ -17,8 +17,7 @@ import {
   api_getProductLineQuestionTemplateFile,
   api_getUserTemplateList,
 } from 'src/request/api';
-import { useService } from 'utils/common';
-import { sleep } from '@volar/language-server/lib/register/registerLanguageFeatures';
+import { sleep, useService } from 'utils/common';
 
 const baseName = 'components.SettingCards.CompletionCard.';
 
@@ -260,7 +259,7 @@ const updateCompletionNumberConfig = async (
   if (value === null) {
     configSetter(constants.min);
   } else {
-    value = Number(value);
+    value = Math.round(Number(value));
     if (value < constants.min) {
       configSetter(constants.min);
     } else if (value > constants.max) {
