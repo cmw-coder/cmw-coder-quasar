@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
-import { timeout, useService } from 'utils/common';
+import { sleep, useService } from 'utils/common';
 import aiAssistantIframe from 'utils/aiAssistantIframe';
 import { ServiceType } from 'shared/types/service';
 import { ActionApi } from 'types/ActionApi';
@@ -17,7 +17,7 @@ const isShow = ref(true);
 const refreshHandle = async () => {
   aiAssistantIframe.destroy();
   isShow.value = false;
-  await timeout(500);
+  await sleep(500);
   isShow.value = true;
   await nextTick();
   await init();

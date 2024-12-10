@@ -16,7 +16,7 @@ export const getLastDirName = (path: string) => {
   return pathArr.at(-1);
 };
 
-export const timeout = (ms: number) => {
+export const sleep = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
