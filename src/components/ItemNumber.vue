@@ -16,9 +16,12 @@ const props = defineProps<Props>();
 const modelValue = ref(0);
 const updating = ref(false);
 
-const updateModelValue = async (newValue: number | string |  undefined) => {
+const updateModelValue = async (newValue: number | string | undefined) => {
   updating.value = true;
-  modelValue.value = await props.updateHandler(modelValue.value, Number(newValue));
+  modelValue.value = await props.updateHandler(
+    modelValue.value,
+    Number(newValue),
+  );
   updating.value = false;
 };
 

@@ -84,10 +84,7 @@ const numberSettings: NumberProps[] = [
       } else if (newValue > APPDATA_NUMBER_CONSTANTS.backupInterval.max) {
         newValue = APPDATA_NUMBER_CONSTANTS.backupInterval.max;
       } else if (isNaN(newValue)) {
-        console.warn(
-          'Update backupInterval: Value is not a number',
-          newValue,
-        );
+        console.warn('Update backupInterval: Value is not a number', newValue);
         return oldValue;
       }
 

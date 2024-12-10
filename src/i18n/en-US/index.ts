@@ -155,7 +155,7 @@ export default {
         },
         tooltips: {
           resetToDefault: 'Reset to default',
-        }
+        },
       },
       UpdateCard: {
         labels: {

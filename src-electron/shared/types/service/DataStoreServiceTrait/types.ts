@@ -63,10 +63,10 @@ export interface BackupData {
 
 export interface AppData {
   backup: {
-    current?: BackupData,
-    intervalMinutes: number,
-    previous?: BackupData,
-  }
+    current?: BackupData;
+    intervalMinutes: number;
+    previous?: BackupData;
+  };
   compatibility: DataCompatibilityType;
   project: Record<string, DataProjectType>;
   window: WindowDataMap;
