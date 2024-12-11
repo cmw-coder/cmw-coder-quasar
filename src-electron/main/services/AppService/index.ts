@@ -253,7 +253,7 @@ export class AppService implements AppServiceTrait {
         hour: [1, 13],
         minute: 0,
       },
-      this._triggerUpdate,
+      () => this._triggerUpdate(),
     );
   }
 
