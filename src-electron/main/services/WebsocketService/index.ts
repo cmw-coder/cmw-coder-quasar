@@ -1,5 +1,4 @@
 import { Reference, SelectionData } from 'cmw-coder-subprocess';
-import { Notification } from 'electron';
 import log from 'electron-log/main';
 import { sync } from 'fast-glob';
 import { createServer } from 'http';
@@ -254,10 +253,10 @@ export class WebsocketService implements WebsocketServiceTrait {
         }
 
         if (code !== 1000) {
-          new Notification({
-            title: 'Source Insight Exited Unexpectedly',
-            body: `PID: ${pid}, code: ${code}`,
-          }).show();
+          this._windowService.trayIcon.notify({
+            title: 'Source Insight 异常退出',
+            content: `进程ID：${pid}, 错误码：${code}`,
+          });
         }
       });
     });

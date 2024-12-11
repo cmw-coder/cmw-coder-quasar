@@ -57,7 +57,7 @@ export class TrayIcon {
     this._tray.displayBalloon({
       icon: this._icon,
       title: `Comware Coder v${packageJson.version}`,
-      content: 'Click tray icon to open main window',
+      content: '点击托盘图标来打开应用窗口',
     });
     this._tray.setContextMenu(contextMenu);
     this._tray.setToolTip(`Comware Coder v${packageJson.version}`);
