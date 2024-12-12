@@ -68,8 +68,8 @@ export class DataStoreService implements DataStoreServiceTrait {
         }
         store.set('project', appData.project);
       },
-      '1.4.5': (store) => {
-        log.info('Upgrading "appData" store to 1.4.5 ...');
+      '1.5.0': (store) => {
+        log.info('Upgrading "appData" store to 1.5.0 ...');
         const appData = store.store;
         if (!appData.backup) {
           appData.backup = defaultAppData.backup;
