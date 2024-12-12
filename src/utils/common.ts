@@ -12,8 +12,8 @@ export const i18nSubPath =
   };
 
 export const getLastDirName = (path: string) => {
-  const pathArr = path.split('\\');
-  return pathArr.at(-1);
+  const pathArr = path.split(/[\\\/]/).filter((item) => item.length);
+  return pathArr.at(-1) ?? path;
 };
 
 export const sleep = (ms: number) => {

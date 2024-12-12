@@ -314,8 +314,8 @@ export class DataStoreService implements DataStoreServiceTrait {
     this._appDataStore.set('backup', backupData);
   }
 
-  async getBackupData(): Promise<AppData['backup']> {
-    return this._appDataStore.get('backup');
+  async retrieveBackup(previewBackup: string) {
+    return this._localBackupManager.retrieveBackup(previewBackup);
   }
 
   async restoreBackup(isCurrent = true, index: number) {
@@ -335,5 +335,15 @@ export class DataStoreService implements DataStoreServiceTrait {
       backupPathList[index],
       backupData.originalPath,
     );
+
+    return true;
+  }
+
+  async dismissNotice(noticeId: string): Promise<void> {
+    const notice = this._appDataStore.get('notice');
+    if (!notice.dismissed.includes(noticeId)) {
+      notice.dismissed.push(noticeId);
+    }
+    this._appDataStore.set('notice', notice);
   }
 }

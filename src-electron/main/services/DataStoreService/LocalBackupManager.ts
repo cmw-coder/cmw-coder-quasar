@@ -1,5 +1,5 @@
 import { app } from 'electron';
-import { copyFileSync, existsSync, mkdirSync, rmSync } from 'fs';
+import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync } from 'fs';
 import { basename, join } from 'path';
 
 export class LocalBackupManager {
@@ -30,6 +30,13 @@ export class LocalBackupManager {
 
   restoreBackup(backupPath: string, originalPath: string) {
     copyFileSync(backupPath, originalPath);
+  }
+
+  retrieveBackup(backupPath: string): ArrayBuffer | undefined {
+    if (!existsSync(backupPath)) {
+      return;
+    }
+    return readFileSync(backupPath).buffer;
   }
 
   private _checkBackupDir() {
