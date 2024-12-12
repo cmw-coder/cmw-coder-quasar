@@ -68,6 +68,9 @@ export interface AppData {
     previous?: BackupData;
   };
   compatibility: DataCompatibilityType;
+  notice: {
+    dismissed: string[];
+  };
   project: Record<string, DataProjectType>;
   window: WindowDataMap;
 }
@@ -79,6 +82,9 @@ export const defaultAppData: AppData = {
   compatibility: {
     transparentFallback: false,
     zoomFix: false,
+  },
+  notice: {
+    dismissed: [],
   },
   project: {},
   window: {

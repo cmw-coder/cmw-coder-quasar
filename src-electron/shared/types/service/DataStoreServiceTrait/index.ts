@@ -19,10 +19,22 @@ export interface DataStoreServiceTrait {
   setProjectSvn(projectPath: string, svnPath: string): Promise<void>;
 
   getActiveModelContent(): Promise<ModelConfig>;
+
   getChatList(): Promise<ChatItem[]>;
+
   getChat(name: string): Promise<ChatFileContent>;
+
   newChat(name: string): Promise<string>;
+
   saveChat(name: string, content: ChatFileContent): Promise<string>;
+
   deleteChat(name: string): Promise<void>;
+
   openChatListDir(): Promise<void>;
+
+  retrieveBackup(backupPath: string): Promise<ArrayBuffer | undefined>;
+
+  restoreBackup(isCurrent: boolean, index: number): Promise<boolean>;
+
+  dismissNotice(noticeId: string): Promise<void>;
 }
