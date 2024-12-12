@@ -159,6 +159,25 @@ export const routes: RouteRecordRaw[] = [
         },
       },
       {
+        path: 'data',
+        components: {
+          header: () => import('layouts/headers/MainHeader.vue'),
+          leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
+          default: () => import('pages/DataManagementPage.vue'),
+        },
+        props: {
+          header: {
+            title: {
+              label: 'data',
+            },
+            windowType: WindowType.Main,
+          },
+          default: {
+            windowType: WindowType.Main,
+          },
+        },
+      },
+      {
         path: 'developer',
         components: {
           header: () => import('layouts/headers/MainHeader.vue'),

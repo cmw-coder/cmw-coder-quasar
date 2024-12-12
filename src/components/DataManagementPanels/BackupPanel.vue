@@ -1,0 +1,156 @@
+<script setup lang="ts">
+import { Dialog, Notify, useQuasar } from 'quasar';
+import { onMounted, ref } from 'vue';
+
+import CodeViewDialog from 'components/CodeViewDialog.vue';
+import { ServiceType } from 'shared/types/service';
+import { AppData } from 'shared/types/service/DataStoreServiceTrait/types';
+import { getLastDirName, i18nSubPath, useService } from 'utils/common';
+
+const baseName = 'components.DataManagementPanels.BackupPanel';
+
+const { dark } = useQuasar();
+const dataStoreService = useService(ServiceType.DATA_STORE);
+
+const backups = ref<Omit<AppData['backup'], 'intervalMinutes'>>();
+const loading = ref(false);
+
+const i18n = i18nSubPath(baseName);
+
+const previewBackup = async (backupPath: string) => {
+  const buffer = await dataStoreService.retrieveBackup(backupPath);
+  Dialog.create({
+    component: CodeViewDialog,
+    componentProps: {
+      title: getLastDirName(backupPath),
+      buffer,
+    },
+  });
+};
+
+const restoreBackup = async (type: 'current' | 'previous', index: number) => {
+  loading.value = true;
+  try {
+    switch (type) {
+      case 'current': {
+        await dataStoreService.restoreBackup(true, index);
+        break;
+      }
+      case 'previous': {
+        await dataStoreService.restoreBackup(false, index);
+        break;
+      }
+    }
+    Notify.create({
+      type: 'positive',
+      message: i18n('notifications.restoreSuccess'),
+    });
+  } catch (error) {
+    Notify.create({
+      type: 'negative',
+      message: i18n('notifications.restoreFailed'),
+      caption: (<Error>error).message,
+    });
+  }
+  await getBackupData();
+  loading.value = false;
+};
+
+const getBackupData = async () => {
+  const { backup } = await dataStoreService.getAppDataAsync();
+  backups.value = {
+    current: backup.current,
+    previous: backup.previous,
+  };
+};
+
+onMounted(() => {
+  getBackupData();
+});
+</script>
+
+<template>
+  <div class="column q-gutter-y-md">
+    <q-card v-for="(data, type) in backups" :key="type" bordered flat>
+      <q-card-section>
+        <div class="row items-center justify-between">
+          <div class="text-h6 text-bold text-primary">
+            {{ i18n(`labels.${type}`) }}
+          </div>
+          <div v-if="data" class="column items-end">
+            <div>
+              <q-chip dense>
+                <q-avatar :color="dark.isActive ? 'grey-3' : 'grey-5'">
+                  <q-icon name="mdi-identifier" size="0.8rem" />
+                </q-avatar>
+                {{ data.projectId }}
+              </q-chip>
+            </div>
+            <div class="text-grey">
+              {{ data.originalPath }}
+            </div>
+          </div>
+        </div>
+      </q-card-section>
+      <q-separator />
+      <q-card-section v-if="!data">
+        <div class="text-center text-h6 text-italic text-grey">
+          {{ i18n('labels.noBackup') }}
+        </div>
+      </q-card-section>
+      <div v-else>
+        <q-list separator>
+          <q-item
+            v-for="(backupPathItem, backupPathIndex) in data.backupPathList"
+            :key="backupPathIndex"
+          >
+            <q-item-section>
+              <q-item-label>
+                {{ getLastDirName(backupPathItem) }}
+              </q-item-label>
+              <q-item-label caption>
+                <q-chip dense>
+                  <q-avatar :color="dark.isActive ? 'grey-3' : 'grey-5'">
+                    <q-icon name="mdi-calendar-clock" size="0.8rem" />
+                  </q-avatar>
+                  {{
+                    new Date(
+                      Number(getLastDirName(backupPathItem).split('_')[0]),
+                    ).toLocaleString()
+                  }}
+                </q-chip>
+              </q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              <div class="row q-gutter-x-sm">
+                <q-btn
+                  flat
+                  dense
+                  icon="mdi-eye"
+                  @click="previewBackup(backupPathItem)"
+                >
+                  <q-tooltip>
+                    {{ i18n('tooltips.preview') }}
+                  </q-tooltip>
+                </q-btn>
+                <q-btn
+                  color="primary"
+                  dense
+                  flat
+                  icon="mdi-file-restore-outline"
+                  @click="restoreBackup(type, backupPathIndex)"
+                >
+                  <q-tooltip>
+                    {{ i18n('tooltips.restore') }}
+                  </q-tooltip>
+                </q-btn>
+              </div>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </div>
+    </q-card>
+  </div>
+</template>
+
+<style scoped></style>

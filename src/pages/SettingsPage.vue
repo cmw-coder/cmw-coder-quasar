@@ -4,8 +4,7 @@ import { useI18n } from 'vue-i18n';
 import CompletionCard from 'components/SettingCards/CompletionCard.vue';
 import GeneralCard from 'components/SettingCards/GeneralCard.vue';
 import UpdateCard from 'components/SettingCards/UpdateCard.vue';
-import ProjectIdCard from 'components/SettingCards/ProjectIdCard.vue';
-import { onBeforeUnmount, onMounted } from 'vue';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { ActionApi } from 'types/ActionApi';
 import { ActionType } from 'shared/types/ActionMessage';
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
@@ -13,10 +12,13 @@ import { ServiceType } from 'shared/types/service';
 import { useService } from 'utils/common';
 
 const baseName = 'pages.SettingPage.';
-const actionApi = new ActionApi(baseName);
-const windowService = useService(ServiceType.WINDOW);
+const projectMoveNoticeId = 'projectMoveNotice';
 
 const { t } = useI18n();
+const dataStoreService = useService(ServiceType.DATA_STORE);
+const windowService = useService(ServiceType.WINDOW);
+
+const dismissed = ref(false);
 
 const i18n = (relativePath: string, data?: Record<string, unknown>) => {
   if (data) {
@@ -26,14 +28,21 @@ const i18n = (relativePath: string, data?: Record<string, unknown>) => {
   }
 };
 
-onMounted(() => {
+const dismissNotice = () => {
+  dataStoreService.dismissNotice(baseName + projectMoveNoticeId);
+  dismissed.value = true;
+};
+
+const actionApi = new ActionApi(baseName);
+onMounted(async () => {
   actionApi.register(ActionType.MainWindowCheckPageReady, (type) => {
     if (type === MainWindowPageType.Setting) {
       windowService.setMainWindowPageReady(MainWindowPageType.Setting);
     }
   });
+  const { notice } = await dataStoreService.getAppDataAsync();
+  dismissed.value = notice.dismissed.includes(baseName + projectMoveNoticeId);
 });
-
 onBeforeUnmount(() => {
   actionApi.unregister();
 });
@@ -45,10 +54,23 @@ onBeforeUnmount(() => {
       <div class="text-center text-h4">
         {{ i18n('labels.title') }}
       </div>
+      <q-slide-transition>
+        <q-banner
+          v-show="!dismissed"
+          class="bg-secondary text-white"
+          inline-actions
+          rounded
+        >
+          {{ i18n('labels.notice') }}
+          <template v-slot:action>
+            <q-btn flat :label="i18n('labels.goto')" to="data" />
+            <q-btn flat icon="close" @click="dismissNotice" />
+          </template>
+        </q-banner>
+      </q-slide-transition>
       <GeneralCard />
       <CompletionCard />
       <UpdateCard />
-      <ProjectIdCard />
     </div>
   </q-page>
 </template>
