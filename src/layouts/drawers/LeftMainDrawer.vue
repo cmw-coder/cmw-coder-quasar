@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 
 import { bus } from 'boot/bus';
 
@@ -11,6 +12,7 @@ interface Navigation {
 }
 
 const { t } = useI18n();
+const { push } = useRouter();
 
 const i18n = (relativePath: string) => {
   return t('layouts.drawers.LeftMainDrawer.' + relativePath);
@@ -30,16 +32,16 @@ const navigations: Navigation[] = [
     route: 'commit',
   },
   {
-    label: 'workflow',
-    icon: 'mdi-ray-start-arrow',
-    available: false,
-    route: 'workflow',
-  },
-  {
     label: 'review',
     icon: 'mdi-message-draw',
     available: false,
     route: 'review',
+  },
+  {
+    label: 'data',
+    icon: 'mdi-database-cog',
+    available: true,
+    route: 'data',
   },
   {
     label: 'feedback',
@@ -73,7 +75,7 @@ const navigations: Navigation[] = [
         <q-item
           :clickable="navigation.available"
           :v-ripple="navigation.available"
-          @click="$router.push(navigation.route)"
+          @click="push(navigation.route)"
         >
           <q-item-section avatar>
             <q-icon

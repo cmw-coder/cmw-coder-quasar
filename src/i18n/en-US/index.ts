@@ -17,6 +17,61 @@ export default {
         insert: 'Insert to editor',
       },
     },
+    CodeViewDialog: {
+      labels: {
+        copy: 'Copy',
+        dismiss: 'Dismiss',
+        encoding: 'File Encoding',
+      },
+      notifications: {
+        copyFailed: 'Failed to copy code',
+        copySuccess: 'Code copied',
+      },
+    },
+    DataManagementPanels: {
+      BackupPanel: {
+        labels: {
+          current: 'Current File Backup List',
+          previous: 'Previous File Backup List',
+          noBackup: 'No backup',
+        },
+        notifications: {
+          restoreSuccess: 'Restore success',
+          restoreFailed: 'Restore failed',
+        },
+        tooltips: {
+          preview: 'Preview backup',
+          restore: 'Restore backup',
+        },
+      },
+      ProjectIdPanel: {
+        labels: {
+          noProject: 'No project',
+          btnEdit: 'Edit',
+          btnDel: 'Delete',
+          editDialogCancel: 'Cancel',
+          editDialogConfirm: 'Confirm',
+          auto: 'Auto',
+          manual: 'Manual',
+          idInputLabel: 'Project ID',
+          idInputHint:
+            'Enter Project ID (NV project number or TB issue number)',
+          idInputError: 'Invalid Project ID',
+          autoManagedInputLabel: 'Auto-manage SVN directory',
+          svnManagedLabel: 'SVN Directory: ',
+          addSvnDir: 'Add SVN Directory',
+          delSvnDir: 'Delete',
+        },
+        dialogs: {
+          delete: {
+            title: 'Delete Project',
+            message: 'Are you sure you want to delete this project?',
+            confirm: 'Confirm',
+            cancel: 'Cancel',
+          },
+        },
+      },
+    },
     DarkModeButton: {
       labels: {
         toggleDarkMode: 'Toggle dark mode',
@@ -169,29 +224,6 @@ export default {
           developerModeEnabled: 'Developer mode enabled',
         },
       },
-      ProjectIdCard: {
-        labels: {
-          title: 'Project Code',
-          btnEdit: 'Edit',
-          btnDel: 'Delete',
-          delDialogTitle: 'Delete Project',
-          delDialogMessage: 'Are you sure you want to delete this project?',
-          delDialogCancel: 'Cancel',
-          delDialogConfirm: 'Confirm',
-          editDialogCancel: 'Cancel',
-          editDialogConfirm: 'Confirm',
-          auto: 'Auto',
-          manual: 'Manual',
-          idInputLabel: 'Project ID',
-          idInputHint:
-            'Enter Project ID (NV project serial number or TB issue number)',
-          idInputError: 'Invalid Project ID',
-          autoManagedInputLabel: 'Auto-manage SVN directory',
-          svnManagedLabel: 'SVN Directory: ',
-          addSvnDir: 'Add SVN Directory',
-          delSvnDir: 'Delete',
-        },
-      },
     },
     WelcomePanels: {
       AutoPanel: {
@@ -235,6 +267,7 @@ export default {
         navigations: {
           chat: 'Chat',
           commit: 'Commit',
+          data: 'Data Management',
           feedback: 'Feedback',
           review: 'Review',
           settings: 'Settings',
@@ -281,6 +314,7 @@ export default {
           title: {
             chat: 'Chat',
             commit: 'Commit',
+            data: 'Data Management',
             feedback: 'Feedback',
             review: 'Review',
             settings: 'Settings',
@@ -358,6 +392,12 @@ export default {
         },
       },
     },
+    DataManagementPage: {
+      tabs: {
+        backup: 'Backup Management',
+        project: 'Project Code',
+      },
+    },
     DeveloperPage: {
       labels: {
         currentFile: 'Current File',
@@ -430,6 +470,9 @@ export default {
     SettingsPage: {
       labels: {
         title: 'Settings',
+        notice:
+          '"Project Code" and "Backup Management" had been moved to the "Data Management" page',
+        goto: 'Go to Data Management',
       },
     },
     UpdatePage: {

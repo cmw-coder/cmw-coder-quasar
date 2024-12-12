@@ -83,7 +83,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <q-header elevated class="bg-primary text-white">
+  <q-header bordered class="bg-primary text-white">
     <q-bar v-if="$q.platform.is.electron" class="q-electron-drag q-pr-none">
       <q-img src="logos/light/logo.svg" width="1.5rem" />
       <div>{{ i18n('labels.title') }}</div>

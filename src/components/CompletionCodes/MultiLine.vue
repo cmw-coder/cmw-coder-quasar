@@ -22,7 +22,6 @@ defineProps<{
     }"
   >
     <div
-      ref="multiLineDom"
       v-html="
         codeToHtml(
           ' '.repeat(cacheOffset) + currentCompletion.substring(cacheOffset),

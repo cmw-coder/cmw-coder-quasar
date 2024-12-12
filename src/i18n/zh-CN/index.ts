@@ -17,6 +17,60 @@ export default {
         insert: '插入到 IDE',
       },
     },
+    CodeViewDialog: {
+      labels: {
+        copy: '复制',
+        dismiss: '关闭',
+        encoding: '文件编码',
+      },
+      notifications: {
+        copyFailed: '复制失败',
+        copySuccess: '复制成功',
+      },
+    },
+    DataManagementPanels: {
+      BackupPanel: {
+        labels: {
+          current: '当前文件备份列表',
+          previous: '上个文件备份列表',
+          noBackup: '没有备份',
+        },
+        notifications: {
+          restoreSuccess: '恢复备份成功',
+          restoreFailed: '恢复备份失败',
+        },
+        tooltips: {
+          preview: '预览备份',
+          restore: '恢复备份',
+        },
+      },
+      ProjectIdPanel: {
+        labels: {
+          noProject: '没有项目',
+          btnEdit: '编辑',
+          btnDel: '删除',
+          editDialogCancel: '取消',
+          editDialogConfirm: '确定',
+          auto: '自动',
+          manual: '手动',
+          idInputLabel: '项目 ID',
+          idInputHint: '请输入项目 ID（NV 项目流水号或 TB 问题单号）',
+          idInputError: '项目 ID 无效',
+          autoManagedInputLabel: '自动管理 SVN 目录',
+          svnManagedLabel: 'SVN 目录: ',
+          addSvnDir: '添加 SVN 目录',
+          delSvnDir: '删除',
+        },
+        dialogs: {
+          delete: {
+            title: '删除项目 ID',
+            message: '确定要删除这个项目 ID 吗？',
+            confirm: '确定',
+            cancel: '取消',
+          },
+        },
+      },
+    },
     DarkModeButton: {
       labels: {
         toggleDarkMode: '切换暗色模式',
@@ -144,7 +198,8 @@ export default {
           minutes: '分钟',
           showSelectActionWindow: '显示选中操作窗口',
           showSelectActionWindowNotice:
-            '禁用此选项可防止在选中代码时出现操作窗口。\n您仍然可以使用 CTRL+I 或 CTRL+L 进行相关操作。',
+            '禁用此选项可防止在选中代码时出现操作窗口。\n' +
+            '您仍然可以使用 CTRL+I 或 CTRL+L 进行相关操作。',
           showStatusWindow: '显示补全状态窗口',
           showStatusWindowNotice: '禁用此选项以在编辑器启动时不再显示状态窗口',
           title: '通用',
@@ -162,30 +217,8 @@ export default {
           title: '更新',
         },
         notifications: {
-          developerModeOngoing: '点击 {times} 次以启用开发者模式',
+          developerModeOngoing: '再点击 {times} 次以启用开发者模式',
           developerModeEnabled: '开发者模式已启用',
-        },
-      },
-      ProjectIdCard: {
-        labels: {
-          title: '项目编码',
-          btnEdit: '编辑',
-          btnDel: '删除',
-          delDialogTitle: '删除项目',
-          delDialogMessage: '您确定要删除此项目吗？',
-          delDialogCancel: '取消',
-          delDialogConfirm: '确定',
-          editDialogCancel: '取消',
-          editDialogConfirm: '确定',
-          auto: '自动',
-          manual: '手动',
-          idInputLabel: '项目 ID',
-          idInputHint: '请输入项目 ID（NV 项目流水号或 TB问题单号）',
-          idInputError: '项目 ID 无效',
-          autoManagedInputLabel: '自动管理 SVN 目录',
-          svnManagedLabel: 'SVN 目录: ',
-          addSvnDir: '添加 SVN 目录',
-          delSvnDir: '删除',
         },
       },
     },
@@ -230,6 +263,7 @@ export default {
         navigations: {
           chat: 'AI 对话',
           commit: '代码提交',
+          data: '数据管理',
           feedback: '问题反馈',
           review: '代码评审',
           settings: '应用设置',
@@ -276,6 +310,7 @@ export default {
           title: {
             chat: 'AI 对话',
             commit: '代码提交',
+            data: '数据管理',
             feedback: '问题反馈',
             review: '代码评审',
             settings: '应用设置',
@@ -353,6 +388,12 @@ export default {
         },
       },
     },
+    DataManagementPage: {
+      tabs: {
+        backup: '备份管理',
+        project: '项目编码',
+      },
+    },
     DeveloperPage: {
       labels: {
         currentFile: '当前文件',
@@ -424,6 +465,8 @@ export default {
     SettingsPage: {
       labels: {
         title: '设置',
+        notice: '“项目编码”和“备份管理”已移至“数据管理”页面',
+        goto: '前往数据管理',
       },
     },
     UpdatePage: {
