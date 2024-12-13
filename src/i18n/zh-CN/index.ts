@@ -384,7 +384,7 @@ export default {
       labels: {
         title: {
           Common: '代码补全',
-          PasteReplace: '修复粘贴内容',
+          PasteReplace: '粘贴内容修复建议（按 Tab 接受）',
         },
       },
     },

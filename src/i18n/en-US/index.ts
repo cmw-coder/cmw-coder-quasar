@@ -388,7 +388,7 @@ export default {
       labels: {
         title: {
           Common: 'Common Completion',
-          PasteReplace: 'Fix Paste Content',
+          PasteReplace: 'Paste Content Fix (Press Tab to accept)',
         },
       },
     },
