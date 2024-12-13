@@ -39,7 +39,7 @@ import { getService } from 'main/services';
 import { ConfigService } from 'main/services/ConfigService';
 import statisticsLog from 'main/components/Loggers/statisticsLog';
 import { UpdateStatusActionMessage } from 'shared/types/ActionMessage';
-import { CaretPosition, Selection } from 'shared/types/common';
+import { CaretPosition, GenerateType, Selection } from 'shared/types/common';
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import { ServiceType } from 'shared/types/service';
 import { WebsocketServiceTrait } from 'shared/types/service/WebsocketServiceTrait';
@@ -452,6 +452,11 @@ export class WebsocketService implements WebsocketServiceTrait {
           getClientVersion(pid),
         );
         if (candidate) {
+          let calculatedY = y;
+          if (type === GenerateType.PasteReplace) {
+            calculatedY =
+              y - height * candidate.split(NEW_LINE_REGEX).length - 40;
+          }
           this._windowService
             .getWindow(WindowType.Completions)
             .completionSelect(
@@ -463,7 +468,7 @@ export class WebsocketService implements WebsocketServiceTrait {
                   this._statisticsReporterService.completionCount(actionId),
               },
               height,
-              { x, y },
+              { x, y: calculatedY },
             )
             .catch((e) => completionLog.warn('WsAction.CompletionSelect', e));
         }
