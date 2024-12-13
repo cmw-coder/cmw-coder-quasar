@@ -5,7 +5,7 @@ import { resolve } from 'path';
 import { container } from 'main/services';
 import { DataStoreService } from 'main/services/DataStoreService';
 import { BaseWindow } from 'main/services/WindowService/types/BaseWindow';
-import { FONT_SIZE_MAPPING, NEW_LINE_REGEX } from 'shared/constants/common';
+import { NEW_LINE_REGEX } from 'shared/constants/common';
 import {
   CompletionClearActionMessage,
   CompletionSetActionMessage,
@@ -18,6 +18,7 @@ import { timeout } from 'main/utils/common';
 import { SimilarSnippetsProcess } from 'main/services/WindowService/types/CompletionsWindow/SimilarSnippetsSubprocess';
 import { FileStructureAnalysisProcess } from 'main/services/WindowService/types/CompletionsWindow/FileStructureAnalysisProcessSubprocess';
 import { DiffSubprocess } from 'main/services/WindowService/types/CompletionsWindow/DiffSubprocess';
+import { getFontSize } from 'main/utils/completion';
 
 const RE_CREATE_TIME = 1000 * 60 * 30;
 
@@ -114,14 +115,7 @@ export class CompletionsWindow extends BaseWindow {
       const lines = completion.split(NEW_LINE_REGEX);
       const longestLine = Math.max(...lines.map((line) => line.length));
 
-      const fontSize = FONT_SIZE_MAPPING[fontHeight]
-        ? FONT_SIZE_MAPPING[fontHeight] * fontHeight
-        : -0.000000000506374957617199 * fontHeight ** 6 +
-          0.000000123078838391882 * fontHeight ** 5 -
-          0.0000118441038684185 * fontHeight ** 4 +
-          0.000574698566099494 * fontHeight ** 3 -
-          0.0147437317361461 * fontHeight ** 2 +
-          1.09720488138051 * fontHeight;
+      const fontSize = getFontSize(fontHeight);
       const windowSize = {
         width: Math.round(fontSize * longestLine),
         height: Math.round(lines.length * fontHeight),

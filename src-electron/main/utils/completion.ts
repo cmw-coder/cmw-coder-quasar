@@ -1,9 +1,10 @@
+import { container } from 'main/services';
+import { DataStoreService } from 'main/services/DataStoreService';
+import { WebsocketService } from 'main/services/WebsocketService';
 import { DataProjectType } from 'main/stores/data/types';
 import packageJson from 'root/package.json';
+import { FONT_SIZE_MAPPING } from 'shared/constants/common';
 import { ServiceType } from 'shared/types/service';
-import { container } from 'main/services';
-import { WebsocketService } from 'main/services/WebsocketService';
-import { DataStoreService } from 'main/services/DataStoreService';
 
 export enum CompletionErrorCause {
   accessToken = 'accessToken',
@@ -22,6 +23,17 @@ export const getClientVersion = (pid: number) => {
     });
   }
   return `${packageJson.version}${clientInfo.version}`;
+};
+
+export const getFontSize = (fontHeight: number) => {
+  return FONT_SIZE_MAPPING[fontHeight]
+    ? FONT_SIZE_MAPPING[fontHeight] * fontHeight
+    : -0.000000000506374957617199 * fontHeight ** 6 +
+        0.000000123078838391882 * fontHeight ** 5 -
+        0.0000118441038684185 * fontHeight ** 4 +
+        0.000574698566099494 * fontHeight ** 3 -
+        0.0147437317361461 * fontHeight ** 2 +
+        1.09720488138051 * fontHeight;
 };
 
 export const getProjectData = (project: string): DataProjectType => {
