@@ -259,7 +259,7 @@ const clearReview = () => {
   <q-page style="height: 100%">
     <div class="current-file">
       <q-list bordered>
-        <q-item>
+        <q-item v-if="false">
           <q-item-section>
             <q-item-label v-if="currentFilePath">
               {{
@@ -454,7 +454,8 @@ const clearReview = () => {
 
 <style lang="scss" scoped>
 .rest-content {
-  height: calc(100% - 54px);
+  // height: calc(100% - 54px);
+  height: calc(100% - 2px);
   overflow-y: hidden;
   border: 1px solid rgba(255, 255, 255, 0.28);
   border-top: none;
