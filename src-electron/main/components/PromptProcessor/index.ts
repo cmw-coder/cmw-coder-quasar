@@ -35,8 +35,8 @@ export class PromptProcessor {
     const completionCached = this._cache.get(cacheKey);
     this._statusWindow.sendMessageToRenderer(
       new UpdateStatusActionMessage({
-        status: Status.READY,
-        detail: 'PromptProcessor.process.cacheHit',
+        status: Status.Standby,
+        detail: '已从缓存中获取到补全',
       }),
     );
     if (completionCached) {
@@ -55,84 +55,69 @@ export class PromptProcessor {
 
     this._abortController = new AbortController();
 
-    // 2024-10-15 去除 CompletionType.Line
     const completionConfig =
       completionType === CompletionType.Function
         ? appConfig.completionConfigs.function
         : appConfig.completionConfigs.snippet;
 
-    try {
-      this._statusWindow.sendMessageToRenderer(
-        new UpdateStatusActionMessage({
-          status: Status.GENERATING,
-          detail: 'PromptProcessor.process.requesting',
-        }),
-      );
-      const questionParams = {
-        question: await promptElements.stringify(completionType),
-        maxTokens: completionConfig.maxTokenCount,
-        temperature: completionConfig.temperature,
-        // 2024-10-15 仅保留如下 stop 参数，去除 \n  \n}  }等
-        stop: ['<fim_pad>', '<｜end▁of▁sentence｜>'],
-        suffix: '',
-        plugin: 'SI',
-        profileModel: appConfig.activeModel,
-        productLine: appConfig.activeTemplate,
-        subType: projectId,
-        templateName:
-          completionType === CompletionType.Line ? 'ShortLineCode' : 'LineCode',
+    this._statusWindow.sendMessageToRenderer(
+      new UpdateStatusActionMessage({
+        status: Status.Requesting,
+        detail: '正在向服务器请求补全……',
+      }),
+    );
+    const questionParams = {
+      question: await promptElements.stringify(completionType),
+      maxTokens: completionConfig.maxTokenCount,
+      temperature: completionConfig.temperature,
+      // 2024-10-15 仅保留如下 stop 参数，去除 \n  \n}  }等
+      stop: ['<fim_pad>', '<｜end▁of▁sentence｜>'],
+      suffix: '',
+      plugin: 'SI',
+      profileModel: appConfig.activeModel,
+      productLine: appConfig.activeTemplate,
+      subType: projectId,
+      templateName: 'LineCode',
+    };
+    completionLog.debug('PromptProcessor.process.questionParams', {
+      ...questionParams,
+      question: '',
+      suffix: '',
+    });
+    completionQuestionLog.debug(
+      'PromptProcessor.process.questionParams.question',
+      questionParams.question.replace(/\r?\n/g, '\\n'),
+    );
+    getService(ServiceType.STATISTICS).completionUpdatePromptConstructTime(
+      actionId,
+      appConfig.activeModel,
+      'LineCode',
+    );
+    const answers = await api_question(
+      questionParams,
+      this._abortController.signal,
+    );
+    completionLog.debug('PromptProcessor.process.answers', answers);
+    getService(ServiceType.STATISTICS).completionUpdateRequestEndTime(actionId);
+    let candidates = answers.map((answer) => answer.text);
+    candidates = processGeneratedSuggestions(
+      candidates,
+      promptElements.fullPrefix,
+    );
+    if (candidates.length) {
+      completionLog.info('PromptProcessor.process.cacheMiss', candidates);
+      this._cache.put(cacheKey, { candidates, type: completionType });
+      return {
+        candidates: candidates,
+        type: completionType,
       };
-      completionLog.debug('PromptProcessor.process.questionParams', {
-        ...questionParams,
-        question: '',
-        suffix: '',
-      });
-      completionQuestionLog.debug(
-        'PromptProcessor.process.questionParams.question',
-        questionParams.question.replace(/\r?\n/g, '\\n'),
-      );
-      getService(ServiceType.STATISTICS).completionUpdatePromptConstructTime(
-        actionId,
-        appConfig.activeModel,
-        completionType === CompletionType.Line ? 'ShortLineCode' : 'LineCode',
-      );
-      const answers = await api_question(
-        questionParams,
-        this._abortController.signal,
-      );
-      completionLog.debug('PromptProcessor.process.answers', answers);
-      getService(ServiceType.STATISTICS).completionUpdateRequestEndTime(
-        actionId,
-      );
-      let candidates = answers.map((answer) => answer.text);
-      candidates = processGeneratedSuggestions(
-        candidates,
-        promptElements.fullPrefix,
-      );
-      if (candidates.length) {
-        completionLog.info('PromptProcessor.process.cacheMiss', candidates);
-        this._cache.put(cacheKey, { candidates, type: completionType });
-        return {
-          candidates: candidates,
-          type: completionType,
-        };
-      }
-      this._statusWindow.sendMessageToRenderer(
-        new UpdateStatusActionMessage({
-          status: Status.ERROR,
-          detail: '生成为空',
-        }),
-      );
-      return undefined;
-    } catch (e) {
-      this._statusWindow.sendMessageToRenderer(
-        new UpdateStatusActionMessage({
-          status: Status.ERROR,
-          detail: `Error: ${e}`,
-        }),
-      );
-      completionLog.error('PromptProcessor.process.error', e);
-      return undefined;
     }
+    this._statusWindow.sendMessageToRenderer(
+      new UpdateStatusActionMessage({
+        status: Status.Empty,
+        detail: 'AI 认为无需补全',
+      }),
+    );
+    return undefined;
   }
 }

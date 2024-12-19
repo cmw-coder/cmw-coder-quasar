@@ -467,12 +467,27 @@ export default {
         },
       },
     },
+    SelectionTipsPage: {
+      labels: {
+        addToChat: 'Add to chat (Ctrl + Alt + I)',
+        review: 'Review highlight code (Ctrl + Alt + L)',
+      },
+    },
     SettingsPage: {
       labels: {
         title: 'Settings',
         notice:
           '"Project Code" and "Backup Management" had been moved to the "Data Management" page',
         goto: 'Go to Data Management',
+      },
+    },
+    StatusPage: {
+      labels: {
+        Standby: 'Standby',
+        Prompting: 'Prompting...',
+        Requesting: 'Requesting...',
+        Empty: 'No need to generate',
+        Failed: 'Generate Failed',
       },
     },
     UpdatePage: {
@@ -505,19 +520,6 @@ export default {
       notifications: {
         copyFailure: 'Failed to copy the workflow ID',
         copySuccess: 'This workflow ID has been copied to the clipboard',
-      },
-    },
-    SelectionTipsPage: {
-      labels: {
-        addToChat: 'Add to chat (Ctrl + Alt + I)',
-        review: 'Review highlight code (Ctrl + Alt + L)',
-      },
-    },
-    StatusPage: {
-      labels: {
-        ERROR: 'Error',
-        GENERATING: 'Generating...',
-        READY: 'Ready',
       },
     },
   },

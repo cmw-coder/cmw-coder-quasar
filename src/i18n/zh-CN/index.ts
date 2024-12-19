@@ -422,6 +422,15 @@ export default {
         title: '欢迎',
       },
     },
+    ProjectIdPage: {
+      labels: {
+        confirm: '确认',
+        description: '当前项目文件夹：{project}',
+        intro: '您需要提供项目 ID 以统计您的编码行为。',
+        temporary: '这是一个临时项目',
+        title: '配置新项目',
+      },
+    },
     ReviewPage: {
       labels: {
         currentFile: '当前文件：{file}',
@@ -453,13 +462,10 @@ export default {
         },
       },
     },
-    ProjectIdPage: {
+    SelectionTipsPage: {
       labels: {
-        confirm: '确认',
-        description: '当前项目文件夹：{project}',
-        intro: '您需要提供项目 ID 以统计您的编码行为。',
-        temporary: '这是一个临时项目',
-        title: '配置新项目',
+        addToChat: '添加到聊天中 (Ctrl + Alt + I)',
+        review: '评审选中代码 (Ctrl + Alt + L)',
       },
     },
     SettingsPage: {
@@ -467,6 +473,15 @@ export default {
         title: '设置',
         notice: '“项目编码”和“备份管理”已移至“数据管理”页面',
         goto: '前往数据管理',
+      },
+    },
+    StatusPage: {
+      labels: {
+        Standby: '准备就绪',
+        Prompting: '构建提示词……',
+        Requesting: '发送请求……',
+        Empty: '无需生成',
+        Failed: '生成失败',
       },
     },
     UpdatePage: {
@@ -499,19 +514,6 @@ export default {
       notifications: {
         copyFailure: '复制工作流 ID 失败',
         copySuccess: '工作流 ID 已复制到剪贴板',
-      },
-    },
-    SelectionTipsPage: {
-      labels: {
-        addToChat: '添加到聊天中 (Ctrl + Alt + I)',
-        review: '评审选中代码 (Ctrl + Alt + L)',
-      },
-    },
-    StatusPage: {
-      labels: {
-        ERROR: '错误',
-        GENERATING: '生成中...',
-        READY: '准备就绪',
       },
     },
   },

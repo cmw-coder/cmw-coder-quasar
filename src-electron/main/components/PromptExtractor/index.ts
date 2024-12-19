@@ -40,6 +40,13 @@ export class PromptExtractor {
     inputs: RawInputs,
     similarSnippetCount: number = 1,
   ): Promise<PromptElements> {
+    this._statusWindow.sendMessageToRenderer(
+      new UpdateStatusActionMessage({
+        status: Status.Prompting,
+        detail: '正在构造提示词……',
+      }),
+    );
+
     const { elements, document, selection, recentFiles } = inputs;
     const queryPrefix = elements.functionPrefix;
     const querySuffix = elements.functionSuffix;
@@ -61,12 +68,6 @@ export class PromptExtractor {
           this._includes = includes;
         }
       });
-      this._statusWindow.sendMessageToRenderer(
-        new UpdateStatusActionMessage({
-          status: Status.GENERATING,
-          detail: 'Generating prompt components...',
-        }),
-      );
       const [ragCode, relativeDefinitions, similarSnippets] = await Promise.all(
         [
           (async () => {

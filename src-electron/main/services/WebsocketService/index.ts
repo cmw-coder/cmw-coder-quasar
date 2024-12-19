@@ -325,8 +325,8 @@ export class WebsocketService implements WebsocketServiceTrait {
         if (!project || !project.length) {
           statusWindow.sendMessageToRenderer(
             new UpdateStatusActionMessage({
-              status: Status.ERROR,
-              detail: 'Invalid project path',
+              status: Status.Failed,
+              detail: '项目路径无效',
             }),
           );
           return new CompletionGenerateServerMessage({
@@ -346,17 +346,6 @@ export class WebsocketService implements WebsocketServiceTrait {
             projectId,
           );
 
-          completionLog.debug('WsAction.CompletionGenerate', {
-            ...data,
-            prefix: 'Removed',
-            suffix: 'Removed',
-          });
-          statusWindow.sendMessageToRenderer(
-            new UpdateStatusActionMessage({
-              status: Status.GENERATING,
-              detail: '触发生成...',
-            }),
-          );
           const rawInputs = new RawInputs(data, project);
           const promptElements =
             await this._promptExtractor.getPromptComponents(
@@ -383,7 +372,7 @@ export class WebsocketService implements WebsocketServiceTrait {
             );
             statusWindow.sendMessageToRenderer(
               new UpdateStatusActionMessage({
-                status: Status.READY,
+                status: Status.Standby,
                 detail: '就绪',
               }),
             );
@@ -429,6 +418,13 @@ export class WebsocketService implements WebsocketServiceTrait {
               completionLog.error('WsAction.CompletionGenerate.error', error);
             }
           }
+
+          statusWindow.sendMessageToRenderer(
+            new UpdateStatusActionMessage({
+              status: Status.Failed,
+              detail: `${e}`,
+            }),
+          );
 
           this._statisticsReporterService.completionAbort(actionId);
           return new CompletionGenerateServerMessage({

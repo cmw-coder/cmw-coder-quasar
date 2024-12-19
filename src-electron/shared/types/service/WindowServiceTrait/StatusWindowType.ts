@@ -1,7 +1,9 @@
 export enum Status {
-  READY = 'READY',
-  GENERATING = 'GENERATING',
-  ERROR = 'ERROR',
+  Standby = 'Standby',
+  Prompting = 'Prompting',
+  Requesting = 'Requesting',
+  Empty = 'Empty',
+  Failed = 'Failed',
 }
 
 export interface StatusData {
