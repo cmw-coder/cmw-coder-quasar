@@ -7,19 +7,10 @@ import completionLog from 'main/components/Loggers/completionLog';
 
 // Start with '//', '#', '{', '/**' or end with '**/'
 const functionHeaderEndRegex = /^\/\/|^#|^\{|^\/\*\*|\*\*\/\s*$/;
-// Line that only have (part of) comment
-const pureCommentRegex = /^\s*\/\/|\*\/\s*$/;
 
 export const getCompletionType = (
   promptElements: PromptElements,
 ): CompletionType => {
-  if (
-    (promptElements.fullPrefix.split(NEW_LINE_REGEX).at(-1) ?? '').trim()
-      .length > 0
-  ) {
-    return CompletionType.Line;
-  }
-
   const lastNonEmptyLine =
     promptElements.fullPrefix.trimEnd().split(NEW_LINE_REGEX).at(-1) ?? '';
   completionLog.debug('getCompletionType', {
@@ -34,14 +25,7 @@ export const getCompletionType = (
     return CompletionType.Function;
   }
 
-  if (
-    pureCommentRegex.test(lastNonEmptyLine) ||
-    promptElements.similarSnippetSelf
-  ) {
-    return CompletionType.Snippet;
-  }
-
-  return CompletionType.Line;
+  return CompletionType.Snippet;
 };
 
 export const processGeneratedSuggestions = (

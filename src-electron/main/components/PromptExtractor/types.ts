@@ -65,10 +65,7 @@ export class PromptElements {
     let promptString: string;
     switch (this.generateType) {
       case GenerateType.Common: {
-        const { common, commonMulti } =
-          activeModelContent.prompt['c'].other.code;
-        promptString =
-          completionType === CompletionType.Line ? common : commonMulti;
+        promptString = activeModelContent.prompt['c'].other.code.commonMulti;
         break;
       }
       case GenerateType.PasteReplace: {

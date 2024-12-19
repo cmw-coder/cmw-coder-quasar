@@ -206,7 +206,7 @@ export class StatisticsService implements StatisticsServiceTrait {
       this.completionAbort(actionId);
       return;
     }
-    data.completions = { candidates: [], type: CompletionType.Line };
+    data.completions = { candidates: [], type: CompletionType.Snippet };
     data.timelines.coderEndPostProcess = DateTime.now();
 
     const requestData = data?.serialize(-1, '');

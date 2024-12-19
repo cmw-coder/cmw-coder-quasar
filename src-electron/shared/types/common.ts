@@ -28,7 +28,6 @@ export class CaretPosition {
 
 export enum CompletionType {
   Function = 'Function',
-  Line = 'Line',
   Snippet = 'Snippet',
 }
 
