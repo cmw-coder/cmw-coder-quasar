@@ -19,6 +19,7 @@ import { SimilarSnippetsProcess } from 'main/services/WindowService/types/Comple
 import { FileStructureAnalysisProcess } from 'main/services/WindowService/types/CompletionsWindow/FileStructureAnalysisProcessSubprocess';
 import { DiffSubprocess } from 'main/services/WindowService/types/CompletionsWindow/DiffSubprocess';
 import { getFontSize } from 'main/utils/completion';
+import completionLog from 'main/components/Loggers/completionLog';
 
 const RE_CREATE_TIME = 1000 * 60 * 30;
 
@@ -114,12 +115,15 @@ export class CompletionsWindow extends BaseWindow {
       let fontHeight = height;
       const lines = completion.split(NEW_LINE_REGEX);
       const longestLine = Math.max(...lines.map((line) => line.length));
+      completionLog.log('宽度计算 longestLine', longestLine);
 
       const fontSize = getFontSize(fontHeight);
+      completionLog.log('宽度计算 fontSize', fontSize);
       const windowSize = {
         width: Math.round(fontSize * (longestLine + 10)),
         height: Math.round(lines.length * fontHeight),
       };
+      completionLog.log('宽度计算 windowSize', windowSize);
       if (compatibility.zoomFix) {
         fontHeight = screen.screenToDipPoint({ x: 0, y: height }).y;
         position = screen.screenToDipPoint(position);
