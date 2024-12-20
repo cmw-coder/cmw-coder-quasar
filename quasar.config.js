@@ -70,7 +70,14 @@ module.exports = configure((/* ctx */) => ({
     // polyfillModulePreload: true,
     // distDir
 
-    // extendViteConf (viteConf) {},
+    extendViteConf(viteConf) {
+      viteConf.optimizeDeps = {
+        include: ['oniguruma-to-es'],
+      };
+      viteConf.build.rollupOptions = {
+        external: ['oniguruma-to-es'],
+      }
+    },
 
     alias: {
       css: path.join(__dirname, './src/css'),
