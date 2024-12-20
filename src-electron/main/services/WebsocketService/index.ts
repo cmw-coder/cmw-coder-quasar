@@ -549,7 +549,7 @@ export class WebsocketService implements WebsocketServiceTrait {
         }
       }
     });
-    this._registerWsAction(WsAction.EditorSelection, ({ data }) => {
+    this._registerWsAction(WsAction.EditorSelection, async ({ data }) => {
       if (data.dimensions.height === 0 || data.content.length === 0) {
         this._windowService.getWindow(WindowType.SelectionTips).hide();
         return;
@@ -573,9 +573,9 @@ export class WebsocketService implements WebsocketServiceTrait {
         ),
         language: 'c',
       };
-      const { id: projectId } = getProjectData(project);
-      selectionTipsWindow
-        .trigger(
+      try {
+        const { id: projectId } = getProjectData(project);
+        await selectionTipsWindow.trigger(
           {
             x: data.dimensions.x,
             y: data.dimensions.y - 30,
@@ -585,8 +585,10 @@ export class WebsocketService implements WebsocketServiceTrait {
             projectId: projectId,
             version: getClientVersion(this._lastActivePid),
           },
-        )
-        .catch((e) => completionLog.error('EditorSelection', e));
+        );
+      } catch (e) {
+        completionLog.error('EditorSelection', e);
+      }
     });
     this._registerWsAction(
       WsAction.EditorState,

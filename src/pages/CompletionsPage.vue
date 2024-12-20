@@ -4,7 +4,6 @@ import { nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 import { NEW_LINE_REGEX } from 'shared/constants/common';
 import { ActionType } from 'shared/types/ActionMessage';
 import { GenerateType } from 'shared/types/common';
-import { WindowType } from 'shared/types/WindowType';
 import { ServiceType } from 'shared/types/service';
 import { ActionApi } from 'types/ActionApi';
 import { i18nSubPath, useService } from 'utils/common';
@@ -14,7 +13,6 @@ import MultiLine from 'components/CompletionCodes/MultiLine.vue';
 const baseName = 'pages.CompletionsPage';
 
 const dataStoreService = useService(ServiceType.DATA_STORE);
-const windowService = useService(ServiceType.WINDOW);
 
 const cacheOffset = ref(0);
 const completionCount = reactive({
@@ -49,31 +47,12 @@ onMounted(async () => {
       height.value = fontHeight;
       generateType.value = type;
       await nextTick();
-      const lines = completion.split(NEW_LINE_REGEX);
-      const codeHeight = lines.length * height.value + 16;
-      const codeWidth =
-        Math.max(...lines.map((line) => line.length)) * fontSize.value * 0.51 +
-        10;
       switch (generateType.value) {
         case GenerateType.Common: {
           isMultiLine.value = completion.split(NEW_LINE_REGEX).length > 1;
-          await windowService.setWindowSize(
-            {
-              width: Math.round(codeWidth),
-              height: Math.round(codeHeight),
-            },
-            WindowType.Completions,
-          );
           break;
         }
         case GenerateType.PasteReplace: {
-          await windowService.setWindowSize(
-            {
-              width: Math.max(360, Math.round(codeWidth + 30)),
-              height: Math.round(codeHeight + 80),
-            },
-            WindowType.Completions,
-          );
           break;
         }
       }

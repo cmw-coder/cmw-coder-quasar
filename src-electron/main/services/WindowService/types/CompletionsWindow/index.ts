@@ -99,7 +99,7 @@ export class CompletionsWindow extends BaseWindow {
     type: GenerateType,
     completion: string,
     count: { index: number; total: number },
-    height: number,
+    fontHeight: number,
     position: { x: number; y: number },
   ) {
     if (!this._window) {
@@ -111,17 +111,10 @@ export class CompletionsWindow extends BaseWindow {
       const { compatibility } = container
         .get<DataStoreService>(ServiceType.DATA_STORE)
         .getAppdata();
-      let fontHeight = height;
       const lines = completion.split(NEW_LINE_REGEX);
-      const longestLine = Math.max(...lines.map((line) => line.length));
 
-      const fontSize = getFontSize(fontHeight);
-      const windowSize = {
-        width: Math.round(fontSize * longestLine),
-        height: Math.round(lines.length * fontHeight),
-      };
       if (compatibility.zoomFix) {
-        fontHeight = screen.screenToDipPoint({ x: 0, y: height }).y;
+        fontHeight = screen.screenToDipPoint({ x: 0, y: fontHeight }).y;
         position = screen.screenToDipPoint(position);
       }
       this._window.setPosition(
@@ -129,7 +122,30 @@ export class CompletionsWindow extends BaseWindow {
         Math.round(position.y),
         false,
       );
-      this._window.setSize(windowSize.width, windowSize.height, false);
+
+      const fontSize = getFontSize(fontHeight);
+      const codeHeight = lines.length * fontHeight + 16;
+      const codeWidth =
+        Math.max(...lines.map((line) => line.length)) * fontSize * 0.51 + 10;
+      switch (type) {
+        case GenerateType.Common: {
+          this._window.setSize(
+            Math.round(codeWidth),
+            Math.round(codeHeight),
+            false,
+          );
+          break;
+        }
+        case GenerateType.PasteReplace: {
+          this._window.setSize(
+            Math.max(360, Math.round(codeWidth + 30)),
+            Math.round(codeHeight + 80),
+            false,
+          );
+          break;
+        }
+      }
+
       this.sendMessageToRenderer(
         new CompletionSetActionMessage({
           completion,
