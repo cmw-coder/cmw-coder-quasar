@@ -173,6 +173,7 @@ export default {
           completionOnPaste: 'Trigger Completion On Paste',
           debounceDelay: 'Trigger Debounce Delay',
           interactionUnlockDelay: 'User Interaction Unlock Delay',
+          pasteMaxLineCount: 'Max Trigger Paste Fix Line Count',
           prefixLineCount: 'Context Prefix Line Count',
           recentFileCount: 'Recent Accessed File Count',
           suffixLineCount: 'Context Suffix Line Count',

@@ -85,6 +85,17 @@ export class ConfigService implements ConfigServiceTrait {
       },
       '1.5.0': (store) => {
         log.info('Upgrading "appConfig" store to 1.5.0 ...');
+        store.set(
+          'completion',
+          Object.fromEntries([
+            ...Object.entries(COMPLETION_CONFIG_BOOLEAN_CONSTANTS).map(
+              ([key, value]) => [key, value.default],
+            ),
+            ...Object.entries(COMPLETION_CONFIG_NUMBER_CONSTANTS).map(
+              ([key, value]) => [key, value.default],
+            ),
+          ]),
+        );
         store.set('showSelectedTipsWindow', true);
         store.set('showStatusWindow', true);
       },

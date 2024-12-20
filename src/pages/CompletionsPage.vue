@@ -52,8 +52,8 @@ onMounted(async () => {
       const lines = completion.split(NEW_LINE_REGEX);
       const codeHeight = lines.length * height.value + 6;
       const codeWidth =
-        Math.max(...lines.map((line) => line.length)) * fontSize.value * 0.5 +
-        3;
+        Math.max(...lines.map((line) => line.length)) * fontSize.value * 0.51 +
+        6;
       switch (generateType.value) {
         case GenerateType.Common: {
           isMultiLine.value = completion.split(NEW_LINE_REGEX).length > 1;
@@ -69,7 +69,7 @@ onMounted(async () => {
         case GenerateType.PasteReplace: {
           await windowService.setWindowSize(
             {
-              width: Math.max(180, Math.round(codeWidth + 33)),
+              width: Math.max(360, Math.round(codeWidth + 33)),
               height: Math.round(codeHeight + 81),
             },
             WindowType.Completions,
@@ -121,6 +121,7 @@ onBeforeUnmount(() => {
         v-else-if="generateType == GenerateType.PasteReplace"
         bordered
         flat
+        style="opacity: 80%"
       >
         <q-card-section class="column q-gutter-md">
           <div class="text-h6">

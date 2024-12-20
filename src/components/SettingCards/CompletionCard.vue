@@ -59,23 +59,28 @@ const completionNumberConfig = reactive<AppCompletionNumberConfig>({
   debounceDelay: COMPLETION_CONFIG_NUMBER_CONSTANTS.debounceDelay.default,
   interactionUnlockDelay:
     COMPLETION_CONFIG_NUMBER_CONSTANTS.interactionUnlockDelay.default,
+  pasteMaxLineCount:
+    COMPLETION_CONFIG_NUMBER_CONSTANTS.pasteMaxLineCount.default,
   prefixLineCount: COMPLETION_CONFIG_NUMBER_CONSTANTS.prefixLineCount.default,
   recentFileCount: COMPLETION_CONFIG_NUMBER_CONSTANTS.recentFileCount.default,
   suffixLineCount: COMPLETION_CONFIG_NUMBER_CONSTANTS.suffixLineCount.default,
 });
-const completionNumberSuffix = {
-  debounceDelay: 'ms',
-  interactionUnlockDelay: 'ms',
-  prefixLineCount: '',
-  recentFileCount: '',
-  suffixLineCount: '',
-};
+const completionNumberSuffix: Record<keyof AppCompletionNumberConfig, string> =
+  {
+    debounceDelay: 'ms',
+    interactionUnlockDelay: 'ms',
+    pasteMaxLineCount: '',
+    prefixLineCount: '',
+    recentFileCount: '',
+    suffixLineCount: '',
+  };
 const completionConfigLoading = reactive<
   Record<keyof AppConfig['completion'], boolean>
 >({
   completionOnPaste: false,
   debounceDelay: false,
   interactionUnlockDelay: false,
+  pasteMaxLineCount: false,
   prefixLineCount: false,
   recentFileCount: false,
   suffixLineCount: false,
@@ -224,6 +229,15 @@ const updateCompletionNumberConfig = async (
       constants = COMPLETION_CONFIG_NUMBER_CONSTANTS.interactionUnlockDelay;
       break;
     }
+    case 'pasteMaxLineCount': {
+      completionConfigLoading.pasteMaxLineCount = true;
+      configSetter = (data: number) =>
+        (completionNumberConfig.pasteMaxLineCount = data);
+      configLoadingSetter = () =>
+        (completionConfigLoading.pasteMaxLineCount = false);
+      constants = COMPLETION_CONFIG_NUMBER_CONSTANTS.pasteMaxLineCount;
+      break;
+    }
     case 'prefixLineCount': {
       completionConfigLoading.prefixLineCount = true;
       configSetter = (data: number) =>
@@ -290,8 +304,8 @@ const updateCompletionNumberConfig = async (
 onMounted(async () => {
   try {
     await refreshProductLineList();
-    refreshModelList();
-    refreshCompletionConfig();
+    refreshModelList().catch();
+    refreshCompletionConfig().catch();
   } catch (error) {
     console.error('onMounted error', error);
   }

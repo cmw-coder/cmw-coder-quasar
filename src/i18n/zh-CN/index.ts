@@ -172,6 +172,7 @@ export default {
           completionOnPaste: '粘贴是否触发补全',
           debounceDelay: '触发消抖延迟',
           interactionUnlockDelay: '用户交互内部解锁延迟',
+          pasteMaxLineCount: '最大触发粘贴修复行数',
           prefixLineCount: '获取上下文前缀行数',
           recentFileCount: '最近访问文件数',
           suffixLineCount: '获取上下文后缀行数',

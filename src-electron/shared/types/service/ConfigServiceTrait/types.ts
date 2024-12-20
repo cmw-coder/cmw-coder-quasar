@@ -29,6 +29,7 @@ export interface AppConfig {
     completionOnPaste: boolean;
     debounceDelay: number;
     interactionUnlockDelay: number;
+    pasteMaxLineCount: number;
     prefixLineCount: number;
     recentFileCount: number;
     suffixLineCount: number;
@@ -48,6 +49,7 @@ export type AppCompletionNumberConfig = Pick<
   AppConfig['completion'],
   | 'debounceDelay'
   | 'interactionUnlockDelay'
+  | 'pasteMaxLineCount'
   | 'prefixLineCount'
   | 'recentFileCount'
   | 'suffixLineCount'

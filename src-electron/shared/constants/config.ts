@@ -37,6 +37,11 @@ export const COMPLETION_CONFIG_NUMBER_CONSTANTS: Record<
     min: 0,
     max: 150,
   },
+  pasteMaxLineCount: {
+    default: 10,
+    min: 0,
+    max: 300,
+  },
   prefixLineCount: {
     default: 200,
     min: 0,
