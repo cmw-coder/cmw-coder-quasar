@@ -113,9 +113,11 @@ export class CompletionsWindow extends BaseWindow {
         .getAppdata();
       const lines = completion.split(NEW_LINE_REGEX);
 
+      let scale = 1;
       if (compatibility.zoomFix) {
         fontHeight = screen.screenToDipPoint({ x: 0, y: fontHeight }).y;
         position = screen.screenToDipPoint(position);
+        scale = screen.screenToDipPoint({ x: 1000, y: 0 }).x / 1000;
       }
       this._window.setPosition(
         Math.round(position.x),
@@ -124,9 +126,9 @@ export class CompletionsWindow extends BaseWindow {
       );
 
       const fontSize = getFontSize(fontHeight);
-      const codeHeight = lines.length * fontHeight + 16;
+      const codeHeight = lines.length * fontHeight + 16 * scale;
       const codeWidth =
-        Math.max(...lines.map((line) => line.length)) * fontSize * 0.52 + 10;
+        Math.max(...lines.map((line) => line.length)) * fontSize * 0.53 + 10 * scale;
       switch (type) {
         case GenerateType.Common: {
           this._window.setSize(
