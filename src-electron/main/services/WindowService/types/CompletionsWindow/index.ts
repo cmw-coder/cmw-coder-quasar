@@ -140,8 +140,8 @@ export class CompletionsWindow extends BaseWindow {
         }
         case GenerateType.PasteReplace: {
           this._window.setSize(
-            Math.max(360, Math.round(codeWidth + 30)),
-            Math.round(codeHeight + 80),
+            Math.max(360 * scale, Math.round(codeWidth + 30 * scale)),
+            Math.round(codeHeight + 80 * scale),
             false,
           );
           break;
