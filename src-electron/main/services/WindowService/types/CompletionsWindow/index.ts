@@ -128,7 +128,7 @@ export class CompletionsWindow extends BaseWindow {
       const fontSize = getFontSize(fontHeight);
       const codeHeight = lines.length * fontHeight + 16 * scale;
       const codeWidth =
-        Math.max(...lines.map((line) => line.length)) * fontSize * 0.53 + 10 * scale;
+        Math.max(...lines.map((line) => line.length)) * fontSize * 0.57 + 10 * scale;
       switch (type) {
         case GenerateType.Common: {
           this._window.setSize(
