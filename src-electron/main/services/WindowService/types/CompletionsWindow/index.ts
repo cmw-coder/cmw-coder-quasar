@@ -117,7 +117,7 @@ export class CompletionsWindow extends BaseWindow {
 
       const fontSize = getFontSize(fontHeight);
       const windowSize = {
-        width: Math.round(fontSize * (longestLine + 2)),
+        width: Math.round(fontSize * (longestLine + 10)),
         height: Math.round(lines.length * fontHeight),
       };
       if (compatibility.zoomFix) {
