@@ -74,9 +74,9 @@ const delProjectHandle = (project: string) => {
     return;
   }
   dialog({
+    persistent: true,
     title: i18n('dialogs.delete.title'),
     message: i18n('dialogs.delete.message'),
-    persistent: true,
     ok: i18n('dialogs.delete.confirm'),
     cancel: i18n('dialogs.delete.cancel'),
   }).onOk(async () => {

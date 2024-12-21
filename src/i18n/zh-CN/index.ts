@@ -30,7 +30,16 @@ export default {
     },
     DataManagementPanels: {
       BackupPanel: {
+        dialogs: {
+          restore: {
+            title: '恢复备份',
+            message: '确定要恢复这个备份吗？',
+            confirm: '确定',
+            cancel: '取消',
+          },
+        },
         labels: {
+          refreshBackups: '刷新备份',
           current: '当前文件备份列表',
           previous: '上个文件备份列表',
           noBackup: '没有备份',
@@ -45,6 +54,14 @@ export default {
         },
       },
       ProjectIdPanel: {
+        dialogs: {
+          delete: {
+            title: '删除项目 ID',
+            message: '确定要删除这个项目 ID 吗？',
+            confirm: '确定',
+            cancel: '取消',
+          },
+        },
         labels: {
           noProject: '没有项目',
           btnEdit: '编辑',
@@ -60,14 +77,6 @@ export default {
           svnManagedLabel: 'SVN 目录: ',
           addSvnDir: '添加 SVN 目录',
           delSvnDir: '删除',
-        },
-        dialogs: {
-          delete: {
-            title: '删除项目 ID',
-            message: '确定要删除这个项目 ID 吗？',
-            confirm: '确定',
-            cancel: '取消',
-          },
         },
       },
     },

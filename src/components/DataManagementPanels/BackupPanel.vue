@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Dialog, Notify, useQuasar } from 'quasar';
-import { onMounted, ref } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 
 import CodeViewDialog from 'components/CodeViewDialog.vue';
 import { ServiceType } from 'shared/types/service';
@@ -9,11 +9,13 @@ import { getLastDirName, i18nSubPath, useService } from 'utils/common';
 
 const baseName = 'components.DataManagementPanels.BackupPanel';
 
-const { dark } = useQuasar();
+const { dark, dialog } = useQuasar();
 const dataStoreService = useService(ServiceType.DATA_STORE);
 
 const backups = ref<Omit<AppData['backup'], 'intervalMinutes'>>();
 const loading = ref(false);
+const refreshInterval = ref(0);
+const refreshCounter = ref(0);
 
 const i18n = i18nSubPath(baseName);
 
@@ -29,7 +31,22 @@ const previewBackup = async (backupPath: string) => {
 };
 
 const restoreBackup = async (type: 'current' | 'previous', index: number) => {
-  loading.value = true;
+  const isConfirm = await new Promise((resolve) =>
+    dialog({
+      persistent: true,
+      title: i18n('dialogs.restore.title'),
+      message: i18n('dialogs.restore.message'),
+      ok: i18n('dialogs.restore.confirm'),
+      cancel: i18n('dialogs.restore.cancel'),
+    })
+      .onOk(() => resolve(true))
+      .onCancel(() => resolve(false))
+      .onDismiss(() => resolve(false)),
+  );
+  if (!isConfirm) {
+    return;
+  }
+
   try {
     switch (type) {
       case 'current': {
@@ -52,25 +69,60 @@ const restoreBackup = async (type: 'current' | 'previous', index: number) => {
       caption: (<Error>error).message,
     });
   }
-  await getBackupData();
-  loading.value = false;
+  await refreshBackupData();
 };
 
-const getBackupData = async () => {
+const refreshBackupData = async () => {
+  loading.value = true;
   const { backup } = await dataStoreService.getAppDataAsync();
   backups.value = {
     current: backup.current,
     previous: backup.previous,
   };
+  refreshCounter.value = 0;
+  setTimeout(
+    () => {
+      loading.value = false;
+    },
+    200 + Math.random() * 500,
+  );
 };
 
 onMounted(() => {
-  getBackupData();
+  refreshBackupData();
+  refreshInterval.value = <number>(<unknown>setInterval(() => {
+    refreshCounter.value += 1;
+    if (refreshCounter.value >= 600) {
+      refreshCounter.value = 0;
+      refreshBackupData();
+    }
+  }, 100));
+});
+
+onUnmounted(() => {
+  clearInterval(refreshInterval.value);
 });
 </script>
 
 <template>
   <div class="column q-gutter-y-md">
+    <div class="row items-center q-gutter-x-md">
+      <q-linear-progress
+        class="col-grow"
+        animation-speed="350"
+        rounded
+        size="xl"
+        :value="refreshCounter / 600"
+      />
+      <q-btn
+        color="primary"
+        dense
+        icon="mdi-refresh"
+        :label="i18n('labels.refreshBackups')"
+        :loading="loading"
+        @click="refreshBackupData"
+      />
+    </div>
     <q-card v-for="(data, type) in backups" :key="type" bordered flat>
       <q-card-section>
         <div class="row items-center justify-between">
@@ -115,7 +167,7 @@ onMounted(() => {
                   </q-avatar>
                   {{
                     new Date(
-                      Number(getLastDirName(backupPathItem).split('_')[0]),
+                      Number(getLastDirName(backupPathItem).split('-')[0]),
                     ).toLocaleString()
                   }}
                 </q-chip>

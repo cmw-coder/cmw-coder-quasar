@@ -30,7 +30,16 @@ export default {
     },
     DataManagementPanels: {
       BackupPanel: {
+        dialogs: {
+          restore: {
+            title: 'Restore Backup',
+            message: 'Are you sure you want to restore this backup?',
+            confirm: 'Confirm',
+            cancel: 'Cancel',
+          },
+        },
         labels: {
+          refreshBackups: 'Refresh Backups',
           current: 'Current File Backup List',
           previous: 'Previous File Backup List',
           noBackup: 'No backup',
@@ -45,6 +54,14 @@ export default {
         },
       },
       ProjectIdPanel: {
+        dialogs: {
+          delete: {
+            title: 'Delete Project ID',
+            message: 'Are you sure you want to delete this project ID?',
+            confirm: 'Confirm',
+            cancel: 'Cancel',
+          },
+        },
         labels: {
           noProject: 'No project',
           btnEdit: 'Edit',
@@ -61,14 +78,6 @@ export default {
           svnManagedLabel: 'SVN Directory: ',
           addSvnDir: 'Add SVN Directory',
           delSvnDir: 'Delete',
-        },
-        dialogs: {
-          delete: {
-            title: 'Delete Project',
-            message: 'Are you sure you want to delete this project?',
-            confirm: 'Confirm',
-            cancel: 'Cancel',
-          },
         },
       },
     },
