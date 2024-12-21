@@ -32,7 +32,7 @@ export class LocalBackupManager {
     copyFileSync(backupPath, originalPath);
   }
 
-  retrieveBackup(backupPath: string): ArrayBuffer | undefined {
+  retrieveBackup(backupPath: string): ArrayBufferLike | undefined {
     if (!existsSync(backupPath)) {
       return;
     }

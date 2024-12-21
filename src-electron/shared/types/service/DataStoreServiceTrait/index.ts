@@ -32,7 +32,7 @@ export interface DataStoreServiceTrait {
 
   openChatListDir(): Promise<void>;
 
-  retrieveBackup(backupPath: string): Promise<ArrayBuffer | undefined>;
+  retrieveBackup(backupPath: string): Promise<ArrayBufferLike | undefined>;
 
   restoreBackup(isCurrent: boolean, index: number): Promise<boolean>;
 
