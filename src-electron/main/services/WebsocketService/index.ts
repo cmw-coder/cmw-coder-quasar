@@ -592,7 +592,7 @@ export class WebsocketService implements WebsocketServiceTrait {
     });
     this._registerWsAction(
       WsAction.EditorState,
-      ({ data: { dimensions, isFocused } }) => {
+      async ({ data: { dimensions, isFocused } }) => {
         const completionsWindow = this._windowService.getWindow(
           WindowType.Completions,
         );
@@ -601,7 +601,10 @@ export class WebsocketService implements WebsocketServiceTrait {
           statusWindow.move(dimensions);
         }
         if (isFocused !== undefined) {
-          if (isFocused) {
+          if (
+            isFocused &&
+            (await this._configService.getConfig('showStatusWindow'))
+          ) {
             statusWindow.show(undefined, false);
           } else {
             completionsWindow.hide();

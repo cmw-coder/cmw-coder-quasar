@@ -120,9 +120,7 @@ const toggleSettings: ToggleProps[] = [
     },
     updateHandler: async (value: boolean) => {
       await configService.setConfig('showStatusWindow', value);
-      if (value) {
-        await windowService.activeWindow(WindowType.Status);
-      } else {
+      if (!value) {
         await windowService.hideWindow(WindowType.Status);
       }
       await sleep(Math.floor(200 + Math.random() * 300));

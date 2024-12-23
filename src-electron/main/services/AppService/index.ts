@@ -137,11 +137,16 @@ export class AppService implements AppServiceTrait {
       this._triggerUpdate();
 
       // 创建代码窗口
-      this._windowService.getWindow(WindowType.Completions).create();
-      this._windowService.getWindow(WindowType.Completions).initReCreateTimer();
+      const completionWindow = this._windowService.getWindow(
+        WindowType.Completions,
+      );
+      completionWindow.create();
+      completionWindow.initReCreateTimer();
 
       // 创建状态窗口
-      this._windowService.getWindow(WindowType.Status).create();
+      const statusWindow = this._windowService.getWindow(WindowType.Status);
+      statusWindow.create();
+      statusWindow.hide();
 
       // 创建代码选中提示窗口
       this._windowService.getWindow(WindowType.SelectionTips).create();
