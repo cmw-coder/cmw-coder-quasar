@@ -291,7 +291,7 @@ export class AppService implements AppServiceTrait {
       }
       if (message.type === CodeSyncSseMessageDataType.TaskUpdate) {
         const task = message.data;
-        codeSyncTaskLog.log('task update', task, this._windowService.trayIcon);
+        codeSyncTaskLog.log('task update', task.id);
         this._windowService.trayIcon.notify({
           title: '移植任务更新',
           content: `移植任务 [${task.id}] 已更新，请前往网页端处理`,
