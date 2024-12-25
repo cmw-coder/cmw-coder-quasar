@@ -19,6 +19,7 @@
     "electron-log": "^5.2.2",
     "electron-store": "^8.2.0",
     "electron-updater": "^6.3.9",
+    "eventsource": "2.x",
     "fast-glob": "^3.3.2",
     "iconv-lite": "^0.6.3",
     "inversify": "^6.1.4",
@@ -39,6 +40,7 @@
   "devDependencies": {
     "@intlify/vite-plugin-vue-i18n": "^3.4.0",
     "@quasar/app-vite": "^1.9.3",
+    "@types/eventsource": "^1.1.15",
     "@types/luxon": "^3.4.2",
     "@types/node": "^16.18.97",
     "@types/node-schedule": "^2.1.7",

@@ -1,5 +1,6 @@
 import codeSyncTaskLog from 'main/components/Loggers/codeSyncTaskLog';
 import { Disposable } from 'main/utils/Disposable';
+import EventSource from 'eventsource';
 
 export interface ServerTask {
   id: number;

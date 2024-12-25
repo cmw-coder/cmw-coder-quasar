@@ -55,6 +55,7 @@ export class AppService implements AppServiceTrait {
   ) {}
 
   init() {
+    console.log('===============', process.versions.node);
     log.initialize();
     log.transports.file.format = '{text}';
     log.transports.file.transforms.push(({ data, message }) => {
