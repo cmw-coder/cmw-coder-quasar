@@ -26,6 +26,11 @@ import { AppServiceTrait } from 'shared/types/service/AppServiceTrait';
 import * as process from 'node:process';
 import * as Electron from 'electron';
 import { getProjectData } from 'main/utils/completion';
+import {
+  CodeSyncSseMessage,
+  CodeSyncSseMessageDataType,
+} from 'main/services/AppService/CodeSyncSseMessage';
+import codeSyncTaskLog from 'main/components/Loggers/codeSyncTaskLog';
 
 interface AbstractServicePort {
   [key: string]: ((...args: unknown[]) => Promise<unknown>) | undefined;
@@ -34,6 +39,7 @@ interface AbstractServicePort {
 @injectable()
 export class AppService implements AppServiceTrait {
   private _backupScheduler?: Job;
+  private codeSyncSseMessage?: CodeSyncSseMessage;
 
   constructor(
     @inject(ServiceType.WINDOW)
@@ -63,6 +69,7 @@ export class AppService implements AppServiceTrait {
     this._initIpc();
     this._initUpdateScheduler();
     this._initShortcutHandler();
+    this._initCodeSyncSseMessage();
   }
 
   async updateBackupIntervalMinutes(intervalMinutes: number) {
@@ -272,5 +279,22 @@ export class AppService implements AppServiceTrait {
       content: '正在检查是否有新版本……',
     });
     this._updaterService.checkUpdate().catch();
+  }
+
+  private async _initCodeSyncSseMessage() {
+    const { baseServerUrl, username } = await this._configService.getConfigs();
+    this.codeSyncSseMessage = new CodeSyncSseMessage(baseServerUrl, username);
+    this.codeSyncSseMessage.addOnDataCallBack((message) => {
+      if (message.type === CodeSyncSseMessageDataType.ConnectSuccess) {
+        codeSyncTaskLog.log('connect success', message);
+      }
+      if (message.type === CodeSyncSseMessageDataType.TaskUpdate) {
+        const task = message.data;
+        this._windowService.trayIcon.notify({
+          title: '移植任务更新',
+          content: `移植任务 [${task.id}] 已更新，请前往网页端处理`,
+        });
+      }
+    });
   }
 }
