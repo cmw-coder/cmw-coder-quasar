@@ -34,7 +34,7 @@ export class CodeSyncSseMessage {
   ) {
     this.sseUrl = `${this.serverUrl}/kong/codeSync/api/v1/sse/connect/${this.username}`;
     codeSyncTaskLog.log('SSE连接中', this.sseUrl);
-    this.sseEvent = new EventSource(this.serverUrl);
+    this.sseEvent = new EventSource(this.sseUrl);
     this.sseEvent.onmessage = (event) => {
       for (let i = 0; i < this.dataCallbackList.length; i++) {
         this.dataCallbackList[i](JSON.parse(event.data));
