@@ -41,10 +41,10 @@ export class CodeSyncSseMessage {
       }
     };
     this.sseEvent.onopen = () => {
-      codeSyncTaskLog.log('SSE连接成功', this.serverUrl);
+      codeSyncTaskLog.log('SSE连接成功', this.sseUrl);
     };
     this.sseEvent.onerror = (e) => {
-      codeSyncTaskLog.log('SSE连接失败', this.serverUrl, e);
+      codeSyncTaskLog.log('SSE连接失败', this.sseUrl, e);
     };
   }
 
