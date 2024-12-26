@@ -289,6 +289,9 @@ export class AppService implements AppServiceTrait {
       if (message.type === CodeSyncSseMessageDataType.ConnectSuccess) {
         codeSyncTaskLog.log('connect success', message);
       }
+      if (message.type === CodeSyncSseMessageDataType.KeepAlive) {
+        codeSyncTaskLog.log('keep alive', message);
+      }
       if (message.type === CodeSyncSseMessageDataType.TaskUpdate) {
         const task = message.data;
         codeSyncTaskLog.log('task update', task.id);

@@ -9,6 +9,7 @@ export interface ServerTask {
 export enum CodeSyncSseMessageDataType {
   ConnectSuccess = 'ConnectSuccess',
   TaskUpdate = 'TaskUpdate',
+  KeepAlive = 'KeepAlive',
 }
 
 export interface ConnectSuccessMessage {
@@ -21,7 +22,12 @@ export interface TaskUpdateMessage {
   data: ServerTask;
 }
 
-type MessageData = ConnectSuccessMessage | TaskUpdateMessage;
+export interface KeepAliveMessage {
+  type: CodeSyncSseMessageDataType.KeepAlive;
+  data: undefined;
+}
+
+type MessageData = ConnectSuccessMessage | TaskUpdateMessage | KeepAliveMessage;
 
 export class CodeSyncSseMessage {
   private sseEvent: EventSource;
