@@ -1,6 +1,7 @@
 import codeSyncTaskLog from 'main/components/Loggers/codeSyncTaskLog';
 import { Disposable } from 'main/utils/Disposable';
 import EventSource from 'eventsource';
+import packageJson from 'root/package.json';
 
 export interface ServerTask {
   id: number;
@@ -40,7 +41,11 @@ export class CodeSyncSseMessage {
   ) {
     this.sseUrl = `${this.serverUrl}/kong/codeSync/api/v1/sse/connect/${this.username}`;
     codeSyncTaskLog.log('SSE连接中', this.sseUrl);
-    this.sseEvent = new EventSource(this.sseUrl);
+    this.sseEvent = new EventSource(this.sseUrl, {
+      headers: {
+        'User-Agent': `${packageJson.productName}/${packageJson.version}`,
+      },
+    });
     this.sseEvent.onmessage = (event) => {
       for (let i = 0; i < this.dataCallbackList.length; i++) {
         this.dataCallbackList[i](JSON.parse(event.data));
