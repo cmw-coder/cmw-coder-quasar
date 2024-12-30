@@ -1,38 +1,21 @@
+import axios, { AxiosProgressEvent, AxiosRequestConfig } from 'axios';
+
 import { ServiceType } from 'shared/types/service';
-import axios, {
-  AxiosError,
-  AxiosProgressEvent,
-  AxiosRequestConfig,
-  AxiosRequestHeaders,
-} from 'axios';
-import { NetworkZone } from 'shared/config';
-import { useService } from 'utils/common';
+import {
+  requestAuthInterceptor,
+  responseRejectInterceptor,
+} from 'shared/utils/request';
 import { api_refreshToken } from 'src/request/login';
-import { WindowType } from 'app/src-electron/shared/types/WindowType';
+import { useService } from 'utils/common';
 
 const _request = axios.create({
   baseURL: '',
   timeout: 60000,
 });
-const configService = useService(ServiceType.CONFIG);
-const windowService = useService(ServiceType.WINDOW);
 
-_request.interceptors.request.use(async (config) => {
-  const { baseServerUrl, token, username, networkZone } =
-    await configService.getConfigs();
-  config.baseURL = baseServerUrl;
-  if (!config.headers) {
-    config.headers = {} as AxiosRequestHeaders;
-  }
-  if (networkZone === NetworkZone.Public) {
-    // 黄、绿区  需要添加token校验
-    config.headers['x-authorization'] = `bearer ${token}`;
-  } else {
-    config.headers['X-Authenticated-Userid'] = username;
-  }
-
-  return config;
-});
+_request.interceptors.request.use(
+  requestAuthInterceptor(() => useService(ServiceType.CONFIG)),
+);
 
 _request.interceptors.response.use(
   (response) => {
@@ -43,42 +26,12 @@ _request.interceptors.response.use(
       return Promise.reject(new Error(response.data || 'Error'));
     }
   },
-  async (error: AxiosError<Error>) => {
-    if (error.response?.status === 401) {
-      const config = error.config;
-      if (!config) {
-        return Promise.reject(new Error('AxiosError.config is undefined'));
-      }
-      // token 过期, refreshToken
-      const { refreshToken, username, networkZone } =
-        await configService.getConfigs();
-      const { access_token, refresh_token } =
-        await api_refreshToken(refreshToken);
-      await configService.setConfigs({
-        token: access_token,
-        refreshToken: refresh_token,
-      });
-      if (!config.headers) {
-        config.headers = {} as AxiosRequestHeaders;
-      }
-      if (networkZone === NetworkZone.Public) {
-        // 黄、绿区  需要添加token校验
-        config.headers['x-authorization'] = `bearer ${access_token}`;
-      } else {
-        config.headers['X-Authenticated-Userid'] = username;
-      }
-      return _request(config);
-    } else if (
-      error.response?.status === 400 &&
-      error.config?.url?.includes('token/refresh')
-    ) {
-      // refreshToken 失败, 重新进行登录
-      await windowService.activeWindow(WindowType.Login);
-    }
-    return Promise.reject(
-      new Error(error?.response?.data?.message || error?.message || 'Error'),
-    );
-  },
+  responseRejectInterceptor(
+    () => useService(ServiceType.CONFIG),
+    () => useService(ServiceType.WINDOW),
+    api_refreshToken,
+    _request,
+  ),
 );
 
 const request = async <T>(config: AxiosRequestConfig, signal?: AbortSignal) => {
