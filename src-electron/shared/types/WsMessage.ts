@@ -239,7 +239,12 @@ export interface EditorSwitchProjectClientMessage extends WsMessage {
 
 export interface HandShakeClientMessage extends WsMessage {
   action: WsAction.HandShake;
-  data: { pid: number; currentProject: string; version: string };
+  data: {
+    pid: number;
+    currentFile: string;
+    currentProject: string;
+    version: string;
+  };
 }
 
 export interface ReviewRequestClientMessage extends WsMessage {

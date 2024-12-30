@@ -212,6 +212,7 @@ export class WebsocketService implements WebsocketServiceTrait {
           pid = data.pid;
           this._clientInfoMap.set(pid, {
             client,
+            currentFile: data.currentFile,
             currentProject: data.currentProject,
             version: data.version,
           });
