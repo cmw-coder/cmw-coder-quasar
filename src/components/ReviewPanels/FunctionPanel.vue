@@ -8,7 +8,7 @@ import {
 } from 'cmw-coder-subprocess';
 import { DateTime } from 'luxon';
 import { BundledLanguage } from 'shiki';
-import { onMounted, ref, withDefaults } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { ServiceType } from 'shared/types/service';
