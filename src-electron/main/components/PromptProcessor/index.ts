@@ -75,8 +75,7 @@ export class PromptProcessor {
       question: await promptElements.stringify(completionType),
       maxTokens: completionConfig.maxTokenCount,
       temperature: completionConfig.temperature,
-      // 2024-10-15 仅保留如下 stop 参数，去除 \n  \n}  }等
-      stop: ['<fim_pad>', '<｜end▁of▁sentence｜>'],
+      stop: completionConfig.stopTokens,
       suffix: '',
       plugin: 'SI',
       profileModel: appConfig.activeModel,
