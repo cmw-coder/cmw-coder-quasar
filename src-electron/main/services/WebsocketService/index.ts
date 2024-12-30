@@ -221,8 +221,10 @@ export class WebsocketService implements WebsocketServiceTrait {
             JSON.stringify(
               new EditorConfigServerMessage({
                 result: 'success',
-                completionConfig:
-                  await this._configService.getConfig('completion'),
+                completion: await this._configService.get('completion'),
+                generic: await this._configService.get('generic'),
+                // shortcut: await this._configService.get('shortcut'),
+                statistic: await this._configService.get('statistic'),
               }),
             ),
           );
