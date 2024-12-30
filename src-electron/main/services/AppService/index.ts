@@ -39,7 +39,7 @@ interface AbstractServicePort {
 
 @injectable()
 export class AppService implements AppServiceTrait {
-  private _backupScheduler?: Job;
+  private _backupInterval?: NodeJS.Timeout;
 
   constructor(
     @inject(ServiceType.WINDOW)
@@ -71,15 +71,17 @@ export class AppService implements AppServiceTrait {
     this._initShortcutHandler();
   }
 
-  async updateBackupIntervalMinutes(intervalMinutes: number) {
-    const backupData = this._dataStoreService.getAppdata().backup;
-    backupData.intervalMinutes = intervalMinutes;
-    this._dataStoreService.setAppData('backup', backupData);
-    if (this._backupScheduler) {
-      if (intervalMinutes <= 0) {
-        this._backupScheduler.cancel();
+  async updateBackupIntervalSeconds(intervalSeconds: number) {
+    this._configService.store.set(
+      'generic.backupIntervalSeconds',
+      intervalSeconds,
+    );
+    if (this._backupInterval) {
+      clearInterval(this._backupInterval);
+      if (intervalSeconds <= 0) {
+        this._backupInterval = undefined;
       } else {
-        this._backupScheduler.reschedule(`*/${intervalMinutes} * * * *`);
+        this._initBackupScheduler();
       }
     }
   }
@@ -154,9 +156,7 @@ export class AppService implements AppServiceTrait {
   }
 
   private _initBackupScheduler() {
-    // Trigger backup every 5 minutes
-    this._backupScheduler = scheduleJob(
-      `*/${this._dataStoreService.getAppdata().backup.intervalMinutes} * * * *`,
+    this._backupInterval = setInterval(
       () => {
         const clientInfo = this._websocketService.getClientInfo();
         if (clientInfo && clientInfo.currentFile?.length) {
@@ -173,6 +173,7 @@ export class AppService implements AppServiceTrait {
             .catch();
         }
       },
+      this._configService.store.get('generic').backupIntervalSeconds * 1000,
     );
   }
 
