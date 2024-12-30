@@ -7,7 +7,7 @@ import {
   ReviewRequestParams,
   ReviewResult,
   ReviewState,
-  Selection,
+  SelectionData
 } from 'cmw-coder-subprocess';
 import { app } from 'electron';
 import path from 'path';
@@ -58,13 +58,13 @@ export class ReviewSubProcess
     reviewLog.log(...payloads);
   }
 
-  async getReferences(selection: Selection): Promise<Reference[]> {
+  async getReferences(selectionData: SelectionData): Promise<Reference[]> {
     const websocketService = container.get<WebsocketService>(
       ServiceType.WEBSOCKET,
     );
-    return websocketService.getCodeReviewReferences(selection);
+    return websocketService.getCodeReviewReferences(selectionData);
     // 性能测试
-    // console.log('getReferences', selection.file);
+    // console.log('getReferences', selectionData.file);
     // await timeout(1000);
     // return [];
   }
