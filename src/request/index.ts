@@ -29,7 +29,7 @@ _request.interceptors.response.use(
   responseRejectInterceptor(
     () => useService(ServiceType.CONFIG),
     () => useService(ServiceType.WINDOW),
-    api_refreshToken,
+    (refreshToken: string) => api_refreshToken(refreshToken),
     _request,
   ),
 );

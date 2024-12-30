@@ -28,7 +28,7 @@ _request.interceptors.response.use(
   responseRejectInterceptor(
     () => getService(ServiceType.CONFIG),
     () => getService(ServiceType.WINDOW),
-    api_refreshToken,
+    (refreshToken: string) => api_refreshToken(refreshToken),
     _request,
   ),
 );
