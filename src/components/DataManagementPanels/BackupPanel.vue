@@ -16,7 +16,7 @@ const dataStoreService = useService(ServiceType.DATA);
 const backups = ref<Omit<AppData['backup'], 'intervalMinutes'>>();
 const loading = ref(false);
 const refreshInterval = ref(0);
-const refreshCounter = ref(0);
+const refreshPercentage = ref(100);
 
 const i18n = i18nSubPath(baseName);
 
@@ -80,7 +80,7 @@ const refreshBackupData = async () => {
     current: backup.current,
     previous: backup.previous,
   };
-  refreshCounter.value = 0;
+  refreshPercentage.value = 100;
   setTimeout(
     () => {
       loading.value = false;
@@ -92,12 +92,12 @@ const refreshBackupData = async () => {
 onMounted(() => {
   refreshBackupData();
   refreshInterval.value = <number>(<unknown>setInterval(() => {
-    refreshCounter.value += 1;
-    if (refreshCounter.value >= 600) {
-      refreshCounter.value = 0;
+    refreshPercentage.value -= 1;
+    if (refreshPercentage.value <= 0) {
+      refreshPercentage.value = 100;
       refreshBackupData();
     }
-  }, 100));
+  }, 300));
 });
 
 onUnmounted(() => {
@@ -107,23 +107,25 @@ onUnmounted(() => {
 
 <template>
   <div class="column q-gutter-y-md">
-    <div class="row items-center q-gutter-x-md">
+    <q-btn
+      color="primary"
+      :loading="loading"
+      @click="refreshBackupData"
+    >
       <q-linear-progress
-        class="col-grow"
-        animation-speed="350"
+        class="absolute"
+        animation-speed="1000"
         rounded
-        size="xl"
-        :value="refreshCounter / 600"
+        size="36px"
+        :value="refreshPercentage / 100"
       />
-      <q-btn
-        color="primary"
-        dense
-        icon="mdi-refresh"
-        :label="i18n('labels.refreshBackups')"
-        :loading="loading"
-        @click="refreshBackupData"
-      />
-    </div>
+      <div class="row z-top">
+        <q-icon name="mdi-refresh" />
+        <div class="q-ml-sm">
+          {{ i18n('labels.refreshBackups') }}
+        </div>
+      </div>
+    </q-btn>
     <q-card v-for="(data, type) in backups" :key="type" bordered flat>
       <q-card-section>
         <div class="row items-center justify-between">

@@ -39,7 +39,7 @@ export default {
           },
         },
         labels: {
-          refreshBackups: '刷新备份',
+          refreshBackups: '刷新文件备份列表',
           current: '当前文件备份列表',
           previous: '上个文件备份列表',
           noBackup: '没有备份',

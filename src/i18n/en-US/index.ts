@@ -39,7 +39,7 @@ export default {
           },
         },
         labels: {
-          refreshBackups: 'Refresh Backups',
+          refreshBackups: 'Refresh File Backup List',
           current: 'Current File Backup List',
           previous: 'Previous File Backup List',
           noBackup: 'No backup',
