@@ -76,63 +76,133 @@ const updateNumberConfig = async (key: string, value: number) => {
   );
 };
 
-const numberSettings: NumberProps[] = [
+const numberProps: NumberProps[] = [
   {
-    label: i18n('labels.backupInterval'),
-    caption: i18n('labels.backupIntervalNotice'),
-    suffix: i18n('labels.minutes'),
-    defaultValue: defaultAppData.backup.intervalMinutes,
-    resetTooltip: i18n('tooltips.resetToDefault'),
+    title: i18n('numberProps.autoSave.title'),
+    caption: i18n('numberProps.autoSave.caption'),
+    suffix: i18n('suffixes.seconds'),
+    defaultValue: DEFAULT_CONFIG_BASE.generic.autoSaveIntervalSeconds,
+    minValue: NUMBER_CONFIG_CONSTRAINTS.generic.autoSaveIntervalSeconds.min,
+    maxValue: NUMBER_CONFIG_CONSTRAINTS.generic.autoSaveIntervalSeconds.max,
+    lowThreshold: {
+      value: NUMBER_CONFIG_CONSTRAINTS.generic.autoSaveIntervalSeconds.low,
+      hint: i18n('numberProps.autoSave.tooLow'),
+    },
     initializer: async () => {
-      const { backup } = await dataStoreService.getAppDataAsync();
-      return backup.intervalMinutes;
+      const { autoSaveIntervalSeconds } = await configService.get('generic');
+      return autoSaveIntervalSeconds;
     },
     updateHandler: async (
       oldValue: number,
       newValue: number,
     ): Promise<number> => {
-      newValue = Math.round(newValue);
-      if (newValue < APPDATA_NUMBER_CONSTANTS.backupInterval.min) {
-        newValue = APPDATA_NUMBER_CONSTANTS.backupInterval.min;
-      } else if (newValue > APPDATA_NUMBER_CONSTANTS.backupInterval.max) {
-        newValue = APPDATA_NUMBER_CONSTANTS.backupInterval.max;
-      } else if (isNaN(newValue)) {
-        console.warn('Update backupInterval: Value is not a number', newValue);
+      try {
+        newValue = Math.round(newValue);
+        await updateNumberConfig('autoSaveIntervalSeconds', newValue);
+        await sleep(Math.floor(200 + Math.random() * 300));
+        return newValue;
+      } catch (e) {
+        console.error(e);
         return oldValue;
       }
-
-      const { backup } = await dataStoreService.getAppDataAsync();
-      backup.intervalMinutes = newValue;
-      await appService.updateBackupIntervalMinutes(newValue);
-      await sleep(Math.floor(200 + Math.random() * 300));
-      return newValue;
+    },
+  },
+  {
+    title: i18n('numberProps.backupInterval.title'),
+    caption: i18n('numberProps.backupInterval.caption'),
+    suffix: i18n('suffixes.seconds'),
+    defaultValue: DEFAULT_CONFIG_BASE.generic.backupIntervalSeconds,
+    minValue: NUMBER_CONFIG_CONSTRAINTS.generic.backupIntervalSeconds.min,
+    maxValue: NUMBER_CONFIG_CONSTRAINTS.generic.backupIntervalSeconds.max,
+    lowThreshold: {
+      value: NUMBER_CONFIG_CONSTRAINTS.generic.backupIntervalSeconds.low,
+      hint: i18n('numberProps.backupInterval.tooLow'),
+    },
+    initializer: async () => {
+      const { backupIntervalSeconds } = await configService.get('generic');
+      return backupIntervalSeconds;
+    },
+    updateHandler: async (
+      oldValue: number,
+      newValue: number,
+    ): Promise<number> => {
+      try {
+        newValue = Math.round(newValue);
+        await appService.updateBackupIntervalSeconds(newValue);
+        await sleep(Math.floor(200 + Math.random() * 300));
+        return newValue;
+      } catch (e) {
+        console.error(e);
+        return oldValue;
+      }
+    },
+  },
+  {
+    title: i18n('numberProps.interactionUnlockDelay.title'),
+    caption: i18n('numberProps.interactionUnlockDelay.caption'),
+    suffix: i18n('suffixes.milliseconds'),
+    defaultValue:
+      DEFAULT_CONFIG_BASE.generic.interactionUnlockDelayMilliSeconds,
+    minValue:
+      NUMBER_CONFIG_CONSTRAINTS.generic.interactionUnlockDelayMilliSeconds.min,
+    maxValue:
+      NUMBER_CONFIG_CONSTRAINTS.generic.interactionUnlockDelayMilliSeconds.max,
+    lowThreshold: {
+      value:
+        NUMBER_CONFIG_CONSTRAINTS.generic.interactionUnlockDelayMilliSeconds
+          .low,
+      hint: i18n('numberProps.interactionUnlockDelay.tooLow'),
+    },
+    highThreshold: {
+      value:
+        NUMBER_CONFIG_CONSTRAINTS.generic.interactionUnlockDelayMilliSeconds
+          .high,
+      hint: i18n('numberProps.interactionUnlockDelay.tooHigh'),
+    },
+    initializer: async () => {
+      const { interactionUnlockDelayMilliSeconds } =
+        await configService.get('generic');
+      return interactionUnlockDelayMilliSeconds;
+    },
+    updateHandler: async (
+      oldValue: number,
+      newValue: number,
+    ): Promise<number> => {
+      try {
+        newValue = Math.round(newValue);
+        await updateNumberConfig(
+          'interactionUnlockDelayMilliSeconds',
+          newValue,
+        );
+        await sleep(Math.floor(200 + Math.random() * 300));
+        return newValue;
+      } catch (e) {
+        console.error(e);
+        return oldValue;
+      }
     },
   },
 ];
 
-const toggleSettings: ToggleProps[] = [
+const toggleProps: ToggleProps[] = [
   {
-    label: i18n('labels.showSelectActionWindow'),
-    caption: i18n('labels.showSelectActionWindowNotice'),
-    initializer: async () => {
-      const configs = await configService.getConfigs();
-      return configs.showSelectedTipsWindow;
-    },
+    title: i18n('toggleProps.showSelectedTipsWindow.title'),
+    caption: i18n('toggleProps.showSelectedTipsWindow.caption'),
+    defaultValue: DEFAULT_CONFIG_BASE.showSelectedTipsWindow,
+    initializer: async () => await configService.get('showSelectedTipsWindow'),
     updateHandler: async (value: boolean) => {
-      await configService.setConfig('showSelectedTipsWindow', value);
+      await configService.set('showSelectedTipsWindow', value);
       await sleep(Math.floor(200 + Math.random() * 300));
       return true;
     },
   },
   {
-    label: i18n('labels.showStatusWindow'),
-    caption: i18n('labels.showStatusWindowNotice'),
-    initializer: async () => {
-      const configs = await configService.getConfigs();
-      return configs.showStatusWindow;
-    },
+    title: i18n('toggleProps.showStatusWindow.title'),
+    caption: i18n('toggleProps.showStatusWindow.caption'),
+    defaultValue: DEFAULT_CONFIG_BASE.showStatusWindow,
+    initializer: async () => await configService.get('showStatusWindow'),
     updateHandler: async (value: boolean) => {
-      await configService.setConfig('showStatusWindow', value);
+      await configService.set('showStatusWindow', value);
       if (!value) {
         await windowService.hideWindow(WindowType.Status);
       }
@@ -141,15 +211,15 @@ const toggleSettings: ToggleProps[] = [
     },
   },
   {
-    label: i18n('labels.transparentFallback'),
+    title: i18n('labels.transparentFallback'),
     initializer: async () => {
-      const { compatibility } = await dataStoreService.getAppDataAsync();
+      const { compatibility } = await dataStoreService.getStoreAsync();
       return compatibility.transparentFallback;
     },
     updateHandler: async (value: boolean) => {
-      const { compatibility } = await dataStoreService.getAppDataAsync();
+      const { compatibility } = await dataStoreService.getStoreAsync();
       compatibility.transparentFallback = value;
-      await dataStoreService.setAppDataAsync('compatibility', compatibility);
+      await dataStoreService.setStoreAsync('compatibility', compatibility);
       await windowService.closeWindow(WindowType.Completions);
       await windowService.closeWindow(WindowType.Status);
       await windowService.closeWindow(WindowType.SelectionTips);
@@ -161,15 +231,15 @@ const toggleSettings: ToggleProps[] = [
     },
   },
   {
-    label: i18n('labels.zoomFix'),
+    title: i18n('labels.zoomFix'),
     initializer: async () => {
-      const { compatibility } = await dataStoreService.getAppDataAsync();
+      const { compatibility } = await dataStoreService.getStoreAsync();
       return compatibility.zoomFix;
     },
     updateHandler: async (value: boolean) => {
-      const { compatibility } = await dataStoreService.getAppDataAsync();
+      const { compatibility } = await dataStoreService.getStoreAsync();
       compatibility.zoomFix = value;
-      await dataStoreService.setAppDataAsync('compatibility', compatibility);
+      await dataStoreService.setStoreAsync('compatibility', compatibility);
       await sleep(Math.floor(200 + Math.random() * 300));
       return true;
     },
@@ -193,18 +263,19 @@ const updateTheme = async (value: Theme) => {
 watch(
   () => baseServerUrl.value,
   async (url) => {
-    await configService.setConfig('baseServerUrl', url);
+    await configService.set('baseServerUrl', url);
   },
 );
 
 onMounted(async () => {
-  developerMode.value =
-    (await configService.getConfig('developerMode')) ?? false;
-  const darkMode = await configService.getConfig('darkMode');
+  developerMode.value = (await configService.get('developerMode')) ?? false;
+  const darkMode = await configService.get('darkMode');
   locale.value =
-    (await configService.getConfig('locale')) ?? lang.getLocale() ?? 'en-US';
+    (await configService.get('locale')).toString() ??
+    lang.getLocale() ??
+    'en-US';
   theme.value = themes.find((t) => t.darkMode === darkMode) ?? theme.value;
-  baseServerUrl.value = (await configService.getConfig('baseServerUrl')) || '';
+  baseServerUrl.value = (await configService.get('baseServerUrl')) || '';
 });
 </script>
 
@@ -291,21 +362,25 @@ onMounted(async () => {
         </q-list>
       </q-expansion-item>
       <item-toggle
-        v-for="(toggleSetting, index) in toggleSettings"
+        v-for="(toggleSetting, index) in toggleProps"
         :key="index"
+        :title="toggleSetting.title"
         :caption="toggleSetting.caption"
+        :default-value="toggleSetting.defaultValue"
         :initializer="toggleSetting.initializer"
-        :label="toggleSetting.label"
         :update-handler="toggleSetting.updateHandler"
       />
       <item-number
-        v-for="(numberSetting, index) in numberSettings"
+        v-for="(numberSetting, index) in numberProps"
         :key="index"
-        :label="numberSetting.label"
+        :title="numberSetting.title"
         :caption="numberSetting.caption"
         :suffix="numberSetting.suffix"
         :default-value="numberSetting.defaultValue"
-        :reset-tooltip="numberSetting.resetTooltip"
+        :min-value="numberSetting.minValue"
+        :max-value="numberSetting.maxValue"
+        :low-threshold="numberSetting.lowThreshold"
+        :high-threshold="numberSetting.highThreshold"
         :initializer="numberSetting.initializer"
         :update-handler="numberSetting.updateHandler"
       />
