@@ -219,7 +219,7 @@ export class WebsocketService implements WebsocketServiceTrait {
           log.info(`Websocket client verified, pid: ${pid}`);
           client.send(
             JSON.stringify(
-              new SettingSyncServerMessage({
+              new EditorConfigServerMessage({
                 result: 'success',
                 completionConfig:
                   await this._configService.getConfig('completion'),

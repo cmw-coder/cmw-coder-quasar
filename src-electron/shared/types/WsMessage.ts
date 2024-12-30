@@ -8,7 +8,6 @@ import {
   Selection,
   SymbolInfo,
 } from 'shared/types/common';
-import { ShortcutConfig } from 'shared/types/keys';
 import { AppConfig } from 'shared/types/service/ConfigServiceTrait/types';
 
 export enum WsAction {
@@ -20,6 +19,7 @@ export enum WsAction {
   CompletionGenerate = 'CompletionGenerate',
   CompletionSelect = 'CompletionSelect',
   EditorCommit = 'EditorCommit',
+  EditorConfig = 'EditorConfig',
   EditorPaste = 'EditorPaste',
   EditorSelection = 'EditorSelection',
   EditorState = 'EditorState',
@@ -27,7 +27,6 @@ export enum WsAction {
   EditorSwitchProject = 'EditorSwitchProject',
   HandShake = 'HandShake',
   ReviewRequest = 'ReviewRequest',
-  SettingSync = 'SettingSync',
 }
 
 export interface WsMessage {
@@ -165,6 +164,21 @@ export interface EditorCommitClientMessage extends WsMessage {
   data: string;
 }
 
+export class EditorConfigServerMessage implements WsMessage {
+  action = WsAction.EditorConfig;
+  data: StandardResult<{
+    completion?: Partial<AppConfig['completion']>;
+    generic?: Partial<AppConfig['generic']>;
+    shortcut?: Partial<AppConfig['shortcut']>;
+    statistic?: Partial<AppConfig['statistic']>;
+  }>;
+  timestamp = Date.now();
+
+  constructor(data: EditorConfigServerMessage['data']) {
+    this.data = data;
+  }
+}
+
 export interface EditorPasteClientMessage extends WsMessage {
   action: WsAction.EditorPaste;
   data: {
@@ -252,19 +266,6 @@ export class ReviewRequestServerMessage implements WsMessage {
   }
 }
 
-export class SettingSyncServerMessage implements WsMessage {
-  action = WsAction.SettingSync;
-  data: StandardResult<{
-    completionConfig?: Partial<AppConfig['completion']>;
-    shortcutConfig?: ShortcutConfig;
-  }>;
-  timestamp = Date.now();
-
-  constructor(data: SettingSyncServerMessage['data']) {
-    this.data = data;
-  }
-}
-
 export interface WsMessageMapping {
   [WsAction.CompletionAccept]: {
     client: CompletionAcceptClientMessage;
@@ -294,6 +295,10 @@ export interface WsMessageMapping {
     client: EditorCommitClientMessage;
     server: void;
   };
+  [WsAction.EditorConfig]: {
+    client: void;
+    server: EditorConfigServerMessage;
+  };
   [WsAction.EditorPaste]: {
     client: EditorPasteClientMessage;
     server: void;
@@ -317,9 +322,5 @@ export interface WsMessageMapping {
   [WsAction.ReviewRequest]: {
     client: ReviewRequestClientMessage;
     server: void;
-  };
-  [WsAction.SettingSync]: {
-    client: void;
-    server: SettingSyncServerMessage;
   };
 }
