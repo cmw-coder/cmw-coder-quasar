@@ -278,6 +278,12 @@ export class DataService implements DataServiceTrait {
 
   async saveBackup(originalPath: string, projectId: string) {
     const backupData = this._appDataStore.get('backup');
+    if (
+      !this._localBackupManager.needBackup(originalPath, backupData.current)
+    ) {
+      return;
+    }
+
     const newBackupPath = this._localBackupManager.createBackup(
       originalPath,
       projectId,
@@ -296,16 +302,21 @@ export class DataService implements DataServiceTrait {
           backupData.previous?.backupPathList,
         );
         backupData.previous = backupData.current;
-      }
-      backupData.current.backupPathList.push(newBackupPath);
-
-      // Limit the number of backups to 5
-      if (backupData.current.backupPathList.length > 5) {
-        this._localBackupManager.deleteBackups(
-          backupData.current.backupPathList.slice(0, -5),
-        );
-        backupData.current.backupPathList =
-          backupData.current.backupPathList.slice(-5);
+        backupData.current = {
+          backupPathList: [newBackupPath],
+          originalPath,
+          projectId,
+        };
+      } else {
+        backupData.current.backupPathList.push(newBackupPath);
+        // Limit the number of backups to 5
+        if (backupData.current.backupPathList.length > 5) {
+          this._localBackupManager.deleteBackups(
+            backupData.current.backupPathList.slice(0, -5),
+          );
+          backupData.current.backupPathList =
+            backupData.current.backupPathList.slice(-5);
+        }
       }
     }
     this._appDataStore.set('backup', backupData);
