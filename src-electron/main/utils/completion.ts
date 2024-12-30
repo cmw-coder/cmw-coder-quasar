@@ -1,8 +1,8 @@
 import { container } from 'main/services';
-import { DataStoreService } from 'main/services/DataStoreService';
 import { WebsocketService } from 'main/services/WebsocketService';
-import { DataProjectType } from 'main/stores/data/types';
+
 import packageJson from 'root/package.json';
+
 import { FONT_SIZE_MAPPING } from 'shared/constants/common';
 import { ServiceType } from 'shared/types/service';
 
@@ -34,17 +34,4 @@ export const getFontSize = (fontHeight: number) => {
         0.000574698566099494 * fontHeight ** 3 -
         0.0147437317361461 * fontHeight ** 2 +
         1.09720488138051 * fontHeight;
-};
-
-export const getProjectData = (project: string): DataProjectType => {
-  const appData = container
-    .get<DataStoreService>(ServiceType.DATA_STORE)
-    .getAppdata();
-  const projectData: DataProjectType | undefined = appData.project[project];
-  if (!projectData || !projectData.id) {
-    throw new Error('Completion Generate Failed, no valid project id.', {
-      cause: CompletionErrorCause.projectData,
-    });
-  }
-  return projectData;
 };

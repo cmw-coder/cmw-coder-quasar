@@ -191,15 +191,17 @@ export class AppService implements AppServiceTrait {
       () => {
         const clientInfo = this._websocketService.getClientInfo();
         if (clientInfo && clientInfo.currentFile?.length) {
-          try {
-            const { id: projectId } = getProjectData(clientInfo.currentProject);
-            log.debug(`Creating backup for '${clientInfo.currentFile}'`);
-            this._dataStoreService
-              .saveBackup(clientInfo.currentFile, projectId)
-              .catch();
-          } catch (e) {
-            console.warn('Backup failed', e);
+          const projectData = this._dataStoreService.getProjectData(
+            clientInfo.currentProject,
+          );
+          if (!projectData?.id.length) {
+            log.warn('No project ID for project:', clientInfo.currentProject);
+            return;
           }
+          log.debug(`Creating backup for '${clientInfo.currentFile}'`);
+          this._dataStoreService
+            .saveBackup(clientInfo.currentFile, projectData.id)
+            .catch();
         }
       },
     );

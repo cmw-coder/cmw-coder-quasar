@@ -1,4 +1,9 @@
-export class CaretPosition {
+export interface CaretPositionTrait {
+  character: number;
+  line: number;
+}
+
+export class CaretPosition implements CaretPositionTrait{
   public readonly character: number;
   public readonly line: number;
 

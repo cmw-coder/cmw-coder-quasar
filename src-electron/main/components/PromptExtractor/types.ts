@@ -178,6 +178,7 @@ export class RawInputs {
     project: string,
   ) {
     const { type, caret, path, context, recentFiles, symbols } = rawData;
+    const caretPosition = new CaretPosition(caret.line, caret.character);
     this.document = new TextDocument(path);
     this.elements = new PromptElements(type, {
       infix: decode(Buffer.from(context.infix, 'base64'), 'utf-8'),
@@ -187,16 +188,13 @@ export class RawInputs {
 
     switch (type) {
       case GenerateType.Common: {
-        this.selection = new Selection(
-          new CaretPosition(caret.line, caret.character),
-          new CaretPosition(caret.line, caret.character),
-        );
+        this.selection = new Selection(caretPosition, caretPosition);
         break;
       }
       case GenerateType.PasteReplace: {
         const infixLines = this.elements.fullInfix.split('\n');
         this.selection = new Selection(
-          new CaretPosition(caret.line, caret.character),
+          caretPosition,
           new CaretPosition(
             caret.line + infixLines.length - 1,
             infixLines[infixLines.length - 1].length,

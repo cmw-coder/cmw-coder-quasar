@@ -313,8 +313,9 @@ export class WebsocketService implements WebsocketServiceTrait {
       async ({ data }, pid) => {
         const statusWindow = this._windowService.getWindow(WindowType.Status);
         const { caret, times } = data;
+        const caretPosition = new CaretPosition(caret.line, caret.character);
         const actionId = this._statisticsReporterService.completionBegin(
-          caret,
+          caretPosition,
           times.start,
           times.symbol,
           times.end,
@@ -334,14 +335,24 @@ export class WebsocketService implements WebsocketServiceTrait {
         }
 
         try {
-          const { id: projectId } = getProjectData(project);
+          const projectData = this._dataStoreService.getProjectData(project);
+          if (!projectData?.id.length) {
+            // noinspection ExceptionCaughtLocallyJS
+            throw new Error(
+              'Completion Generate Failed, no valid project id.',
+              {
+                cause: CompletionErrorCause.projectData,
+              },
+            );
+          }
+
           this._statisticsReporterService.fileRecorderManager.addFileRecorder(
             data.path,
-            projectId,
+            projectData.id,
           );
           this._statisticsReporterService.completionUpdateProjectId(
             actionId,
-            projectId,
+            projectData.id,
           );
 
           const rawInputs = new RawInputs(data, project);
@@ -361,7 +372,7 @@ export class WebsocketService implements WebsocketServiceTrait {
           const completions = await this._promptProcessor.process(
             actionId,
             promptElements,
-            projectId,
+            projectData.id,
           );
           if (completions) {
             this._statisticsReporterService.completionGenerated(
@@ -485,66 +496,60 @@ export class WebsocketService implements WebsocketServiceTrait {
         clientInfo.currentFile?.length &&
         clientInfo.currentProject?.length
       ) {
-        try {
-          const { caret, context, recentFiles } = data;
-          const { id: projectId } = getProjectData(clientInfo.currentProject);
-          this._statisticsReporterService
-            .copiedLines(
-              context.infix.split(NEW_LINE_REGEX).length,
-              projectId,
-              getClientVersion(pid),
-            )
-            .catch();
-          if (clientInfo.currentFile) {
-            this._statisticsReporterService.fileRecorderManager.addFileRecorder(
-              clientInfo.currentFile,
-              projectId,
-            );
-          }
-          const document = new TextDocument(clientInfo.currentFile);
-          let repo = '';
-          for (const [key, value] of Object.entries(MODULE_PATH)) {
-            if (document.fileName.includes(value)) {
-              repo = key;
-              break;
-            }
-          }
-          this._statisticsReporterService
-            .copiedContents({
-              content: context.infix,
-              context: {
-                prefix: context.prefix,
-                suffix: context.suffix,
-              },
-              path: document.fileName,
-              position: caret,
-              projectId,
-              recentFiles,
-              repo,
-              svn: (
-                this._dataStoreService.getAppdata().project[projectId]?.svn ??
-                []
-              ).map(({ directory }) => directory),
-              userId: (await getService(ServiceType.CONFIG).getConfigs())
-                .username,
-            })
-            .catch();
-        } catch (e) {
-          const error = <Error>e;
-          switch (error.cause) {
-            case CompletionErrorCause.projectData: {
-              console.log('CompletionErrorCause.projectData', error);
-              this._windowService.getWindow(WindowType.ProjectId).show();
-              this._windowService
-                .getWindow(WindowType.ProjectId)
-                .setProject(clientInfo.currentProject);
-              break;
-            }
-            default: {
-              break;
-            }
+        const projectData = this._dataStoreService.getProjectData(
+          clientInfo.currentProject,
+        );
+        if (!projectData?.id.length) {
+          statisticsLog.error(
+            'WsAction.EditorPaste',
+            `No project ID for project "${clientInfo.currentProject}"`,
+          );
+          this._windowService.getWindow(WindowType.ProjectId).show();
+          this._windowService
+            .getWindow(WindowType.ProjectId)
+            .setProject(clientInfo.currentProject);
+          return;
+        }
+
+        const { caret, context, recentFiles } = data;
+        const caretPosition = new CaretPosition(caret.line, caret.character);
+        this._statisticsReporterService
+          .copiedLines(
+            context.infix.split(NEW_LINE_REGEX).length,
+            projectData.id,
+            getClientVersion(pid),
+          )
+          .catch();
+        if (clientInfo.currentFile) {
+          this._statisticsReporterService.fileRecorderManager.addFileRecorder(
+            clientInfo.currentFile,
+            projectData.id,
+          );
+        }
+        const document = new TextDocument(clientInfo.currentFile);
+        let repo = '';
+        for (const [key, value] of Object.entries(MODULE_PATH)) {
+          if (document.fileName.includes(value)) {
+            repo = key;
+            break;
           }
         }
+        this._statisticsReporterService
+          .copiedContents({
+            content: context.infix,
+            context: {
+              prefix: context.prefix,
+              suffix: context.suffix,
+            },
+            path: document.fileName,
+            position: caretPosition,
+            projectId: projectData.id,
+            recentFiles,
+            repo,
+            svn: (projectData?.svn ?? []).map(({ directory }) => directory),
+            userId: (await getService(ServiceType.CONFIG).getStore()).username,
+          })
+          .catch();
       }
     });
     this._registerWsAction(WsAction.EditorSelection, async ({ data }) => {
@@ -571,8 +576,16 @@ export class WebsocketService implements WebsocketServiceTrait {
         ),
         language: 'c',
       };
+
+      const projectData = this._dataStoreService.getProjectData(project);
+      if (!projectData?.id.length) {
+        completionLog.error(
+          'WsAction.EditorSelection',
+          `No project ID for project "${project}"`,
+        );
+        return;
+      }
       try {
-        const { id: projectId } = getProjectData(project);
         await selectionTipsWindow.trigger(
           {
             x: data.dimensions.x,
@@ -580,7 +593,7 @@ export class WebsocketService implements WebsocketServiceTrait {
           },
           selectionData,
           {
-            projectId: projectId,
+            projectId: projectData.id,
             version: getClientVersion(this._lastActivePid),
           },
         );

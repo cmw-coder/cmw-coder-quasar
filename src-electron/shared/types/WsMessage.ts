@@ -1,7 +1,7 @@
 import { Reference } from 'cmw-coder-subprocess';
 
 import {
-  CaretPosition,
+  CaretPositionTrait,
   Completions,
   GenerateType,
   KeptRatio,
@@ -77,7 +77,7 @@ export interface CompletionGenerateClientMessage extends WsMessage {
   action: WsAction.CompletionGenerate;
   data: {
     type: GenerateType;
-    caret: CaretPosition;
+    caret: CaretPositionTrait;
     path: string;
     context: {
       infix: string;
@@ -182,7 +182,7 @@ export class EditorConfigServerMessage implements WsMessage {
 export interface EditorPasteClientMessage extends WsMessage {
   action: WsAction.EditorPaste;
   data: {
-    caret: CaretPosition;
+    caret: CaretPositionTrait;
     context: {
       infix: string;
       prefix: string;

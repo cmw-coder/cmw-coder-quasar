@@ -147,8 +147,8 @@ export class DataStoreService implements DataStoreServiceTrait {
     return this._appDataStore.store;
   }
 
-  setAppData<T extends keyof AppData>(key: T, value: AppData[T]) {
-    this._appDataStore.set(key, value);
+  getProjectData(project: string): ProjectData | undefined {
+    return this._appDataStore.get('project')[project];
   }
 
   private async _updateCurrentQuestionTemplateFile() {

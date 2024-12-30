@@ -211,7 +211,7 @@ export class WindowService implements WindowServiceTrait {
   }
 
   async getWindowIsFixed(windowType: WindowType) {
-    const { fixed } = this._dataStoreService.getWindowData(windowType);
+    const { fixed } = this._dataService.getWindowData(windowType);
     return !!fixed;
   }
 
@@ -275,21 +275,10 @@ export class WindowService implements WindowServiceTrait {
       return;
     }
     const targetDirPath = targetDirPathList[0];
-    const clientInfo = getService(ServiceType.WEBSOCKET).getClientInfo();
-    if (!clientInfo || !clientInfo.currentProject || !clientInfo.version) {
+    const extraData = this._parseExtraData();
+    if (!extraData) {
       return;
     }
-    const websocketService = container.get<WebsocketService>(
-      ServiceType.WEBSOCKET,
-    );
-    const project = await websocketService.getProjectData();
-    if (!project) {
-      return;
-    }
-    const extraData: ExtraData = {
-      projectId: project.id,
-      version: clientInfo.version,
-    };
     // 上报一次 PROJECT_REVIEW 使用
     const appConfig = await this._configService.getConfigs();
     try {
@@ -325,21 +314,10 @@ export class WindowService implements WindowServiceTrait {
     if (!this._parserInitialized) {
       return;
     }
-    const clientInfo = getService(ServiceType.WEBSOCKET).getClientInfo();
-    if (!clientInfo || !clientInfo.currentProject || !clientInfo.version) {
+    const extraData = this._parseExtraData();
+    if (!extraData) {
       return;
     }
-    const websocketService = container.get<WebsocketService>(
-      ServiceType.WEBSOCKET,
-    );
-    const project = await websocketService.getProjectData();
-    if (!project) {
-      return;
-    }
-    const extraData: ExtraData = {
-      projectId: project.id,
-      version: clientInfo.version,
-    };
     // 上报一次 FILE_REVIEW 使用
     if (reportSku) {
       const appConfig = await this._configService.getConfigs();
@@ -491,5 +469,22 @@ export class WindowService implements WindowServiceTrait {
     const mainWindow = this.getWindow(WindowType.Main);
     const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
     return reviewPage.reviewSubProcess.proxyFn.getReviewFileContent(filePath);
+  }
+
+  private _parseExtraData(): ExtraData | undefined {
+    const clientInfo = getService(ServiceType.WEBSOCKET).getClientInfo();
+    if (!clientInfo?.currentProject.length || !clientInfo?.version.length) {
+      return;
+    }
+    const projectData = this._dataService.getProjectData(
+      clientInfo.currentProject,
+    );
+    if (!projectData?.id.length) {
+      return;
+    }
+    return {
+      projectId: projectData.id,
+      version: clientInfo.version,
+    };
   }
 }
