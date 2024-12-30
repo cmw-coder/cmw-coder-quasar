@@ -7,32 +7,33 @@ import {
 import { BrowserWindow, app, dialog, screen } from 'electron';
 import log from 'electron-log/main';
 import { inject, injectable } from 'inversify';
-
+import { DateTime } from 'luxon';
+import { dirname } from 'path';
+// Main types
 import { TrayIcon } from 'main/components/TrayIcon';
 import { MenuEntry } from 'main/components/TrayIcon/types';
-import { WindowServiceTrait } from 'shared/types/service/WindowServiceTrait';
-import { NetworkZone } from 'shared/config';
-import { ServiceType } from 'shared/types/service';
-import { WindowType } from 'shared/types/WindowType';
-import { defaultAppData } from 'shared/types/service/DataStoreServiceTrait/types';
-import { FeedbackWindow } from 'main/services/WindowService/types/FeedbackWindow';
-import { ProjectIdWindow } from 'main/services/WindowService/types/ProjectIdWindow';
-import { WelcomeWindow } from 'main/services/WindowService/types/WelcomeWindow';
-import { LoginWindow } from 'main/services/WindowService/types/LoginWindow';
-import { CompletionsWindow } from 'main/services/WindowService/types/CompletionsWindow';
-import { MainWindow } from 'main/services/WindowService/types/MainWindow';
-import { UpdateWindow } from 'main/services/WindowService/types/UpdateWindow';
-import { BaseWindow } from 'main/services/WindowService/types/BaseWindow';
+import { api_reportSKU } from 'main/request/sku';
 import { ConfigService } from 'main/services/ConfigService';
-import { DataStoreService } from 'main/services/DataStoreService';
-import { WebsocketService } from 'main/services/WebsocketService';
+import { DataService } from 'main/services/DataService';
+// Main service window types
+import { BaseWindow } from 'main/services/WindowService/types/BaseWindow';
+import { CompletionsWindow } from 'main/services/WindowService/types/CompletionsWindow';
+import { FeedbackWindow } from 'main/services/WindowService/types/FeedbackWindow';
+import { LoginWindow } from 'main/services/WindowService/types/LoginWindow';
+import { MainWindow } from 'main/services/WindowService/types/MainWindow';
+import { ProjectIdWindow } from 'main/services/WindowService/types/ProjectIdWindow';
 import { SelectionTipsWindow } from 'main/services/WindowService/types/SelectionTipsWindow';
 import { StatusWindow } from 'main/services/WindowService/types/StatusWindow';
+import { UpdateWindow } from 'main/services/WindowService/types/UpdateWindow';
+import { WelcomeWindow } from 'main/services/WindowService/types/WelcomeWindow';
+// Shared types
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
-import { container, getService } from 'main/services';
-import { DateTime } from 'luxon';
-import { api_reportSKU } from 'main/request/sku';
-import { dirname } from 'path';
+import { ServiceType } from 'shared/types/service';
+import { NetworkZone } from 'shared/types/service/ConfigServiceTrait/types';
+import { defaultAppData } from 'shared/types/service/DataServiceTrait/types';
+import { WindowServiceTrait } from 'shared/types/service/WindowServiceTrait';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
+import { getService } from 'main/services';
 
 interface WindowMap {
   [WindowType.Completions]: CompletionsWindow;
@@ -57,8 +58,8 @@ export class WindowService implements WindowServiceTrait {
   constructor(
     @inject(ServiceType.CONFIG)
     private _configService: ConfigService,
-    @inject(ServiceType.DATA_STORE)
-    private _dataStoreService: DataStoreService,
+    @inject(ServiceType.DATA)
+    private _dataService: DataService,
   ) {
     this.windowMap.set(WindowType.Feedback, new FeedbackWindow());
     this.windowMap.set(WindowType.ProjectId, new ProjectIdWindow());

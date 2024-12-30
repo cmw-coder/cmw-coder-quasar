@@ -1,19 +1,20 @@
 <script setup lang="ts">
+import { DateTime } from 'luxon';
+import { useQuasar } from 'quasar';
 import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import ProjectIdInput from 'components/ProjectIdInput.vue';
-import { WindowType } from 'shared/types/WindowType';
-import { useService } from 'utils/common';
 import { ServiceType } from 'shared/types/service';
-import { useQuasar } from 'quasar';
-import { DateTime } from 'luxon';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
+
+import ProjectIdInput from 'components/ProjectIdInput.vue';
+import { useService } from 'utils/common';
 
 const { t } = useI18n();
 
 const { notify } = useQuasar();
 
-const dataStoreService = useService(ServiceType.DATA_STORE);
+const dataStoreService = useService(ServiceType.DATA);
 const windowService = useService(ServiceType.WINDOW);
 
 const i18n = (relativePath: string, data?: Record<string, unknown>) => {

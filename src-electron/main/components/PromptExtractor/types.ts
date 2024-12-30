@@ -19,7 +19,7 @@ import {
 } from 'shared/types/common';
 import { ServiceType } from 'shared/types/service';
 import { CompletionGenerateClientMessage } from 'shared/types/WsMessage';
-import { TemplateType } from 'shared/types/service/DataStoreServiceTrait/types';
+import { TemplateType } from 'shared/types/service/DataServiceTrait/types';
 
 export class PromptElements {
   private readonly _isInsideFunction: boolean;
@@ -60,7 +60,7 @@ export class PromptElements {
 
   async stringify(completionType: CompletionType) {
     const activeModelContent = await getService(
-      ServiceType.DATA_STORE,
+      ServiceType.DATA,
     ).getActiveModelContent();
     let promptString: string;
     switch (this.generateType) {

@@ -1,38 +1,27 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { onMounted, ref } from 'vue';
 
-import {
-  COMPLETION_CONFIG_BOOLEAN_CONSTANTS,
-  COMPLETION_CONFIG_NUMBER_CONSTANTS,
-} from 'shared/constants/config';
 import { ServiceType } from 'shared/types/service';
 import {
-  AppCompletionBooleanConfig,
-  AppCompletionNumberConfig,
-  AppConfig,
-} from 'shared/types/service/ConfigServiceTrait/types';
-import { SettingSyncServerMessage } from 'shared/types/WsMessage';
+  DEFAULT_CONFIG_BASE,
+  NUMBER_CONFIG_CONSTRAINTS,
+} from 'shared/types/service/ConfigServiceTrait/constants';
+import { EditorConfigServerMessage } from 'shared/types/WsMessage';
+
+import ItemNumber, {
+  Props as NumberProps,
+} from 'components/ItemNumberInput.vue';
 import {
   api_getProductLineQuestionTemplateFile,
   api_getUserTemplateList,
 } from 'src/request/api';
-import { sleep, useService } from 'utils/common';
+import { i18nSubPath, sleep, useService } from 'utils/common';
 
-const baseName = 'components.SettingCards.CompletionCard.';
 
-const { t } = useI18n();
-
-const i18n = (relativePath: string, data?: Record<string, unknown>) => {
-  if (data) {
-    return t(baseName + relativePath, data);
-  } else {
-    return t(baseName + relativePath);
-  }
-};
+const baseName = 'components.SettingCards.CompletionCard';
 
 const configService = useService(ServiceType.CONFIG);
-const dataStoreService = useService(ServiceType.DATA_STORE);
+const dataStoreService = useService(ServiceType.DATA);
 const websocketService = useService(ServiceType.WEBSOCKET);
 
 const productLineList = ref<string[]>([]);

@@ -1,31 +1,37 @@
-import { app, BrowserWindow, ipcMain, Menu } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  IpcMainInvokeEvent,
+  ipcMain,
+  Menu,
+} from 'electron';
 import { globalShortcut } from 'electron/main';
 import log from 'electron-log/main';
 import { inject, injectable } from 'inversify';
 import { DateTime } from 'luxon';
-import { Job, scheduleJob } from 'node-schedule';
+import { exit } from 'node:process';
+import { scheduleJob } from 'node-schedule';
 import { release, version } from 'os';
 
 import { container } from 'main/services';
 import { ConfigService } from 'main/services/ConfigService';
-import { DataStoreService } from 'main/services/DataStoreService';
+import { DataService } from 'main/services/DataService';
 import { UpdaterService } from 'main/services/UpdaterService';
 import { WebsocketService } from 'main/services/WebsocketService';
 import { WindowService } from 'main/services/WindowService';
+
 import { registerAction, triggerAction } from 'preload/types/ActionApi';
 import {
   ControlMessage,
   triggerControlCallback,
 } from 'preload/types/ControlApi';
+
 import { ACTION_API_KEY, CONTROL_API_KEY } from 'shared/constants/common';
-import { SERVICE_CALL_KEY, ServiceType } from 'shared/types/service';
 import { ActionMessage, ActionType } from 'shared/types/ActionMessage';
-import { NetworkZone } from 'shared/config';
-import { WindowType } from 'shared/types/WindowType';
+import { SERVICE_CALL_KEY, ServiceType } from 'shared/types/service';
 import { AppServiceTrait } from 'shared/types/service/AppServiceTrait';
-import * as process from 'node:process';
-import * as Electron from 'electron';
-import { getProjectData } from 'main/utils/completion';
+import { NetworkZone } from 'shared/types/service/ConfigServiceTrait/types';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
 
 interface AbstractServicePort {
   [key: string]: ((...args: unknown[]) => Promise<unknown>) | undefined;
@@ -44,8 +50,8 @@ export class AppService implements AppServiceTrait {
     private _updaterService: UpdaterService,
     @inject(ServiceType.CONFIG)
     private _configService: ConfigService,
-    @inject(ServiceType.DATA_STORE)
-    private _dataStoreService: DataStoreService,
+    @inject(ServiceType.DATA)
+    private _dataStoreService: DataService,
   ) {}
 
   init() {
@@ -84,7 +90,7 @@ export class AppService implements AppServiceTrait {
     Menu.setApplicationMenu(null);
     if (!app.requestSingleInstanceLock()) {
       app.quit();
-      process.exit(-1);
+      exit(-1);
     }
     app.setLoginItemSettings({
       openAtLogin: true,
@@ -172,7 +178,7 @@ export class AppService implements AppServiceTrait {
 
       // 创建主界面
       this._windowService.getWindow(WindowType.Main).create();
-      if (this._dataStoreService.getAppdata().window.Main.show) {
+      if (this._dataStoreService.getStoreSync().window.Main.show) {
         this._windowService.getWindow(WindowType.Main).show();
       }
     });
@@ -203,7 +209,7 @@ export class AppService implements AppServiceTrait {
     ipcMain.handle(
       SERVICE_CALL_KEY,
       <T extends ServiceType>(
-        _: Electron.IpcMainInvokeEvent,
+        _: IpcMainInvokeEvent,
         serviceName: T,
         functionName: string,
         ...payloads: unknown[]

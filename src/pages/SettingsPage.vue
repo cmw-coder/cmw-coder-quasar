@@ -1,21 +1,22 @@
 <script setup lang="ts">
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+
+import { ActionType } from 'shared/types/ActionMessage';
+import { MainWindowPageType } from 'shared/types/MainWindowPageType';
+import { ServiceType } from 'shared/types/service';
 
 import CompletionCard from 'components/SettingCards/CompletionCard.vue';
 import GeneralCard from 'components/SettingCards/GeneralCard.vue';
 import UpdateCard from 'components/SettingCards/UpdateCard.vue';
-import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { ActionApi } from 'types/ActionApi';
-import { ActionType } from 'shared/types/ActionMessage';
-import { MainWindowPageType } from 'shared/types/MainWindowPageType';
-import { ServiceType } from 'shared/types/service';
 import { useService } from 'utils/common';
 
 const baseName = 'pages.SettingPage.';
 const projectMoveNoticeId = 'projectMoveNotice';
 
 const { t } = useI18n();
-const dataStoreService = useService(ServiceType.DATA_STORE);
+const dataStoreService = useService(ServiceType.DATA);
 const windowService = useService(ServiceType.WINDOW);
 
 const dismissed = ref(false);
@@ -40,7 +41,7 @@ onMounted(async () => {
       windowService.setMainWindowPageReady(MainWindowPageType.Setting);
     }
   });
-  const { notice } = await dataStoreService.getAppDataAsync();
+  const { notice } = await dataStoreService.getStoreAsync();
   dismissed.value = notice.dismissed.includes(baseName + projectMoveNoticeId);
 });
 onBeforeUnmount(() => {

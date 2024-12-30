@@ -1,11 +1,11 @@
-import { DataProjectType } from 'main/stores/data/types';
 import { SimilarSnippet } from 'shared/types/common';
+import { ProjectData } from 'shared/types/service/DataServiceTrait/types';
 import { ClientInfo } from 'main/services/WebsocketService/types';
 
 export interface WebsocketServiceTrait {
   getCurrentFile(): Promise<string | undefined>;
 
-  getProjectData(): Promise<DataProjectType | undefined>;
+  getLastActivateProjectData(): Promise<ProjectData | undefined>;
 
   getSimilarSnippets(
     character: number,

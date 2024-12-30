@@ -3,8 +3,14 @@ import log from 'electron-log';
 import { resolve } from 'path';
 
 import { container } from 'main/services';
-import { DataStoreService } from 'main/services/DataStoreService';
+import { DataService } from 'main/services/DataService';
 import { BaseWindow } from 'main/services/WindowService/types/BaseWindow';
+import { DiffSubprocess } from 'main/services/WindowService/types/CompletionsWindow/DiffSubprocess';
+import { SimilarSnippetsProcess } from 'main/services/WindowService/types/CompletionsWindow/SimilarSnippetsSubprocess';
+import { FileStructureAnalysisProcess } from 'main/services/WindowService/types/CompletionsWindow/FileStructureAnalysisProcessSubprocess';
+import { timeout } from 'main/utils/common';
+import { getFontSize } from 'main/utils/completion';
+
 import { NEW_LINE_REGEX } from 'shared/constants/common';
 import {
   CompletionClearActionMessage,
@@ -13,12 +19,7 @@ import {
 } from 'shared/types/ActionMessage';
 import { GenerateType } from 'shared/types/common';
 import { ServiceType } from 'shared/types/service';
-import { WindowType } from 'shared/types/WindowType';
-import { timeout } from 'main/utils/common';
-import { SimilarSnippetsProcess } from 'main/services/WindowService/types/CompletionsWindow/SimilarSnippetsSubprocess';
-import { FileStructureAnalysisProcess } from 'main/services/WindowService/types/CompletionsWindow/FileStructureAnalysisProcessSubprocess';
-import { DiffSubprocess } from 'main/services/WindowService/types/CompletionsWindow/DiffSubprocess';
-import { getFontSize } from 'main/utils/completion';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
 
 const RE_CREATE_TIME = 1000 * 60 * 30;
 
@@ -43,8 +44,8 @@ export class CompletionsWindow extends BaseWindow {
 
   constructor() {
     const { compatibility } = container
-      .get<DataStoreService>(ServiceType.DATA_STORE)
-      .getAppdata();
+      .get<DataService>(ServiceType.DATA)
+      .getStoreSync();
     super(WindowType.Completions, {
       width: compatibility.transparentFallback ? 0 : 3840,
       height: compatibility.transparentFallback ? 0 : 2160,
@@ -83,8 +84,8 @@ export class CompletionsWindow extends BaseWindow {
       return;
     }
     const { compatibility } = container
-      .get<DataStoreService>(ServiceType.DATA_STORE)
-      .getAppdata();
+      .get<DataService>(ServiceType.DATA)
+      .getStoreSync();
     this._window.setIgnoreMouseEvents(!compatibility.transparentFallback);
   }
 
@@ -109,8 +110,8 @@ export class CompletionsWindow extends BaseWindow {
     }
     if (this._window) {
       const { compatibility } = container
-        .get<DataStoreService>(ServiceType.DATA_STORE)
-        .getAppdata();
+        .get<DataService>(ServiceType.DATA)
+        .getStoreSync();
       const lines = completion.split(NEW_LINE_REGEX);
 
       let scale = 1;

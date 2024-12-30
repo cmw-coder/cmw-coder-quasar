@@ -4,13 +4,15 @@ import {
   screen,
 } from 'electron';
 import Logger from 'electron-log';
-import { ACTION_API_KEY, WINDOW_URL_MAPPING } from 'shared/constants/common';
-import { ServiceType } from 'shared/types/service';
-import { WindowType } from 'shared/types/WindowType';
-import { container } from 'main/services';
-import { DataStoreService } from 'main/services/DataStoreService';
-import { ActionMessageMapping } from 'shared/types/ActionMessage';
 import { resolve } from 'path';
+
+import { container } from 'main/services';
+import { DataService } from 'main/services/DataService';
+
+import { ACTION_API_KEY, WINDOW_URL_MAPPING } from 'shared/constants/common';
+import { ActionMessageMapping } from 'shared/types/ActionMessage';
+import { ServiceType } from 'shared/types/service';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
 
 export interface windowOptions extends BrowserWindowConstructorOptions {
   useEdgeHide?: boolean;
@@ -95,8 +97,8 @@ export abstract class BaseWindow {
     if (!this._window) {
       return;
     }
-    const dataStoreService = container.get<DataStoreService>(
-      ServiceType.DATA_STORE,
+    const dataStoreService = container.get<DataService>(
+      ServiceType.DATA,
     );
     const windowData = dataStoreService.getWindowData(this._type);
     dataStoreService.saveWindowData(this._type, {
@@ -164,8 +166,8 @@ export abstract class BaseWindow {
     //   this.edgeShow();
     // }
 
-    const dataStoreService = container.get<DataStoreService>(
-      ServiceType.DATA_STORE,
+    const dataStoreService = container.get<DataService>(
+      ServiceType.DATA,
     );
 
     const storedWindowData = dataStoreService.getWindowData(this._type);
@@ -221,8 +223,8 @@ export abstract class BaseWindow {
     }
     const [x, y] = this._window.getPosition();
     if (this.options?.storePosition) {
-      const dataStoreService = container.get<DataStoreService>(
-        ServiceType.DATA_STORE,
+      const dataStoreService = container.get<DataService>(
+        ServiceType.DATA,
       );
       const windowData = dataStoreService.getWindowData(this._type);
       windowData.x = x;
@@ -279,8 +281,8 @@ export abstract class BaseWindow {
 
   toggleFixed() {
     if (!this._window) return;
-    const dataStoreService = container.get<DataStoreService>(
-      ServiceType.DATA_STORE,
+    const dataStoreService = container.get<DataService>(
+      ServiceType.DATA,
     );
     const windowData = dataStoreService.getWindowData(this._type);
     windowData.fixed = !windowData.fixed;

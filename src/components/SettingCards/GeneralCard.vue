@@ -5,14 +5,20 @@ import { onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
-import ItemToggle, { Props as ToggleProps } from 'components/ItemToggle.vue';
-import ItemNumber, { Props as NumberProps } from 'components/ItemNumber.vue';
-import { WindowType } from 'shared/types/WindowType';
 import { ServiceType } from 'shared/types/service';
-import messages from 'src/i18n';
-import { sleep, useService } from 'utils/common';
-import { defaultAppData } from 'shared/types/service/DataStoreServiceTrait/types';
-import { APPDATA_NUMBER_CONSTANTS } from 'shared/constants/config';
+import {
+  DEFAULT_CONFIG_BASE,
+  NUMBER_CONFIG_CONSTRAINTS,
+} from 'shared/types/service/ConfigServiceTrait/constants';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
+import { EditorConfigServerMessage } from 'shared/types/WsMessage';
+
+import ItemNumber, {
+  Props as NumberProps,
+} from 'components/ItemNumberInput.vue';
+import ItemToggle, { Props as ToggleProps } from 'components/ItemToggle.vue';
+import { messages } from 'src/i18n';
+import { i18nSubPath, sleep, useService } from 'utils/common';
 
 interface Locale {
   isoName: string;
@@ -44,23 +50,30 @@ const themes: Theme[] = [
   },
 ];
 
-const baseName = 'components.SettingCards.GeneralCard.';
+const baseName = 'components.SettingCards.GeneralCard';
 
 const appService = useService(ServiceType.App);
 const configService = useService(ServiceType.CONFIG);
-const dataStoreService = useService(ServiceType.DATA_STORE);
+const dataStoreService = useService(ServiceType.DATA);
+const websocketService = useService(ServiceType.WEBSOCKET);
 const windowService = useService(ServiceType.WINDOW);
 
-const { locale, t } = useI18n({ useScope: 'global' });
+const { locale } = useI18n({ useScope: 'global' });
 const { lang } = useQuasar();
 const { push } = useRouter();
 
-const i18n = (relativePath: string, data?: Record<string, unknown>) => {
-  if (data) {
-    return t(baseName + relativePath, data);
-  } else {
-    return t(baseName + relativePath);
-  }
+const i18n = i18nSubPath(baseName);
+
+const updateNumberConfig = async (key: string, value: number) => {
+  await configService.set(`generic.${key}`, value);
+  websocketService.send(
+    JSON.stringify(
+      new EditorConfigServerMessage({
+        result: 'success',
+        generic: { [key]: value },
+      }),
+    ),
+  );
 };
 
 const numberSettings: NumberProps[] = [

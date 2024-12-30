@@ -5,7 +5,7 @@ import {
 import packageJson from 'root/package.json';
 import { ServiceType } from 'shared/types/service';
 import { container } from 'main/services';
-import { DataStoreService } from 'main/services/DataStoreService';
+import { DataService } from 'main/services/DataService';
 import { StatisticsService } from 'main/services/StatisticsService';
 import { svnPath } from 'main/services/SvnService/constants';
 import { NEW_LINE_REGEX } from 'shared/constants/common';
@@ -51,10 +51,10 @@ export const getAddedLines = async (path: string, revision: number) => {
  * @deprecated
  */
 export const reportProjectAdditions = async () => {
-  const dataStoreService = container.get<DataStoreService>(
-    ServiceType.DATA_STORE,
+  const dataStoreService = container.get<DataService>(
+    ServiceType.DATA,
   );
-  const appData = dataStoreService.getAppdata();
+  const appData = dataStoreService.getStoreSync();
   const statisticsReporterService = container.get<StatisticsService>(
     ServiceType.STATISTICS,
   );

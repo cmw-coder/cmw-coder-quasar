@@ -2,10 +2,10 @@ import { SelectionData, ExtraData } from 'cmw-coder-subprocess';
 
 import { container } from 'main/services';
 import { ConfigService } from 'main/services/ConfigService';
-import { DataStoreService } from 'main/services/DataStoreService';
+import { DataService } from 'main/services/DataService';
 import { BaseWindow } from 'main/services/WindowService/types/BaseWindow';
 import { ServiceType } from 'shared/types/service';
-import { WindowType } from 'shared/types/WindowType';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
 
 const WINDOW_HEIGHT = 34;
 const WINDOW_WIDTH = 540;
@@ -16,8 +16,8 @@ export class SelectionTipsWindow extends BaseWindow {
 
   constructor() {
     const { compatibility } = container
-      .get<DataStoreService>(ServiceType.DATA_STORE)
-      .getAppdata();
+      .get<DataService>(ServiceType.DATA)
+      .getStoreSync();
     super(WindowType.SelectionTips, {
       useContentSize: true,
       resizable: false,
@@ -46,15 +46,12 @@ export class SelectionTipsWindow extends BaseWindow {
   ) {
     this.selectionData = selectionData;
     this.extraData = extraData;
-    const configService = container.get<ConfigService>(ServiceType.CONFIG);
-    let showSelectedTipsWindow = await configService.getConfig(
-      'showSelectedTipsWindow',
-    );
-    if (showSelectedTipsWindow === undefined) {
-      await configService.setConfig('showSelectedTipsWindow', true);
-      showSelectedTipsWindow = true;
-    }
-    if (showSelectedTipsWindow) {
+    if (
+      container
+        .get<ConfigService>(ServiceType.CONFIG)
+        .store.get('showSelectedTipsWindow') ??
+      true
+    ) {
       this.show({
         x: position.x,
         y: position.y,

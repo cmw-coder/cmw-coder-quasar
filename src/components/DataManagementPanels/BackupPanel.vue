@@ -2,15 +2,16 @@
 import { Dialog, Notify, useQuasar } from 'quasar';
 import { onMounted, onUnmounted, ref } from 'vue';
 
-import CodeViewDialog from 'components/CodeViewDialog.vue';
 import { ServiceType } from 'shared/types/service';
-import { AppData } from 'shared/types/service/DataStoreServiceTrait/types';
+import { AppData } from 'shared/types/service/DataServiceTrait/types';
+
+import CodeViewDialog from 'components/CodeViewDialog.vue';
 import { getLastDirName, i18nSubPath, useService } from 'utils/common';
 
 const baseName = 'components.DataManagementPanels.BackupPanel';
 
 const { dark, dialog } = useQuasar();
-const dataStoreService = useService(ServiceType.DATA_STORE);
+const dataStoreService = useService(ServiceType.DATA);
 
 const backups = ref<Omit<AppData['backup'], 'intervalMinutes'>>();
 const loading = ref(false);
@@ -74,7 +75,7 @@ const restoreBackup = async (type: 'current' | 'previous', index: number) => {
 
 const refreshBackupData = async () => {
   loading.value = true;
-  const { backup } = await dataStoreService.getAppDataAsync();
+  const { backup } = await dataStoreService.getStoreAsync();
   backups.value = {
     current: backup.current,
     previous: backup.previous,
