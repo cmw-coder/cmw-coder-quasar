@@ -33,12 +33,7 @@ defaultStoreData.compatibility.transparentFallback =
   parseInt(release().split('.')[0]) < 10;
 
 @injectable()
-export class DataStoreService implements DataStoreServiceTrait {
-  /**
-   * @deprecated
-   */
-  dataStoreBefore1_2_0 = new DataStoreBefore1_2_0();
-
+export class DataService implements DataServiceTrait {
   private _activeModelContent: ModelConfig = extend<ModelConfig>(
     true,
     {},
@@ -132,18 +127,18 @@ export class DataStoreService implements DataStoreServiceTrait {
     this._appDataStore.set('window', windowData);
   }
 
-  async getAppDataAsync() {
+  async getStoreAsync() {
     return this._appDataStore.store;
   }
 
-  async setAppDataAsync<T extends keyof AppData>(
+  async setStoreAsync<T extends keyof AppData>(
     key: T,
     value: AppData[T],
   ): Promise<void> {
     this._appDataStore.set(key, value);
   }
 
-  getAppdata() {
+  getStoreSync() {
     return this._appDataStore.store;
   }
 

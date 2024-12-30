@@ -1,6 +1,6 @@
 import { ExtensionConfig } from 'shared/types/ExtensionMessageDetails';
 import { ChatFileContent, ChatItem } from 'shared/types/ChatMessage';
-import { type ModelConfig } from 'shared/types/service/DataStoreServiceTrait/types';
+import { type ModelConfig } from 'shared/types/service/DataServiceTrait/types';
 
 export enum UiToExtensionCommand {
   GET_CONFIG = 'GET_CONFIG',

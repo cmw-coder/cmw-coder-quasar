@@ -3,7 +3,9 @@ import { QStepper, useQuasar } from 'quasar';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { defaultServerUrlMap, NetworkZone } from 'shared/config';
+import { DEFAULT_SERVER_URL_MAP } from 'shared/types/service/ConfigServiceTrait/constants';
+import { NetworkZone } from 'shared/types/service/ConfigServiceTrait/types';
+
 import { checkUrlAccessible } from 'utils/common';
 
 const baseName = 'components.WelcomePanels.ManualPanel.';
@@ -40,7 +42,7 @@ const stepper = ref<QStepper>();
 const nextHandle = async () => {
   switch (step.value) {
     case 0: {
-      serverUrl.value = defaultServerUrlMap[networkZone.value];
+      serverUrl.value = DEFAULT_SERVER_URL_MAP[networkZone.value];
       stepper.value?.next();
       break;
     }

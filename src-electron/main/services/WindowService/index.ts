@@ -9,13 +9,12 @@ import log from 'electron-log/main';
 import { inject, injectable } from 'inversify';
 import { DateTime } from 'luxon';
 import { dirname } from 'path';
-// Main types
+
 import { TrayIcon } from 'main/components/TrayIcon';
 import { MenuEntry } from 'main/components/TrayIcon/types';
 import { api_reportSKU } from 'main/request/sku';
 import { ConfigService } from 'main/services/ConfigService';
 import { DataService } from 'main/services/DataService';
-// Main service window types
 import { BaseWindow } from 'main/services/WindowService/types/BaseWindow';
 import { CompletionsWindow } from 'main/services/WindowService/types/CompletionsWindow';
 import { FeedbackWindow } from 'main/services/WindowService/types/FeedbackWindow';
@@ -26,7 +25,7 @@ import { SelectionTipsWindow } from 'main/services/WindowService/types/Selection
 import { StatusWindow } from 'main/services/WindowService/types/StatusWindow';
 import { UpdateWindow } from 'main/services/WindowService/types/UpdateWindow';
 import { WelcomeWindow } from 'main/services/WindowService/types/WelcomeWindow';
-// Shared types
+
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import { ServiceType } from 'shared/types/service';
 import { NetworkZone } from 'shared/types/service/ConfigServiceTrait/types';

@@ -1,8 +1,9 @@
 import { AxiosProgressEvent } from 'axios';
 
 import request, { streamRequest } from 'main/request';
+
 import { Answer, QuestionParams } from 'shared/types/api';
-import { ModelConfigMap } from 'shared/types/service/DataStoreServiceTrait/types';
+import { ModelConfigMap } from 'shared/types/service/DataServiceTrait/types';
 
 export const api_refreshToken = (refreshToken: string) =>
   request<{

@@ -1,22 +1,20 @@
 import log from 'electron-log/main';
 import ElectronStore from 'electron-store';
 import { injectable } from 'inversify';
-import { userInfo } from 'os';
-import { extend } from 'quasar';
+
 import { container } from 'main/services';
 import { WindowService } from 'main/services/WindowService';
-import { LinseerConfigStore } from 'main/stores/config';
-import { NetworkZone, defaultAppConfigNetworkZoneMap } from 'shared/config';
-import {
-  COMPLETION_CONFIG_BOOLEAN_CONSTANTS,
-  COMPLETION_CONFIG_NUMBER_CONSTANTS,
-} from 'shared/constants/config';
+
 import {
   SwitchLocaleActionMessage,
   ToggleDarkModeActionMessage,
 } from 'shared/types/ActionMessage';
 import { ServiceType } from 'shared/types/service';
 import { ConfigServiceTrait } from 'shared/types/service/ConfigServiceTrait';
+import {
+  DEFAULT_CONFIG_BASE,
+  DEFAULT_CONFIG_MAP,
+} from 'shared/types/service/ConfigServiceTrait/constants';
 import { AppConfig } from 'shared/types/service/ConfigServiceTrait/types';
 
 const defaultStoreData = extend<AppConfig>(
