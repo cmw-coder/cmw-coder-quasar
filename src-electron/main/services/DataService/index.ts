@@ -16,10 +16,12 @@ import { getRevision } from 'main/utils/svn';
 import { ChatFileContent } from 'shared/types/ChatMessage';
 import { ServiceType } from 'shared/types/service';
 import { DataServiceTrait } from 'shared/types/service/DataServiceTrait';
-import { defaultModelConfig } from 'shared/types/service/DataServiceTrait/constants';
+import {
+  DEFAULT_APP_DATA,
+  DEFAULT_MODEL_CONFIG,
+} from 'shared/types/service/DataServiceTrait/constants';
 import {
   AppData,
-  defaultAppData,
   ModelConfig,
   ModelConfigMap,
   ProjectData,
@@ -27,7 +29,7 @@ import {
 } from 'shared/types/service/DataServiceTrait/types';
 import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
 
-const defaultStoreData = extend<AppData>(true, {}, defaultAppData);
+const defaultStoreData = extend<AppData>(true, {}, DEFAULT_APP_DATA);
 
 defaultStoreData.compatibility.transparentFallback =
   parseInt(release().split('.')[0]) < 10;
@@ -37,7 +39,7 @@ export class DataService implements DataServiceTrait {
   private _activeModelContent: ModelConfig = extend<ModelConfig>(
     true,
     {},
-    defaultModelConfig,
+    DEFAULT_MODEL_CONFIG,
   );
   private _appDataStore = new ElectronStore<AppData>({
     name: 'appData',
@@ -48,7 +50,7 @@ export class DataService implements DataServiceTrait {
         const appData = store.store;
         if (!appData.window[WindowType.SelectionTips]) {
           appData.window[WindowType.SelectionTips] =
-            defaultAppData.window[WindowType.SelectionTips];
+            DEFAULT_APP_DATA.window[WindowType.SelectionTips];
         }
         store.set('window', appData.window);
       },
@@ -68,7 +70,7 @@ export class DataService implements DataServiceTrait {
         log.info('Upgrading "appData" store to 1.5.0 ...');
         const appData = store.store;
         if (!appData.backup) {
-          appData.backup = defaultAppData.backup;
+          appData.backup = DEFAULT_APP_DATA.backup;
         }
         store.set('backup', appData.backup);
       },
@@ -95,8 +97,7 @@ export class DataService implements DataServiceTrait {
   async scheduleJobUpdateActiveModelContent() {
     try {
       log.info('DataStoreService.scheduleJob.updateActiveModelContent');
-      let { activeModel, activeModelKey } =
-        this._configService.store.store;
+      let { activeModel, activeModelKey } = this._configService.store.store;
       await this._updateCurrentQuestionTemplateFile();
       if (!this._currentQuestionTemplateFile) {
         return;

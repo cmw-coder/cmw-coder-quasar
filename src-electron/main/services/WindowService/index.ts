@@ -13,6 +13,7 @@ import { dirname } from 'path';
 import { TrayIcon } from 'main/components/TrayIcon';
 import { MenuEntry } from 'main/components/TrayIcon/types';
 import { api_reportSKU } from 'main/request/sku';
+import { getService } from 'main/services';
 import { ConfigService } from 'main/services/ConfigService';
 import { DataService } from 'main/services/DataService';
 import { BaseWindow } from 'main/services/WindowService/types/BaseWindow';
@@ -29,10 +30,9 @@ import { WelcomeWindow } from 'main/services/WindowService/types/WelcomeWindow';
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import { ServiceType } from 'shared/types/service';
 import { NetworkZone } from 'shared/types/service/ConfigServiceTrait/types';
-import { defaultAppData } from 'shared/types/service/DataServiceTrait/types';
+import { DEFAULT_APP_DATA } from 'shared/types/service/DataServiceTrait/constants';
 import { WindowServiceTrait } from 'shared/types/service/WindowServiceTrait';
 import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
-import { getService } from 'main/services';
 
 interface WindowMap {
   [WindowType.Completions]: CompletionsWindow;
@@ -146,7 +146,7 @@ export class WindowService implements WindowServiceTrait {
       window = BrowserWindow.getFocusedWindow();
     }
     if (window) {
-      const defaultWindowSize = defaultAppData.window[type];
+      const defaultWindowSize = DEFAULT_APP_DATA.window[type];
       window.setSize(
         defaultWindowSize.width || 600,
         defaultWindowSize.height || 800,

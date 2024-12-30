@@ -1,6 +1,73 @@
-import { ModelConfig } from 'shared/types/service/DataServiceTrait/types';
+import { AppData, ModelConfig } from 'shared/types/service/DataServiceTrait/types';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
 
-export const defaultModelConfig: ModelConfig = {
+export const DEFAULT_APP_DATA: AppData = {
+  backup: {},
+  compatibility: {
+    transparentFallback: false,
+    zoomFix: false,
+  },
+  notice: {
+    dismissed: [],
+  },
+  project: {},
+  window: {
+    [WindowType.Completions]: {
+      height: 0,
+      width: 0,
+      show: false,
+    },
+    [WindowType.Login]: {
+      height: 600,
+      width: 800,
+      show: false,
+    },
+    [WindowType.Main]: {
+      height: 1300,
+      width: 780,
+      show: false,
+    },
+    [WindowType.Quake]: {
+      height: 600,
+      width: 800,
+      show: false,
+    },
+    [WindowType.Welcome]: {
+      height: 600,
+      width: 800,
+      show: false,
+    },
+    [WindowType.ProjectId]: {
+      height: 600,
+      width: 800,
+      show: false,
+    },
+    [WindowType.Feedback]: {
+      height: 800,
+      width: 800,
+      show: false,
+    },
+    [WindowType.Update]: {
+      height: 800,
+      width: 800,
+      show: false,
+    },
+    [WindowType.SelectionTips]: {
+      height: 34,
+      width: 455,
+      show: false,
+    },
+    [WindowType.Status]: {
+      height: 32,
+      width: 200,
+      show: false,
+      x: 200,
+      y: 0,
+    },
+  },
+};
+
+export const DEFAULT_MODEL_CONFIG: ModelConfig = {
   template: {
     CodeAddComment:
       '请为以下 %{language}% 代码添加注释，请用中文回答，代码段用 markdown 格式返回\n%{code}%',

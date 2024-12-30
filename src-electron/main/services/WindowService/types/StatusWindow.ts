@@ -1,9 +1,9 @@
 import { FloatingBaseWindow } from 'main/services/WindowService/types/FloatingBaseWindow';
 
-import { defaultAppData } from 'shared/types/service/DataServiceTrait/types';
+import { DEFAULT_APP_DATA } from 'shared/types/service/DataServiceTrait/constants';
 import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
 
-const defaultData = defaultAppData.window[WindowType.Status];
+const defaultData = DEFAULT_APP_DATA.window[WindowType.Status];
 
 export class StatusWindow extends FloatingBaseWindow {
   constructor() {

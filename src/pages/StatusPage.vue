@@ -5,7 +5,7 @@ import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { ActionType } from 'shared/types/ActionMessage';
 import { CompletionStatus, CompletionStatusData } from 'shared/types/common';
 import { ServiceType } from 'shared/types/service';
-import { defaultAppData } from 'shared/types/service/DataServiceTrait/types';
+import { DEFAULT_APP_DATA } from 'shared/types/service/DataServiceTrait/constants';
 import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
 
 import { ActionApi } from 'types/ActionApi';
@@ -17,11 +17,22 @@ const { changeAlpha, getPaletteColor } = colors;
 
 const colorMap = {
   [CompletionStatus.Standby]: 'transparent',
-  [CompletionStatus.Prompting]: changeAlpha(getPaletteColor('orange') ?? '', 0.7),
-  [CompletionStatus.Requesting]: changeAlpha(getPaletteColor('primary') ?? '', 0.7),
+  [CompletionStatus.Prompting]: changeAlpha(
+    getPaletteColor('orange') ?? '',
+    0.7,
+  ),
+  [CompletionStatus.Requesting]: changeAlpha(
+    getPaletteColor('primary') ?? '',
+    0.7,
+  ),
   [CompletionStatus.Empty]: changeAlpha(getPaletteColor('purple') ?? '', 0.7),
-  [CompletionStatus.Failed]: changeAlpha(getPaletteColor('negative') ?? '', 0.7),
+  [CompletionStatus.Failed]: changeAlpha(
+    getPaletteColor('negative') ?? '',
+    0.7,
+  ),
 };
+const defaultWidth = DEFAULT_APP_DATA.window[WindowType.Status].width ?? 200;
+const defaultHeight = DEFAULT_APP_DATA.window[WindowType.Status].height ?? 32;
 
 const { dark } = useQuasar();
 const windowService = useService(ServiceType.WINDOW);
@@ -41,8 +52,16 @@ onMounted(() => {
     if (statusData.value.status === CompletionStatus.Failed) {
       await windowService.setWindowSize(
         {
-          width: defaultAppData.window[WindowType.Status].width ?? 200,
-          height: 80 + statusData.value.detail.split('\n').length * 24,
+          width: defaultWidth,
+          height: 80 + statusData.value.detail.split('\n').length * 32,
+        },
+        WindowType.Status,
+      );
+    } else {
+      await windowService.setWindowSize(
+        {
+          width: defaultWidth,
+          height: defaultHeight,
         },
         WindowType.Status,
       );
@@ -56,7 +75,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <q-page class="column q-gutter-y-xs">
+  <q-page class="column q-gutter-y-xs" :style="{ maxWidth: defaultWidth }">
     <q-bar
       class="q-electron-drag rounded-borders"
       :style="{
