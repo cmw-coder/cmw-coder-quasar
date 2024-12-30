@@ -6,7 +6,7 @@ import {
 } from 'cmw-coder-subprocess';
 
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
-import { WindowType } from 'shared/types/WindowType';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
 
 export interface WindowServiceTrait {
   finishLogin(): Promise<void>;

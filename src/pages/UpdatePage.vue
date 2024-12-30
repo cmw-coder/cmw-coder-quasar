@@ -8,10 +8,11 @@ import {
   UpdateFinishActionMessage,
   UpdateDownloadActionMessage,
 } from 'shared/types/ActionMessage';
-import { WindowType } from 'shared/types/WindowType';
+import { ServiceType } from 'shared/types/service';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
+
 import { ActionApi } from 'types/ActionApi';
 import { useService } from 'utils/common';
-import { ServiceType } from 'shared/types/service';
 
 const baseName = 'pages.UpdatePage.';
 

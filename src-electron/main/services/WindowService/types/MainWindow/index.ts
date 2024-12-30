@@ -1,13 +1,15 @@
 import { resolve } from 'path';
+
 import { BaseWindow } from 'main/services/WindowService/types/BaseWindow';
-import { WindowType } from 'shared/types/WindowType';
-import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import { BasePage } from 'main/services/WindowService/types/MainWindow/pages/BasePage';
 import { ChatPage } from 'main/services/WindowService/types/MainWindow/pages/ChatPage';
 import { CommitPage } from 'main/services/WindowService/types/MainWindow/pages/CommitPage';
 import { ReviewPage } from 'main/services/WindowService/types/MainWindow/pages/ReviewPage';
-import { WorkFlowPage } from 'main/services/WindowService/types/MainWindow/pages/WorkFlowPage';
 import { SettingPage } from 'main/services/WindowService/types/MainWindow/pages/SettingPage';
+import { WorkFlowPage } from 'main/services/WindowService/types/MainWindow/pages/WorkFlowPage';
+
+import { MainWindowPageType } from 'shared/types/MainWindowPageType';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
 
 interface PageMap {
   [MainWindowPageType.Chat]: ChatPage;

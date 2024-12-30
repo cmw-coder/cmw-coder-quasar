@@ -4,12 +4,13 @@ import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
+import { ServiceType } from 'shared/types/service';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
+
 import packageJson from 'app/package.json';
 import AccountInput from 'components/AccountInput.vue';
-import { WindowType } from 'shared/types/WindowType';
 import { api_feedback } from 'src/request/api';
 import { useService } from 'utils/common';
-import { ServiceType } from 'shared/types/service';
 
 const baseName = 'pages.FeedbackPage.';
 
@@ -88,7 +89,7 @@ const submit = async () => {
 };
 
 onMounted(async () => {
-  const appConfig = await configService.getConfigs();
+  const appConfig = await configService.getStore();
   userId.value = appConfig.username;
   baseUrl.value = appConfig.baseServerUrl;
 });

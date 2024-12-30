@@ -3,15 +3,13 @@ import { colors, useQuasar } from 'quasar';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 
 import { ActionType } from 'shared/types/ActionMessage';
+import { CompletionStatus, CompletionStatusData } from 'shared/types/common';
 import { ServiceType } from 'shared/types/service';
-import {
-  Status,
-  StatusData,
-} from 'shared/types/service/WindowServiceTrait/StatusWindowType';
+import { defaultAppData } from 'shared/types/service/DataServiceTrait/types';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
+
 import { ActionApi } from 'types/ActionApi';
 import { i18nSubPath, useService } from 'utils/common';
-import { WindowType } from 'shared/types/WindowType';
-import { defaultAppData } from 'shared/types/service/DataStoreServiceTrait/types';
 
 const baseName = 'pages.StatusPage';
 

@@ -1,7 +1,7 @@
 import { ipcRenderer } from 'electron';
 
 import { CONTROL_API_KEY } from 'shared/constants/common';
-import { WindowType } from 'shared/types/WindowType';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
 
 export enum ControlType {
   Close = 'Close',

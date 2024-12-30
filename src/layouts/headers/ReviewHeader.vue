@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
+
+import { ServiceType } from 'shared/types/service';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
 
 import { bus } from 'boot/bus';
-import { ServiceType } from 'shared/types/service';
-import { WindowType } from 'shared/types/WindowType';
 import { useService } from 'utils/common';
-import { useRouter } from 'vue-router';
 
 interface Props {
   leftDrawer?: {

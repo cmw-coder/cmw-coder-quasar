@@ -1,6 +1,7 @@
 import { FloatingBaseWindow } from 'main/services/WindowService/types/FloatingBaseWindow';
-import { defaultAppData } from 'shared/types/service/DataStoreServiceTrait/types';
-import { WindowType } from 'shared/types/WindowType';
+
+import { defaultAppData } from 'shared/types/service/DataServiceTrait/types';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
 
 const defaultData = defaultAppData.window[WindowType.Status];
 

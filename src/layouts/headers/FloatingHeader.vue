@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n';
 import { useQuasar } from 'quasar';
 import { PropType, onBeforeUnmount, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+
 import { ServiceType } from 'shared/types/service';
-import { WindowType } from 'shared/types/WindowType';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
+
 import { useService } from 'utils/common';
 
 type ControlType = 'defaultSize' | 'minimize' | 'toggleMaximize' | 'close';

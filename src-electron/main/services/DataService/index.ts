@@ -8,23 +8,24 @@ import {
   api_getProductLineQuestionTemplateFile,
   api_getUserTemplateList,
 } from 'main/request/api';
-import { DataStoreBefore1_2_0 } from 'main/stores/data';
-import { DataStoreServiceTrait } from 'shared/types/service/DataStoreServiceTrait';
-import { defaultModelConfig } from 'shared/types/service/DataStoreServiceTrait/constants';
+import { ConfigService } from 'main/services/ConfigService';
+import { LocalBackupManager } from 'main/services/DataService/LocalBackupManager';
+import { LocalChatManager } from 'main/services/DataService/LocalChatManager';
+import { getRevision } from 'main/utils/svn';
+
+import { ChatFileContent } from 'shared/types/ChatMessage';
+import { ServiceType } from 'shared/types/service';
+import { DataServiceTrait } from 'shared/types/service/DataServiceTrait';
+import { defaultModelConfig } from 'shared/types/service/DataServiceTrait/constants';
 import {
   AppData,
   defaultAppData,
   ModelConfig,
   ModelConfigMap,
+  ProjectData,
   WindowData,
-} from 'shared/types/service/DataStoreServiceTrait/types';
-import { WindowType } from 'shared/types/WindowType';
-import { ServiceType } from 'shared/types/service';
-import { getRevision } from 'main/utils/svn';
-import { ConfigService } from 'main/services/ConfigService';
-import { ChatFileContent } from 'shared/types/ChatMessage';
-import { LocalChatManager } from 'main/services/DataStoreService/LocalChatManager';
-import { LocalBackupManager } from 'main/services/DataStoreService/LocalBackupManager';
+} from 'shared/types/service/DataServiceTrait/types';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
 
 const defaultStoreData = extend<AppData>(true, {}, defaultAppData);
 

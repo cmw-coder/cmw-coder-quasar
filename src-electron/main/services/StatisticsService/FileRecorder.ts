@@ -1,11 +1,13 @@
+import { existsSync } from 'fs';
 import { readFile, stat } from 'fs/promises';
 import iconv from 'iconv-lite';
-import { container } from 'main/services';
-import { ServiceType } from 'shared/types/service';
-import { WindowService } from 'main/services/WindowService';
-import { WindowType } from 'shared/types/WindowType';
+
 import diffLog from 'main/components/Loggers/diffLog';
-import { existsSync } from 'fs';
+import { container } from 'main/services';
+import { WindowService } from 'main/services/WindowService';
+
+import { ServiceType } from 'shared/types/service';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
 
 const DESTROY_TIME = 1000 * 60 * 30;
 

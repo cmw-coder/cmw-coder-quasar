@@ -1,20 +1,25 @@
 import { createHash } from 'crypto';
+
+import completionLog from 'main/components/Loggers/completionLog';
+import completionQuestionLog from 'main/components/Loggers/completionQuestionLog';
 import { PromptElements } from 'main/components/PromptExtractor/types';
 import { LRUCache } from 'main/components/PromptProcessor/types';
 import {
   getCompletionType,
   processGeneratedSuggestions,
 } from 'main/components/PromptProcessor/utils';
-import { ServiceType } from 'shared/types/service';
 import { api_question } from 'main/request/api';
-import { Completions, CompletionType } from 'shared/types/common';
 import { container, getService } from 'main/services';
-import completionLog from 'main/components/Loggers/completionLog';
-import completionQuestionLog from 'main/components/Loggers/completionQuestionLog';
 import { WindowService } from 'main/services/WindowService';
-import { WindowType } from 'shared/types/WindowType';
+
 import { UpdateStatusActionMessage } from 'shared/types/ActionMessage';
-import { Status } from 'shared/types/service/WindowServiceTrait/StatusWindowType';
+import {
+  Completions,
+  CompletionStatus,
+  CompletionType,
+} from 'shared/types/common';
+import { ServiceType } from 'shared/types/service';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
 
 export class PromptProcessor {
   private _abortController?: AbortController;
