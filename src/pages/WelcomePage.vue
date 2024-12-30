@@ -3,11 +3,13 @@ import { useQuasar } from 'quasar';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import { ServiceType } from 'shared/types/service';
+import { DEFAULT_CONFIG_MAP } from 'shared/types/service/ConfigServiceTrait/constants';
+import { NetworkZone } from 'shared/types/service/ConfigServiceTrait/types';
+
 import AutoPanel from 'components/WelcomePanels/AutoPanel.vue';
 import FinishPanel from 'components/WelcomePanels/FinishPanel.vue';
 import ManualPanel from 'components/WelcomePanels/ManualPanel.vue';
-import { defaultAppConfigNetworkZoneMap, NetworkZone } from 'shared/config';
-import { ServiceType } from 'shared/types/service';
 import { useService } from 'utils/common';
 
 const baseName = 'pages.WelcomePage.';
@@ -38,20 +40,11 @@ const finishHandle = async (data: { url: string; zone: NetworkZone }) => {
   }
 };
 
-const updateConfig = async (url: string, zone: NetworkZone) => {
-  const originalAppConfig = await configService.getConfigs();
-  const defaultNetworkZoneAppConfig = defaultAppConfigNetworkZoneMap[zone];
-  originalAppConfig.networkZone = zone;
-  originalAppConfig.baseServerUrl = url;
-
-  originalAppConfig.activeTemplate = defaultNetworkZoneAppConfig.activeTemplate;
-  originalAppConfig.activeModel = defaultNetworkZoneAppConfig.activeModel;
-  originalAppConfig.activeModelKey = defaultNetworkZoneAppConfig.activeModelKey;
-  originalAppConfig.activeChat = defaultNetworkZoneAppConfig.activeChat;
-  originalAppConfig.completionConfigs =
-    defaultNetworkZoneAppConfig.completionConfigs;
-
-  await configService.setConfigs(originalAppConfig);
+const updateConfig = async (url: string, networkZone: NetworkZone) => {
+  await configService.setConfigs({
+    ...DEFAULT_CONFIG_MAP[networkZone],
+    baseServerUrl: url,
+  });
   await updaterService.init();
 };
 </script>

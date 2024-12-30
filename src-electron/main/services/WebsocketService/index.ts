@@ -614,7 +614,7 @@ export class WebsocketService implements WebsocketServiceTrait {
         if (isFocused !== undefined) {
           if (
             isFocused &&
-            (await this._configService.getConfig('showStatusWindow'))
+            (await this._configService.get('showStatusWindow'))
           ) {
             statusWindow.show(undefined, false);
           } else {

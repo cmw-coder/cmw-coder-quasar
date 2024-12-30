@@ -102,42 +102,11 @@ export class AppService implements AppServiceTrait {
     });
     app.whenReady().then(async () => {
       log.info('Comware Coder is ready');
-      // ========================
-      log.info('Migrate data from old data store (< 1.2.0)');
-      const oldProjectData =
-        this._dataStoreService.dataStoreBefore1_2_0.store.project;
-      const newProjectData = this._dataStoreService.getAppdata().project;
-      const oldProjectKeys = Object.keys(oldProjectData);
-      for (let i = 0; i < oldProjectKeys.length; i++) {
-        const key = oldProjectKeys[i];
-        if (newProjectData[key] === undefined) {
-          newProjectData[key] = {
-            ...oldProjectData[key],
-            isAutoManaged: true,
-          };
-        }
-      }
-      this._dataStoreService.setAppData('project', newProjectData);
-      // ========================
 
-      // ========================
-      log.info('Migrate data from old config store (< 1.2.0)');
-      const oldConfigData = this._configService.configStore.data;
-      if (
-        oldConfigData.tokens &&
-        oldConfigData.tokens.access &&
-        oldConfigData.tokens.refresh
-      ) {
-        await this._configService.setConfigs({
-          token: oldConfigData.tokens.access,
-          refreshToken: oldConfigData.tokens.refresh,
-        });
-      }
-      // ========================
       this._websocketService.startServer();
       this._websocketService.registerActions();
 
-      const config = await this._configService.getConfigs();
+      const config = await this._configService.getStore();
 
       this._windowService.trayIcon.activate();
       this._triggerUpdate();
@@ -156,7 +125,7 @@ export class AppService implements AppServiceTrait {
 
       // 创建代码选中提示窗口
       this._windowService.getWindow(WindowType.SelectionTips).create();
-      if (await this._configService.getConfig('showStatusWindow')) {
+      if (await this._configService.get('showStatusWindow')) {
         this._windowService.getWindow(WindowType.Status).show();
       }
 

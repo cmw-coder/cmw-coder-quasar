@@ -33,7 +33,7 @@ export class PromptProcessor {
     promptElements: PromptElements,
     projectId: string,
   ): Promise<Completions | undefined> {
-    const appConfig = await getService(ServiceType.CONFIG).getConfigs();
+    const appConfig = await getService(ServiceType.CONFIG).getStore();
     const cacheKey = createHash('sha1')
       .update(promptElements.fullPrefix.trimEnd())
       .digest('base64');

@@ -96,7 +96,7 @@ export class DataService implements DataServiceTrait {
     try {
       log.info('DataStoreService.scheduleJob.updateActiveModelContent');
       let { activeModel, activeModelKey } =
-        await this._configService.getConfigs();
+        this._configService.store.store;
       await this._updateCurrentQuestionTemplateFile();
       if (!this._currentQuestionTemplateFile) {
         return;
@@ -107,8 +107,8 @@ export class DataService implements DataServiceTrait {
         activeModel = models[0];
         activeModelKey =
           this._currentQuestionTemplateFile[activeModel].config.modelKey;
-        await this._configService.setConfig('activeModel', activeModel);
-        await this._configService.setConfig('activeModelKey', activeModelKey);
+        this._configService.store.set('activeModel', activeModel);
+        this._configService.store.set('activeModelKey', activeModelKey);
       }
       this._activeModelContent = this._currentQuestionTemplateFile[activeModel];
     } catch (e) {
@@ -148,7 +148,7 @@ export class DataService implements DataServiceTrait {
 
   private async _updateCurrentQuestionTemplateFile() {
     try {
-      const { activeTemplate } = await this._configService.getConfigs();
+      const { activeTemplate } = await this._configService.getStore();
       this._currentQuestionTemplateFile =
         await api_getProductLineQuestionTemplateFile(activeTemplate);
     } catch (error) {
@@ -158,7 +158,7 @@ export class DataService implements DataServiceTrait {
 
   async refreshServerTemplateList() {
     try {
-      const username = await this._configService.getConfig('username');
+      const username = await this._configService.get('username');
       this._serverTemplateList = await api_getUserTemplateList(username);
       console.log('_serverTemplateList', this._serverTemplateList);
     } catch (error) {
@@ -175,7 +175,7 @@ export class DataService implements DataServiceTrait {
     }
 
     let { activeTemplate, activeModel, activeModelKey } =
-      await this._configService.getConfigs();
+      await this._configService.getStore();
 
     if (!this._serverTemplateList.includes(activeTemplate)) {
       log.warn(
@@ -184,7 +184,7 @@ export class DataService implements DataServiceTrait {
       );
       activeTemplate = this._serverTemplateList[0];
       this._currentQuestionTemplateFile = undefined;
-      await this._configService.setConfig('activeTemplate', activeTemplate);
+      this._configService.store.set('activeTemplate', activeTemplate);
     }
     if (!this._currentQuestionTemplateFile) {
       // 缓存模板内容不存在
@@ -199,8 +199,8 @@ export class DataService implements DataServiceTrait {
       activeModel = models[0];
       activeModelKey =
         this._currentQuestionTemplateFile[activeModel].config.modelKey;
-      await this._configService.setConfig('activeModel', activeModel);
-      await this._configService.setConfig('activeModelKey', activeModelKey);
+      this._configService.store.set('activeModel', activeModel);
+      this._configService.store.set('activeModelKey', activeModelKey);
     }
     this._activeModelContent = this._currentQuestionTemplateFile[activeModel];
     return this._activeModelContent;

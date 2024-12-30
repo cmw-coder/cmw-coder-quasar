@@ -239,7 +239,7 @@ export class PromptExtractor {
 
   private async _getRagCode(prefix: string, suffix: string, filePath: string) {
     const configService = container.get<ConfigService>(ServiceType.CONFIG);
-    const networkZone = await configService.getConfig('networkZone');
+    const networkZone = await configService.get('networkZone');
     if (networkZone !== NetworkZone.Normal) {
       return '';
     }
@@ -274,7 +274,7 @@ export class PromptExtractor {
     currentRepoPath: string,
   ) {
     const configService = container.get<ConfigService>(ServiceType.CONFIG);
-    const networkZone = await configService.getConfig('networkZone');
+    const networkZone = await configService.get('networkZone');
     if (networkZone !== NetworkZone.Normal) {
       return [];
     }

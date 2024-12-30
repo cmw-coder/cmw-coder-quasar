@@ -14,7 +14,7 @@ export const constructData = async (
   firstClass: string,
   skuName: string,
 ): Promise<ReportSkuDto[]> => {
-  const appConfig = await getService(ServiceType.CONFIG).getConfigs();
+  const appConfig = await getService(ServiceType.CONFIG).getStore();
   const basicData = {
     begin: Math.floor(startTime / 1000),
     end: Math.floor(endTime / 1000),

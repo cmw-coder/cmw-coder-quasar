@@ -213,7 +213,7 @@ const feedBackHandle = async (
   comment?: string,
 ) => {
   const configService = useService(ServiceType.CONFIG);
-  const username = await configService.getConfig('username');
+  const username = await configService.get('username');
   console.log('feedBackHandle', {
     serverTaskId: review.serverTaskId,
     userId: username || 'NONE',

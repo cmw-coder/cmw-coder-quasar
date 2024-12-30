@@ -31,7 +31,7 @@ export class UpdaterService implements UpdaterServiceTrait {
   }
 
   async init() {
-    const { baseServerUrl } = this._configService.getConfigsSync();
+    const baseServerUrl = this._configService.store.get('baseServerUrl');
     this.updateUrl = `${baseServerUrl}/h3c-ai-assistant/plugin/sourceinsight`;
     this._updater = new NsisUpdater({
       channel: 'release',

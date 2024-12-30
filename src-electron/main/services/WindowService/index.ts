@@ -172,7 +172,7 @@ export class WindowService implements WindowServiceTrait {
   }
 
   async finishWelcome() {
-    const config = await this._configService.getConfigs();
+    const config = await this._configService.getStore();
     if (config.networkZone === NetworkZone.Public && !config.token) {
       // 黄、绿区环境需要登录
       this.getWindow(WindowType.Login).show();
@@ -279,7 +279,7 @@ export class WindowService implements WindowServiceTrait {
       return;
     }
     // 上报一次 PROJECT_REVIEW 使用
-    const appConfig = await this._configService.getConfigs();
+    const appConfig = await this._configService.getStore();
     try {
       await api_reportSKU([
         {
@@ -319,7 +319,7 @@ export class WindowService implements WindowServiceTrait {
     }
     // 上报一次 FILE_REVIEW 使用
     if (reportSku) {
-      const appConfig = await this._configService.getConfigs();
+      const appConfig = await this._configService.getStore();
       try {
         await api_reportSKU([
           {
@@ -365,7 +365,7 @@ export class WindowService implements WindowServiceTrait {
       return;
     }
     // 上报一次 CODE_REVIEW 使用
-    const appConfig = await this._configService.getConfigs();
+    const appConfig = await this._configService.getStore();
     try {
       await api_reportSKU([
         {
