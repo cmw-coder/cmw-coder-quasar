@@ -1,5 +1,4 @@
-import { APPDATA_NUMBER_CONSTANTS } from 'shared/constants/config';
-import { WindowType } from 'shared/types/WindowType';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
 
 export enum TemplateType {
   CodeAddComment = 'CodeAddComment',
@@ -29,12 +28,18 @@ interface PromptTemplate {
   embedding: string;
 }
 
-export interface DataCompatibilityType {
+export interface BackupData {
+  backupPathList: string[];
+  originalPath: string;
+  projectId: string;
+}
+
+export interface CompatibilityData {
   transparentFallback: boolean;
   zoomFix: boolean;
 }
 
-export interface DataProjectType {
+export interface ProjectData {
   id: string;
   isAutoManaged: boolean;
   lastAddedLines: number;
@@ -55,30 +60,21 @@ export interface WindowData {
 
 export type WindowDataMap = Record<WindowType, WindowData>;
 
-export interface BackupData {
-  backupPathList: string[];
-  originalPath: string;
-  projectId: string;
-}
-
 export interface AppData {
   backup: {
     current?: BackupData;
-    intervalMinutes: number;
     previous?: BackupData;
   };
-  compatibility: DataCompatibilityType;
+  compatibility: CompatibilityData;
   notice: {
     dismissed: string[];
   };
-  project: Record<string, DataProjectType>;
+  project: Record<string, ProjectData>;
   window: WindowDataMap;
 }
 
 export const defaultAppData: AppData = {
-  backup: {
-    intervalMinutes: APPDATA_NUMBER_CONSTANTS.backupInterval.default,
-  },
+  backup: {},
   compatibility: {
     transparentFallback: false,
     zoomFix: false,

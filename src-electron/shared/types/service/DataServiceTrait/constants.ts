@@ -1,4 +1,4 @@
-import { ModelConfig } from 'shared/types/service/DataStoreServiceTrait/types';
+import { ModelConfig } from 'shared/types/service/DataServiceTrait/types';
 
 export const defaultModelConfig: ModelConfig = {
   template: {
