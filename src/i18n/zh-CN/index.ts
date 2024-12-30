@@ -85,6 +85,16 @@ export default {
         toggleDarkMode: '切换暗色模式',
       },
     },
+    ItemNumberInput: {
+      tooltips: {
+        resetToDefault: '重置为默认值',
+      },
+    },
+    ItemToggle: {
+      tooltips: {
+        resetToDefault: '重置为默认值',
+      },
+    },
     LoginPanels: {
       AccountPanel: {
         errors: {
@@ -178,24 +188,53 @@ export default {
           title: '代码补全',
           productLine: '产品线',
           model: 'AI 模型',
-          completionOnPaste: '粘贴是否触发补全',
-          debounceDelay: '触发消抖延迟',
-          interactionUnlockDelay: '用户交互内部解锁延迟',
-          pasteMaxLineCount: '最大触发粘贴修复行数',
-          prefixLineCount: '获取上下文前缀行数',
-          recentFileCount: '最近访问文件数',
-          suffixLineCount: '获取上下文后缀行数',
-          rangeHint: '范围：{min} - {max}',
         },
-        tooltips: {
-          resetToDefault: '重置为默认值',
+        numberProps: {
+          debounceDelay: {
+            title: '触发消抖延迟',
+            caption:
+              '范围：0 - 1000。用户键入后触发补全的延迟时间',
+            tooLow:
+              '将值设置得太低可能会导致较高的服务器和 CPU 负载',
+            tooHigh: '将值设置得太高可能会导致响应变慢',
+          },
+          pasteFixMaxTriggerLineCount: {
+            title: '最大触发粘贴修复行数',
+            caption:
+              '范围：0 - 100。粘贴时触发粘贴修复的最大行数',
+            tooHigh:
+              '将值设置得太高可能会导致响应变慢和性能问题',
+          },
+          prefixLineCount: {
+            title: '上下文-前缀行数',
+            caption:
+              '范围：0 - 1000。补全时获取上下文的前缀行数',
+            tooHigh:
+              '将值设置得太高可能会导致响应变慢和性能问题',
+          },
+          recentFileCount: {
+            title: '近期访问文件数',
+            caption:
+              '范围：0 - 50。补全时获取近期访问文件的数量，设置为 0 将禁用获取最近访问文件',
+            tooHigh:
+              '将值设置得太高可能会导致响应变慢和性能问题',
+          },
+          suffixLineCount: {
+            title: '上下文-后缀行数',
+            caption:
+              '范围：0 - 1000。补全时获取上下文的后缀行数',
+            tooHigh:
+              '将值设置得太高可能会导致响应变慢和性能问题',
+          },
+        },
+        suffixes: {
+          milliseconds: '毫秒',
+          minutes: '分钟',
+          seconds: '秒',
         },
       },
       GeneralCard: {
         labels: {
-          backupInterval: '自动备份间隔',
-          backupIntervalNotice:
-            '范围：0 - 1140。备份当前编码文件的时间间隔，设置为 0 将禁用自动备份。',
           baseServerUrl: '服务地址',
           developerOptions: '开发者选项',
           displayTheme: '界面主题',
@@ -205,19 +244,46 @@ export default {
             light: '亮色',
           },
           locale: '界面语言',
-          minutes: '分钟',
-          showSelectActionWindow: '显示选中操作窗口',
-          showSelectActionWindowNotice:
-            '禁用此选项可防止在选中代码时出现操作窗口。\n' +
-            '您仍然可以使用 CTRL+I 或 CTRL+L 进行相关操作。',
-          showStatusWindow: '显示补全状态窗口',
-          showStatusWindowNotice: '禁用此选项以在编辑器启动时不再显示状态窗口',
           title: '通用',
           transparentFallback: '透明窗口兼容模式（Windows 7）',
           zoomFix: '窗口缩放修复',
         },
-        tooltips: {
-          resetToDefault: '重置为默认值',
+        numberProps: {
+          autoSave: {
+            title: '自动保存间隔',
+            caption:
+              '范围：0 - 3600。触发自动保存的时间间隔，设置为 0 将禁用自动保存',
+            tooLow: '将值设置得太低可能会增加磁盘 IO 和 CPU 负载',
+          },
+          backupInterval: {
+            title: '自动备份间隔',
+            caption:
+              '范围：0 - 3600。备份当前编码文件的时间间隔，设置为 0 将禁用自动备份',
+            tooLow: '将值设置得太低可能会增加磁盘 IO 和 CPU 负载',
+          },
+          interactionUnlockDelay: {
+            title: '用户交互内部解锁延迟',
+            caption: '范围：0 - 1000。用户交互内部解锁延迟',
+            tooLow: '将值设置得太低可能会导致数据竞争和影响插件稳定性',
+            tooHigh: '将值设置得太高可能会导致补全响应变慢',
+          },
+        },
+        suffixes: {
+          milliseconds: '毫秒',
+          minutes: '分钟',
+          seconds: '秒',
+        },
+        toggleProps: {
+          showSelectedTipsWindow: {
+            title: '显示选中提示窗口',
+            caption:
+              '禁用此选项可防止在选中代码时出现提示窗口\n' +
+              '您仍然可以使用 CTRL+I 或 CTRL+L 进行相关操作',
+          },
+          showStatusWindow: {
+            title: '显示补全状态窗口',
+            caption: '禁用此选项以不再显示补全状态窗口',
+          },
         },
       },
       UpdateCard: {
