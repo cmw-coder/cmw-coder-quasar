@@ -323,7 +323,7 @@ export class WebsocketService implements WebsocketServiceTrait {
         if (!project || !project.length) {
           statusWindow.sendMessageToRenderer(
             new UpdateStatusActionMessage({
-              status: Status.Failed,
+              status: CompletionStatus.Failed,
               detail: '项目路径无效',
             }),
           );
@@ -370,7 +370,7 @@ export class WebsocketService implements WebsocketServiceTrait {
             );
             statusWindow.sendMessageToRenderer(
               new UpdateStatusActionMessage({
-                status: Status.Standby,
+                status: CompletionStatus.Standby,
                 detail: '就绪',
               }),
             );
@@ -419,7 +419,7 @@ export class WebsocketService implements WebsocketServiceTrait {
 
           statusWindow.sendMessageToRenderer(
             new UpdateStatusActionMessage({
-              status: Status.Failed,
+              status: CompletionStatus.Failed,
               detail: `${e}`,
             }),
           );

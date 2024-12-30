@@ -40,7 +40,7 @@ export class PromptProcessor {
     const completionCached = this._cache.get(cacheKey);
     this._statusWindow.sendMessageToRenderer(
       new UpdateStatusActionMessage({
-        status: Status.Standby,
+        status: CompletionStatus.Standby,
         detail: '已从缓存中获取到补全',
       }),
     );
@@ -67,7 +67,7 @@ export class PromptProcessor {
 
     this._statusWindow.sendMessageToRenderer(
       new UpdateStatusActionMessage({
-        status: Status.Requesting,
+        status: CompletionStatus.Requesting,
         detail: '正在向服务器请求补全……',
       }),
     );
@@ -119,7 +119,7 @@ export class PromptProcessor {
     }
     this._statusWindow.sendMessageToRenderer(
       new UpdateStatusActionMessage({
-        status: Status.Empty,
+        status: CompletionStatus.Empty,
         detail: 'AI 认为无需补全',
       }),
     );

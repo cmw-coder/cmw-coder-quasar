@@ -16,19 +16,19 @@ const baseName = 'pages.StatusPage';
 const { changeAlpha, getPaletteColor } = colors;
 
 const colorMap = {
-  [Status.Standby]: 'transparent',
-  [Status.Prompting]: changeAlpha(getPaletteColor('orange') ?? '', 0.7),
-  [Status.Requesting]: changeAlpha(getPaletteColor('primary') ?? '', 0.7),
-  [Status.Empty]: changeAlpha(getPaletteColor('purple') ?? '', 0.7),
-  [Status.Failed]: changeAlpha(getPaletteColor('negative') ?? '', 0.7),
+  [CompletionStatus.Standby]: 'transparent',
+  [CompletionStatus.Prompting]: changeAlpha(getPaletteColor('orange') ?? '', 0.7),
+  [CompletionStatus.Requesting]: changeAlpha(getPaletteColor('primary') ?? '', 0.7),
+  [CompletionStatus.Empty]: changeAlpha(getPaletteColor('purple') ?? '', 0.7),
+  [CompletionStatus.Failed]: changeAlpha(getPaletteColor('negative') ?? '', 0.7),
 };
 
 const { dark } = useQuasar();
 const windowService = useService(ServiceType.WINDOW);
 const actionApi = new ActionApi(baseName);
 
-const statusData = ref<StatusData>({
-  status: Status.Standby,
+const statusData = ref<CompletionStatusData>({
+  status: CompletionStatus.Standby,
   detail: 'I AM READY FOR GENERATING CODE',
 });
 
@@ -38,7 +38,7 @@ onMounted(() => {
   actionApi.register(ActionType.UpdateStatus, async (data) => {
     console.log('UpdateStatus', data);
     statusData.value = data;
-    if (statusData.value.status === Status.Failed) {
+    if (statusData.value.status === CompletionStatus.Failed) {
       await windowService.setWindowSize(
         {
           width: defaultAppData.window[WindowType.Status].width ?? 200,
@@ -68,22 +68,22 @@ onBeforeUnmount(() => {
       style="border-width: 2px; border-style: solid"
     >
       <q-img
-        v-if="statusData.status == Status.Standby"
+        v-if="statusData.status == CompletionStatus.Standby"
         :src="`logos/${dark.isActive ? 'light' : 'dark'}/logo.svg`"
         width="1.5rem"
       />
       <q-spinner-rings
-        v-else-if="statusData.status === Status.Prompting"
+        v-else-if="statusData.status === CompletionStatus.Prompting"
         color="orange"
         size="1.5rem"
       />
       <q-spinner-grid
-        v-else-if="statusData.status === Status.Requesting"
+        v-else-if="statusData.status === CompletionStatus.Requesting"
         color="primary"
         size="1.5rem"
       />
       <q-icon
-        v-else-if="statusData.status === Status.Empty"
+        v-else-if="statusData.status === CompletionStatus.Empty"
         color="purple"
         name="mdi-text-box-check-outline"
         size="1.5rem"
@@ -97,7 +97,7 @@ onBeforeUnmount(() => {
       </div>
     </q-bar>
     <q-card
-      v-if="statusData.status === Status.Failed"
+      v-if="statusData.status === CompletionStatus.Failed"
       bordered
       flat
       :style="{

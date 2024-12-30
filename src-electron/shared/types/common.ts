@@ -26,6 +26,19 @@ export class CaretPosition {
   }
 }
 
+export enum CompletionStatus {
+  Standby = 'Standby',
+  Prompting = 'Prompting',
+  Requesting = 'Requesting',
+  Empty = 'Empty',
+  Failed = 'Failed',
+}
+
+export interface CompletionStatusData {
+  status: CompletionStatus;
+  detail: string;
+}
+
 export enum CompletionType {
   Function = 'Function',
   Snippet = 'Snippet',

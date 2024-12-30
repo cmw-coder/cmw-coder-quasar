@@ -43,7 +43,7 @@ export class PromptExtractor {
   ): Promise<PromptElements> {
     this._statusWindow.sendMessageToRenderer(
       new UpdateStatusActionMessage({
-        status: Status.Prompting,
+        status: CompletionStatus.Prompting,
         detail: '正在构造提示词……',
       }),
     );
