@@ -22,6 +22,7 @@ export default {
         copy: '复制',
         dismiss: '关闭',
         encoding: '文件编码',
+        tooManyLines: '代码行数 > 5000，已禁用代码高亮',
       },
       notifications: {
         copyFailed: '复制失败',

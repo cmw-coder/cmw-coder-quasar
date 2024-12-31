@@ -22,6 +22,7 @@ export default {
         copy: 'Copy',
         dismiss: 'Dismiss',
         encoding: 'File Encoding',
+        tooManyLines: 'Code lines > 5000, code highlighting disabled',
       },
       notifications: {
         copyFailed: 'Failed to copy code',

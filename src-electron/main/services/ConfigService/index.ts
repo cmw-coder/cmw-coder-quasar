@@ -59,8 +59,8 @@ export class ConfigService implements ConfigServiceTrait {
         store.set('showSelectedTipsWindow', true);
         store.set('showStatusWindow', true);
       },
-      '1.5.1': (store) => {
-        log.info('Upgrading "appConfig" store to 1.5.1 ...');
+      '1.5.2': (store) => {
+        log.info('Upgrading "appConfig" store to 1.5.2 ...');
         store.set('locale', 'zh-CN');
         const {
           showSelectedTipsWindow,
