@@ -27,7 +27,7 @@ const updateModelValue = async (newValue: number | string | undefined) => {
 
   newValue = Number(newValue);
   if (isNaN(newValue)) {
-    console.warn('updateModelValue: newValue is not a number', newValue);
+    updating.value = false;
     return;
   }
 
@@ -121,10 +121,10 @@ onBeforeMount(async () => {
       <q-input
         dense
         input-class="text-right"
+        input-style="width: 4em"
         :maxlength="maxValue?.toString().length"
         :model-value="modelValue"
         @change="updateModelValue"
-        input-style="width: 4em"
       >
         <template v-slot:after>
           <div class="text-body2">
