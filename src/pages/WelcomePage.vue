@@ -41,9 +41,11 @@ const finishHandle = async (data: { url: string; zone: NetworkZone }) => {
 };
 
 const updateConfig = async (url: string, networkZone: NetworkZone) => {
+  const username = await configService.get('username');
   await configService.setConfigs({
     ...DEFAULT_CONFIG_MAP[networkZone],
     baseServerUrl: url,
+    username,
   });
   await updaterService.init();
 };

@@ -1,6 +1,7 @@
 import log from 'electron-log/main';
 import ElectronStore from 'electron-store';
 import { injectable } from 'inversify';
+import { userInfo } from 'node:os';
 
 import { container } from 'main/services';
 import { WindowService } from 'main/services/WindowService';
@@ -21,7 +22,7 @@ import { AppConfig } from 'shared/types/service/ConfigServiceTrait/types';
 export class ConfigService implements ConfigServiceTrait {
   store = new ElectronStore<AppConfig>({
     name: 'appConfig',
-    defaults: DEFAULT_CONFIG_BASE,
+    defaults: { ...DEFAULT_CONFIG_BASE, username: userInfo().username },
     migrations: {
       '1.2.1': (store) => {
         log.info('Upgrading "appConfig" store to 1.2.1 ...');
@@ -82,7 +83,11 @@ export class ConfigService implements ConfigServiceTrait {
     },
   });
 
-  constructor() {}
+  constructor() {
+    if (!this.store.get('username')) {
+      this.store.set('username', userInfo().username);
+    }
+  }
 
   async getStore() {
     return this.store.store;
