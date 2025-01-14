@@ -23,9 +23,11 @@ export const DEFAULT_APP_DATA: AppData = {
       show: false,
     },
     [WindowType.Main]: {
-      height: 1300,
-      width: 780,
-      show: false,
+      x: 300,
+      y: 50,
+      height: 1000,
+      width: 620,
+      show: true,
     },
     [WindowType.Quake]: {
       height: 600,
