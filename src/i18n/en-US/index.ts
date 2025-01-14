@@ -285,7 +285,7 @@ export default {
             title: 'Show Selection Tips Window',
             caption:
               'Disable this option to prevent the tips window from appearing when you select the code\n' +
-              'You can still use CTRL + I or CTRL + L for relevant operations',
+              'You can still use Ctrl + Alt + I or Ctrl + Alt + L for relevant operations',
           },
           showStatusWindow: {
             title: 'Show Generate Status Window',

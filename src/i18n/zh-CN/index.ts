@@ -279,7 +279,7 @@ export default {
             title: '显示选中提示窗口',
             caption:
               '禁用此选项可防止在选中代码时出现提示窗口\n' +
-              '您仍然可以使用 CTRL+I 或 CTRL+L 进行相关操作',
+              '您仍然可以使用 Ctrl + Alt + I 或 Ctrl + Alt + L 进行相关操作',
           },
           showStatusWindow: {
             title: '显示补全状态窗口',
