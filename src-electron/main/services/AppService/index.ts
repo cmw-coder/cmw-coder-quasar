@@ -45,7 +45,7 @@ interface AbstractServicePort {
 @injectable()
 export class AppService implements AppServiceTrait {
   private _backupInterval?: NodeJS.Timeout;
-  private codeSyncSseMessage?: CodeSyncSseMessage;
+  private _codeSyncSseMessage?: CodeSyncSseMessage;
 
   constructor(
     @inject(ServiceType.WINDOW)
@@ -61,7 +61,6 @@ export class AppService implements AppServiceTrait {
   ) {}
 
   init() {
-    console.log('===============', process.versions.node);
     log.initialize();
     log.transports.file.format = '{text}';
     log.transports.file.transforms.push(({ data, message }) => {
@@ -258,10 +257,10 @@ export class AppService implements AppServiceTrait {
     this._updaterService.checkUpdate().catch();
   }
 
-  private async _initCodeSyncSseMessage() {
-    const { baseServerUrl, username } = await this._configService.getConfigs();
-    this.codeSyncSseMessage = new CodeSyncSseMessage(baseServerUrl, username);
-    this.codeSyncSseMessage.addOnDataCallBack((message) => {
+  private _initCodeSyncSseMessage() {
+    const { baseServerUrl, username } = this._configService.store.store;
+    this._codeSyncSseMessage = new CodeSyncSseMessage(baseServerUrl, username);
+    this._codeSyncSseMessage.addOnDataCallBack((message) => {
       if (message.type === CodeSyncSseMessageDataType.ConnectSuccess) {
         codeSyncTaskLog.log('connect success', message);
       }

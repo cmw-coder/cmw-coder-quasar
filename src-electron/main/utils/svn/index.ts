@@ -51,9 +51,7 @@ export const getAddedLines = async (path: string, revision: number) => {
  * @deprecated
  */
 export const reportProjectAdditions = async () => {
-  const dataStoreService = container.get<DataService>(
-    ServiceType.DATA,
-  );
+  const dataStoreService = container.get<DataService>(ServiceType.DATA);
   const appData = dataStoreService.getStoreSync();
   const statisticsReporterService = container.get<StatisticsService>(
     ServiceType.STATISTICS,

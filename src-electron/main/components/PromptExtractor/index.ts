@@ -14,7 +14,11 @@ import { WindowService } from 'main/services/WindowService';
 import { TextDocument } from 'main/types/TextDocument';
 
 import { UpdateStatusActionMessage } from 'shared/types/ActionMessage';
-import { CaretPosition, CompletionStatus, SimilarSnippet } from 'shared/types/common';
+import {
+  CaretPosition,
+  CompletionStatus,
+  SimilarSnippet,
+} from 'shared/types/common';
 import { ServiceType } from 'shared/types/service';
 import { NetworkZone } from 'shared/types/service/ConfigServiceTrait/types';
 import { WindowType } from 'shared/types/service/WindowServiceTrait/types';

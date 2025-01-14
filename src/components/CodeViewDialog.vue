@@ -70,11 +70,7 @@ const copyContent = () => {
           v-html="codeToHtml(content, 'c')"
         />
         <div v-else class="column q-px-sm">
-          <q-banner
-            class="bg-warning text-white"
-            dense
-            rounded
-          >
+          <q-banner class="bg-warning text-white" dense rounded>
             {{ i18n('labels.tooManyLines') }}
           </q-banner>
           <code style="white-space: pre-line">

@@ -99,12 +99,18 @@ export const DEFAULT_CONFIG_MAP: Record<NetworkZone, AppConfig> = {
   },
 };
 
-export const NUMBER_CONFIG_CONSTRAINTS: Record<string, Record<string, {
-  min: number;
-  max: number;
-  low?: number;
-  high?: number;
-}>> = {
+export const NUMBER_CONFIG_CONSTRAINTS: Record<
+  string,
+  Record<
+    string,
+    {
+      min: number;
+      max: number;
+      low?: number;
+      high?: number;
+    }
+  >
+> = {
   completion: {
     debounceDelayMilliSeconds: {
       min: 0,

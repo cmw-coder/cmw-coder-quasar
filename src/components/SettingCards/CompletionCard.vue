@@ -17,7 +17,6 @@ import {
 } from 'src/request/api';
 import { i18nSubPath, sleep, useService } from 'utils/common';
 
-
 const baseName = 'components.SettingCards.CompletionCard';
 
 const configService = useService(ServiceType.CONFIG);
@@ -92,10 +91,13 @@ const numberProps: NumberProps[] = [
     title: i18n('numberProps.pasteFixMaxTriggerLineCount.title'),
     caption: i18n('numberProps.pasteFixMaxTriggerLineCount.caption'),
     defaultValue: DEFAULT_CONFIG_BASE.completion.pasteFixMaxTriggerLineCount,
-    minValue: NUMBER_CONFIG_CONSTRAINTS.completion.pasteFixMaxTriggerLineCount.min,
-    maxValue: NUMBER_CONFIG_CONSTRAINTS.completion.pasteFixMaxTriggerLineCount.max,
+    minValue:
+      NUMBER_CONFIG_CONSTRAINTS.completion.pasteFixMaxTriggerLineCount.min,
+    maxValue:
+      NUMBER_CONFIG_CONSTRAINTS.completion.pasteFixMaxTriggerLineCount.max,
     highThreshold: {
-      value: NUMBER_CONFIG_CONSTRAINTS.completion.pasteFixMaxTriggerLineCount.high,
+      value:
+        NUMBER_CONFIG_CONSTRAINTS.completion.pasteFixMaxTriggerLineCount.high,
       hint: i18n('numberProps.pasteFixMaxTriggerLineCount.tooHigh'),
     },
     initializer: async () =>
@@ -134,7 +136,7 @@ const numberProps: NumberProps[] = [
         console.error(e);
         return oldValue;
       }
-    }
+    },
   },
   {
     title: i18n('numberProps.prefixLineCount.title'),

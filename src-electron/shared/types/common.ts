@@ -3,7 +3,7 @@ export interface CaretPositionTrait {
   line: number;
 }
 
-export class CaretPosition implements CaretPositionTrait{
+export class CaretPosition implements CaretPositionTrait {
   public readonly character: number;
   public readonly line: number;
 

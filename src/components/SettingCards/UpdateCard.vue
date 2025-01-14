@@ -53,8 +53,7 @@ const tryEnableDeveloperMode = () => {
 };
 
 onMounted(async () => {
-  developerMode.value =
-    (await configService.get('developerMode')) ?? false;
+  developerMode.value = (await configService.get('developerMode')) ?? false;
 });
 </script>
 

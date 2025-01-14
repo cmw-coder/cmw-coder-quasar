@@ -7,7 +7,7 @@ import {
   ReviewRequestParams,
   ReviewResult,
   ReviewState,
-  SelectionData
+  SelectionData,
 } from 'cmw-coder-subprocess';
 import { app } from 'electron';
 import path from 'path';
