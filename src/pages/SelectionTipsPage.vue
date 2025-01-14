@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { useService } from 'utils/common';
+
 import { ServiceType } from 'shared/types/service';
-import { WindowType } from 'shared/types/WindowType';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
+
+import { useService } from 'utils/common';
 
 const baseName = 'pages.SelectionTipsPage.';
 const windowService = useService(ServiceType.WINDOW);

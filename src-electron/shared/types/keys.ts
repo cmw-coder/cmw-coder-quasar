@@ -8,8 +8,3 @@ export interface Shortcut {
   keycode: number;
   modifiers: Modifier[];
 }
-
-export interface ShortcutConfig {
-  commit?: Shortcut;
-  manualCompletion?: Shortcut;
-}

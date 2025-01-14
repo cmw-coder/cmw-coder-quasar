@@ -1,4 +1,9 @@
-export class CaretPosition {
+export interface CaretPositionTrait {
+  character: number;
+  line: number;
+}
+
+export class CaretPosition implements CaretPositionTrait{
   public readonly character: number;
   public readonly line: number;
 
@@ -24,6 +29,19 @@ export class CaretPosition {
       return 0;
     }
   }
+}
+
+export enum CompletionStatus {
+  Standby = 'Standby',
+  Prompting = 'Prompting',
+  Requesting = 'Requesting',
+  Empty = 'Empty',
+  Failed = 'Failed',
+}
+
+export interface CompletionStatusData {
+  status: CompletionStatus;
+  detail: string;
 }
 
 export enum CompletionType {

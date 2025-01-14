@@ -1,14 +1,13 @@
 import { Reference } from 'cmw-coder-subprocess';
 
 import {
-  CaretPosition,
+  CaretPositionTrait,
   Completions,
   GenerateType,
   KeptRatio,
   Selection,
   SymbolInfo,
 } from 'shared/types/common';
-import { ShortcutConfig } from 'shared/types/keys';
 import { AppConfig } from 'shared/types/service/ConfigServiceTrait/types';
 
 export enum WsAction {
@@ -20,6 +19,7 @@ export enum WsAction {
   CompletionGenerate = 'CompletionGenerate',
   CompletionSelect = 'CompletionSelect',
   EditorCommit = 'EditorCommit',
+  EditorConfig = 'EditorConfig',
   EditorPaste = 'EditorPaste',
   EditorSelection = 'EditorSelection',
   EditorState = 'EditorState',
@@ -27,7 +27,6 @@ export enum WsAction {
   EditorSwitchProject = 'EditorSwitchProject',
   HandShake = 'HandShake',
   ReviewRequest = 'ReviewRequest',
-  SettingSync = 'SettingSync',
 }
 
 export interface WsMessage {
@@ -78,7 +77,7 @@ export interface CompletionGenerateClientMessage extends WsMessage {
   action: WsAction.CompletionGenerate;
   data: {
     type: GenerateType;
-    caret: CaretPosition;
+    caret: CaretPositionTrait;
     path: string;
     context: {
       infix: string;
@@ -165,10 +164,25 @@ export interface EditorCommitClientMessage extends WsMessage {
   data: string;
 }
 
+export class EditorConfigServerMessage implements WsMessage {
+  action = WsAction.EditorConfig;
+  data: StandardResult<{
+    completion?: Partial<AppConfig['completion']>;
+    generic?: Partial<AppConfig['generic']>;
+    shortcut?: Partial<AppConfig['shortcut']>;
+    statistic?: Partial<AppConfig['statistic']>;
+  }>;
+  timestamp = Date.now();
+
+  constructor(data: EditorConfigServerMessage['data']) {
+    this.data = data;
+  }
+}
+
 export interface EditorPasteClientMessage extends WsMessage {
   action: WsAction.EditorPaste;
   data: {
-    caret: CaretPosition;
+    caret: CaretPositionTrait;
     context: {
       infix: string;
       prefix: string;
@@ -225,7 +239,12 @@ export interface EditorSwitchProjectClientMessage extends WsMessage {
 
 export interface HandShakeClientMessage extends WsMessage {
   action: WsAction.HandShake;
-  data: { pid: number; currentProject: string; version: string };
+  data: {
+    pid: number;
+    currentFile: string;
+    currentProject: string;
+    version: string;
+  };
 }
 
 export interface ReviewRequestClientMessage extends WsMessage {
@@ -248,19 +267,6 @@ export class ReviewRequestServerMessage implements WsMessage {
   timestamp = Date.now();
 
   constructor(data: ReviewRequestServerMessage['data']) {
-    this.data = data;
-  }
-}
-
-export class SettingSyncServerMessage implements WsMessage {
-  action = WsAction.SettingSync;
-  data: StandardResult<{
-    completionConfig?: Partial<AppConfig['completion']>;
-    shortcutConfig?: ShortcutConfig;
-  }>;
-  timestamp = Date.now();
-
-  constructor(data: SettingSyncServerMessage['data']) {
     this.data = data;
   }
 }
@@ -294,6 +300,10 @@ export interface WsMessageMapping {
     client: EditorCommitClientMessage;
     server: void;
   };
+  [WsAction.EditorConfig]: {
+    client: void;
+    server: EditorConfigServerMessage;
+  };
   [WsAction.EditorPaste]: {
     client: EditorPasteClientMessage;
     server: void;
@@ -317,9 +327,5 @@ export interface WsMessageMapping {
   [WsAction.ReviewRequest]: {
     client: ReviewRequestClientMessage;
     server: void;
-  };
-  [WsAction.SettingSync]: {
-    client: void;
-    server: SettingSyncServerMessage;
   };
 }

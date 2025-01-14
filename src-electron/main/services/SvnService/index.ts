@@ -3,7 +3,7 @@ import log from 'electron-log/main';
 import { injectable } from 'inversify';
 
 import { container } from 'main/services';
-import { DataStoreService } from 'main/services/DataStoreService';
+import { DataService } from 'main/services/DataService';
 import { WindowService } from 'main/services/WindowService';
 import { svnPath } from 'main/services/SvnService/constants';
 import { fileDiff, repoStatus } from 'main/services/SvnService/utils';
@@ -12,7 +12,7 @@ import { executeCommand } from 'main/utils/common';
 import { NEW_LINE_REGEX } from 'shared/constants/common';
 import { ServiceType } from 'shared/types/service';
 import type { SvnServiceTrait } from 'shared/types/service/SvnServiceTrait';
-import { WindowType } from 'shared/types/WindowType';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
 import path from 'path';
 import fs from 'fs';
 import { getRevision } from 'main/utils/svn';
@@ -62,8 +62,8 @@ export class SvnService implements SvnServiceTrait {
       .get<WebsocketService>(ServiceType.WEBSOCKET)
       .getClientInfo()?.currentProject;
     const { project } = container
-      .get<DataStoreService>(ServiceType.DATA_STORE)
-      .getAppdata();
+      .get<DataService>(ServiceType.DATA)
+      .getStoreSync();
     if (currentProjectPath && project[currentProjectPath]) {
       return await Promise.all(
         project[currentProjectPath].svn.map(async (svn) => ({

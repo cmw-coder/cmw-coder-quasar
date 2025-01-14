@@ -2,17 +2,18 @@
 import { extend, useQuasar } from 'quasar';
 import { computed, onMounted, reactive, ref, toRaw } from 'vue';
 
-import { i18nSubPath, useService } from 'utils/common';
 import { ServiceType } from 'shared/types/service';
-import { DataProjectType } from 'shared/types/service/DataStoreServiceTrait/types';
+import { ProjectData } from 'shared/types/service/DataServiceTrait/types';
+
+import { i18nSubPath, useService } from 'utils/common';
 
 const baseName = 'components.DataManagementPanels.ProjectIdPanel';
 
-const dataStoreService = useService(ServiceType.DATA_STORE);
+const dataStoreService = useService(ServiceType.DATA);
 const { dialog } = useQuasar();
 
 const loading = ref(false);
-const projectData = ref<undefined | Record<string, DataProjectType>>();
+const projectData = ref<undefined | Record<string, ProjectData>>();
 const projectList = computed(() => {
   return Object.keys(projectData.value || {});
 });
@@ -32,7 +33,7 @@ const i18n = i18nSubPath(baseName);
 
 const refreshHandle = async () => {
   loading.value = true;
-  const appData = await dataStoreService.getAppDataAsync();
+  const appData = await dataStoreService.getStoreAsync();
   projectData.value = appData.project;
   loading.value = false;
 };
@@ -46,7 +47,7 @@ const editProjectHandle = (project: string) => {
     true,
     {},
     toRaw(projectData.value[project]),
-  ) as DataProjectType;
+  ) as ProjectData;
   console.log('editProjectHandle', projectItem);
   editProject.id = projectItem.id;
   editProject.project = project;
@@ -58,13 +59,13 @@ const confirmEdit = async () => {
   if (!projectData.value) {
     return;
   }
-  const originData: Record<string, DataProjectType> = JSON.parse(
+  const originData: Record<string, ProjectData> = JSON.parse(
     JSON.stringify(toRaw(projectData.value)),
   );
   originData[editProject.project].id = editProject.id;
   originData[editProject.project].svn = toRaw(editProject.svn);
   originData[editProject.project].isAutoManaged = editProject.isAutoManaged;
-  await dataStoreService.setAppDataAsync('project', originData);
+  await dataStoreService.setStoreAsync('project', originData);
   await refreshHandle();
   editFlag.value = false;
 };
@@ -83,11 +84,11 @@ const delProjectHandle = (project: string) => {
     if (!projectData.value) {
       return;
     }
-    const originData: Record<string, DataProjectType> = JSON.parse(
+    const originData: Record<string, ProjectData> = JSON.parse(
       JSON.stringify(toRaw(projectData.value)),
     );
     delete originData[project];
-    await dataStoreService.setAppDataAsync('project', originData);
+    await dataStoreService.setStoreAsync('project', originData);
     await refreshHandle();
   });
 };

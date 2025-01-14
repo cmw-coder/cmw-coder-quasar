@@ -1,36 +1,42 @@
-import { app, BrowserWindow, ipcMain, Menu } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  IpcMainInvokeEvent,
+  ipcMain,
+  Menu,
+} from 'electron';
 import { globalShortcut } from 'electron/main';
 import log from 'electron-log/main';
 import { inject, injectable } from 'inversify';
 import { DateTime } from 'luxon';
-import { Job, scheduleJob } from 'node-schedule';
+import { exit } from 'node:process';
+import { scheduleJob } from 'node-schedule';
 import { release, version } from 'os';
 
+import codeSyncTaskLog from 'main/components/Loggers/codeSyncTaskLog';
 import { container } from 'main/services';
+import {
+  CodeSyncSseMessage,
+  CodeSyncSseMessageDataType,
+} from 'main/services/AppService/CodeSyncSseMessage';
 import { ConfigService } from 'main/services/ConfigService';
-import { DataStoreService } from 'main/services/DataStoreService';
+import { DataService } from 'main/services/DataService';
 import { UpdaterService } from 'main/services/UpdaterService';
 import { WebsocketService } from 'main/services/WebsocketService';
 import { WindowService } from 'main/services/WindowService';
+
 import { registerAction, triggerAction } from 'preload/types/ActionApi';
 import {
   ControlMessage,
   triggerControlCallback,
 } from 'preload/types/ControlApi';
+
 import { ACTION_API_KEY, CONTROL_API_KEY } from 'shared/constants/common';
-import { SERVICE_CALL_KEY, ServiceType } from 'shared/types/service';
 import { ActionMessage, ActionType } from 'shared/types/ActionMessage';
-import { NetworkZone } from 'shared/config';
-import { WindowType } from 'shared/types/WindowType';
+import { SERVICE_CALL_KEY, ServiceType } from 'shared/types/service';
 import { AppServiceTrait } from 'shared/types/service/AppServiceTrait';
-import * as process from 'node:process';
-import * as Electron from 'electron';
-import { getProjectData } from 'main/utils/completion';
-import {
-  CodeSyncSseMessage,
-  CodeSyncSseMessageDataType,
-} from 'main/services/AppService/CodeSyncSseMessage';
-import codeSyncTaskLog from 'main/components/Loggers/codeSyncTaskLog';
+import { NetworkZone } from 'shared/types/service/ConfigServiceTrait/types';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
 
 interface AbstractServicePort {
   [key: string]: ((...args: unknown[]) => Promise<unknown>) | undefined;
@@ -38,7 +44,7 @@ interface AbstractServicePort {
 
 @injectable()
 export class AppService implements AppServiceTrait {
-  private _backupScheduler?: Job;
+  private _backupInterval?: NodeJS.Timeout;
   private codeSyncSseMessage?: CodeSyncSseMessage;
 
   constructor(
@@ -50,8 +56,8 @@ export class AppService implements AppServiceTrait {
     private _updaterService: UpdaterService,
     @inject(ServiceType.CONFIG)
     private _configService: ConfigService,
-    @inject(ServiceType.DATA_STORE)
-    private _dataStoreService: DataStoreService,
+    @inject(ServiceType.DATA)
+    private _dataStoreService: DataService,
   ) {}
 
   init() {
@@ -73,15 +79,17 @@ export class AppService implements AppServiceTrait {
     this._initCodeSyncSseMessage();
   }
 
-  async updateBackupIntervalMinutes(intervalMinutes: number) {
-    const backupData = this._dataStoreService.getAppdata().backup;
-    backupData.intervalMinutes = intervalMinutes;
-    this._dataStoreService.setAppData('backup', backupData);
-    if (this._backupScheduler) {
-      if (intervalMinutes <= 0) {
-        this._backupScheduler.cancel();
+  async updateBackupIntervalSeconds(intervalSeconds: number) {
+    this._configService.store.set(
+      'generic.backupIntervalSeconds',
+      intervalSeconds,
+    );
+    if (this._backupInterval) {
+      clearInterval(this._backupInterval);
+      if (intervalSeconds <= 0) {
+        this._backupInterval = undefined;
       } else {
-        this._backupScheduler.reschedule(`*/${intervalMinutes} * * * *`);
+        this._initBackupScheduler();
       }
     }
   }
@@ -92,7 +100,7 @@ export class AppService implements AppServiceTrait {
     Menu.setApplicationMenu(null);
     if (!app.requestSingleInstanceLock()) {
       app.quit();
-      process.exit(-1);
+      exit(-1);
     }
     app.setLoginItemSettings({
       openAtLogin: true,
@@ -104,42 +112,11 @@ export class AppService implements AppServiceTrait {
     });
     app.whenReady().then(async () => {
       log.info('Comware Coder is ready');
-      // ========================
-      log.info('Migrate data from old data store (< 1.2.0)');
-      const oldProjectData =
-        this._dataStoreService.dataStoreBefore1_2_0.store.project;
-      const newProjectData = this._dataStoreService.getAppdata().project;
-      const oldProjectKeys = Object.keys(oldProjectData);
-      for (let i = 0; i < oldProjectKeys.length; i++) {
-        const key = oldProjectKeys[i];
-        if (newProjectData[key] === undefined) {
-          newProjectData[key] = {
-            ...oldProjectData[key],
-            isAutoManaged: true,
-          };
-        }
-      }
-      this._dataStoreService.setAppData('project', newProjectData);
-      // ========================
 
-      // ========================
-      log.info('Migrate data from old config store (< 1.2.0)');
-      const oldConfigData = this._configService.configStore.data;
-      if (
-        oldConfigData.tokens &&
-        oldConfigData.tokens.access &&
-        oldConfigData.tokens.refresh
-      ) {
-        await this._configService.setConfigs({
-          token: oldConfigData.tokens.access,
-          refreshToken: oldConfigData.tokens.refresh,
-        });
-      }
-      // ========================
       this._websocketService.startServer();
       this._websocketService.registerActions();
 
-      const config = await this._configService.getConfigs();
+      const config = await this._configService.getStore();
 
       this._windowService.trayIcon.activate();
       this._triggerUpdate();
@@ -158,7 +135,7 @@ export class AppService implements AppServiceTrait {
 
       // 创建代码选中提示窗口
       this._windowService.getWindow(WindowType.SelectionTips).create();
-      if (await this._configService.getConfig('showStatusWindow')) {
+      if (await this._configService.get('showStatusWindow')) {
         this._windowService.getWindow(WindowType.Status).show();
       }
 
@@ -180,30 +157,31 @@ export class AppService implements AppServiceTrait {
 
       // 创建主界面
       this._windowService.getWindow(WindowType.Main).create();
-      if (this._dataStoreService.getAppdata().window.Main.show) {
+      if (this._dataStoreService.getStoreSync().window.Main.show) {
         this._windowService.getWindow(WindowType.Main).show();
       }
     });
   }
 
   private _initBackupScheduler() {
-    // Trigger backup every 5 minutes
-    this._backupScheduler = scheduleJob(
-      `*/${this._dataStoreService.getAppdata().backup.intervalMinutes} * * * *`,
+    this._backupInterval = setInterval(
       () => {
         const clientInfo = this._websocketService.getClientInfo();
         if (clientInfo && clientInfo.currentFile?.length) {
-          try {
-            const { id: projectId } = getProjectData(clientInfo.currentProject);
-            log.debug(`Creating backup for '${clientInfo.currentFile}'`);
-            this._dataStoreService
-              .saveBackup(clientInfo.currentFile, projectId)
-              .catch();
-          } catch (e) {
-            console.warn('Backup failed', e);
+          const projectData = this._dataStoreService.getProjectData(
+            clientInfo.currentProject,
+          );
+          if (!projectData?.id.length) {
+            log.warn('No project ID for project:', clientInfo.currentProject);
+            return;
           }
+          log.debug(`Creating backup for '${clientInfo.currentFile}'`);
+          this._dataStoreService
+            .saveBackup(clientInfo.currentFile, projectData.id)
+            .catch();
         }
       },
+      this._configService.store.get('generic').backupIntervalSeconds * 1000,
     );
   }
 
@@ -211,7 +189,7 @@ export class AppService implements AppServiceTrait {
     ipcMain.handle(
       SERVICE_CALL_KEY,
       <T extends ServiceType>(
-        _: Electron.IpcMainInvokeEvent,
+        _: IpcMainInvokeEvent,
         serviceName: T,
         functionName: string,
         ...payloads: unknown[]
@@ -247,14 +225,12 @@ export class AppService implements AppServiceTrait {
 
   private _initShortcutHandler() {
     app.whenReady().then(() => {
-      // 注册选中代码快捷键
       globalShortcut.register('CommandOrControl+Alt+I', async () => {
         await this._windowService.addSelectionToChat();
       });
-      // globalShortcut.register('CommandOrControl+Alt+L', async () => {
-      //   await this._windowService.reviewSelection();
-      // });
-      // 注册open devtool 快捷键
+      globalShortcut.register('CommandOrControl+Alt+L', async () => {
+        await this._windowService.reviewSelection();
+      });
       globalShortcut.register('CommandOrControl+Shift+I', () => {
         const window = BrowserWindow.getFocusedWindow();
         if (window) {

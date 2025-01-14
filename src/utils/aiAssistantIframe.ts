@@ -1,7 +1,6 @@
 import { SelectionData } from 'cmw-coder-subprocess';
 import { extend, uid } from 'quasar';
 
-import { NetworkZone } from 'shared/config';
 import { NEW_LINE_REGEX } from 'shared/constants/common';
 import {
   Commands,
@@ -15,6 +14,7 @@ import {
 } from 'shared/types/ExtensionMessage';
 import { ExtensionConfig } from 'shared/types/ExtensionMessageDetails';
 import { ServiceType } from 'shared/types/service';
+import { NetworkZone } from 'shared/types/service/ConfigServiceTrait/types';
 import { ChatInsertServerMessage } from 'shared/types/WsMessage';
 import { useService } from 'utils/common';
 
@@ -30,7 +30,7 @@ export class AiAssistantIframe {
   private refreshHandle!: () => void;
   private messageEventListener?: (event: MessageEvent) => void;
   private configService = useService(ServiceType.CONFIG);
-  private dataStoreService = useService(ServiceType.DATA_STORE);
+  private dataStoreService = useService(ServiceType.DATA);
   private websocketService = useService(ServiceType.WEBSOCKET);
 
   init(iframeWindow: Window, url: string, refreshHandle: () => void) {
@@ -97,10 +97,11 @@ export class AiAssistantIframe {
 
     switch (command) {
       case UiToExtensionCommand.GET_CONFIG: {
-        const config = await this.configService.getConfigs();
+        const config = await this.configService.getStore();
         const modelContent =
           await this.dataStoreService.getActiveModelContent();
-        const projectData = await this.websocketService.getProjectData();
+        const projectData =
+          await this.websocketService.getLastActivateProjectData();
         const extensionConfig: ExtensionConfig = {
           appType: 'SI',
           serverUrl: config.baseServerUrl,
@@ -143,13 +144,13 @@ export class AiAssistantIframe {
         return undefined as UiToExtensionCommandExecResultMap[T];
       }
       case UiToExtensionCommand.GET_THEME: {
-        const darkMode = await this.configService.getConfig('darkMode');
+        const darkMode = await this.configService.get('darkMode');
         return (
           darkMode ? 'DARK' : 'LIGHT'
         ) as UiToExtensionCommandExecResultMap[T];
       }
       case UiToExtensionCommand.GET_TOKEN: {
-        const { token, refreshToken } = await this.configService.getConfigs();
+        const { token, refreshToken } = await this.configService.getStore();
         return {
           token,
           refresh_token: refreshToken,

@@ -3,7 +3,7 @@ import type { WebSocket } from 'ws';
 
 export interface ClientInfo {
   client: WebSocket;
-  currentFile?: string;
+  currentFile: string;
   currentProject: string;
   version: string;
 }

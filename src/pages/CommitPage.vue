@@ -2,17 +2,19 @@
 import { useQuasar } from 'quasar';
 import { PropType, computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import ChangeList from 'components/DiffPanels/ChangeList.vue';
-import DiffDisplay from 'components/DiffPanels/DiffDisplay.vue';
-import { ServiceType } from 'shared/types/service';
-import { FileChanges } from 'shared/types/service/SvnServiceTrait/types';
-import { WindowType } from 'shared/types/WindowType';
-import { generateCommitPrompt } from 'utils/commitPrompt';
-import { getLastDirName, useService } from 'utils/common';
-import { api_questionStream } from 'src/request/api';
-import { ActionApi } from 'types/ActionApi';
+
 import { ActionType } from 'shared/types/ActionMessage';
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
+import { ServiceType } from 'shared/types/service';
+import { FileChanges } from 'shared/types/service/SvnServiceTrait/types';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
+
+import ChangeList from 'components/DiffPanels/ChangeList.vue';
+import DiffDisplay from 'components/DiffPanels/DiffDisplay.vue';
+import { api_questionStream } from 'src/request/api';
+import { ActionApi } from 'types/ActionApi';
+import { generateCommitPrompt } from 'utils/commitPrompt';
+import { getLastDirName, useService } from 'utils/common';
 
 const props = defineProps({
   windowType: {
@@ -57,7 +59,7 @@ const selectedSvn = computed(() => {
 // };
 
 const generateCommitMessageHandle = async () => {
-  const appConfig = await configService.getConfigs();
+  const appConfig = await configService.getStore();
   const changedFileList = selectedSvn.value.changedFileList;
   if (changedFileList && changedFileList.length) {
     loadingGenerate.value = true;

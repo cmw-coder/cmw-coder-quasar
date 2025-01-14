@@ -3,7 +3,7 @@ import 'reflect-metadata';
 
 import { AppService } from 'main/services/AppService';
 import { ConfigService } from 'main/services/ConfigService';
-import { DataStoreService } from 'main/services/DataStoreService';
+import { DataService } from 'main/services/DataService';
 import { StatisticsService } from 'main/services/StatisticsService';
 import { SvnService } from 'main/services/SvnService';
 import { UpdaterService } from 'main/services/UpdaterService';
@@ -18,7 +18,7 @@ export const container = new Container({
 
 container.bind(ServiceType.App).to(AppService);
 container.bind(ServiceType.CONFIG).to(ConfigService);
-container.bind(ServiceType.DATA_STORE).to(DataStoreService);
+container.bind(ServiceType.DATA).to(DataService);
 container.bind(ServiceType.STATISTICS).to(StatisticsService);
 container.bind(ServiceType.SVN).to(SvnService);
 container.bind(ServiceType.UPDATER).to(UpdaterService);

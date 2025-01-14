@@ -47,14 +47,14 @@ const tryEnableDeveloperMode = () => {
       message: i18n('notifications.developerModeEnabled'),
       icon: 'mdi-dev-to',
     });
-    configService.setConfig('developerMode', developerMode.value);
+    configService.set('developerMode', developerMode.value);
     push('developer');
   }
 };
 
 onMounted(async () => {
   developerMode.value =
-    (await configService.getConfig('developerMode')) ?? false;
+    (await configService.get('developerMode')) ?? false;
 });
 </script>
 

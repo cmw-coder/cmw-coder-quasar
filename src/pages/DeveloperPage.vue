@@ -2,11 +2,12 @@
 import { onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import CodeBlock from 'components/CodeBlock.vue';
 import { NEW_LINE_REGEX } from 'shared/constants/common';
 import { SimilarSnippet } from 'shared/types/common';
 import { ServiceType } from 'shared/types/service';
-import { WindowType } from 'shared/types/WindowType';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
+
+import CodeBlock from 'components/CodeBlock.vue';
 import { useHighlighter } from 'stores/highlighter';
 import { useService } from 'utils/common';
 

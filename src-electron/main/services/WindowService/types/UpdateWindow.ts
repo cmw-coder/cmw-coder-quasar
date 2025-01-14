@@ -1,10 +1,12 @@
 import { ProgressInfo } from 'electron-updater';
+
+import { FloatingBaseWindow } from 'main/services/WindowService/types/FloatingBaseWindow';
+
 import {
   UpdateFinishActionMessage,
   UpdateProgressActionMessage,
 } from 'shared/types/ActionMessage';
-import { WindowType } from 'shared/types/WindowType';
-import { FloatingBaseWindow } from 'main/services/WindowService/types/FloatingBaseWindow';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
 
 export class UpdateWindow extends FloatingBaseWindow {
   constructor() {

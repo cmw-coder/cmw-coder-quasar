@@ -1,6 +1,6 @@
 import { AxiosProgressEvent } from 'axios';
 
-import { ModelConfigMap } from 'shared/types/service/DataStoreServiceTrait/types';
+import { ModelConfigMap } from 'shared/types/service/DataServiceTrait/types';
 import { Answer, FeedbackForm, QuestionParams } from 'shared/types/api';
 import request, { streamRequest } from 'src/request';
 

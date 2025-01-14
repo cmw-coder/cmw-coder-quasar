@@ -64,9 +64,24 @@ const copyContent = () => {
       </q-card-section>
       <q-separator />
       <q-scroll-area style="height: 80vh">
-        <div class="q-mx-sm" v-html="codeToHtml(content, 'c')" />
+        <div
+          v-if="content.split('\n').length <= 5000"
+          class="q-mx-sm"
+          v-html="codeToHtml(content, 'c')"
+        />
+        <div v-else class="column q-px-sm">
+          <q-banner
+            class="bg-warning text-white"
+            dense
+            rounded
+          >
+            {{ i18n('labels.tooManyLines') }}
+          </q-banner>
+          <code style="white-space: pre-line">
+            {{ content }}
+          </code>
+        </div>
       </q-scroll-area>
-      <!-- buttons example -->
       <q-card-actions align="right">
         <q-btn
           color="primary"

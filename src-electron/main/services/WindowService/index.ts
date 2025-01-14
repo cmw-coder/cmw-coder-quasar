@@ -7,32 +7,32 @@ import {
 import { BrowserWindow, app, dialog, screen } from 'electron';
 import log from 'electron-log/main';
 import { inject, injectable } from 'inversify';
+import { DateTime } from 'luxon';
+import { dirname } from 'path';
 
 import { TrayIcon } from 'main/components/TrayIcon';
 import { MenuEntry } from 'main/components/TrayIcon/types';
-import { WindowServiceTrait } from 'shared/types/service/WindowServiceTrait';
-import { NetworkZone } from 'shared/config';
-import { ServiceType } from 'shared/types/service';
-import { WindowType } from 'shared/types/WindowType';
-import { defaultAppData } from 'shared/types/service/DataStoreServiceTrait/types';
-import { FeedbackWindow } from 'main/services/WindowService/types/FeedbackWindow';
-import { ProjectIdWindow } from 'main/services/WindowService/types/ProjectIdWindow';
-import { WelcomeWindow } from 'main/services/WindowService/types/WelcomeWindow';
-import { LoginWindow } from 'main/services/WindowService/types/LoginWindow';
-import { CompletionsWindow } from 'main/services/WindowService/types/CompletionsWindow';
-import { MainWindow } from 'main/services/WindowService/types/MainWindow';
-import { UpdateWindow } from 'main/services/WindowService/types/UpdateWindow';
-import { BaseWindow } from 'main/services/WindowService/types/BaseWindow';
+import { api_reportSKU } from 'main/request/sku';
+import { getService } from 'main/services';
 import { ConfigService } from 'main/services/ConfigService';
-import { DataStoreService } from 'main/services/DataStoreService';
-import { WebsocketService } from 'main/services/WebsocketService';
+import { DataService } from 'main/services/DataService';
+import { BaseWindow } from 'main/services/WindowService/types/BaseWindow';
+import { CompletionsWindow } from 'main/services/WindowService/types/CompletionsWindow';
+import { FeedbackWindow } from 'main/services/WindowService/types/FeedbackWindow';
+import { LoginWindow } from 'main/services/WindowService/types/LoginWindow';
+import { MainWindow } from 'main/services/WindowService/types/MainWindow';
+import { ProjectIdWindow } from 'main/services/WindowService/types/ProjectIdWindow';
 import { SelectionTipsWindow } from 'main/services/WindowService/types/SelectionTipsWindow';
 import { StatusWindow } from 'main/services/WindowService/types/StatusWindow';
+import { UpdateWindow } from 'main/services/WindowService/types/UpdateWindow';
+import { WelcomeWindow } from 'main/services/WindowService/types/WelcomeWindow';
+
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
-import { container, getService } from 'main/services';
-import { DateTime } from 'luxon';
-import { api_reportSKU } from 'main/request/sku';
-import { dirname } from 'path';
+import { ServiceType } from 'shared/types/service';
+import { NetworkZone } from 'shared/types/service/ConfigServiceTrait/types';
+import { DEFAULT_APP_DATA } from 'shared/types/service/DataServiceTrait/constants';
+import { WindowServiceTrait } from 'shared/types/service/WindowServiceTrait';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
 
 interface WindowMap {
   [WindowType.Completions]: CompletionsWindow;
@@ -57,8 +57,8 @@ export class WindowService implements WindowServiceTrait {
   constructor(
     @inject(ServiceType.CONFIG)
     private _configService: ConfigService,
-    @inject(ServiceType.DATA_STORE)
-    private _dataStoreService: DataStoreService,
+    @inject(ServiceType.DATA)
+    private _dataService: DataService,
   ) {
     this.windowMap.set(WindowType.Feedback, new FeedbackWindow());
     this.windowMap.set(WindowType.ProjectId, new ProjectIdWindow());
@@ -146,7 +146,7 @@ export class WindowService implements WindowServiceTrait {
       window = BrowserWindow.getFocusedWindow();
     }
     if (window) {
-      const defaultWindowSize = defaultAppData.window[type];
+      const defaultWindowSize = DEFAULT_APP_DATA.window[type];
       window.setSize(
         defaultWindowSize.width || 600,
         defaultWindowSize.height || 800,
@@ -172,7 +172,7 @@ export class WindowService implements WindowServiceTrait {
   }
 
   async finishWelcome() {
-    const config = await this._configService.getConfigs();
+    const config = await this._configService.getStore();
     if (config.networkZone === NetworkZone.Public && !config.token) {
       // 黄、绿区环境需要登录
       this.getWindow(WindowType.Login).show();
@@ -210,7 +210,7 @@ export class WindowService implements WindowServiceTrait {
   }
 
   async getWindowIsFixed(windowType: WindowType) {
-    const { fixed } = this._dataStoreService.getWindowData(windowType);
+    const { fixed } = this._dataService.getWindowData(windowType);
     return !!fixed;
   }
 
@@ -274,23 +274,12 @@ export class WindowService implements WindowServiceTrait {
       return;
     }
     const targetDirPath = targetDirPathList[0];
-    const clientInfo = getService(ServiceType.WEBSOCKET).getClientInfo();
-    if (!clientInfo || !clientInfo.currentProject || !clientInfo.version) {
+    const extraData = this._parseExtraData();
+    if (!extraData) {
       return;
     }
-    const websocketService = container.get<WebsocketService>(
-      ServiceType.WEBSOCKET,
-    );
-    const project = await websocketService.getProjectData();
-    if (!project) {
-      return;
-    }
-    const extraData: ExtraData = {
-      projectId: project.id,
-      version: clientInfo.version,
-    };
     // 上报一次 PROJECT_REVIEW 使用
-    const appConfig = await this._configService.getConfigs();
+    const appConfig = await this._configService.getStore();
     try {
       await api_reportSKU([
         {
@@ -324,24 +313,13 @@ export class WindowService implements WindowServiceTrait {
     if (!this._parserInitialized) {
       return;
     }
-    const clientInfo = getService(ServiceType.WEBSOCKET).getClientInfo();
-    if (!clientInfo || !clientInfo.currentProject || !clientInfo.version) {
+    const extraData = this._parseExtraData();
+    if (!extraData) {
       return;
     }
-    const websocketService = container.get<WebsocketService>(
-      ServiceType.WEBSOCKET,
-    );
-    const project = await websocketService.getProjectData();
-    if (!project) {
-      return;
-    }
-    const extraData: ExtraData = {
-      projectId: project.id,
-      version: clientInfo.version,
-    };
     // 上报一次 FILE_REVIEW 使用
     if (reportSku) {
-      const appConfig = await this._configService.getConfigs();
+      const appConfig = await this._configService.getStore();
       try {
         await api_reportSKU([
           {
@@ -387,7 +365,7 @@ export class WindowService implements WindowServiceTrait {
       return;
     }
     // 上报一次 CODE_REVIEW 使用
-    const appConfig = await this._configService.getConfigs();
+    const appConfig = await this._configService.getStore();
     try {
       await api_reportSKU([
         {
@@ -490,5 +468,22 @@ export class WindowService implements WindowServiceTrait {
     const mainWindow = this.getWindow(WindowType.Main);
     const reviewPage = mainWindow.getPage(MainWindowPageType.Review);
     return reviewPage.reviewSubProcess.proxyFn.getReviewFileContent(filePath);
+  }
+
+  private _parseExtraData(): ExtraData | undefined {
+    const clientInfo = getService(ServiceType.WEBSOCKET).getClientInfo();
+    if (!clientInfo?.currentProject.length || !clientInfo?.version.length) {
+      return;
+    }
+    const projectData = this._dataService.getProjectData(
+      clientInfo.currentProject,
+    );
+    if (!projectData?.id.length) {
+      return;
+    }
+    return {
+      projectId: projectData.id,
+      version: clientInfo.version,
+    };
   }
 }

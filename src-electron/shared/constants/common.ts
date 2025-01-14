@@ -1,5 +1,5 @@
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
-import { WindowType } from 'shared/types/WindowType';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
 
 export const ACTION_API_KEY = 'actionApi' as const;
 export const CONTROL_API_KEY = 'controlApi' as const;

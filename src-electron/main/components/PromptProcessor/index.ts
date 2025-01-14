@@ -1,20 +1,25 @@
 import { createHash } from 'crypto';
+
+import completionLog from 'main/components/Loggers/completionLog';
+import completionQuestionLog from 'main/components/Loggers/completionQuestionLog';
 import { PromptElements } from 'main/components/PromptExtractor/types';
 import { LRUCache } from 'main/components/PromptProcessor/types';
 import {
   getCompletionType,
   processGeneratedSuggestions,
 } from 'main/components/PromptProcessor/utils';
-import { ServiceType } from 'shared/types/service';
 import { api_question } from 'main/request/api';
-import { Completions, CompletionType } from 'shared/types/common';
 import { container, getService } from 'main/services';
-import completionLog from 'main/components/Loggers/completionLog';
-import completionQuestionLog from 'main/components/Loggers/completionQuestionLog';
 import { WindowService } from 'main/services/WindowService';
-import { WindowType } from 'shared/types/WindowType';
+
 import { UpdateStatusActionMessage } from 'shared/types/ActionMessage';
-import { Status } from 'shared/types/service/WindowServiceTrait/StatusWindowType';
+import {
+  Completions,
+  CompletionStatus,
+  CompletionType,
+} from 'shared/types/common';
+import { ServiceType } from 'shared/types/service';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
 
 export class PromptProcessor {
   private _abortController?: AbortController;
@@ -28,14 +33,14 @@ export class PromptProcessor {
     promptElements: PromptElements,
     projectId: string,
   ): Promise<Completions | undefined> {
-    const appConfig = await getService(ServiceType.CONFIG).getConfigs();
+    const appConfig = await getService(ServiceType.CONFIG).getStore();
     const cacheKey = createHash('sha1')
       .update(promptElements.fullPrefix.trimEnd())
       .digest('base64');
     const completionCached = this._cache.get(cacheKey);
     this._statusWindow.sendMessageToRenderer(
       new UpdateStatusActionMessage({
-        status: Status.Standby,
+        status: CompletionStatus.Standby,
         detail: '已从缓存中获取到补全',
       }),
     );
@@ -62,7 +67,7 @@ export class PromptProcessor {
 
     this._statusWindow.sendMessageToRenderer(
       new UpdateStatusActionMessage({
-        status: Status.Requesting,
+        status: CompletionStatus.Requesting,
         detail: '正在向服务器请求补全……',
       }),
     );
@@ -70,8 +75,7 @@ export class PromptProcessor {
       question: await promptElements.stringify(completionType),
       maxTokens: completionConfig.maxTokenCount,
       temperature: completionConfig.temperature,
-      // 2024-10-15 仅保留如下 stop 参数，去除 \n  \n}  }等
-      stop: ['<fim_pad>', '<｜end▁of▁sentence｜>'],
+      stop: completionConfig.stopTokens,
       suffix: '',
       plugin: 'SI',
       profileModel: appConfig.activeModel,
@@ -114,7 +118,7 @@ export class PromptProcessor {
     }
     this._statusWindow.sendMessageToRenderer(
       new UpdateStatusActionMessage({
-        status: Status.Empty,
+        status: CompletionStatus.Empty,
         detail: 'AI 认为无需补全',
       }),
     );

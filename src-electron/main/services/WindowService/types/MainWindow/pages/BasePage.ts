@@ -1,5 +1,6 @@
 import { container } from 'main/services';
 import { WindowService } from 'main/services/WindowService';
+
 import { MAIN_WINDOW_PAGE_URL_MAPPING } from 'shared/constants/common';
 import {
   MainWindowActivePageActionMessage,
@@ -7,7 +8,7 @@ import {
 } from 'shared/types/ActionMessage';
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import { ServiceType } from 'shared/types/service';
-import { WindowType } from 'shared/types/WindowType';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
 
 export class BasePage {
   readonly _type: MainWindowPageType;

@@ -1,12 +1,15 @@
 import log from 'electron-log/main';
 import { NsisUpdater, ProgressInfo, UpdateInfo } from 'electron-updater';
 import { injectable, inject } from 'inversify';
-import packageJson from 'root/package.json';
-import { ServiceType } from 'shared/types/service';
-import { UpdaterServiceTrait } from 'shared/types/service/UpdaterServiceTrait';
-import { WindowType } from 'shared/types/WindowType';
-import { ConfigService } from 'main/services/ConfigService';
+
 import { WindowService } from 'main/services/WindowService';
+
+import packageJson from 'root/package.json';
+
+import { ServiceType } from 'shared/types/service';
+import { ConfigService } from 'main/services/ConfigService';
+import { UpdaterServiceTrait } from 'shared/types/service/UpdaterServiceTrait';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
 
 @injectable()
 export class UpdaterService implements UpdaterServiceTrait {
@@ -28,7 +31,7 @@ export class UpdaterService implements UpdaterServiceTrait {
   }
 
   async init() {
-    const { baseServerUrl } = this._configService.getConfigsSync();
+    const baseServerUrl = this._configService.store.get('baseServerUrl');
     this.updateUrl = `${baseServerUrl}/h3c-ai-assistant/plugin/sourceinsight`;
     this._updater = new NsisUpdater({
       channel: 'release',

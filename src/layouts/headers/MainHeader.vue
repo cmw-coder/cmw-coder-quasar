@@ -2,9 +2,10 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { bus } from 'boot/bus';
 import { ServiceType } from 'shared/types/service';
-import { WindowType } from 'shared/types/WindowType';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
+
+import { bus } from 'boot/bus';
 import { useService } from 'utils/common';
 
 interface Props {

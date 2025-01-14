@@ -2,12 +2,12 @@ import { ChatFileContent, ChatItem } from 'shared/types/ChatMessage';
 import {
   AppData,
   ModelConfig,
-} from 'shared/types/service/DataStoreServiceTrait/types';
+} from 'shared/types/service/DataServiceTrait/types';
 
-export interface DataStoreServiceTrait {
-  getAppDataAsync(): Promise<AppData>;
+export interface DataServiceTrait {
+  getStoreAsync(): Promise<AppData>;
 
-  setAppDataAsync<T extends keyof AppData>(
+  setStoreAsync<T extends keyof AppData>(
     key: T,
     value: AppData[T],
   ): Promise<void>;

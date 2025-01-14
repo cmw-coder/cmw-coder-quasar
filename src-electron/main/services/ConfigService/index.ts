@@ -1,38 +1,28 @@
 import log from 'electron-log/main';
 import ElectronStore from 'electron-store';
 import { injectable } from 'inversify';
-import { userInfo } from 'os';
-import { extend } from 'quasar';
+import { userInfo } from 'node:os';
+
 import { container } from 'main/services';
 import { WindowService } from 'main/services/WindowService';
-import { LinseerConfigStore } from 'main/stores/config';
-import { NetworkZone, defaultAppConfigNetworkZoneMap } from 'shared/config';
-import {
-  COMPLETION_CONFIG_BOOLEAN_CONSTANTS,
-  COMPLETION_CONFIG_NUMBER_CONSTANTS,
-} from 'shared/constants/config';
+
 import {
   SwitchLocaleActionMessage,
   ToggleDarkModeActionMessage,
 } from 'shared/types/ActionMessage';
 import { ServiceType } from 'shared/types/service';
 import { ConfigServiceTrait } from 'shared/types/service/ConfigServiceTrait';
+import {
+  DEFAULT_CONFIG_BASE,
+  DEFAULT_CONFIG_MAP,
+} from 'shared/types/service/ConfigServiceTrait/constants';
 import { AppConfig } from 'shared/types/service/ConfigServiceTrait/types';
-
-const defaultStoreData = extend<AppConfig>(
-  true,
-  {},
-  defaultAppConfigNetworkZoneMap[NetworkZone.Normal],
-);
-defaultStoreData.username = userInfo().username;
 
 @injectable()
 export class ConfigService implements ConfigServiceTrait {
-  configStore = new LinseerConfigStore();
-
-  appConfigStore = new ElectronStore<AppConfig>({
+  store = new ElectronStore<AppConfig>({
     name: 'appConfig',
-    defaults: defaultStoreData,
+    defaults: { ...DEFAULT_CONFIG_BASE, username: userInfo().username },
     migrations: {
       '1.2.1': (store) => {
         log.info('Upgrading "appConfig" store to 1.2.1 ...');
@@ -65,67 +55,79 @@ export class ConfigService implements ConfigServiceTrait {
           store.set('baseServerUrl', 'http://10.113.36.121');
         }
       },
-      '1.4.4': (store) => {
-        log.info('Upgrading "appConfig" store to 1.4.4 ...');
-        const locale = store.get('locale');
-        if (locale === 'ZH-CN') {
-          store.set('locale', 'zh-CN');
-        }
-        store.set(
-          'completion',
-          Object.fromEntries([
-            ...Object.entries(COMPLETION_CONFIG_BOOLEAN_CONSTANTS).map(
-              ([key, value]) => [key, value.default],
-            ),
-            ...Object.entries(COMPLETION_CONFIG_NUMBER_CONSTANTS).map(
-              ([key, value]) => [key, value.default],
-            ),
-          ]),
-        );
-      },
       '1.5.0': (store) => {
         log.info('Upgrading "appConfig" store to 1.5.0 ...');
-        store.set(
-          'completion',
-          Object.fromEntries([
-            ...Object.entries(COMPLETION_CONFIG_BOOLEAN_CONSTANTS).map(
-              ([key, value]) => [key, value.default],
-            ),
-            ...Object.entries(COMPLETION_CONFIG_NUMBER_CONSTANTS).map(
-              ([key, value]) => [key, value.default],
-            ),
-          ]),
-        );
         store.set('showSelectedTipsWindow', true);
         store.set('showStatusWindow', true);
+      },
+      '1.5.2': (store) => {
+        log.info('Upgrading "appConfig" store to 1.5.2 ...');
+        store.set('locale', 'zh-CN');
+        const {
+          showSelectedTipsWindow,
+          completionConfigs,
+          completion,
+          generic,
+          shortcut,
+          statistic,
+        } = DEFAULT_CONFIG_MAP[store.get('networkZone')];
+        store.set({
+          showSelectedTipsWindow,
+          completionConfigs,
+          completion,
+          generic,
+          shortcut,
+          statistic,
+        });
       },
     },
   });
 
-  constructor() {}
-
-  getConfigsSync() {
-    return this.appConfigStore.store;
+  constructor() {
+    if (!this.store.get('username')) {
+      this.store.set('username', userInfo().username);
+    }
   }
 
-  async getConfigs() {
-    return this.appConfigStore.store;
+  async getStore() {
+    return this.store.store;
   }
 
-  async getConfig<T extends keyof AppConfig>(key: T) {
-    return this.appConfigStore.get(key);
+  async get<Key extends keyof AppConfig>(key: Key): Promise<AppConfig[Key]>;
+  async get<Key extends keyof AppConfig>(
+    key: Key,
+    defaultValue: Required<AppConfig>[Key],
+  ): Promise<Required<AppConfig>[Key]>;
+  async get<Key extends string, Value = unknown>(
+    key: Exclude<Key, keyof AppConfig>,
+    defaultValue?: Value,
+  ): Promise<Value> {
+    return this.store.get(key, defaultValue);
   }
 
-  async setConfig<T extends keyof AppConfig>(key: T, value: AppConfig[T]) {
-    this.appConfigStore.set(key, value);
+  async set<Key extends keyof AppConfig>(
+    key: Key,
+    value?: AppConfig[Key],
+  ): Promise<void>;
+  async set(key: string, value: unknown): Promise<void>;
+  async set(object: Partial<AppConfig>): Promise<void>;
+  async set<Key extends keyof AppConfig>(
+    keyOrObject: Key | string | Partial<AppConfig>,
+    value?: unknown,
+  ): Promise<void> {
+    if (typeof keyOrObject === 'object') {
+      this.store.set(keyOrObject);
+    } else {
+      this.store.set(keyOrObject, value);
+    }
   }
 
   async setConfigs(data: Partial<AppConfig>) {
-    this.appConfigStore.set(data);
+    this.store.set(data);
   }
 
   async setDarkMode(dark: boolean) {
-    this.appConfigStore.set('darkMode', dark);
+    this.store.set('darkMode', dark);
     // Notify other windows that theme has changed
     const windowService = container.get<WindowService>(ServiceType.WINDOW);
     windowService.windowMap.forEach((baseWindow) => {
@@ -134,7 +136,7 @@ export class ConfigService implements ConfigServiceTrait {
   }
 
   async setLocale(locale: string): Promise<void> {
-    this.appConfigStore.set('locale', locale);
+    this.store.set('locale', locale);
     // Notify other windows that locale has changed
     const windowService = container.get<WindowService>(ServiceType.WINDOW);
     windowService.windowMap.forEach((baseWindow) => {

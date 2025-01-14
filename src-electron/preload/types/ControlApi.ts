@@ -1,15 +1,13 @@
 import { ipcRenderer } from 'electron';
 
 import { CONTROL_API_KEY } from 'shared/constants/common';
-import { WindowType } from 'shared/types/WindowType';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
 
 export enum ControlType {
   Close = 'Close',
-  DevTools = 'DevTools',
   Hide = 'Hide',
   Minimize = 'Minimize',
   Move = 'Move',
-  Reload = 'Reload',
   Resize = 'Resize',
   Show = 'Show',
   ToggleMaximize = 'ToggleMaximize',
@@ -23,16 +21,6 @@ export interface ControlMessage {
 
 export class CloseControlMessage implements ControlMessage {
   type = ControlType.Close;
-  data: undefined;
-  windowType: WindowType;
-
-  constructor(windowType: WindowType) {
-    this.windowType = windowType;
-  }
-}
-
-export class DevToolsControlMessage implements ControlMessage {
-  type = ControlType.DevTools;
   data: undefined;
   windowType: WindowType;
 
@@ -68,16 +56,6 @@ export class MoveControlMessage implements ControlMessage {
 
   constructor(position: { x?: number; y?: number }, windowType: WindowType) {
     this.data = position;
-    this.windowType = windowType;
-  }
-}
-
-export class ReloadControlMessage implements ControlMessage {
-  type = ControlType.Reload;
-  data: undefined;
-  windowType: WindowType;
-
-  constructor(windowType: WindowType) {
     this.windowType = windowType;
   }
 }
@@ -125,18 +103,6 @@ type ControlMessageUnion =
   | ShowControlMessage
   | ToggleMaximizeControlMessage;
 
-interface ControlMessageMapping {
-  [ControlType.Close]: CloseControlMessage;
-  [ControlType.DevTools]: DevToolsControlMessage;
-  [ControlType.Hide]: HideControlMessage;
-  [ControlType.Minimize]: MinimizeControlMessage;
-  [ControlType.Move]: MoveControlMessage;
-  [ControlType.Reload]: ReloadControlMessage;
-  [ControlType.Resize]: ResizeControlMessage;
-  [ControlType.Show]: ShowControlMessage;
-  [ControlType.ToggleMaximize]: ToggleMaximizeControlMessage;
-}
-
 type GenericCallBack = (data: never) => void;
 
 const handlerMap = new Map<WindowType, Map<ControlType, GenericCallBack>>();
@@ -144,18 +110,6 @@ const handlerMap = new Map<WindowType, Map<ControlType, GenericCallBack>>();
 // -------------------------------------------------------------------------------------------------------
 // ↑↑↑↑↑↑↑↑↑↑                                   Local stuff                                     ↑↑↑↑↑↑↑↑↑↑
 // -------------------------------------------------------------------------------------------------------
-
-export const registerControlCallback = <T extends keyof ControlMessageMapping>(
-  windowType: WindowType,
-  controlType: T,
-  callback: (data: ControlMessageMapping[T]['data']) => void,
-) => {
-  if (handlerMap.has(windowType)) {
-    handlerMap.get(windowType)?.set(controlType, callback);
-  } else {
-    handlerMap.set(windowType, new Map([[controlType, callback]]));
-  }
-};
 
 export const triggerControlCallback = (
   windowType: WindowType,

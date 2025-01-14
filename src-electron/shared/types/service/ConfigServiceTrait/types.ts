@@ -1,7 +1,18 @@
-import { NetworkZone } from 'shared/config';
+import { Shortcut } from 'shared/types/keys';
+import { AvailableLocales } from 'web/i18n';
 
-export interface CompletionConfigType {
-  contextLimit: number;
+export enum NetworkZone {
+  // 红区
+  Normal = 'Normal',
+  // 黄、绿区
+  Public = 'Public',
+  // 路由红区
+  Secure = 'Secure',
+  // 未知 -- 默认值
+  Unknown = 'Unknown',
+}
+
+export interface CompletionConfig {
   maxTokenCount: number;
   stopTokens: string[];
   suggestionCount: number;
@@ -18,39 +29,34 @@ export interface AppConfig {
   activeModel: string;
   activeModelKey: string;
   activeChat: string;
-  locale: string;
+  locale: AvailableLocales;
   useMultipleChat: boolean;
   useEnterSend: boolean;
   darkMode: boolean;
   developerMode: boolean;
   showSelectedTipsWindow: boolean;
   showStatusWindow: boolean;
+  completionConfigs: {
+    function: CompletionConfig;
+    snippet: CompletionConfig;
+  };
   completion: {
-    completionOnPaste: boolean;
-    debounceDelay: number;
-    interactionUnlockDelay: number;
-    pasteMaxLineCount: number;
+    debounceDelayMilliSeconds: number;
+    pasteFixMaxTriggerLineCount: number;
     prefixLineCount: number;
     recentFileCount: number;
     suffixLineCount: number;
   };
-  completionConfigs: {
-    function: CompletionConfigType;
-    line: CompletionConfigType;
-    snippet: CompletionConfigType;
+  generic: {
+    autoSaveIntervalSeconds: number;
+    backupIntervalSeconds: number;
+    interactionUnlockDelayMilliSeconds: number;
+  };
+  shortcut: {
+    commit: Shortcut;
+    manualCompletion: Shortcut;
+  };
+  statistic: {
+    checkEditedCompletion: boolean;
   };
 }
-
-export type AppCompletionBooleanConfig = Pick<
-  AppConfig['completion'],
-  'completionOnPaste'
->;
-export type AppCompletionNumberConfig = Pick<
-  AppConfig['completion'],
-  | 'debounceDelay'
-  | 'interactionUnlockDelay'
-  | 'pasteMaxLineCount'
-  | 'prefixLineCount'
-  | 'recentFileCount'
-  | 'suffixLineCount'
->;

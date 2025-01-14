@@ -1,9 +1,8 @@
 import { SelectionData } from 'cmw-coder-subprocess';
 
-import { CompletionCacheClientMessage } from 'shared/types/WsMessage';
+import { CompletionStatusData, GenerateType } from 'shared/types/common';
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
-import { StatusData } from 'shared/types/service/WindowServiceTrait/StatusWindowType';
-import { GenerateType } from 'shared/types/common';
+import { CompletionCacheClientMessage } from 'shared/types/WsMessage';
 
 export enum ActionType {
   CompletionClear = 'CompletionClear',
@@ -160,9 +159,9 @@ export class MainWindowCheckPageReadyActionMessage implements ActionMessage {
 
 export class UpdateStatusActionMessage implements ActionMessage {
   type = ActionType.UpdateStatus;
-  data: StatusData;
+  data: CompletionStatusData;
 
-  constructor(data: StatusData) {
+  constructor(data: CompletionStatusData) {
     this.data = data;
   }
 }

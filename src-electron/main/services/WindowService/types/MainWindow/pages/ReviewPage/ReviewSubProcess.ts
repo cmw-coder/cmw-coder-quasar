@@ -7,9 +7,11 @@ import {
   ReviewRequestParams,
   ReviewResult,
   ReviewState,
-  Selection,
+  SelectionData
 } from 'cmw-coder-subprocess';
 import { app } from 'electron';
+import path from 'path';
+
 import reviewLog from 'main/components/Loggers/reviewLog';
 import {
   api_code_review,
@@ -21,16 +23,15 @@ import {
 import { container } from 'main/services';
 import { ConfigService } from 'main/services/ConfigService';
 import { WebsocketService } from 'main/services/WebsocketService';
-// import { timeout } from 'main/utils/common';
 import { WindowService } from 'main/services/WindowService';
 import { cmwCoderSubprocessPath } from 'main/services/WindowService/constants';
-import path from 'path';
+
 import {
   ReviewDataUpdateActionMessage,
   ReviewFileListUpdateActionMessage,
 } from 'shared/types/ActionMessage';
 import { ServiceType } from 'shared/types/service';
-import { WindowType } from 'shared/types/WindowType';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
 
 export class ReviewSubProcess
   extends MessageToReviewChildProxy
@@ -50,20 +51,20 @@ export class ReviewSubProcess
 
   async getConfig(): Promise<AppConfig> {
     const configService = container.get<ConfigService>(ServiceType.CONFIG);
-    return configService.getConfigs();
+    return configService.getStore();
   }
 
   async log(...payloads: never[]): Promise<void> {
     reviewLog.log(...payloads);
   }
 
-  async getReferences(selection: Selection): Promise<Reference[]> {
+  async getReferences(selectionData: SelectionData): Promise<Reference[]> {
     const websocketService = container.get<WebsocketService>(
       ServiceType.WEBSOCKET,
     );
-    return websocketService.getCodeReviewReferences(selection);
+    return websocketService.getCodeReviewReferences(selectionData);
     // 性能测试
-    // console.log('getReferences', selection.file);
+    // console.log('getReferences', selectionData.file);
     // await timeout(1000);
     // return [];
   }

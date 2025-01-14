@@ -1,16 +1,28 @@
 import { AppConfig } from 'shared/types/service/ConfigServiceTrait/types';
 
 export interface ConfigServiceTrait {
-  getConfigs(): Promise<AppConfig>;
+  get<Key extends keyof AppConfig>(key: Key): Promise<AppConfig[Key]>;
 
-  getConfig<T extends keyof AppConfig>(
-    key: T,
-  ): Promise<AppConfig[T] | undefined>;
+  get<Key extends keyof AppConfig>(
+    key: Key,
+    defaultValue: Required<AppConfig>[Key],
+  ): Promise<Required<AppConfig>[Key]>;
 
-  setConfig<T extends keyof AppConfig>(
-    key: T,
-    value: AppConfig[T],
+  get<Key extends string, Value = unknown>(
+    key: Exclude<Key, keyof AppConfig>,
+    defaultValue?: Value,
+  ): Promise<Value>;
+
+  getStore(): Promise<AppConfig>;
+
+  set<Key extends keyof AppConfig>(
+    key: Key,
+    value?: AppConfig[Key],
   ): Promise<void>;
+
+  set(key: string, value: unknown): Promise<void>;
+
+  set(object: Partial<AppConfig>): Promise<void>;
 
   setConfigs(configs: Partial<AppConfig>): Promise<void>;
 

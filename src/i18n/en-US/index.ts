@@ -22,6 +22,7 @@ export default {
         copy: 'Copy',
         dismiss: 'Dismiss',
         encoding: 'File Encoding',
+        tooManyLines: 'Code lines > 5000, code highlighting disabled',
       },
       notifications: {
         copyFailed: 'Failed to copy code',
@@ -39,7 +40,7 @@ export default {
           },
         },
         labels: {
-          refreshBackups: 'Refresh Backups',
+          refreshBackups: 'Refresh File Backup List',
           current: 'Current File Backup List',
           previous: 'Previous File Backup List',
           noBackup: 'No backup',
@@ -84,6 +85,16 @@ export default {
     DarkModeButton: {
       labels: {
         toggleDarkMode: 'Toggle dark mode',
+      },
+    },
+    ItemNumberInput: {
+      tooltips: {
+        resetToDefault: 'Reset to default',
+      },
+    },
+    ItemToggle: {
+      tooltips: {
+        resetToDefault: 'Reset to default',
       },
     },
     LoginPanels: {
@@ -179,24 +190,53 @@ export default {
           title: 'Code Completion',
           productLine: 'Product Line',
           model: 'Model',
-          completionOnPaste: 'Trigger Completion On Paste',
-          debounceDelay: 'Trigger Debounce Delay',
-          interactionUnlockDelay: 'User Interaction Unlock Delay',
-          pasteMaxLineCount: 'Max Trigger Paste Fix Line Count',
-          prefixLineCount: 'Context Prefix Line Count',
-          recentFileCount: 'Recent Accessed File Count',
-          suffixLineCount: 'Context Suffix Line Count',
-          rangeHint: 'Range: {min} ~ {max}',
         },
-        tooltips: {
-          resetToDefault: 'Reset to default',
+        numberProps: {
+          debounceDelay: {
+            title: 'Trigger Debounce Delay',
+            caption:
+              'Range: 0 - 500. The delay of completion trigger after typing',
+            tooLow:
+              'Setting the value too low may cause high server and CPU load',
+            tooHigh: 'Setting the value too high may cause slow response',
+          },
+          pasteFixMaxTriggerLineCount: {
+            title: 'Max Trigger Paste Fix Line Count',
+            caption:
+              'Range: 0 - 100. The maximum line count to trigger paste fix',
+            tooHigh:
+              'Setting the value too high may cause slow response and performance issues',
+          },
+          prefixLineCount: {
+            title: 'Context Prefix Line Count',
+            caption:
+              'Range: 0 - 1000. The line count of context prefix for completion',
+            tooHigh:
+              'Setting the value too high may cause slow response and performance issues',
+          },
+          recentFileCount: {
+            title: 'Recent Accessed File Count',
+            caption:
+              'Range: 0 - 50. The count of recent accessed files for completion',
+            tooHigh:
+              'Setting the value too high may cause slow response and performance issues',
+          },
+          suffixLineCount: {
+            title: 'Context Suffix Line Count',
+            caption:
+              'Range: 0 - 1000. The line count of context suffix for completion',
+            tooHigh:
+              'Setting the value too high may cause slow response and performance issues',
+          },
+        },
+        suffixes: {
+          milliseconds: 'ms',
+          minutes: 'min',
+          seconds: 'sec',
         },
       },
       GeneralCard: {
         labels: {
-          backupInterval: 'Backup Interval',
-          backupIntervalNotice:
-            'Range: 0 - 1140. The interval of auto backup, set to 0 to disable auto backup',
           baseServerUrl: 'Base Server Address',
           developerOptions: 'Developer Options',
           displayTheme: 'Display Theme',
@@ -206,20 +246,52 @@ export default {
             light: 'Light',
           },
           locale: 'Language',
-          minutes: 'minutes',
-          showSelectActionWindow: 'Show Selection Action Window',
-          showSelectActionWindowNotice:
-            'Disable this option to prevent the action window from appearing when you select the code.\n' +
-            'You can still use CTRL + I or CTRL + L for relevant operations.',
-          showStatusWindow: 'Show Generate Status Window',
-          showStatusWindowNotice:
-            'Disable this option to stop the status window from appearing when the editor launches.',
           title: 'General',
           transparentFallback: 'Transparent fallback (Windows 7)',
           zoomFix: 'Fix window zoom',
         },
-        tooltips: {
-          resetToDefault: 'Reset to default',
+        numberProps: {
+          autoSave: {
+            title: 'Auto Save Interval',
+            caption:
+              'Range: 0 - 3600. The interval of auto save, set to 0 to disable auto save',
+            tooLow:
+              'Setting the value too low may increase disk IO and CPU load',
+          },
+          backupInterval: {
+            title: 'Backup Interval',
+            caption:
+              'Range: 0 - 3600. The interval of auto backup, set to 0 to disable auto backup',
+            tooLow:
+              'Setting the value too low may increase disk IO and CPU load',
+          },
+          interactionUnlockDelay: {
+            title: 'User Interaction Unlock Delay',
+            caption:
+              'Range: 0 - 500. The duration of internal lock after user interaction',
+            tooLow:
+              'Setting the value too low may cause data race and stability issues',
+            tooHigh:
+              'Setting the value too high may cause slow response',
+          }
+        },
+        suffixes: {
+          milliseconds: 'milliseconds',
+          minutes: 'minutes',
+          seconds: 'seconds',
+        },
+        toggleProps: {
+          showSelectedTipsWindow: {
+            title: 'Show Selection Tips Window',
+            caption:
+              'Disable this option to prevent the tips window from appearing when you select the code\n' +
+              'You can still use Ctrl + Alt + I or Ctrl + Alt + L for relevant operations',
+          },
+          showStatusWindow: {
+            title: 'Show Generate Status Window',
+            caption:
+              'Disable this option to stop the status window from appearing',
+          },
         },
       },
       UpdateCard: {

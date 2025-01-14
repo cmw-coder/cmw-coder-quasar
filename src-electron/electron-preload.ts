@@ -9,20 +9,18 @@ import {
 } from 'preload/types/ActionApi';
 import {
   CloseControlMessage,
-  DevToolsControlMessage,
   HideControlMessage,
   MinimizeControlMessage,
   MoveControlMessage,
-  ReloadControlMessage,
-  ResizeControlMessage,
   sendControlAction,
   ShowControlMessage,
   ToggleMaximizeControlMessage,
 } from 'preload/types/ControlApi';
+
 import { ACTION_API_KEY, CONTROL_API_KEY } from 'shared/constants/common';
 import { ActionMessage } from 'shared/types/ActionMessage';
-import { WindowType } from 'shared/types/WindowType';
 import { SERVICE_CALL_KEY, ServiceType } from 'shared/types/service';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
 
 contextBridge.exposeInMainWorld(ACTION_API_KEY, {
   register: registerAction,
@@ -37,18 +35,12 @@ contextBridge.exposeInMainWorld(ACTION_API_KEY, {
 contextBridge.exposeInMainWorld(CONTROL_API_KEY, {
   close: (windowType: WindowType) =>
     sendControlAction(new CloseControlMessage(windowType)),
-  devTools: (windowType: WindowType) =>
-    sendControlAction(new DevToolsControlMessage(windowType)),
   hide: (windowType: WindowType) =>
     sendControlAction(new HideControlMessage(windowType)),
   minimize: (windowType: WindowType) =>
     sendControlAction(new MinimizeControlMessage(windowType)),
   move: (position: { x?: number; y?: number }, windowType: WindowType) =>
     sendControlAction(new MoveControlMessage(position, windowType)),
-  reload: (windowType: WindowType) =>
-    sendControlAction(new ReloadControlMessage(windowType)),
-  resize: (size: { width?: number; height?: number }, windowType: WindowType) =>
-    sendControlAction(new ResizeControlMessage(size, windowType)),
   show: (windowType: WindowType) =>
     sendControlAction(new ShowControlMessage(windowType)),
   toggleMaximize: () => sendControlAction(new ToggleMaximizeControlMessage()),

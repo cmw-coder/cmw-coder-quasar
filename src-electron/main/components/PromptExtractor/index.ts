@@ -1,23 +1,24 @@
 import { basename, extname } from 'path';
+
+import completionLog from 'main/components/Loggers/completionLog';
 import {
   PromptElements,
   RawInputs,
   SimilarSnippetConfig,
 } from 'main/components/PromptExtractor/types';
 import { separateTextByLine } from 'main/components/PromptExtractor/utils';
-import { container, getService } from 'main/services';
-import { TextDocument } from 'main/types/TextDocument';
-import { CaretPosition, SimilarSnippet } from 'shared/types/common';
-import { ServiceType } from 'shared/types/service';
 import { apiRagCode, apiRagFunctionDeclaration } from 'main/request/rag';
+import { container, getService } from 'main/services';
 import { ConfigService } from 'main/services/ConfigService';
-import { NetworkZone } from 'shared/config';
 import { WindowService } from 'main/services/WindowService';
-import { WindowType } from 'shared/types/WindowType';
-import completionLog from 'main/components/Loggers/completionLog';
-import { asyncMemoizeWithLimit } from 'shared/utils';
+import { TextDocument } from 'main/types/TextDocument';
+
 import { UpdateStatusActionMessage } from 'shared/types/ActionMessage';
-import { Status } from 'shared/types/service/WindowServiceTrait/StatusWindowType';
+import { CaretPosition, CompletionStatus, SimilarSnippet } from 'shared/types/common';
+import { ServiceType } from 'shared/types/service';
+import { NetworkZone } from 'shared/types/service/ConfigServiceTrait/types';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
+import { asyncMemoizeWithLimit } from 'shared/utils';
 
 export class PromptExtractor {
   private _globals: string = '';
@@ -42,7 +43,7 @@ export class PromptExtractor {
   ): Promise<PromptElements> {
     this._statusWindow.sendMessageToRenderer(
       new UpdateStatusActionMessage({
-        status: Status.Prompting,
+        status: CompletionStatus.Prompting,
         detail: '正在构造提示词……',
       }),
     );
@@ -238,7 +239,7 @@ export class PromptExtractor {
 
   private async _getRagCode(prefix: string, suffix: string, filePath: string) {
     const configService = container.get<ConfigService>(ServiceType.CONFIG);
-    const networkZone = await configService.getConfig('networkZone');
+    const networkZone = await configService.get('networkZone');
     if (networkZone !== NetworkZone.Normal) {
       return '';
     }
@@ -273,7 +274,7 @@ export class PromptExtractor {
     currentRepoPath: string,
   ) {
     const configService = container.get<ConfigService>(ServiceType.CONFIG);
-    const networkZone = await configService.getConfig('networkZone');
+    const networkZone = await configService.get('networkZone');
     if (networkZone !== NetworkZone.Normal) {
       return [];
     }

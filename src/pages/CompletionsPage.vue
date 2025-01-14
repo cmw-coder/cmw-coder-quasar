@@ -12,7 +12,7 @@ import MultiLine from 'components/CompletionCodes/MultiLine.vue';
 
 const baseName = 'pages.CompletionsPage';
 
-const dataStoreService = useService(ServiceType.DATA_STORE);
+const dataStoreService = useService(ServiceType.DATA);
 
 const cacheOffset = ref(0);
 const completionCount = reactive({
@@ -66,7 +66,7 @@ onMounted(async () => {
     }
   });
 
-  const appData = await dataStoreService.getAppDataAsync();
+  const appData = await dataStoreService.getStoreAsync();
   console.log('CompletionImmersivePage.vue appData', appData);
   transparentFallback.value = appData.compatibility.transparentFallback;
 });

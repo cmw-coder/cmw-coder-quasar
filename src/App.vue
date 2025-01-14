@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 
 import { ActionType } from 'shared/types/ActionMessage';
 import { ServiceType } from 'shared/types/service';
+
 import { useHighlighter } from 'stores/highlighter';
 import { ActionApi } from 'types/ActionApi';
 import { useService } from 'utils/common';
@@ -28,18 +29,18 @@ onMounted(async () => {
   actionApi.register(ActionType.SwitchLocale, (newLocale) => {
     locale.value = newLocale;
   });
-  const darkMode = await configService.getConfig('darkMode');
+  const darkMode = await configService.get('darkMode');
   if (darkMode === undefined) {
     dark.set('auto');
-    await configService.setConfig('darkMode', dark.isActive);
+    await configService.set('darkMode', dark.isActive);
   } else {
     dark.set(darkMode);
   }
 
-  const currentLocale = await configService.getConfig('locale');
+  const currentLocale = await configService.get('locale');
   if (!currentLocale?.length) {
     locale.value = lang.getLocale() ?? 'en-US';
-    await configService.setConfig('locale', locale.value);
+    await configService.set('locale', locale.value);
   } else {
     locale.value = currentLocale;
   }

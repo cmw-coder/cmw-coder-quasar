@@ -1,6 +1,6 @@
 import { RouteRecordRaw } from 'vue-router';
 
-import { WindowType } from 'shared/types/WindowType';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
 
 // noinspection JSUnusedGlobalSymbols
 export const routes: RouteRecordRaw[] = [

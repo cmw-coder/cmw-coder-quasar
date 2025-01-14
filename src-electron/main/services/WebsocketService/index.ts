@@ -7,14 +7,20 @@ import { posix, sep } from 'path';
 import { uid } from 'quasar';
 import { WebSocketServer } from 'ws';
 
+import completionLog from 'main/components/Loggers/completionLog';
+import reviewLog from 'main/components/Loggers/reviewLog';
+import statisticsLog from 'main/components/Loggers/statisticsLog';
 import { PromptExtractor } from 'main/components/PromptExtractor';
+import { MODULE_PATH } from 'main/components/PromptExtractor/constants';
 import { RawInputs } from 'main/components/PromptExtractor/types';
 import {
   calculateFunctionPrefix,
   calculateFunctionSuffix,
 } from 'main/components/PromptExtractor/utils';
 import { PromptProcessor } from 'main/components/PromptProcessor';
-import { DataStoreService } from 'main/services/DataStoreService';
+import { getService } from 'main/services';
+import { ConfigService } from 'main/services/ConfigService';
+import { DataService } from 'main/services/DataService';
 import { StatisticsService } from 'main/services/StatisticsService';
 import { MAX_REFERENCES_REQUEST_TIME } from 'main/services/WebsocketService/constants';
 import {
@@ -24,32 +30,26 @@ import {
 } from 'main/services/WebsocketService/types';
 import { findSvnPath } from 'main/services/WebsocketService/utils';
 import { WindowService } from 'main/services/WindowService';
-import { DataProjectType } from 'main/stores/data/types';
 import { TextDocument } from 'main/types/TextDocument';
-import {
-  CompletionErrorCause,
-  getClientVersion,
-  getProjectData,
-} from 'main/utils/completion';
-import completionLog from 'main/components/Loggers/completionLog';
-import reviewLog from 'main/components/Loggers/reviewLog';
+import { CompletionErrorCause, getClientVersion } from 'main/utils/completion';
+
 import { NEW_LINE_REGEX } from 'shared/constants/common';
-import { MODULE_PATH } from 'main/components/PromptExtractor/constants';
-import { getService } from 'main/services';
-import { ConfigService } from 'main/services/ConfigService';
-import statisticsLog from 'main/components/Loggers/statisticsLog';
 import { UpdateStatusActionMessage } from 'shared/types/ActionMessage';
-import { CaretPosition, GenerateType, Selection } from 'shared/types/common';
+import {
+  CaretPosition,
+  CompletionStatus,
+  GenerateType,
+  Selection,
+} from 'shared/types/common';
 import { MainWindowPageType } from 'shared/types/MainWindowPageType';
 import { ServiceType } from 'shared/types/service';
 import { WebsocketServiceTrait } from 'shared/types/service/WebsocketServiceTrait';
-import { Status } from 'shared/types/service/WindowServiceTrait/StatusWindowType';
-import { WindowType } from 'shared/types/WindowType';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
 import {
   CompletionGenerateServerMessage,
   HandShakeClientMessage,
   ReviewRequestServerMessage,
-  SettingSyncServerMessage,
+  EditorConfigServerMessage,
   StandardResult,
   WsAction,
   WsMessageMapping,
@@ -70,7 +70,6 @@ export class WebsocketService implements WebsocketServiceTrait {
   private _promptProcessor = new PromptProcessor();
   private _promptExtractor = new PromptExtractor();
   private _webSocketServer?: WebSocketServer;
-  // private referencesResolveHandle?: (value: Reference[]) => void;
   private referencesResolveHandleMap = new Map<
     string,
     (value: Reference[]) => void
@@ -79,8 +78,8 @@ export class WebsocketService implements WebsocketServiceTrait {
   constructor(
     @inject(ServiceType.CONFIG)
     private _configService: ConfigService,
-    @inject(ServiceType.DATA_STORE)
-    private _dataStoreService: DataStoreService,
+    @inject(ServiceType.DATA)
+    private _dataStoreService: DataService,
     @inject(ServiceType.STATISTICS)
     private _statisticsReporterService: StatisticsService,
     @inject(ServiceType.WINDOW)
@@ -133,14 +132,13 @@ export class WebsocketService implements WebsocketServiceTrait {
     return this.getClientInfo(this._lastActivePid)?.currentFile;
   }
 
-  async getProjectData() {
+  async getLastActivateProjectData() {
     const project = this.getClientInfo(this._lastActivePid)?.currentProject;
     if (!project) {
       return undefined;
     }
-    const appData = this._dataStoreService.getAppdata();
-    const projectData: DataProjectType | undefined = appData.project[project];
-    if (!projectData || !projectData.id) {
+    const projectData = this._dataStoreService.getProjectData(project);
+    if (!projectData?.id.length) {
       return undefined;
     }
     return projectData;
@@ -214,6 +212,7 @@ export class WebsocketService implements WebsocketServiceTrait {
           pid = data.pid;
           this._clientInfoMap.set(pid, {
             client,
+            currentFile: data.currentFile,
             currentProject: data.currentProject,
             version: data.version,
           });
@@ -221,10 +220,12 @@ export class WebsocketService implements WebsocketServiceTrait {
           log.info(`Websocket client verified, pid: ${pid}`);
           client.send(
             JSON.stringify(
-              new SettingSyncServerMessage({
+              new EditorConfigServerMessage({
                 result: 'success',
-                completionConfig:
-                  await this._configService.getConfig('completion'),
+                completion: await this._configService.get('completion'),
+                generic: await this._configService.get('generic'),
+                // shortcut: await this._configService.get('shortcut'),
+                statistic: await this._configService.get('statistic'),
               }),
             ),
           );
@@ -315,8 +316,9 @@ export class WebsocketService implements WebsocketServiceTrait {
       async ({ data }, pid) => {
         const statusWindow = this._windowService.getWindow(WindowType.Status);
         const { caret, times } = data;
+        const caretPosition = new CaretPosition(caret.line, caret.character);
         const actionId = this._statisticsReporterService.completionBegin(
-          caret,
+          caretPosition,
           times.start,
           times.symbol,
           times.end,
@@ -325,7 +327,7 @@ export class WebsocketService implements WebsocketServiceTrait {
         if (!project || !project.length) {
           statusWindow.sendMessageToRenderer(
             new UpdateStatusActionMessage({
-              status: Status.Failed,
+              status: CompletionStatus.Failed,
               detail: '项目路径无效',
             }),
           );
@@ -336,14 +338,24 @@ export class WebsocketService implements WebsocketServiceTrait {
         }
 
         try {
-          const { id: projectId } = getProjectData(project);
+          const projectData = this._dataStoreService.getProjectData(project);
+          if (!projectData?.id.length) {
+            // noinspection ExceptionCaughtLocallyJS
+            throw new Error(
+              'Completion Generate Failed, no valid project id.',
+              {
+                cause: CompletionErrorCause.projectData,
+              },
+            );
+          }
+
           this._statisticsReporterService.fileRecorderManager.addFileRecorder(
             data.path,
-            projectId,
+            projectData.id,
           );
           this._statisticsReporterService.completionUpdateProjectId(
             actionId,
-            projectId,
+            projectData.id,
           );
 
           const rawInputs = new RawInputs(data, project);
@@ -363,7 +375,7 @@ export class WebsocketService implements WebsocketServiceTrait {
           const completions = await this._promptProcessor.process(
             actionId,
             promptElements,
-            projectId,
+            projectData.id,
           );
           if (completions) {
             this._statisticsReporterService.completionGenerated(
@@ -372,7 +384,7 @@ export class WebsocketService implements WebsocketServiceTrait {
             );
             statusWindow.sendMessageToRenderer(
               new UpdateStatusActionMessage({
-                status: Status.Standby,
+                status: CompletionStatus.Standby,
                 detail: '就绪',
               }),
             );
@@ -421,7 +433,7 @@ export class WebsocketService implements WebsocketServiceTrait {
 
           statusWindow.sendMessageToRenderer(
             new UpdateStatusActionMessage({
-              status: Status.Failed,
+              status: CompletionStatus.Failed,
               detail: `${e}`,
             }),
           );
@@ -487,66 +499,60 @@ export class WebsocketService implements WebsocketServiceTrait {
         clientInfo.currentFile?.length &&
         clientInfo.currentProject?.length
       ) {
-        try {
-          const { caret, context, recentFiles } = data;
-          const { id: projectId } = getProjectData(clientInfo.currentProject);
-          this._statisticsReporterService
-            .copiedLines(
-              context.infix.split(NEW_LINE_REGEX).length,
-              projectId,
-              getClientVersion(pid),
-            )
-            .catch();
-          if (clientInfo.currentFile) {
-            this._statisticsReporterService.fileRecorderManager.addFileRecorder(
-              clientInfo.currentFile,
-              projectId,
-            );
-          }
-          const document = new TextDocument(clientInfo.currentFile);
-          let repo = '';
-          for (const [key, value] of Object.entries(MODULE_PATH)) {
-            if (document.fileName.includes(value)) {
-              repo = key;
-              break;
-            }
-          }
-          this._statisticsReporterService
-            .copiedContents({
-              content: context.infix,
-              context: {
-                prefix: context.prefix,
-                suffix: context.suffix,
-              },
-              path: document.fileName,
-              position: caret,
-              projectId,
-              recentFiles,
-              repo,
-              svn: (
-                this._dataStoreService.getAppdata().project[projectId]?.svn ??
-                []
-              ).map(({ directory }) => directory),
-              userId: (await getService(ServiceType.CONFIG).getConfigs())
-                .username,
-            })
-            .catch();
-        } catch (e) {
-          const error = <Error>e;
-          switch (error.cause) {
-            case CompletionErrorCause.projectData: {
-              console.log('CompletionErrorCause.projectData', error);
-              this._windowService.getWindow(WindowType.ProjectId).show();
-              this._windowService
-                .getWindow(WindowType.ProjectId)
-                .setProject(clientInfo.currentProject);
-              break;
-            }
-            default: {
-              break;
-            }
+        const projectData = this._dataStoreService.getProjectData(
+          clientInfo.currentProject,
+        );
+        if (!projectData?.id.length) {
+          statisticsLog.error(
+            'WsAction.EditorPaste',
+            `No project ID for project "${clientInfo.currentProject}"`,
+          );
+          this._windowService.getWindow(WindowType.ProjectId).show();
+          this._windowService
+            .getWindow(WindowType.ProjectId)
+            .setProject(clientInfo.currentProject);
+          return;
+        }
+
+        const { caret, context, recentFiles } = data;
+        const caretPosition = new CaretPosition(caret.line, caret.character);
+        this._statisticsReporterService
+          .copiedLines(
+            context.infix.split(NEW_LINE_REGEX).length,
+            projectData.id,
+            getClientVersion(pid),
+          )
+          .catch();
+        if (clientInfo.currentFile) {
+          this._statisticsReporterService.fileRecorderManager.addFileRecorder(
+            clientInfo.currentFile,
+            projectData.id,
+          );
+        }
+        const document = new TextDocument(clientInfo.currentFile);
+        let repo = '';
+        for (const [key, value] of Object.entries(MODULE_PATH)) {
+          if (document.fileName.includes(value)) {
+            repo = key;
+            break;
           }
         }
+        this._statisticsReporterService
+          .copiedContents({
+            content: context.infix,
+            context: {
+              prefix: context.prefix,
+              suffix: context.suffix,
+            },
+            path: document.fileName,
+            position: caretPosition,
+            projectId: projectData.id,
+            recentFiles,
+            repo,
+            svn: (projectData?.svn ?? []).map(({ directory }) => directory),
+            userId: (await getService(ServiceType.CONFIG).getStore()).username,
+          })
+          .catch();
       }
     });
     this._registerWsAction(WsAction.EditorSelection, async ({ data }) => {
@@ -573,8 +579,16 @@ export class WebsocketService implements WebsocketServiceTrait {
         ),
         language: 'c',
       };
+
+      const projectData = this._dataStoreService.getProjectData(project);
+      if (!projectData?.id.length) {
+        completionLog.error(
+          'WsAction.EditorSelection',
+          `No project ID for project "${project}"`,
+        );
+        return;
+      }
       try {
-        const { id: projectId } = getProjectData(project);
         await selectionTipsWindow.trigger(
           {
             x: data.dimensions.x,
@@ -582,7 +596,7 @@ export class WebsocketService implements WebsocketServiceTrait {
           },
           selectionData,
           {
-            projectId: projectId,
+            projectId: projectData.id,
             version: getClientVersion(this._lastActivePid),
           },
         );
@@ -603,7 +617,7 @@ export class WebsocketService implements WebsocketServiceTrait {
         if (isFocused !== undefined) {
           if (
             isFocused &&
-            (await this._configService.getConfig('showStatusWindow'))
+            (await this._configService.get('showStatusWindow'))
           ) {
             statusWindow.show(undefined, false);
           } else {

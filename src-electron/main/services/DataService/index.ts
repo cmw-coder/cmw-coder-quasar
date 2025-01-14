@@ -8,40 +8,38 @@ import {
   api_getProductLineQuestionTemplateFile,
   api_getUserTemplateList,
 } from 'main/request/api';
-import { DataStoreBefore1_2_0 } from 'main/stores/data';
-import { DataStoreServiceTrait } from 'shared/types/service/DataStoreServiceTrait';
-import { defaultModelConfig } from 'shared/types/service/DataStoreServiceTrait/constants';
+import { ConfigService } from 'main/services/ConfigService';
+import { LocalBackupManager } from 'main/services/DataService/LocalBackupManager';
+import { LocalChatManager } from 'main/services/DataService/LocalChatManager';
+import { getRevision } from 'main/utils/svn';
+
+import { ChatFileContent } from 'shared/types/ChatMessage';
+import { ServiceType } from 'shared/types/service';
+import { DataServiceTrait } from 'shared/types/service/DataServiceTrait';
+import {
+  DEFAULT_APP_DATA,
+  DEFAULT_MODEL_CONFIG,
+} from 'shared/types/service/DataServiceTrait/constants';
 import {
   AppData,
-  defaultAppData,
   ModelConfig,
   ModelConfigMap,
+  ProjectData,
   WindowData,
-} from 'shared/types/service/DataStoreServiceTrait/types';
-import { WindowType } from 'shared/types/WindowType';
-import { ServiceType } from 'shared/types/service';
-import { getRevision } from 'main/utils/svn';
-import { ConfigService } from 'main/services/ConfigService';
-import { ChatFileContent } from 'shared/types/ChatMessage';
-import { LocalChatManager } from 'main/services/DataStoreService/LocalChatManager';
-import { LocalBackupManager } from 'main/services/DataStoreService/LocalBackupManager';
+} from 'shared/types/service/DataServiceTrait/types';
+import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
 
-const defaultStoreData = extend<AppData>(true, {}, defaultAppData);
+const defaultStoreData = extend<AppData>(true, {}, DEFAULT_APP_DATA);
 
 defaultStoreData.compatibility.transparentFallback =
   parseInt(release().split('.')[0]) < 10;
 
 @injectable()
-export class DataStoreService implements DataStoreServiceTrait {
-  /**
-   * @deprecated
-   */
-  dataStoreBefore1_2_0 = new DataStoreBefore1_2_0();
-
+export class DataService implements DataServiceTrait {
   private _activeModelContent: ModelConfig = extend<ModelConfig>(
     true,
     {},
-    defaultModelConfig,
+    DEFAULT_MODEL_CONFIG,
   );
   private _appDataStore = new ElectronStore<AppData>({
     name: 'appData',
@@ -52,7 +50,7 @@ export class DataStoreService implements DataStoreServiceTrait {
         const appData = store.store;
         if (!appData.window[WindowType.SelectionTips]) {
           appData.window[WindowType.SelectionTips] =
-            defaultAppData.window[WindowType.SelectionTips];
+            DEFAULT_APP_DATA.window[WindowType.SelectionTips];
         }
         store.set('window', appData.window);
       },
@@ -68,11 +66,11 @@ export class DataStoreService implements DataStoreServiceTrait {
         }
         store.set('project', appData.project);
       },
-      '1.5.0': (store) => {
-        log.info('Upgrading "appData" store to 1.5.0 ...');
+      '1.5.2': (store) => {
+        log.info('Upgrading "appData" store to 1.5.2 ...');
         const appData = store.store;
         if (!appData.backup) {
-          appData.backup = defaultAppData.backup;
+          appData.backup = DEFAULT_APP_DATA.backup;
         }
         store.set('backup', appData.backup);
       },
@@ -99,8 +97,7 @@ export class DataStoreService implements DataStoreServiceTrait {
   async scheduleJobUpdateActiveModelContent() {
     try {
       log.info('DataStoreService.scheduleJob.updateActiveModelContent');
-      let { activeModel, activeModelKey } =
-        await this._configService.getConfigs();
+      let { activeModel, activeModelKey } = this._configService.store.store;
       await this._updateCurrentQuestionTemplateFile();
       if (!this._currentQuestionTemplateFile) {
         return;
@@ -111,8 +108,8 @@ export class DataStoreService implements DataStoreServiceTrait {
         activeModel = models[0];
         activeModelKey =
           this._currentQuestionTemplateFile[activeModel].config.modelKey;
-        await this._configService.setConfig('activeModel', activeModel);
-        await this._configService.setConfig('activeModelKey', activeModelKey);
+        this._configService.store.set('activeModel', activeModel);
+        this._configService.store.set('activeModelKey', activeModelKey);
       }
       this._activeModelContent = this._currentQuestionTemplateFile[activeModel];
     } catch (e) {
@@ -131,28 +128,28 @@ export class DataStoreService implements DataStoreServiceTrait {
     this._appDataStore.set('window', windowData);
   }
 
-  async getAppDataAsync() {
+  async getStoreAsync() {
     return this._appDataStore.store;
   }
 
-  async setAppDataAsync<T extends keyof AppData>(
+  async setStoreAsync<T extends keyof AppData>(
     key: T,
     value: AppData[T],
   ): Promise<void> {
     this._appDataStore.set(key, value);
   }
 
-  getAppdata() {
+  getStoreSync() {
     return this._appDataStore.store;
   }
 
-  setAppData<T extends keyof AppData>(key: T, value: AppData[T]) {
-    this._appDataStore.set(key, value);
+  getProjectData(project: string): ProjectData | undefined {
+    return this._appDataStore.get('project')[project];
   }
 
   private async _updateCurrentQuestionTemplateFile() {
     try {
-      const { activeTemplate } = await this._configService.getConfigs();
+      const { activeTemplate } = await this._configService.getStore();
       this._currentQuestionTemplateFile =
         await api_getProductLineQuestionTemplateFile(activeTemplate);
     } catch (error) {
@@ -162,7 +159,7 @@ export class DataStoreService implements DataStoreServiceTrait {
 
   async refreshServerTemplateList() {
     try {
-      const username = await this._configService.getConfig('username');
+      const username = await this._configService.get('username');
       this._serverTemplateList = await api_getUserTemplateList(username);
       console.log('_serverTemplateList', this._serverTemplateList);
     } catch (error) {
@@ -179,7 +176,7 @@ export class DataStoreService implements DataStoreServiceTrait {
     }
 
     let { activeTemplate, activeModel, activeModelKey } =
-      await this._configService.getConfigs();
+      await this._configService.getStore();
 
     if (!this._serverTemplateList.includes(activeTemplate)) {
       log.warn(
@@ -188,7 +185,7 @@ export class DataStoreService implements DataStoreServiceTrait {
       );
       activeTemplate = this._serverTemplateList[0];
       this._currentQuestionTemplateFile = undefined;
-      await this._configService.setConfig('activeTemplate', activeTemplate);
+      this._configService.store.set('activeTemplate', activeTemplate);
     }
     if (!this._currentQuestionTemplateFile) {
       // 缓存模板内容不存在
@@ -203,8 +200,8 @@ export class DataStoreService implements DataStoreServiceTrait {
       activeModel = models[0];
       activeModelKey =
         this._currentQuestionTemplateFile[activeModel].config.modelKey;
-      await this._configService.setConfig('activeModel', activeModel);
-      await this._configService.setConfig('activeModelKey', activeModelKey);
+      this._configService.store.set('activeModel', activeModel);
+      this._configService.store.set('activeModelKey', activeModelKey);
     }
     this._activeModelContent = this._currentQuestionTemplateFile[activeModel];
     return this._activeModelContent;
@@ -281,6 +278,12 @@ export class DataStoreService implements DataStoreServiceTrait {
 
   async saveBackup(originalPath: string, projectId: string) {
     const backupData = this._appDataStore.get('backup');
+    if (
+      !this._localBackupManager.needBackup(originalPath, backupData.current)
+    ) {
+      return;
+    }
+
     const newBackupPath = this._localBackupManager.createBackup(
       originalPath,
       projectId,
@@ -299,16 +302,21 @@ export class DataStoreService implements DataStoreServiceTrait {
           backupData.previous?.backupPathList,
         );
         backupData.previous = backupData.current;
-      }
-      backupData.current.backupPathList.push(newBackupPath);
-
-      // Limit the number of backups to 5
-      if (backupData.current.backupPathList.length > 5) {
-        this._localBackupManager.deleteBackups(
-          backupData.current.backupPathList.slice(0, -5),
-        );
-        backupData.current.backupPathList =
-          backupData.current.backupPathList.slice(-5);
+        backupData.current = {
+          backupPathList: [newBackupPath],
+          originalPath,
+          projectId,
+        };
+      } else {
+        backupData.current.backupPathList.push(newBackupPath);
+        // Limit the number of backups to 5
+        if (backupData.current.backupPathList.length > 5) {
+          this._localBackupManager.deleteBackups(
+            backupData.current.backupPathList.slice(0, -5),
+          );
+          backupData.current.backupPathList =
+            backupData.current.backupPathList.slice(-5);
+        }
       }
     }
     this._appDataStore.set('backup', backupData);
