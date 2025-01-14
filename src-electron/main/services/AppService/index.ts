@@ -217,14 +217,12 @@ export class AppService implements AppServiceTrait {
 
   private _initShortcutHandler() {
     app.whenReady().then(() => {
-      // 注册选中代码快捷键
       globalShortcut.register('CommandOrControl+Alt+I', async () => {
         await this._windowService.addSelectionToChat();
       });
-      // globalShortcut.register('CommandOrControl+Alt+L', async () => {
-      //   await this._windowService.reviewSelection();
-      // });
-      // 注册open devtool 快捷键
+      globalShortcut.register('CommandOrControl+Alt+L', async () => {
+        await this._windowService.reviewSelection();
+      });
       globalShortcut.register('CommandOrControl+Shift+I', () => {
         const window = BrowserWindow.getFocusedWindow();
         if (window) {
