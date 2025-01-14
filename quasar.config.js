@@ -76,7 +76,7 @@ module.exports = configure((/* ctx */) => ({
       };
       viteConf.build.rollupOptions = {
         external: ['oniguruma-to-es'],
-      }
+      };
     },
 
     alias: {

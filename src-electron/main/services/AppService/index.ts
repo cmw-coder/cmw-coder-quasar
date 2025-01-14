@@ -13,7 +13,12 @@ import { exit } from 'node:process';
 import { scheduleJob } from 'node-schedule';
 import { release, version } from 'os';
 
+import codeSyncTaskLog from 'main/components/Loggers/codeSyncTaskLog';
 import { container } from 'main/services';
+import {
+  CodeSyncSseMessage,
+  CodeSyncSseMessageDataType,
+} from 'main/services/AppService/CodeSyncSseMessage';
 import { ConfigService } from 'main/services/ConfigService';
 import { DataService } from 'main/services/DataService';
 import { UpdaterService } from 'main/services/UpdaterService';
@@ -40,6 +45,7 @@ interface AbstractServicePort {
 @injectable()
 export class AppService implements AppServiceTrait {
   private _backupInterval?: NodeJS.Timeout;
+  private _codeSyncSseMessage?: CodeSyncSseMessage;
 
   constructor(
     @inject(ServiceType.WINDOW)
@@ -69,6 +75,7 @@ export class AppService implements AppServiceTrait {
     this._initIpc();
     this._initUpdateScheduler();
     this._initShortcutHandler();
+    this._initCodeSyncSseMessage();
   }
 
   async updateBackupIntervalSeconds(intervalSeconds: number) {
@@ -248,5 +255,26 @@ export class AppService implements AppServiceTrait {
       content: '正在检查是否有新版本……',
     });
     this._updaterService.checkUpdate().catch();
+  }
+
+  private _initCodeSyncSseMessage() {
+    const { baseServerUrl, username } = this._configService.store.store;
+    this._codeSyncSseMessage = new CodeSyncSseMessage(baseServerUrl, username);
+    this._codeSyncSseMessage.addOnDataCallBack((message) => {
+      if (message.type === CodeSyncSseMessageDataType.ConnectSuccess) {
+        codeSyncTaskLog.log('connect success', message);
+      }
+      if (message.type === CodeSyncSseMessageDataType.KeepAlive) {
+        codeSyncTaskLog.log('keep alive', message);
+      }
+      if (message.type === CodeSyncSseMessageDataType.TaskUpdate) {
+        const task = message.data;
+        codeSyncTaskLog.log('task update', task.id);
+        this._windowService.trayIcon.notify({
+          title: '移植任务更新',
+          content: `移植任务 [${task.id}] 已更新，请前往网页端处理`,
+        });
+      }
+    });
   }
 }

@@ -193,39 +193,30 @@ export default {
         numberProps: {
           debounceDelay: {
             title: '触发消抖延迟',
-            caption:
-              '范围：0 - 1000。用户键入后触发补全的延迟时间',
-            tooLow:
-              '将值设置得太低可能会导致较高的服务器和 CPU 负载',
+            caption: '范围：0 - 1000。用户键入后触发补全的延迟时间',
+            tooLow: '将值设置得太低可能会导致较高的服务器和 CPU 负载',
             tooHigh: '将值设置得太高可能会导致响应变慢',
           },
           pasteFixMaxTriggerLineCount: {
             title: '最大触发粘贴修复行数',
-            caption:
-              '范围：0 - 100。粘贴时触发粘贴修复的最大行数',
-            tooHigh:
-              '将值设置得太高可能会导致响应变慢和性能问题',
+            caption: '范围：0 - 100。粘贴时触发粘贴修复的最大行数',
+            tooHigh: '将值设置得太高可能会导致响应变慢和性能问题',
           },
           prefixLineCount: {
             title: '上下文-前缀行数',
-            caption:
-              '范围：0 - 1000。补全时获取上下文的前缀行数',
-            tooHigh:
-              '将值设置得太高可能会导致响应变慢和性能问题',
+            caption: '范围：0 - 1000。补全时获取上下文的前缀行数',
+            tooHigh: '将值设置得太高可能会导致响应变慢和性能问题',
           },
           recentFileCount: {
             title: '近期访问文件数',
             caption:
               '范围：0 - 50。补全时获取近期访问文件的数量，设置为 0 将禁用获取最近访问文件',
-            tooHigh:
-              '将值设置得太高可能会导致响应变慢和性能问题',
+            tooHigh: '将值设置得太高可能会导致响应变慢和性能问题',
           },
           suffixLineCount: {
             title: '上下文-后缀行数',
-            caption:
-              '范围：0 - 1000。补全时获取上下文的后缀行数',
-            tooHigh:
-              '将值设置得太高可能会导致响应变慢和性能问题',
+            caption: '范围：0 - 1000。补全时获取上下文的后缀行数',
+            tooHigh: '将值设置得太高可能会导致响应变慢和性能问题',
           },
         },
         suffixes: {

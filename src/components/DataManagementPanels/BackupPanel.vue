@@ -107,11 +107,7 @@ onUnmounted(() => {
 
 <template>
   <div class="column q-gutter-y-md">
-    <q-btn
-      color="primary"
-      :loading="loading"
-      @click="refreshBackupData"
-    >
+    <q-btn color="primary" :loading="loading" @click="refreshBackupData">
       <q-linear-progress
         class="absolute"
         animation-speed="1000"

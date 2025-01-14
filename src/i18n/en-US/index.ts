@@ -271,9 +271,8 @@ export default {
               'Range: 0 - 500. The duration of internal lock after user interaction',
             tooLow:
               'Setting the value too low may cause data race and stability issues',
-            tooHigh:
-              'Setting the value too high may cause slow response',
-          }
+            tooHigh: 'Setting the value too high may cause slow response',
+          },
         },
         suffixes: {
           milliseconds: 'milliseconds',

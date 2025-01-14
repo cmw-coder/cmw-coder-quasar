@@ -97,9 +97,7 @@ export abstract class BaseWindow {
     if (!this._window) {
       return;
     }
-    const dataStoreService = container.get<DataService>(
-      ServiceType.DATA,
-    );
+    const dataStoreService = container.get<DataService>(ServiceType.DATA);
     const windowData = dataStoreService.getWindowData(this._type);
     dataStoreService.saveWindowData(this._type, {
       ...windowData,
@@ -166,9 +164,7 @@ export abstract class BaseWindow {
     //   this.edgeShow();
     // }
 
-    const dataStoreService = container.get<DataService>(
-      ServiceType.DATA,
-    );
+    const dataStoreService = container.get<DataService>(ServiceType.DATA);
 
     const storedWindowData = dataStoreService.getWindowData(this._type);
     const { x, y, height, width } = {
@@ -223,9 +219,7 @@ export abstract class BaseWindow {
     }
     const [x, y] = this._window.getPosition();
     if (this.options?.storePosition) {
-      const dataStoreService = container.get<DataService>(
-        ServiceType.DATA,
-      );
+      const dataStoreService = container.get<DataService>(ServiceType.DATA);
       const windowData = dataStoreService.getWindowData(this._type);
       windowData.x = x;
       windowData.y = y;
@@ -281,9 +275,7 @@ export abstract class BaseWindow {
 
   toggleFixed() {
     if (!this._window) return;
-    const dataStoreService = container.get<DataService>(
-      ServiceType.DATA,
-    );
+    const dataStoreService = container.get<DataService>(ServiceType.DATA);
     const windowData = dataStoreService.getWindowData(this._type);
     windowData.fixed = !windowData.fixed;
     if (windowData.fixed) {

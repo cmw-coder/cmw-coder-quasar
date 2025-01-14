@@ -1,4 +1,7 @@
-import { AppData, ModelConfig } from 'shared/types/service/DataServiceTrait/types';
+import {
+  AppData,
+  ModelConfig,
+} from 'shared/types/service/DataServiceTrait/types';
 import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
 
 export const DEFAULT_APP_DATA: AppData = {
