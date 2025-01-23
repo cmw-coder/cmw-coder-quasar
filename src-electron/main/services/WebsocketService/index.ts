@@ -47,9 +47,9 @@ import { WebsocketServiceTrait } from 'shared/types/service/WebsocketServiceTrai
 import { WindowType } from 'shared/types/service/WindowServiceTrait/types';
 import {
   CompletionGenerateServerMessage,
+  EditorConfigServerMessage,
   HandShakeClientMessage,
   ReviewRequestServerMessage,
-  EditorConfigServerMessage,
   StandardResult,
   WsAction,
   WsMessageMapping,
@@ -95,11 +95,22 @@ export class WebsocketService implements WebsocketServiceTrait {
             description: 'This welcome page',
           },
           {
+            route: '/config',
+            method: 'GET',
+            description: 'Get the current configuration',
+          },
+          {
             route: '/dev/similar-snippets',
             method: 'POST',
             description: 'Test similar snippets',
           },
         ],
+      });
+    });
+    this._httpRouter.addRoute('/config', HttpMethod.GET, (_, res) => {
+      res.sendJson({
+        message: 'Success',
+        config: this._configService.store.store,
       });
     });
     this._httpRouter.addRoute(
